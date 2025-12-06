@@ -1,0 +1,9 @@
+List of things that needs to be prepared, added, or changed in the project
+
+1. Answer to: How to handle situation where 2 people speak at the same time?
+
+2. Answer to: Is there a way to automatially assign correct names for speakers without manually editing transcripts and changing the IDs for names?
+
+3. Create script for local use (shortlist of models: Whisper, SpeechBrain)
+
+4. Prepare cloud version in Google Colab after local one is functional
