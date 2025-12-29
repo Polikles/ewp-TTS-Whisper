@@ -18,3 +18,5 @@ List of things that needs to be prepared, added, or changed in the project
 4. Prepare cloud version in Google Colab after local one is functional
 
     TBD;
+
+5. prepare flowchart for data to map inputs and outputs
