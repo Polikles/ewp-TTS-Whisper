@@ -5,7 +5,7 @@ The tool is based on Whisper TTS model. The plan is to create a workflow for mak
 
 The steps are:
 
-1. Put recordings into the folder (2-channel .wav files)
+1. Put recordings into the folder (mono-channel .wav files)
 2. run the script that will generate time-stamped transcripts with speaker identification
 
 At first we'll start with Whisper, but maybe we'll experiment with SpeechBrain later
