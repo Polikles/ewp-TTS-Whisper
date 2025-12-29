@@ -1,9 +1,20 @@
 List of things that needs to be prepared, added, or changed in the project
 
 1. Answer to: How to handle situation where 2 people speak at the same time?
+    solution1: use diarization, if having two or more people speaking at once is unavoidable. At worst you'd have to review transcripts manually
+
+    solution2: record every speaker on separate track. This way, even if there are 2 or more people speaking at the same time, you should have clear recordings of everyone involved. IMPORTANT: all recordings should be edited on the same timeline to avoid shifts and mismatches of transcripts
+
 
 2. Answer to: Is there a way to automatially assign correct names for speakers without manually editing transcripts and changing the IDs for names?
 
+    yes, there are at least few solutions. I'm opting (at least for now) to use the name from the filename of recording. All recordings should be exported as mono track separate for every speaker and using standardized name, e.g. S01E01_John.wav, S01E02_Paul.wav - for an episode with two speakers: John and Paul
+
 3. Create script for local use (shortlist of models: Whisper, SpeechBrain)
 
+    for now, I'm sticking with Whisper. I'd like to use large-v3, but have to test how it works with per-word and per-sentence timestamps
+
+
 4. Prepare cloud version in Google Colab after local one is functional
+
+    TBD;
