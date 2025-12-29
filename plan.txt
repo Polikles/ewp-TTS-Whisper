@@ -43,3 +43,13 @@ Step-by-step plan
 4. addition:
 
     - option to recursively scan subfolders/subcatalogs and gerenate transcriptions only when there is no matching transcription file
+
+5. another version (maybe with different model than Whisper):
+
+    - transcripts of audio files with more than one speaker, with automatic assignation of speaker ID (may be random, as it's easy to fix in manual review). It's important, since sometimes I receive audio recordings extracted from video recordings, so there is no way to separate the channels
+
+    - diarization is needed
+
+    - find similar (may be commercial) solutions for transcripts to check what options do they have, and maybe to look for hints on how they manage the speakers
+
+    
