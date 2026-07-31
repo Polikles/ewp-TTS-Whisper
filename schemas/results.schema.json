@@ -1,0 +1,804 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/local-transcriber/results.schema.json",
+  "title": "EWP-transcripts results",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "application_version",
+    "run_id",
+    "job_id",
+    "status",
+    "created_at",
+    "result_version",
+    "episode",
+    "sources",
+    "speakers",
+    "processing",
+    "transcript",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "application_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "result_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "episode": {
+      "$ref": "#/$defs/episode"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "speakers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/speaker"
+      }
+    },
+    "processing": {
+      "$ref": "#/$defs/processing"
+    },
+    "transcript": {
+      "$ref": "#/$defs/transcript"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/warning"
+      }
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/error"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "initial_outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/output"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "episode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "episode_id",
+        "episode_signature_sha256",
+        "source_topology",
+        "language"
+      ],
+      "properties": {
+        "episode_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "episode_signature_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_topology": {
+          "enum": [
+            "single_file",
+            "file_group",
+            "split_channels"
+          ]
+        },
+        "language": {
+          "enum": [
+            "pl",
+            "en",
+            "auto"
+          ]
+        },
+        "detected_language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "input_path",
+        "normalized_path",
+        "filename",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "stream_index",
+        "channel_selection",
+        "duration_ms",
+        "sample_rate_hz",
+        "channel_count"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^source_[0-9]{3,}$"
+        },
+        "input_path": {
+          "type": "string"
+        },
+        "normalized_path": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "media_type": {
+          "enum": [
+            "audio",
+            "video"
+          ]
+        },
+        "container": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "codec": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stream_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stream_language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "channel_selection": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "mono"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_rate_hz": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channel_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "speaker_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "speaker_label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "speaker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "speaker_id",
+        "speaker_label",
+        "speaker_source",
+        "first_seen_ms"
+      ],
+      "properties": {
+        "speaker_id": {
+          "type": "string",
+          "pattern": "^speaker_[0-9]{3,}$"
+        },
+        "speaker_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "speaker_source": {
+          "enum": [
+            "explicit",
+            "filename",
+            "channel_metadata",
+            "diarization",
+            "default"
+          ]
+        },
+        "first_seen_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "name"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "asr",
+            "alignment",
+            "diarization",
+            "vad"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "local_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "status",
+        "duration_ms"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "completed",
+            "failed",
+            "skipped"
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    },
+    "audio_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "integrated_lufs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "true_peak_dbfs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rms_dbfs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dc_offset": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "clipping_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "silence_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "channel_level_difference_db": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "processing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preset",
+        "effective_config",
+        "environment",
+        "models",
+        "channel_analysis",
+        "audio_quality",
+        "stages"
+      ],
+      "properties": {
+        "preset": {
+          "type": "string"
+        },
+        "effective_config": {
+          "type": "object"
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "os",
+            "python",
+            "device",
+            "compute_type"
+          ],
+          "properties": {
+            "os": {
+              "type": "string"
+            },
+            "wsl_distribution": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "python": {
+              "type": "string"
+            },
+            "ffmpeg": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "whisperx": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pytorch": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cuda_runtime": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "device": {
+              "type": "string"
+            },
+            "compute_type": {
+              "type": "string"
+            },
+            "batch_size": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "peak_vram_bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/model"
+          }
+        },
+        "channel_analysis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requested_mode",
+            "detected_mode",
+            "effective_mode",
+            "confidence"
+          ],
+          "properties": {
+            "requested_mode": {
+              "enum": [
+                "auto",
+                "mono",
+                "dual_mono",
+                "split_speakers",
+                "mixed_stereo"
+              ]
+            },
+            "detected_mode": {
+              "enum": [
+                "mono",
+                "dual_mono",
+                "split_speakers",
+                "mixed_stereo",
+                "ambiguous"
+              ]
+            },
+            "effective_mode": {
+              "enum": [
+                "mono",
+                "dual_mono",
+                "split_speakers",
+                "mixed_stereo"
+              ]
+            },
+            "confidence": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "metrics": {
+              "type": "object"
+            }
+          }
+        },
+        "audio_quality": {
+          "$ref": "#/$defs/audio_quality"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stage"
+          }
+        }
+      }
+    },
+    "word": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "word_id",
+        "text",
+        "start_ms",
+        "end_ms",
+        "timestamp_source"
+      ],
+      "properties": {
+        "word_id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "start_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp_source": {
+          "enum": [
+            "aligned",
+            "interpolated",
+            "segment_fallback"
+          ]
+        },
+        "speaker_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "segment_id",
+        "start_ms",
+        "end_ms",
+        "text",
+        "speaker_id",
+        "overlap",
+        "active_speaker_ids",
+        "words"
+      ],
+      "properties": {
+        "segment_id": {
+          "type": "string"
+        },
+        "start_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        },
+        "speaker_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overlap": {
+          "type": "boolean"
+        },
+        "active_speaker_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "words": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/word"
+          }
+        }
+      }
+    },
+    "transcript": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "segments"
+      ],
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/segment"
+          }
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "stage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "context": {
+          "type": "object"
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "stage"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "exception_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "safe_details": {
+          "type": "object"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "path"
+      ],
+      "properties": {
+        "format": {
+          "enum": [
+            "results_json",
+            "segments_json",
+            "txt",
+            "srt",
+            "vtt"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

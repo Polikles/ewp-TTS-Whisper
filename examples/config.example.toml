@@ -1,0 +1,82 @@
+# Local Transcriber — example MVP configuration
+config_version = "1.0"
+
+[general]
+language = "pl"                 # pl | en | auto
+preset = "accurate"
+offline = true
+interactive = true
+
+[input]
+recursive = false
+follow_symlinks = false
+supported_audio = ["wav", "mp3", "flac", "m4a", "ogg", "opus"]
+supported_video = ["mp4", "mkv", "mov"]
+
+[grouping]
+speaker_suffix_separator = "-"
+parse_single_file_suffix_only_when_speaker_count_one = true
+duration_warning_ms = 100
+duration_error_ms = 500
+require_equal_sample_rate = true
+
+[channels]
+mode = "auto"                   # auto | mono | dual-mono | split-speakers | mixed-stereo
+ambiguous_fallback = "dual-mono"
+dual_mono_min_correlation = 0.995
+dual_mono_max_rms_difference_db = 1.5
+
+[models]
+# Candidate for the accurate preset. E-005 must compare large-v2 and large-v3 on the Polish corpus.
+asr_model = "large-v3"
+compute_type = "float16"
+batch_size = 16
+device = "cuda"
+model_cache_dir = "/home/user/.cache/local-transcriber/models"
+allow_network_downloads_during_transcription = false
+
+[diarization]
+model = "pyannote/speaker-diarization-community-1"
+local_model_path = "/home/user/.cache/local-transcriber/models/pyannote-community-1"
+speaker_count = "auto"         # auto or a positive integer through CLI/config API
+preserve_overlap = true
+use_exclusive_for_word_assignment = true
+
+[quality]
+analyze = true
+warn_only = true
+detect_clipping = true
+detect_low_level = true
+detect_channel_imbalance = true
+detect_silence_ratio = true
+
+[subtitles]
+preset = "youtube"
+max_lines = 2
+target_chars_per_line = 42
+max_chars_per_line = 46
+min_duration_ms = 1000
+max_duration_ms = 7000
+target_chars_per_second = 17
+max_chars_per_second = 20
+min_gap_ms = 80
+max_merge_gap_ms = 300
+speaker_labels = "on-change"   # on-change | always | never
+
+[outputs]
+generate_txt = true
+generate_srt = true
+generate_vtt = true
+generate_segments_json = false
+batch_output_directory_name = "output-transcribe"
+encoding = "utf-8"
+
+[runtime]
+work_root = "/home/user/.cache/local-transcriber/work"
+keep_temp_on_success = false
+keep_temp_on_error = true
+continue_batch_after_error = true
+max_concurrent_gpu_jobs = 1
+lock_timeout_seconds = 0
+log_format = "text"            # text | jsonl
+log_transcript_text = false

@@ -1,0 +1,289 @@
+{
+  "schema_version": "1.0",
+  "application_version": "0.1.0",
+  "run_id": "123e4567-e89b-12d3-a456-426614174000",
+  "job_id": "S01E01",
+  "status": "completed",
+  "created_at": "2026-07-29T14:00:00Z",
+  "completed_at": "2026-07-29T14:08:42Z",
+  "result_version": 1,
+  "episode": {
+    "episode_id": "S01E01",
+    "episode_signature_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_topology": "file_group",
+    "language": "en",
+    "detected_language": "en"
+  },
+  "sources": [
+    {
+      "source_id": "source_001",
+      "input_path": "D:/podcast/S01E01-jan.wav",
+      "normalized_path": "/mnt/d/podcast/S01E01-jan.wav",
+      "filename": "S01E01-jan.wav",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 1000000,
+      "media_type": "audio",
+      "container": "wav",
+      "codec": "pcm_s24le",
+      "stream_index": 0,
+      "stream_language": null,
+      "channel_selection": "mono",
+      "duration_ms": 3600000,
+      "sample_rate_hz": 48000,
+      "channel_count": 1,
+      "speaker_id": "speaker_001",
+      "speaker_label": "jan"
+    },
+    {
+      "source_id": "source_002",
+      "input_path": "D:/podcast/S01E01-anna.wav",
+      "normalized_path": "/mnt/d/podcast/S01E01-anna.wav",
+      "filename": "S01E01-anna.wav",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 1001000,
+      "media_type": "audio",
+      "container": "wav",
+      "codec": "pcm_s24le",
+      "stream_index": 0,
+      "stream_language": null,
+      "channel_selection": "mono",
+      "duration_ms": 3600040,
+      "sample_rate_hz": 48000,
+      "channel_count": 1,
+      "speaker_id": "speaker_002",
+      "speaker_label": "anna"
+    }
+  ],
+  "speakers": [
+    {
+      "speaker_id": "speaker_001",
+      "speaker_label": "jan",
+      "speaker_source": "filename",
+      "first_seen_ms": 1240,
+      "source_ids": [
+        "source_001"
+      ]
+    },
+    {
+      "speaker_id": "speaker_002",
+      "speaker_label": "anna",
+      "speaker_source": "filename",
+      "first_seen_ms": 4320,
+      "source_ids": [
+        "source_002"
+      ]
+    }
+  ],
+  "processing": {
+    "preset": "accurate",
+    "effective_config": {
+      "language": "en",
+      "speaker_count": 2,
+      "channel_mode": "mono"
+    },
+    "environment": {
+      "os": "WSL2 Ubuntu 24.04",
+      "wsl_distribution": "Ubuntu-24.04",
+      "python": "3.12.x",
+      "ffmpeg": "6.x",
+      "whisperx": "3.8.6",
+      "pytorch": "pinned-by-lockfile",
+      "cuda_runtime": "pinned-by-lockfile",
+      "device": "NVIDIA GeForce RTX 3090",
+      "compute_type": "float16",
+      "batch_size": 16,
+      "peak_vram_bytes": 12000000000
+    },
+    "models": [
+      {
+        "role": "asr",
+        "name": "large-v3",
+        "revision": null,
+        "local_path": "/home/user/.cache/models/asr"
+      },
+      {
+        "role": "alignment",
+        "name": "english-alignment-model",
+        "revision": null,
+        "local_path": "/home/user/.cache/models/alignment-en"
+      }
+    ],
+    "channel_analysis": {
+      "requested_mode": "auto",
+      "detected_mode": "mono",
+      "effective_mode": "mono",
+      "confidence": 1.0,
+      "metrics": {}
+    },
+    "audio_quality": {
+      "integrated_lufs": -16.1,
+      "true_peak_dbfs": -1.2,
+      "rms_dbfs": -19.4,
+      "dc_offset": 0.0001,
+      "clipping_ratio": 0.0,
+      "silence_ratio": 0.31,
+      "channel_level_difference_db": null
+    },
+    "stages": [
+      {
+        "name": "probe",
+        "status": "completed",
+        "duration_ms": 620,
+        "details": {}
+      },
+      {
+        "name": "transcribe",
+        "status": "completed",
+        "duration_ms": 470000,
+        "details": {}
+      },
+      {
+        "name": "align",
+        "status": "completed",
+        "duration_ms": 38000,
+        "details": {}
+      },
+      {
+        "name": "merge",
+        "status": "completed",
+        "duration_ms": 2200,
+        "details": {}
+      }
+    ]
+  },
+  "transcript": {
+    "language": "en",
+    "segments": [
+      {
+        "segment_id": "seg_000001",
+        "start_ms": 1240,
+        "end_ms": 3900,
+        "text": "Welcome to another episode.",
+        "speaker_id": "speaker_001",
+        "overlap": false,
+        "active_speaker_ids": [
+          "speaker_001"
+        ],
+        "source_ids": [
+          "source_001"
+        ],
+        "confidence": 0.96,
+        "words": [
+          {
+            "word_id": "word_000001",
+            "text": "Welcome",
+            "start_ms": 1240,
+            "end_ms": 1700,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_001",
+            "confidence": 0.97
+          },
+          {
+            "word_id": "word_000002",
+            "text": "to",
+            "start_ms": 1720,
+            "end_ms": 1800,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_001",
+            "confidence": 0.99
+          },
+          {
+            "word_id": "word_000003",
+            "text": "another",
+            "start_ms": 1820,
+            "end_ms": 2500,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_001",
+            "confidence": 0.95
+          },
+          {
+            "word_id": "word_000004",
+            "text": "episode.",
+            "start_ms": 2550,
+            "end_ms": 3900,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_001",
+            "confidence": 0.94
+          }
+        ]
+      },
+      {
+        "segment_id": "seg_000002",
+        "start_ms": 4320,
+        "end_ms": 6320,
+        "text": "Today we discuss transcription.",
+        "speaker_id": "speaker_002",
+        "overlap": false,
+        "active_speaker_ids": [
+          "speaker_002"
+        ],
+        "source_ids": [
+          "source_002"
+        ],
+        "confidence": 0.95,
+        "words": [
+          {
+            "word_id": "word_000005",
+            "text": "Today",
+            "start_ms": 4320,
+            "end_ms": 4800,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_002",
+            "confidence": 0.96
+          },
+          {
+            "word_id": "word_000006",
+            "text": "we",
+            "start_ms": 4820,
+            "end_ms": 5450,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_002",
+            "confidence": 0.94
+          },
+          {
+            "word_id": "word_000007",
+            "text": "discuss",
+            "start_ms": 5480,
+            "end_ms": 5550,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_002",
+            "confidence": 0.98
+          },
+          {
+            "word_id": "word_000008",
+            "text": "transcription.",
+            "start_ms": 5580,
+            "end_ms": 6320,
+            "timestamp_source": "aligned",
+            "speaker_id": "speaker_002",
+            "confidence": 0.93
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "error": null,
+  "initial_outputs": [
+    {
+      "format": "results_json",
+      "path": "D:/podcast/S01E01_results.json",
+      "sha256": null
+    },
+    {
+      "format": "txt",
+      "path": "D:/podcast/S01E01_transcript.txt",
+      "sha256": null
+    },
+    {
+      "format": "srt",
+      "path": "D:/podcast/S01E01_subtitles.srt",
+      "sha256": null
+    },
+    {
+      "format": "vtt",
+      "path": "D:/podcast/S01E01_subtitles.vtt",
+      "sha256": null
+    }
+  ]
+}

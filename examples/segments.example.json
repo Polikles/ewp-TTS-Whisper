@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-29T14:09:00Z",
+  "job_id": "S01E01",
+  "derived_from": {
+    "results_file": "S01E01_results.json",
+    "results_sha256": "b3697aa25b06af6a07e1879d5a12e8200022dc44bf07052178f2a4daef5bea37",
+    "results_schema_version": "1.0"
+  },
+  "segmentation": {
+    "mode": "sentence",
+    "include_words": true
+  },
+  "speakers": [
+    {
+      "speaker_id": "speaker_001",
+      "speaker_label": "jan"
+    },
+    {
+      "speaker_id": "speaker_002",
+      "speaker_label": "anna"
+    }
+  ],
+  "segments": [
+    {
+      "segment_id": "sentence_000001",
+      "start_ms": 1240,
+      "end_ms": 3900,
+      "text": "Welcome to another episode.",
+      "speaker_id": "speaker_001",
+      "overlap": false,
+      "active_speaker_ids": [
+        "speaker_001"
+      ],
+      "word_ids": [
+        "word_000001",
+        "word_000002",
+        "word_000003",
+        "word_000004"
+      ]
+    },
+    {
+      "segment_id": "sentence_000002",
+      "start_ms": 4320,
+      "end_ms": 6320,
+      "text": "Today we discuss transcription.",
+      "speaker_id": "speaker_002",
+      "overlap": false,
+      "active_speaker_ids": [
+        "speaker_002"
+      ],
+      "word_ids": [
+        "word_000005",
+        "word_000006",
+        "word_000007",
+        "word_000008"
+      ]
+    }
+  ]
+}
