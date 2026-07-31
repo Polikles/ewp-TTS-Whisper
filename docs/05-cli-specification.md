@@ -1,0 +1,190 @@
+# CLI Specification
+
+Working command name: `transcriber`.
+
+## 1. General rules
+
+- Every command supports `--config PATH`.
+- CLI flags override TOML values.
+- `--non-interactive` disables all prompts.
+- `--json-output` writes a machine-readable operation result to stdout; logs go to stderr.
+- `--verbose` and `--debug` increase log detail.
+- Secrets are never printed.
+
+## 2. `doctor`
+
+Checks the environment without running transcription.
+
+```text
+transcriber doctor
+```
+
+Checks include:
+
+- WSL2 and distribution;
+- GPU visibility through `nvidia-smi`;
+- CUDA availability in PyTorch;
+- FFmpeg and ffprobe;
+- Python and lockfile state;
+- free space in the work directory;
+- ASR, alignment, and diarization models;
+- `HF_TOKEN` presence reported only as `present` or `missing`;
+- offline readiness.
+
+## 3. `inspect`
+
+```text
+transcriber inspect INPUT [OPTIONS]
+```
+
+Does not run ASR. Returns:
+
+- discovered files;
+- media streams;
+- detected groups;
+- audio parameters;
+- channel classification;
+- hashes;
+- quality warnings (TODO);
+- existing results and the skip/process decision.
+
+Options:
+
+```text
+--recursive
+--channel-mode auto|mono|dual-mono|split-speakers|mixed-stereo
+--speaker-count auto|N
+--audio-stream INDEX
+--audio-language CODE
+--allow-duration-mismatch
+```
+
+## 4. `dry-run`
+
+```text
+transcriber dry-run INPUT [OPTIONS]
+```
+
+Performs discovery, probing, grouping, hashing, existing-result lookup, and export planning. It does not load ASR models or create final files.
+
+For every job, output must include:
+
+```text
+PROCESS / SKIP / ERROR
+job_id
+sources
+speakers
+channel decision
+language
+result version
+planned output paths
+warnings
+```
+
+## 5. `transcribe`
+
+```text
+transcriber transcribe INPUT [OPTIONS]
+```
+
+Primary options:
+
+```text
+--output-dir PATH
+--recursive
+--language pl|en|auto
+--speaker-count auto|N
+--speaker NAME                 # single-speaker input
+--speaker-map SOURCE=NAME      # repeatable
+--channel-mode auto|mono|dual-mono|split-speakers|mixed-stereo
+--audio-stream INDEX
+--audio-language CODE
+--preset accurate
+--format txt                   # repeatable
+--format srt
+--format vtt
+--segments
+--force
+--allow-duration-mismatch
+--keep-temp
+--non-interactive
+```
+
+Default post-transcription exports are defined in TOML. `results.json` is always created and does not require a flag.
+
+### Output directory
+
+- single file without `--output-dir`: source directory;
+- directory batch without `--output-dir`: `<input>/output-ewp_transcriber`;
+- explicit `--output-dir`: selected directory with a safe output naming structure.
+
+## 6. Explicit file group
+
+Recommended contract:
+
+```text
+transcriber transcribe --group FILE1 FILE2 [FILE3 ...]
+```
+
+`--group` creates exactly one job. Speaker labels may come from suffixes or `--speaker-map`.
+
+An implementation may alternatively support a manifest, but the syntax choice must not change domain rules.
+
+## 7. `export`
+
+```text
+transcriber export RESULTS_JSON [OPTIONS]
+```
+
+Options:
+
+```text
+--format txt
+--format srt
+--format vtt
+--segments
+--output-dir PATH
+--force
+--subtitle-preset youtube
+--speaker-labels on-change|always|never
+```
+
+The command does not open audio or load models. An existing export is skipped without `--force`; with `--force`, the next version number is created.
+
+## 8. `clean`
+
+```text
+transcriber clean temp
+transcriber clean failed
+transcriber clean all-workdirs
+```
+
+Safety options:
+
+```text
+--dry-run
+--older-than DAYS
+--yes
+```
+
+The command does not remove final results, models, tokens, or configuration. Model-cache deletion must be a separately named operation outside the MVP or require separate confirmation.
+
+## 9. Exit codes
+
+| Code | Meaning |
+|---:|---|
+| 0 | all jobs completed or were validly skipped |
+| 1 | general or unexpected error |
+| 2 | invalid arguments or configuration |
+| 3 | missing dependency, model, or environment capability |
+| 4 | input error or no supported media stream |
+| 5 | at least one batch job failed |
+| 6 | interrupted by the user |
+| 7 | lock or concurrent-write conflict |
+| 8 | data-schema mismatch |
+
+## 10. Interactive mode
+
+A prompt is allowed only when stdin and stderr are TTYs. In the MVP, a prompt may be used to select one of several audio streams. Every other decision should have a deterministic default or require a flag.
+
+In non-interactive mode, a missing required decision fails the affected job instead of blocking the process.
