@@ -5,7 +5,7 @@
 Every job receives a directory in the WSL filesystem, for example:
 
 ```text
-~/.cache/local-transcriber/work/<run_id>/<job_id>/
+~/.cache/ewp-transcripts/work/<run_id>/<job_id>/
 ```
 
 It may contain decoded WAV files, extracted channels, raw backend output, and diagnostic artifacts.
@@ -66,7 +66,6 @@ Minimum catalog:
 CHANNEL_CLASSIFICATION_AMBIGUOUS
 INPUT_DURATION_MISMATCH
 INPUT_SAMPLE_RATE_MISMATCH
-MULTIPLE_AUDIO_STREAMS
 AUDIO_CLIPPING_DETECTED
 AUDIO_LOW_LEVEL
 AUDIO_CHANNEL_LEVEL_MISMATCH

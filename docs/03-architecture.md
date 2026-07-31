@@ -9,7 +9,7 @@ The application core is a domain library. The CLI, future GUI, and any future lo
 ```mermaid
 flowchart TD
     A[Input discovery] --> B[Path normalization]
-    B --> C[ffprobe / stream selection]
+    B --> C[ffprobe media inspection]
     C --> D[Grouping and source signature]
     D --> E[Existing result lookup]
     E -->|skip| Z[Batch summary]
@@ -39,7 +39,7 @@ flowchart TD
 ## 3. Recommended modules
 
 ```text
-src/ewp-transcripts/
+src/ewp_transcripts/
   domain/
     jobs
     sources
@@ -130,7 +130,7 @@ The JSON result records:
 
 ## 7. Responsibility boundaries
 
-- FFmpeg handles probing, stream selection, decoding, and preparation of working audio.
+- FFmpeg handles probing, decoding, and preparation of working audio.
 - The channel classifier determines channel topology only; it does not identify people.
 - WhisperX handles ASR and word alignment.
 - pyannote handles diarization of mixed material.

@@ -45,6 +45,6 @@ A future publication/redaction mode may remove or pseudonymize paths from shared
 - installation from a lockfile;
 - preference for official sources;
 - no automatic prerelease use;
-- vulnerability scanning in CI;
+- local vulnerability scanning as part of the release gate;
 - dependency upgrades in dedicated pull requests with audio-quality regression tests;
 - backend versions recorded in every result.

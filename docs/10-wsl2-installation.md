@@ -27,8 +27,8 @@ Ubuntu 26.04 LTS exists, but 24.04 remains the baseline to reduce risk from newl
 The following should reside in the WSL filesystem:
 
 ```text
-/home/<user>/projects/local-transcriber
-/home/<user>/.cache/local-transcriber
+/home/<user>/projects/ewp-transcripts
+/home/<user>/.cache/ewp-transcripts
 /home/<user>/.cache/huggingface
 ```
 

@@ -1,6 +1,6 @@
 # EWP Transcriber
 
-> This repository documents the MVP of a local offline CLI tool for accurate transcription of audio recordings and audio tracks extracted from video files.
+> This repository documents the MVP of EWP-transcripts, a local offline CLI tool for accurate transcription of audio recordings.
 
 ## Status
 

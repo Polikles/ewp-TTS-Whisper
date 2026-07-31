@@ -1,4 +1,4 @@
-# Local Transcriber — example MVP configuration
+# EWP-transcripts — example MVP configuration
 config_version = "1.0"
 
 [general]
@@ -11,7 +11,6 @@ interactive = true
 recursive = false
 follow_symlinks = false
 supported_audio = ["wav", "mp3", "flac", "m4a", "ogg", "opus"]
-supported_video = ["mp4", "mkv", "mov"]
 
 [grouping]
 speaker_suffix_separator = "-"
@@ -32,12 +31,12 @@ asr_model = "large-v3"
 compute_type = "float16"
 batch_size = 16
 device = "cuda"
-model_cache_dir = "/home/user/.cache/local-transcriber/models"
+model_cache_dir = "/home/user/.cache/ewp-transcripts/models"
 allow_network_downloads_during_transcription = false
 
 [diarization]
 model = "pyannote/speaker-diarization-community-1"
-local_model_path = "/home/user/.cache/local-transcriber/models/pyannote-community-1"
+local_model_path = "/home/user/.cache/ewp-transcripts/models/pyannote-community-1"
 speaker_count = "auto"         # auto or a positive integer through CLI/config API
 preserve_overlap = true
 use_exclusive_for_word_assignment = true
@@ -68,11 +67,11 @@ generate_txt = true
 generate_srt = true
 generate_vtt = true
 generate_segments_json = false
-batch_output_directory_name = "output-transcribe"
+batch_output_directory_name = "output-ewp-transcripts"
 encoding = "utf-8"
 
 [runtime]
-work_root = "/home/user/.cache/local-transcriber/work"
+work_root = "/home/user/.cache/ewp-transcripts/work"
 keep_temp_on_success = false
 keep_temp_on_error = true
 continue_batch_after_error = true

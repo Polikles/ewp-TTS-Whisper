@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/local-transcriber/segments.schema.json",
+  "$id": "https://example.invalid/ewp-transcripts/segments.schema.json",
   "title": "EWP-transcripts derived segments",
   "type": "object",
   "additionalProperties": false,

@@ -10,7 +10,7 @@ Build a stable domain model and headless pipeline before any GUI. ML integration
 - Python 3.12 and `uv`;
 - lockfile;
 - linting, formatting, type checking, and test runner;
-- CPU-only CI;
+- local CPU-only quality gate;
 - TOML loading;
 - data models and JSON Schema;
 - application and schema versioning rules.
@@ -23,7 +23,6 @@ Build a stable domain model and headless pipeline before any GUI. ML integration
 - file/directory discovery;
 - explicit recursion;
 - ffprobe adapter;
-- audio-stream selection;
 - SHA-256;
 - suffix-based grouping;
 - duration/sample-rate validation;

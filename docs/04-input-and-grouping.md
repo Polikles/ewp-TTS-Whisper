@@ -27,7 +27,8 @@ Several paths supplied in one grouping operation create one episode. Explicit gr
 Official MVP test matrix:
 
 - audio: WAV, MP3, FLAC, M4A/AAC, OGG/Vorbis, Opus;
-- video: MP4, MKV, MOV.
+
+Video containers and audio-stream selection are deferred until stage 2.
 
 Other formats are supported on a best-effort basis when FFmpeg can decode them.
 
@@ -107,7 +108,6 @@ Every file receives a SHA-256 hash of its complete content. Selected stream and 
 
 - SHA-256 of every source file;
 - source order;
-- audio stream index;
 - channel index or channel mode;
 - `speaker_id` and label assignment;
 - job ID.

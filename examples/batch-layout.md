@@ -23,7 +23,7 @@ Default outputs:
 
 ```text
 season01/
-  output-transcribe/
+  output-ewp-transcripts/
     S01E01_results.json
     S01E01_transcript.txt
     S01E01_subtitles.srt

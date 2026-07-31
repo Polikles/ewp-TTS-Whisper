@@ -21,7 +21,7 @@ Recommended locations:
 
 ```text
 project: ./transcriber.toml
-user: ~/.config/ewp-transcriber/config.toml
+user: ~/.config/ewp-transcripts/config.toml
 ```
 
 The application should not modify project configuration automatically.

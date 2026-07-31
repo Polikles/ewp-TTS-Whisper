@@ -2,16 +2,16 @@
 
 ## 1. Purpose
 
-Local Transcriber generates accurate local transcripts, word timestamps, speaker assignments, and readable subtitles from edited podcast and training recordings.
+EWP-transcripts generates accurate local transcripts, word timestamps, speaker assignments, and readable subtitles from edited podcast and training recordings.
 
 The application is a post-production tool. Input material is expected to follow this workflow:
 
 ```text
-audio recording or audio + video recording
+audio recording
         ↓
 editing all tracks on a shared timeline
         ↓
-exporting one or more audio/video files
+exporting one or more audio files
         ↓
 EWP Transcriber
         ↓
@@ -48,7 +48,7 @@ The MVP includes:
 
 - a single video file with audio-track selection;
 - biometric identification of people from their voices (after extracting enough samples from previously analyzed recordings);
-- technical media inspection and audio-quality warnings;
+- automatic audio repair based on diagnostic warnings;
 - automatic denoising, normalization, or audio repair;
 - LLM-based transcript correction;
 - GUI transcript editing;

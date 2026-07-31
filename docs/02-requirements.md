@@ -7,11 +7,10 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 ### A. Input and discovery
 
 - **FR-A01** The application MUST accept a path to a single file or a directory.
-- **FR-A02** For a directory, the application MUST inspect only files directly inside that directory by defaultA
+- **FR-A02** For a directory, the application MUST inspect only files directly inside that directory by default.
 - **FR-A03** Recursive discovery MUST require an explicit option.
-- **FR-A04** The application MUST identify media content through FFmpeg/ffprobe rather than relying only on filenamA extensions.
-- **FR-A05** The application MUST support audio files and extraction of a selected audio stream from video files.
-- **FR-A06** When multiple audio streams exist, the application MUST require a selection. In non-intAractive mode, a missing selection is an error for that file.
+- **FR-A04** The application MUST identify media content through FFmpeg/ffprobe rather than relying only on filename extensions.
+- **FR-A05** The application MUST support audio files decodable by FFmpeg. Video files and audio-stream selection are deferred until stage 2.
 - **FR-A07** The application MUST normalize Windows and WSL paths.
 - **FR-A08** The application MUST NOT follow symbolic links by default.
 - **FR-A08.1** No, --force nor any other command MUST NOT make symlink to be followed.
@@ -68,7 +67,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 ### F. Duplicates, versions, and state
 
 - **FR-F00** The application MUST calculate SHA-256 for every source before transcription.
-- **FR-F01** A grouped episode MUST receive a deterministic `episode_signature` that includes hashes, speaker assignments, channel selections, and stream selections.
+- **FR-F01** A grouped episode MUST receive a deterministic `episode_signature` that includes hashes, speaker assignments, and channel selections.
 - **FR-F02** A completed result with the same signature MUST be skipped unless `--force` is supplied.
 - **FR-F03** `--force` MUST create the first available `_vNNN` suffix, beginning with `_v002`.
 - **FR-F04** All exports created during one run MUST use the same version number.
@@ -94,6 +93,12 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-H01** A missing required model MUST produce a clear error and setup instructions.
 - **FR-H02** The Hugging Face token MUST be read from the `HF_TOKEN` environment variable.
 - **FR-H03** After models have been prepared locally, transcription MUST work without network access.
+
+### I. Audio diagnostics
+
+- **FR-I00** The application MUST provide lightweight, non-destructive audio-quality diagnostics.
+- **FR-I01** Diagnostics MUST be warning-only and MUST NOT modify or repair source audio.
+- **FR-I02** MVP diagnostics MUST cover clipping, low level, channel-level imbalance, and high silence ratio.
 
 ## 2. Non-functional requirements
 

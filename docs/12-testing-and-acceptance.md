@@ -139,8 +139,6 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [ ] FLAC.
 - [ ] M4A/AAC.
 - [ ] Opus.
-- [ ] MP4 with one audio stream.
-- [ ] MKV with Polish and English audio streams.
 
 ## 3. Text-quality evaluation
 

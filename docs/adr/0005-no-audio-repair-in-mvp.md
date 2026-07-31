@@ -9,7 +9,7 @@ The MVP may analyze basic quality metrics and emits warnings, but it does not de
 
 ## Rationale
 
-An automatic filter may damage speech, and different defects require different methods. Assumed typical input has already been edited as ewt-transcriber is a post-production tool
+An automatic filter may damage speech, and different defects require different methods. Typical input is assumed to have already been edited because EWP-transcripts is a post-production tool.
 
 ## Consequences
 

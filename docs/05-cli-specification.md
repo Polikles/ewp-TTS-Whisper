@@ -54,8 +54,6 @@ Options:
 --recursive
 --channel-mode auto|mono|dual-mono|split-speakers|mixed-stereo
 --speaker-count auto|N
---audio-stream INDEX
---audio-language CODE
 --allow-duration-mismatch
 ```
 
@@ -97,8 +95,6 @@ Primary options:
 --speaker NAME                 # single-speaker input
 --speaker-map SOURCE=NAME      # repeatable
 --channel-mode auto|mono|dual-mono|split-speakers|mixed-stereo
---audio-stream INDEX
---audio-language CODE
 --preset accurate
 --format txt                   # repeatable
 --format srt
@@ -115,7 +111,7 @@ Default post-transcription exports are defined in TOML. `results.json` is always
 ### Output directory
 
 - single file without `--output-dir`: source directory;
-- directory batch without `--output-dir`: `<input>/output-ewp_transcriber`;
+- directory batch without `--output-dir`: `<input>/output-ewp-transcripts`;
 - explicit `--output-dir`: selected directory with a safe output naming structure.
 
 ## 6. Explicit file group
@@ -185,6 +181,6 @@ The command does not remove final results, models, tokens, or configuration. Mod
 
 ## 10. Interactive mode
 
-A prompt is allowed only when stdin and stderr are TTYs. In the MVP, a prompt may be used to select one of several audio streams. Every other decision should have a deterministic default or require a flag.
+A prompt is allowed only when stdin and stderr are TTYs. MVP decisions should have a deterministic default or require a flag.
 
 In non-interactive mode, a missing required decision fails the affected job instead of blocking the process.
