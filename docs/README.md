@@ -20,7 +20,7 @@
 | [14 - Dependency baseline](14-dependency-baseline.md) | Verified environment starting point |
 | [15 - Glossary](15-glossary.md) | Standardized terminology |
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
-| [17 - Definition of Done](17-definition-of-done.md) | MVP completion criteria |
+| [17 - Definition of Done](17-definition-of-done-mvp.md) | MVP completion criteria |
 | [99 - Version 2 roadmap](99-roadmap-v2.md) | GUI, audio repair, LLMs, benchmarks, and Docker |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 
@@ -32,6 +32,13 @@
 - [ADR-0004: SHA-256 and non-destructive versioning](adr/0004-hashing-and-versioning.md)
 - [ADR-0005: No audio repair in the MVP](adr/0005-no-audio-repair-in-mvp.md)
 - [ADR-0006: Interface-independent application core](adr/0006-interface-independent-core.md)
+
+## Implementation guidance
+
+- [Architecture and coding rules](ARCHITECTURE_AND_CODING_RULES.md)
+- [Repository structure](REPOSITORY_STRUCTURE.md)
+- [Agent MVP implementation plan](MVP_IMPLEMENTATION_PLAN.md)
+- [Testing strategy](TESTING_STRATEGY.md)
 
 ## Machine-readable artifacts
 
