@@ -1,0 +1,22 @@
+# Glossary
+
+- **Alignment** — mapping recognized words to precise time ranges.
+- **ASR** — automatic speech recognition.
+- **Cue** — one SRT/VTT subtitle unit containing a time range and text.
+- **DER** — Diarization Error Rate.
+- **Diarization** — determining which anonymous speaker is active at a given time.
+- **Dual mono** — two identical or nearly identical channels.
+- **Episode job** — one processing unit: a single file or a file group.
+- **Episode signature** — SHA-256 of the canonical description of all sources and assignments.
+- **Ground truth** — a manually verified reference transcript or annotation.
+- **Mixed stereo** — stereo containing substantially the same mix on both channels.
+- **Overlap** — simultaneous speech from at least two speakers.
+- **Results JSON** — the complete canonical transcription result.
+- **Segments JSON** — an optional lightweight derived export.
+- **Speaker ID** — stable technical identifier such as `speaker_001`.
+- **Speaker label** — display name such as `jan` or `Speaker1`.
+- **Split speakers** — one speaker per channel or per file in a group.
+- **Timestamp source** — how a word time was obtained: alignment, interpolation, or segment fallback.
+- **VAD** — voice activity detection.
+- **WER/CER** — word/character error measures against ground truth.
+- **Workdir** — temporary working directory stored in WSL.
