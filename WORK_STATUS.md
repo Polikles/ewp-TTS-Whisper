@@ -8,9 +8,23 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-The project is in **Phase 0 preparation: WSL, dependency, and GPU compatibility spike**.
+The project is in **Phase 0 execution: integrated GPU pipeline validation**.
 
-No application code or production package scaffold has been created yet. The current work is documentation and preparation for proving the ML dependency stack on the target workstation.
+No application code or production package scaffold has been created yet. The dependency, CUDA, model-acquisition, ASR/alignment, and diarization component gates have passed on the target workstation. The next gate combines those components in one sequential job.
+
+## Authoritative resume point
+
+Resume with [`WSL config/RUN_PHASE0_INTEGRATED.md`](WSL%20config/RUN_PHASE0_INTEGRATED.md), starting at section 1.
+
+The owner should run sections 1–6 in local WSL and return the sanitized stop-point evidence. Stop immediately if the run attempts a download, requests a token, fails on CUDA, or does not return exclusive diarization.
+
+After the integrated gate passes:
+
+1. record its accepted evidence in [`WSL config/PHASE0_RESULTS.md`](WSL%20config/PHASE0_RESULTS.md);
+2. run a second complete job to verify repeated sequential loading and unloading;
+3. perform the environment-level network-blocked replay;
+4. continue the preliminary model/preset comparison;
+5. promote the approved dependency definition and external spike lockfile only after all Phase 0 gates pass.
 
 ## Completed before this session
 
@@ -97,11 +111,16 @@ Recommended external dataset path:
 
 ## Current repository state
 
-The WSL documentation created today is intentionally **not committed yet**. It should be reviewed against the live media preparation and dependency spike before being committed.
+The confirmed WSL spike documentation through the integrated-run instructions is included in the session-closing documentation commit.
 
-An unrelated untracked file named `LICENSE_SKETCH.TXT` exists in the repository. It belongs to the project owner and must not be modified, staged, or committed as part of the WSL documentation work unless explicitly requested.
+An untracked file named `LICENSE_SKETCH.TXT` exists in the repository. It belongs to the project owner and remains intentionally uncommitted.
 
 At the end of today, documentation link validation and `git diff --check` passed.
+
+## Backlog
+
+- Review `LICENSE_SKETCH.TXT`, select and finalize the future repository license, then replace the sketch with the appropriately named final license file in a dedicated change. Do not commit the sketch as the repository license without that review.
+- Build the manifest-driven corpus WER/CER runner and human-readable transcript diff after additional manually verified references are available.
 
 ## Next user actions
 
@@ -148,6 +167,26 @@ Media gate update: completed. P0-01 is true mono and its manually checked refere
 Dependency research update: Candidate A is documented in [`WSL config/DEPENDENCY_CANDIDATE_MATRIX.md`](WSL%20config/DEPENDENCY_CANDIDATE_MATRIX.md). It follows the stable WhisperX 3.8.6 upstream stack: PyTorch 2.8.0/cu128, matched audio/vision packages, TorchCodec 0.7, and pyannote.audio 4.0.7 as the first compatibility hypothesis.
 
 WSL execution update: the exact restartable environment procedure is documented in [`WSL config/PREPARE_PHASE0_WSL.md`](WSL%20config/PREPARE_PHASE0_WSL.md). The future production installation procedure has a separate placeholder at [`WSL config/INSTALL_APPLICATION.md`](WSL%20config/INSTALL_APPLICATION.md) and must be completed only after the production lockfile and CLI exist.
+
+Resolver update: Phase 0 sections 0–5 passed. `uv lock` resolved 117 packages under CPython 3.12.3. Key versions are CTranslate2 4.8.1, faster-whisper 1.2.1, huggingface-hub 0.36.2, Transformers 4.57.6, and Triton 3.4.0. PyTorch-family versions correctly use the `+cu128` suffix. Continue with `PREPARE_PHASE0_WSL.md` sections 6–10.
+
+Environment gate update: sections 6–10 passed. The lock hash is `a309c86ba2a06b86842ee3cb56dffc76a15e635f72a2f46bdf5847e7ab88c14c`; dependency checks, WhisperX import, CUDA tensor execution on RTX 3090, and TorchCodec decoding all passed. Evidence is in [`WSL config/PHASE0_RESULTS.md`](WSL%20config/PHASE0_RESULTS.md). Continue with [`WSL config/PREPARE_PHASE0_MODELS.md`](WSL%20config/PREPARE_PHASE0_MODELS.md).
+
+Model-preparation update: path/privacy checks and the `hf` CLI check passed. Step 3 stopped safely because `huggingface-hub==0.36.2` does not support the newer `hf download --dry-run` flag. The runbook now uses the compatible `HfApi.model_info` metadata query. Resume at model-preparation step 3.
+
+Public-model update: metadata inspection and downloads passed for the ASR and Polish alignment models, and their downloaded snapshot names match the recorded immutable revisions. The NLTK command exposed Python's safe-path protection for the `regex` import, and `python -P` alone was insufficient in the uv project context. This is not a compatibility stopper. The runbook now invokes the already locked virtualenv interpreter from `/tmp`, with `-P`. Resume at model-preparation step 5, verify `punkt_tab`, then continue to the gated Community-1 steps.
+
+Model-acquisition gate update: **passed**. NLTK `punkt_tab` is installed, Community-1 gated access and download succeeded at revision `3533c8cf8e369892e6b79ff1bf80f7b0286a54ee`, the downloaded revision matched the metadata query, and `HF_TOKEN` was removed from the shell. Cache sizes were 6.8 GB for Hugging Face and 15 MB for NLTK. Next, prepare and run the P0-01 Polish ASR and word-alignment smoke test using only the recorded local snapshots.
+
+ASR/alignment execution update: the restartable P0-01 procedure is documented in [`WSL config/RUN_PHASE0_ASR_ALIGNMENT.md`](WSL%20config/RUN_PHASE0_ASR_ALIGNMENT.md). It fixes Polish explicitly, uses `float16` and batch size 4, loads both immutable snapshots locally with library offline controls, unloads ASR before alignment, retains transcript-bearing output only in the external spike workspace, and emits a sanitized measurement report. Resume at section 1 of that runbook.
+
+Initial ASR/alignment result: **compatibility and gross-correctness PASS**. P0-01 completed in 4.095 seconds for ASR plus 1.175 seconds for alignment after model loads; all 226 generated words were timestamped. Manual comparison against the 227-word clean-studio reference found one substitution, one short omission, and minor punctuation differences. The run also exposed an unpinned Torch Hub download made by WhisperX's Silero VAD adapter, so it is not accepted as the local-only replay. The runbook now uses WhisperX's bundled Pyannote VAD asset and distinct output names. Rerun that corrected gate before moving to diarization. A manifest-driven corpus WER/CER and human-readable diff runner has been added to the testing backlog.
+
+Bundled-VAD replay update: **PASS**. The corrected Pyannote-VAD run made no network download, produced the same transcript and manual quality assessment, timestamped every generated word, and released PyTorch allocations to 8.1 MiB after each stage. The Lightning in-memory checkpoint upgrade notice and Pyannote TF32 reproducibility warning are accepted; do not modify the installed checkpoint. The P0-03 regular/exclusive Community-1 procedure is ready in [`WSL config/RUN_PHASE0_DIARIZATION.md`](WSL%20config/RUN_PHASE0_DIARIZATION.md). Resume at section 1.
+
+Community-1 component update: **technical PASS; manual speaker accuracy pending**. P0-03 ran locally without a token or download, produced two labels, returned both regular and exclusive diarization, and unloaded to 8.1 MiB of PyTorch allocation. Regular output contained 22 turns and 59.012 seconds of detected overlap; exclusive output contained 50 non-overlapping turns. These files intentionally contain only speaker intervals. The untimestamped reference cannot validate boundaries or overlap duration. Next, prepare the integrated P0-03 ASR, alignment, exclusive-diarization, and word-speaker-assignment gate so the owner can review speaker-labelled text.
+
+Integrated-gate update: the restartable full P0-03 sequence is ready in [`WSL config/RUN_PHASE0_INTEGRATED.md`](WSL%20config/RUN_PHASE0_INTEGRATED.md). It runs ASR, Polish alignment, Community-1 exclusive diarization, and word-speaker assignment in one process; unloads every GPU model between stages; writes JSON and readable speaker-labelled text only to the external evidence directory; and emits sanitized performance, allocation, timestamp, and assignment counts. Resume at section 1.
 
 ## Decisions still intentionally open
 

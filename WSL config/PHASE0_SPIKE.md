@@ -44,6 +44,8 @@ Required evidence:
 - a small tensor operation completes on CUDA;
 - versions and CUDA runtime are recorded without dumping the full environment.
 
+Accepted results are recorded in [`PHASE0_RESULTS.md`](PHASE0_RESULTS.md). After the environment gate passes, follow [`PREPARE_PHASE0_MODELS.md`](PREPARE_PHASE0_MODELS.md).
+
 ### 4. ASR and alignment
 
 Run a short Polish recording through transcription and word alignment. Record:
@@ -55,13 +57,19 @@ Run a short Polish recording through transcription and word alignment. Record:
 - whether numbers, punctuation, or symbols lack timestamps;
 - sanitized errors and warnings, without publishing transcript text by default.
 
+Use the restartable procedure in [`RUN_PHASE0_ASR_ALIGNMENT.md`](RUN_PHASE0_ASR_ALIGNMENT.md).
+
 ### 5. Diarization
 
 After explicit gated-model setup, run a short multi-speaker recording. Confirm model loading, speaker intervals, exclusive diarization availability when supported, and no token exposure.
 
+Use [`RUN_PHASE0_DIARIZATION.md`](RUN_PHASE0_DIARIZATION.md).
+
 ### 6. Model unloading
 
 Run stages sequentially and observe whether model references and GPU allocations can be released sufficiently for the next stage and a second job.
+
+First run the complete single-job sequence in [`RUN_PHASE0_INTEGRATED.md`](RUN_PHASE0_INTEGRATED.md). A subsequent gate repeats the job to test second-run stability.
 
 ### 7. Offline replay
 

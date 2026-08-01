@@ -23,6 +23,31 @@ This is the first compatibility candidate, not an approved production baseline. 
 | transformers | resolver-selected `>=4.48.0` | WhisperX constraint; exact version captured in lockfile and tested for alignment compatibility |
 | FFmpeg/ffprobe | 6.1.1-3ubuntu5 | verified Ubuntu installation; supported by TorchCodec's FFmpeg 4–8 range |
 
+## Resolver result
+
+Resolved successfully on the target workstation on **2026-08-01**:
+
+```text
+Python interpreter: CPython 3.12.3 at /usr/bin/python3
+uv: 0.12.0
+packages resolved: 117
+resolution time: 1.65 s
+```
+
+Key resolved transitive versions:
+
+```text
+ctranslate2=4.8.1
+faster-whisper=1.2.1
+huggingface-hub=0.36.2
+transformers=4.57.6
+triton=3.4.0
+```
+
+The matched PyTorch-family versions carry the `+cu128` local-version suffix. This is expected and confirms selection of the CUDA 12.8 wheel variants. It is materially different from resolving CPU-only wheels and must be retained in evidence and the lockfile.
+
+Resolution alone does not approve Candidate A. Installation, import, CUDA, TorchCodec, ASR, alignment, diarization, unloading, and offline tests remain required.
+
 ## Why CUDA 12.8
 
 WhisperX 3.8.6's tagged `pyproject.toml` directs Linux x86_64 PyTorch packages to the official `cu128` index. PyTorch publishes the matched set:

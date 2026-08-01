@@ -321,6 +321,14 @@ TorchCodec report:
 
 Do not send the full lockfile, environment variables, usernames, tokens, transcripts, or model-cache paths unless specifically needed to diagnose a failure.
 
+Record the lockfile identity without pasting its contents:
+
+```bash
+sha256sum uv.lock
+```
+
+Keep the complete `uv.lock` in the spike directory. It will be reviewed and promoted into the application repository only after Candidate A passes all Phase 0 gates.
+
 ## Safe restart procedure
 
 The authoritative inputs are `pyproject.toml` and `uv.lock`. To retest installation without changing resolution:

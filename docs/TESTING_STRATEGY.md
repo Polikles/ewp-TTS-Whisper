@@ -333,6 +333,8 @@ The manifest should describe for each case:
 
 The test suite must not depend on arbitrary filename discovery inside the dataset. It should read the manifest.
 
+Once multiple manually verified transcripts exist, add a corpus comparison runner to the local test suite. It should execute selected presets against manifest cases, apply the documented normalization policy, produce machine-readable per-case and aggregate WER/CER, and retain a human-readable word-diff report for error review. Candidate output must always be compared with an independent manually verified reference, never with another model's uncorrected transcript.
+
 ## 5. Synthetic repository fixtures
 
 Small generated fixtures remain inside the application repository for deterministic mechanics testing.
