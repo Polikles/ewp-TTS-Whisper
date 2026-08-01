@@ -40,6 +40,8 @@ Reprocessing the same source with `--force` creates a consistently versioned res
 
 The complete index is available in [`docs/README.md`](docs/README.md).
 
+Operational WSL2 setup and verification instructions are in [`WSL config/`](WSL%20config/README.md).
+
 Recommended starting documents:
 
 1. [`docs/01-product-scope.md`](docs/01-product-scope.md) — MVP purpose and boundaries.

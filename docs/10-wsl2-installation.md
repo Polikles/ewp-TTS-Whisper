@@ -1,5 +1,7 @@
 # Reference Environment: WSL2
 
+Operational clean-machine instructions and verification checklists are maintained in [`../WSL config/`](../WSL%20config/README.md). This document remains the normative environment policy.
+
 ## 1. MVP baseline
 
 - Windows 11;

@@ -39,6 +39,7 @@
 - [Repository structure](REPOSITORY_STRUCTURE.md)
 - [Agent MVP implementation plan](MVP_IMPLEMENTATION_PLAN.md)
 - [Testing strategy](TESTING_STRATEGY.md)
+- [WSL setup and verification](../WSL%20config/README.md)
 
 ## Machine-readable artifacts
 
