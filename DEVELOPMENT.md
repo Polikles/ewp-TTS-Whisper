@@ -9,6 +9,17 @@
 5. Implement `doctor`, `inspect`, and `dry-run` before the transcription pipeline.
 6. Run separate WhisperX and channel-classification spikes before freezing the `accurate` preset.
 
+## Local setup and quality gate
+
+```bash
+uv sync --locked
+make check
+uv build
+```
+
+`make check` uses the already synchronized environment and does not update dependencies or
+download models. GPU and ML validation is run separately on the target WSL workstation.
+
 ## Technical recommendations
 
 - Python 3.12;

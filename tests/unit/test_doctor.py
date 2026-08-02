@@ -13,9 +13,7 @@ from ewp_transcripts.domain import DiagnosticStatus
 
 
 def _successful_runner(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    stdout = (
-        "NVIDIA GeForce RTX 3090, 24576\n" if "nvidia-smi" in arguments[0] else "ok\n"
-    )
+    stdout = "NVIDIA GeForce RTX 3090, 24576\n" if "nvidia-smi" in arguments[0] else "ok\n"
     return subprocess.CompletedProcess(arguments, 0, stdout=stdout, stderr="")
 
 

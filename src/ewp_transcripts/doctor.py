@@ -32,9 +32,7 @@ def _python_check(version_info: tuple[int, int, int]) -> DiagnosticCheck:
     return DiagnosticCheck(
         code="python",
         status=DiagnosticStatus.PASS if supported else DiagnosticStatus.FAIL,
-        message="Python version is supported."
-        if supported
-        else "Python 3.12 is required.",
+        message="Python version is supported." if supported else "Python 3.12 is required.",
         context={"version": ".".join(map(str, version_info))},
     )
 
@@ -90,11 +88,7 @@ def _command_check(
 
     return DiagnosticCheck(
         code=executable,
-        status=(
-            DiagnosticStatus.PASS
-            if completed.returncode == 0
-            else DiagnosticStatus.FAIL
-        ),
+        status=(DiagnosticStatus.PASS if completed.returncode == 0 else DiagnosticStatus.FAIL),
         message=(
             f"Executable '{executable}' is available."
             if completed.returncode == 0
@@ -181,9 +175,7 @@ def run_doctor(
 ) -> DoctorResult:
     """Run deterministic lightweight checks without importing ML backends."""
 
-    release = (
-        _read_os_release(Path("/etc/os-release")) if os_release is None else os_release
-    )
+    release = _read_os_release(Path("/etc/os-release")) if os_release is None else os_release
     checks = (
         _python_check(python_version),
         _wsl_check(kernel_release),

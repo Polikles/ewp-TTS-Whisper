@@ -80,18 +80,14 @@ class ModelsConfig(StrictConfigModel):
 
 class DiarizationConfig(StrictConfigModel):
     model: str = "pyannote/speaker-diarization-community-1"
-    local_model_path: Path = Path(
-        "~/.cache/ewp-transcripts/models/pyannote-community-1"
-    )
+    local_model_path: Path = Path("~/.cache/ewp-transcripts/models/pyannote-community-1")
     speaker_count: Literal["auto"] | int = "auto"
     preserve_overlap: bool = True
     use_exclusive_for_word_assignment: bool = True
 
     @field_validator("speaker_count", mode="after")
     @classmethod
-    def validate_speaker_count(
-        cls, value: Literal["auto"] | int
-    ) -> Literal["auto"] | int:
+    def validate_speaker_count(cls, value: Literal["auto"] | int) -> Literal["auto"] | int:
         if isinstance(value, int) and value < 1:
             raise ValueError("speaker_count must be 'auto' or a positive integer")
         return value
@@ -196,13 +192,9 @@ def _read_toml(path: Path, *, required: bool) -> ConfigurationData:
     except FileNotFoundError as error:
         if not required:
             return {}
-        raise InvalidConfigurationError(
-            f"Configuration file does not exist: {path}"
-        ) from error
+        raise InvalidConfigurationError(f"Configuration file does not exist: {path}") from error
     except (OSError, tomllib.TOMLDecodeError) as error:
-        raise InvalidConfigurationError(
-            f"Cannot read configuration file: {path}"
-        ) from error
+        raise InvalidConfigurationError(f"Cannot read configuration file: {path}") from error
 
 
 def _packaged_defaults() -> ConfigurationData:
@@ -210,9 +202,7 @@ def _packaged_defaults() -> ConfigurationData:
     try:
         return tomllib.loads(resource.read_text(encoding="utf-8"))
     except (OSError, tomllib.TOMLDecodeError) as error:
-        raise InvalidConfigurationError(
-            "Packaged default configuration is invalid"
-        ) from error
+        raise InvalidConfigurationError("Packaged default configuration is invalid") from error
 
 
 def load_config(
