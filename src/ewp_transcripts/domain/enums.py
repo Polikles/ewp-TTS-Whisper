@@ -9,3 +9,21 @@ class DiagnosticStatus(StrEnum):
     PASS = "pass"
     WARNING = "warning"
     FAIL = "fail"
+
+
+class LanguageMode(StrEnum):
+    """Supported language selection modes."""
+
+    POLISH = "pl"
+    ENGLISH = "en"
+    AUTO = "auto"
+
+
+class ChannelMode(StrEnum):
+    """Supported input channel interpretations."""
+
+    AUTO = "auto"
+    MONO = "mono"
+    DUAL_MONO = "dual-mono"
+    SPLIT_SPEAKERS = "split-speakers"
+    MIXED_STEREO = "mixed-stereo"

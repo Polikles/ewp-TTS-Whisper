@@ -1,0 +1,70 @@
+"""Tests for strict configuration loading and precedence."""
+
+from pathlib import Path
+
+import pytest
+
+from ewp_transcripts.config import load_config
+from ewp_transcripts.domain.enums import LanguageMode
+from ewp_transcripts.domain.errors import InvalidConfigurationError
+
+
+def _write(path: Path, content: str) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return path
+
+
+def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
+    config = load_config(cwd=tmp_path, home=tmp_path)
+
+    assert config.general.language is LanguageMode.POLISH
+    assert config.models.asr_model == "large-v2"
+    assert config.models.compute_type == "float16"
+    assert config.models.batch_size == 4
+    assert config.outputs.batch_output_directory_name == "output-ewp-transcripts"
+    assert config.quality.warn_only is True
+
+
+def test_documented_precedence_is_applied(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    project = tmp_path / "project"
+    explicit = tmp_path / "selected.toml"
+    _write(home / ".config/ewp-transcripts/config.toml", "[models]\nbatch_size = 2\n")
+    _write(project / "transcriber.toml", "[models]\nbatch_size = 4\n")
+    _write(explicit, "[models]\nbatch_size = 8\n")
+
+    config = load_config(
+        explicit_path=explicit,
+        cwd=project,
+        home=home,
+        cli_overrides={"models": {"batch_size": 12}},
+    )
+
+    assert config.models.batch_size == 12
+
+
+def test_unknown_key_is_rejected(tmp_path: Path) -> None:
+    selected = _write(tmp_path / "selected.toml", "[general]\nunknown = true\n")
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+def test_invalid_threshold_order_is_rejected(tmp_path: Path) -> None:
+    selected = _write(
+        tmp_path / "selected.toml",
+        "[grouping]\nduration_warning_ms = 501\nduration_error_ms = 500\n",
+    )
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+def test_missing_explicit_file_is_rejected(tmp_path: Path) -> None:
+    with pytest.raises(InvalidConfigurationError, match="does not exist"):
+        load_config(
+            explicit_path=tmp_path / "missing.toml",
+            cwd=tmp_path,
+            home=tmp_path,
+        )

@@ -1,8 +1,7 @@
-# EWP-transcripts — example MVP configuration
 config_version = "1.0"
 
 [general]
-language = "pl"                 # pl | en | auto
+language = "pl"
 preset = "accurate"
 offline = true
 interactive = true
@@ -20,24 +19,23 @@ duration_error_ms = 500
 require_equal_sample_rate = true
 
 [channels]
-mode = "auto"                   # auto | mono | dual-mono | split-speakers | mixed-stereo
+mode = "auto"
 ambiguous_fallback = "dual-mono"
 dual_mono_min_correlation = 0.995
 dual_mono_max_rms_difference_db = 1.5
 
 [models]
-# ADR-0007 default for the accurate preset; remains configurable.
 asr_model = "large-v2"
 compute_type = "float16"
-batch_size = 4                     # Phase 0 baseline; tune only after stability testing
+batch_size = 4
 device = "cuda"
-model_cache_dir = "/home/user/.cache/ewp-transcripts/models"
+model_cache_dir = "~/.cache/ewp-transcripts/models"
 allow_network_downloads_during_transcription = false
 
 [diarization]
 model = "pyannote/speaker-diarization-community-1"
-local_model_path = "/home/user/.cache/ewp-transcripts/models/pyannote-community-1"
-speaker_count = "auto"         # auto or a positive integer through CLI/config API
+local_model_path = "~/.cache/ewp-transcripts/models/pyannote-community-1"
+speaker_count = "auto"
 preserve_overlap = true
 use_exclusive_for_word_assignment = true
 
@@ -60,7 +58,7 @@ target_chars_per_second = 17
 max_chars_per_second = 20
 min_gap_ms = 80
 max_merge_gap_ms = 300
-speaker_labels = "on-change"   # on-change | always | never
+speaker_labels = "on-change"
 
 [outputs]
 generate_txt = true
@@ -71,11 +69,11 @@ batch_output_directory_name = "output-ewp-transcripts"
 encoding = "utf-8"
 
 [runtime]
-work_root = "/home/user/.cache/ewp-transcripts/work"
+work_root = "~/.cache/ewp-transcripts/work"
 keep_temp_on_success = false
 keep_temp_on_error = true
 continue_batch_after_error = true
 max_concurrent_gpu_jobs = 1
 lock_timeout_seconds = 0
-log_format = "text"            # text | jsonl
+log_format = "text"
 log_transcript_text = false

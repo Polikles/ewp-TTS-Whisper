@@ -7,3 +7,7 @@ class ApplicationError(Exception):
 
 class MissingCapabilityError(ApplicationError):
     """Raised when the environment lacks a required runtime capability."""
+
+
+class InvalidConfigurationError(ApplicationError):
+    """Raised when a configuration source cannot be read or validated."""
