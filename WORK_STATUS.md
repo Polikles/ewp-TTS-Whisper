@@ -2,36 +2,28 @@
 
 Last updated: **2026-07-31**.
 
-Latest resume update: **2026-08-01**.
+Latest resume update: **2026-08-02**.
 
 Use this file as the starting point for the next work session.
 
 ## Current stage
 
-The project is in **Phase 0 execution: model comparison and dependency promotion**.
+The project is at the **Phase 0 closeout: commit the validated application lockfile**.
 
-No application code or production package scaffold has been created yet. Candidate A has passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, and environment-level network-blocked tests on the target workstation.
+No application code or production package scaffold has been created yet. Candidate A has passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, environment-level network-blocked, model-comparison, and application-lock promotion tests on the target workstation.
 
 ## Authoritative resume point
 
-Resume with dependency-definition and lockfile promotion using `large-v2` as the accepted MVP accurate-preset default. Candidate A is technically reproducible and offline-capable.
+Commit the already generated and validated `uv.lock` as a single-file change. Candidate A is technically reproducible and offline-capable, and `large-v2` is the accepted MVP accurate-preset default.
 
-Follow [`WSL config/PROMOTE_PHASE0_DEPENDENCIES.md`](WSL%20config/PROMOTE_PHASE0_DEPENDENCIES.md), starting at section 1. It copies the accepted external spike lock, changes only root-project metadata offline, and verifies a separate locked application environment before the lock is committed.
+The promotion procedure in [`WSL config/PROMOTE_PHASE0_DEPENDENCIES.md`](WSL%20config/PROMOTE_PHASE0_DEPENDENCIES.md) passed. The promoted lock hash is `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`; offline sync, compatibility checks, import checks, and all 11 exact-version checks passed.
 
-Required owner input before quality comparison:
+Immediate next action in the target WSL clone:
 
-1. P0-02 and P0-03 untimestamped references are confirmed manually verified;
-2. remove speaker-label metadata from the reference text before lexical scoring;
-3. keep transcript references in the external test-data repository, not this application repository.
-
-Next technical work:
-
-1. specify a fair, normalized comparison for the candidate accurate-preset ASR models;
-2. explicitly acquire any additional candidate model revision;
-3. run candidates against manually verified P0-01, P0-02, and the non-overlapping portions of P0-03;
-4. record WER/CER, timing, allocation limitations, and qualitative Polish errors;
-5. decide the accurate-preset model;
-6. promote the approved dependency definition and external spike lockfile into the application repository.
+1. fast-forward to the documentation commit;
+2. confirm the generated `uv.lock` still has the accepted promoted hash;
+3. commit and push only `uv.lock`;
+4. confirm the application repository is clean apart from explicitly excluded local files.
 
 ## Completed before this session
 
@@ -215,15 +207,15 @@ ASR comparison result: measured and recorded in ADR-0007. `large-v2` has a very 
 
 Accurate-preset decision: **`large-v2` selected**. ADR-0007 is accepted and records the exact revision, complete evidence, contrary P0-03 result, and rationale. The comparison corpus contains only three cases, so this is an initial baseline rather than a permanent model ranking; rerun the automated comparison after building the larger manually verified dataset. Next, promote the validated dependency definition and lockfile into the application repository.
 
+Dependency-promotion result: **PASS**. The accepted spike lock was promoted offline to the production project metadata. The resulting lock hash is `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`. A fresh application `.venv` synchronized from it offline, `uv pip check` accepted all 116 installed packages, WhisperX imported, and all 11 exact dependency versions matched the validated baseline. Only the generated `uv.lock` remains to be committed.
+
 ## Decisions still intentionally open
 
 These must be resolved by measurements, not guessed in advance:
 
-- final ASR model for the `accurate` preset;
-- exact PyTorch/CUDA/WhisperX/pyannote versions;
-- Polish and English alignment models and revisions;
+- English alignment model and revision;
 - validated batch size;
-- peak VRAM and model-unloading procedure;
+- application-level peak VRAM thresholds;
 - final channel-classification thresholds;
 - public external dataset license and redistribution permissions.
 

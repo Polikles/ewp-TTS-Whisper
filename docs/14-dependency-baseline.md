@@ -1,6 +1,6 @@
 # Dependency Baseline
 
-Verified through Phase 0 on **2026-08-02**. This is a starting point, not a substitute for the promoted lockfile and integration tests.
+Verified through Phase 0 on **2026-08-02**. The promoted application lock has SHA-256 `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`; integration tests remain required as application code is added.
 
 ## 1. Environment
 
@@ -24,13 +24,14 @@ Ubuntu 26.04 LTS has been released, but 24.04 remains the baseline until the com
 | WhisperX Python requirement | `>=3.10,<3.14` according to package metadata |
 | ASR model | `Systran/faster-whisper-large-v2` revision `f0fe81560cb8b68660e564f55dd99207059c092e` for the `accurate` preset |
 | Diarization | local `pyannote/speaker-diarization-community-1` |
-| Alignment | model selected for `pl`/`en`, then pinned after validation |
+| Polish alignment | `jonatasgrosman/wav2vec2-large-xlsr-53-polish` revision `6b1cea36bd8bc5f65ec8081667cd9c0207d51970` |
+| English alignment | select and pin after validation |
 
 ADR-0007 records the three-case `large-v2`/`large-v3` comparison and the initial `large-v2` decision. The corpus is small, so the decision must be reevaluated on the larger manually verified Polish dataset. `large-v3` remains configurable.
 
 ## 3. Recommended application libraries
 
-Do not freeze version numbers until the first lockfile is produced:
+The ML dependency versions are frozen by `pyproject.toml` and the promoted `uv.lock`. Select and lock the remaining application libraries when their modules are introduced:
 
 - CLI: Typer or an equivalent strongly typed library;
 - models and validation: Pydantic 2;

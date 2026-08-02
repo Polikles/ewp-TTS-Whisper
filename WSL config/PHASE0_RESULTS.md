@@ -1,8 +1,8 @@
 # Phase 0 results
 
-Last updated: **2026-08-01**.
+Last updated: **2026-08-02**.
 
-This file records accepted, sanitized evidence from the target RTX 3090 WSL workstation. Full lockfiles, generated transcripts, audio, model caches, and tokens remain outside this repository until explicitly promoted or excluded.
+This file records accepted, sanitized evidence from the target RTX 3090 WSL workstation. Generated transcripts, audio, model caches, and tokens remain outside this repository.
 
 ## Gate A — base workstation
 
@@ -75,10 +75,24 @@ duration_seconds=95.376
 
 This confirms that TorchCodec 0.7.0 can load the installed Ubuntu FFmpeg shared libraries and decode the mono PCM fixture.
 
-## Remaining gates
+## Gate F — application dependency-lock promotion
 
-- preliminary model comparison and accurate-preset decision;
-- promotion of the approved dependency definition and lockfile.
+Status: **PASS; the generated lockfile is ready to commit**.
+
+The accepted spike lock was copied into the application repository and its root-project metadata was updated with `uv lock --offline`. No transitive dependency was re-resolved from the network.
+
+```text
+accepted_spike_lock_sha256=a309c86ba2a06b86842ee3cb56dffc76a15e635f72a2f46bdf5847e7ab88c14c
+promoted_application_lock_sha256=c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359
+resolved_packages=117
+offline_uv_sync=PASS
+uv_pip_check=PASS (116 packages)
+Python=3.12.3
+WhisperX_import=PASS
+exact_version_checks=PASS (11/11)
+```
+
+The exact-version checks covered WhisperX, PyTorch, TorchAudio, TorchVision, TorchCodec, pyannote-audio, faster-whisper, CTranslate2, huggingface-hub, Transformers, and Triton. All matched the Phase 0 baseline above.
 
 ## Compatibility note — Hugging Face CLI
 

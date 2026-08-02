@@ -125,3 +125,7 @@ sanitized git status:
 ```
 
 Do not send the complete lockfile, model paths, caches, tokens, or environment dumps.
+
+## Accepted result — 2026-08-02
+
+All steps passed on the target WSL workstation. The promoted lock SHA-256 is `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`. Offline synchronization installed 116 compatible packages under Python 3.12.3, WhisperX imported successfully, and all 11 exact-version checks matched the Phase 0 baseline.
