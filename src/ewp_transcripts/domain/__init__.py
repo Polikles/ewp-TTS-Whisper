@@ -7,8 +7,11 @@ from ewp_transcripts.domain.models import (
     DiscoveredFile,
     DiscoveryResult,
     DoctorResult,
+    EpisodeCandidate,
+    GroupedSource,
     MediaProbeResult,
     SkippedPath,
+    SourceFingerprint,
 )
 
 __all__ = [
@@ -19,6 +22,9 @@ __all__ = [
     "DiscoveryResult",
     "DiscoverySkipReason",
     "DoctorResult",
+    "EpisodeCandidate",
+    "GroupedSource",
     "MediaProbeResult",
     "SkippedPath",
+    "SourceFingerprint",
 ]

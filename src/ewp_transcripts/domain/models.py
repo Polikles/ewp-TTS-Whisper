@@ -83,3 +83,32 @@ class MediaProbeResult(BaseModel):
     format_names: tuple[str, ...]
     duration_ms: int = Field(ge=0)
     audio_streams: tuple[AudioStream, ...]
+
+
+class SourceFingerprint(BaseModel):
+    """Content identity calculated without modifying the source file."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    path: Path
+    filename: str = Field(min_length=1)
+    size_bytes: int = Field(ge=0)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class GroupedSource(BaseModel):
+    """Fingerprinted source with an optional filename-derived speaker label."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    fingerprint: SourceFingerprint
+    speaker_label: str | None = None
+
+
+class EpisodeCandidate(BaseModel):
+    """Filename-derived episode candidate before media compatibility checks."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    job_id: str = Field(min_length=1)
+    sources: tuple[GroupedSource, ...] = Field(min_length=1)

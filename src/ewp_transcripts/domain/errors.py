@@ -31,3 +31,7 @@ class MediaProbeError(ApplicationError):
 
 class NoAudioStreamError(MediaProbeError):
     """Raised when an inspected input contains no supported audio stream."""
+
+
+class AmbiguousGroupError(ApplicationError):
+    """Raised when filename conventions cannot produce a unique episode group."""
