@@ -59,7 +59,15 @@ def test_doctor_json_returns_environment_exit_code_without_secrets(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     secret = "test-secret-that-must-not-be-printed"
-    monkeypatch.setenv("HF_TOKEN", secret)
+    diagnostic = run_doctor(
+        finder=lambda name: None if name == "nvidia-smi" else f"/usr/bin/{name}",
+        runner=_successful_runner,
+        environ={"HF_TOKEN": secret},
+        python_version=(3, 12, 3),
+        kernel_release="6.18.0-microsoft-standard-WSL2",
+        os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
+    )
+    monkeypatch.setattr("ewp_transcripts.cli.doctor", lambda: diagnostic)
     runner = CliRunner()
     result = runner.invoke(app, ["doctor", "--json-output"])
 
