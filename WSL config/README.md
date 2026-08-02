@@ -35,6 +35,14 @@ Prepare and validate the isolated environment with [`PREPARE_PHASE0_WSL.md`](PRE
 
 Accepted evidence is accumulated in [`PHASE0_RESULTS.md`](PHASE0_RESULTS.md). After the environment passes, acquire models with [`PREPARE_PHASE0_MODELS.md`](PREPARE_PHASE0_MODELS.md), run the P0-01 ASR/alignment gate with [`RUN_PHASE0_ASR_ALIGNMENT.md`](RUN_PHASE0_ASR_ALIGNMENT.md), run the P0-03 Community-1 component gate with [`RUN_PHASE0_DIARIZATION.md`](RUN_PHASE0_DIARIZATION.md), then combine all stages with [`RUN_PHASE0_INTEGRATED.md`](RUN_PHASE0_INTEGRATED.md).
 
+After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
+
+Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
+
+After technical reproducibility passes, prepare the accurate-preset benchmark with [`PREPARE_PHASE0_MODEL_COMPARISON.md`](PREPARE_PHASE0_MODEL_COMPARISON.md).
+
+Run the prepared benchmark with [`RUN_PHASE0_MODEL_COMPARISON.md`](RUN_PHASE0_MODEL_COMPARISON.md).
+
 ## Safety rules
 
 - Do not install a Linux NVIDIA display driver inside WSL.

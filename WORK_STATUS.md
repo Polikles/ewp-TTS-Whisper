@@ -8,23 +8,28 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-The project is in **Phase 0 execution: integrated GPU pipeline validation**.
+The project is in **Phase 0 execution: model comparison and dependency promotion**.
 
-No application code or production package scaffold has been created yet. The dependency, CUDA, model-acquisition, ASR/alignment, and diarization component gates have passed on the target workstation. The next gate combines those components in one sequential job.
+No application code or production package scaffold has been created yet. Candidate A has passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, and environment-level network-blocked tests on the target workstation.
 
 ## Authoritative resume point
 
-Resume with [`WSL config/RUN_PHASE0_INTEGRATED.md`](WSL%20config/RUN_PHASE0_INTEGRATED.md), starting at section 1.
+Resume with [`WSL config/RUN_PHASE0_MODEL_COMPARISON.md`](WSL%20config/RUN_PHASE0_MODEL_COMPARISON.md), starting at section 1. Candidate A itself is technically reproducible and offline-capable.
 
-The owner should run sections 1–6 in local WSL and return the sanitized stop-point evidence. Stop immediately if the run attempts a download, requests a token, fails on CUDA, or does not return exclusive diarization.
+Required owner input before quality comparison:
 
-After the integrated gate passes:
+1. P0-02 and P0-03 untimestamped references are confirmed manually verified;
+2. remove speaker-label metadata from the reference text before lexical scoring;
+3. keep transcript references in the external test-data repository, not this application repository.
 
-1. record its accepted evidence in [`WSL config/PHASE0_RESULTS.md`](WSL%20config/PHASE0_RESULTS.md);
-2. run a second complete job to verify repeated sequential loading and unloading;
-3. perform the environment-level network-blocked replay;
-4. continue the preliminary model/preset comparison;
-5. promote the approved dependency definition and external spike lockfile only after all Phase 0 gates pass.
+Next technical work:
+
+1. specify a fair, normalized comparison for the candidate accurate-preset ASR models;
+2. explicitly acquire any additional candidate model revision;
+3. run candidates against manually verified P0-01, P0-02, and the non-overlapping portions of P0-03;
+4. record WER/CER, timing, allocation limitations, and qualitative Polish errors;
+5. decide the accurate-preset model;
+6. promote the approved dependency definition and external spike lockfile into the application repository.
 
 ## Completed before this session
 
@@ -187,6 +192,22 @@ Bundled-VAD replay update: **PASS**. The corrected Pyannote-VAD run made no netw
 Community-1 component update: **technical PASS; manual speaker accuracy pending**. P0-03 ran locally without a token or download, produced two labels, returned both regular and exclusive diarization, and unloaded to 8.1 MiB of PyTorch allocation. Regular output contained 22 turns and 59.012 seconds of detected overlap; exclusive output contained 50 non-overlapping turns. These files intentionally contain only speaker intervals. The untimestamped reference cannot validate boundaries or overlap duration. Next, prepare the integrated P0-03 ASR, alignment, exclusive-diarization, and word-speaker-assignment gate so the owner can review speaker-labelled text.
 
 Integrated-gate update: the restartable full P0-03 sequence is ready in [`WSL config/RUN_PHASE0_INTEGRATED.md`](WSL%20config/RUN_PHASE0_INTEGRATED.md). It runs ASR, Polish alignment, Community-1 exclusive diarization, and word-speaker assignment in one process; unloads every GPU model between stages; writes JSON and readable speaker-labelled text only to the external evidence directory; and emits sanitized performance, allocation, timestamp, and assignment counts. Resume at section 1.
+
+Integrated result update: **technical PASS, non-overlapping quality PASS, mixed-overlap reconstruction FAIL**. The complete local sequence produced 956 timestamped and assigned words across both labels and returned to 8.1 MiB of PyTorch allocation after every stage. Manual review found correct non-overlapping speech but severe omissions where voices overlap in the single mixed waveform. This confirms the documented limitation rather than expanding MVP scope: preserve overlap metadata, emit `OVERLAPPING_SPEECH`, and do not claim both utterances were recovered. The second-run procedure is ready in [`WSL config/RUN_PHASE0_REPEAT.md`](WSL%20config/RUN_PHASE0_REPEAT.md).
+
+Second-run update: **PASS**. Run 2 reproduced all structural, speaker, timestamp, and allocation measurements and produced byte-for-byte identical JSON and text hashes. The exact reversible network-blocked replay is ready in [`WSL config/RUN_PHASE0_NETWORK_BLOCK.md`](WSL%20config/RUN_PHASE0_NETWORK_BLOCK.md). Resume there and remove the temporary firewall rule even if the blocked inference run fails.
+
+Network-blocked replay update: **PASS**. A named Hyper-V Firewall rule blocked outbound WSL HTTPS while Windows remained online. The complete integrated job succeeded without a token, download, retry, or fallback and reproduced the accepted JSON and text byte-for-byte. The rule was removed and WSL connectivity was restored and verified. Candidate A is now accepted as technically reproducible and offline-capable. Resume with the model-comparison input checkpoint above.
+
+Quality-input update: the complete P0-02 and P0-03 transcripts are manually verified and may be used for untimestamped lexical evaluation. [`tools/phase0_score_transcript.py`](tools/phase0_score_transcript.py) now provides dependency-free deterministic WER/CER scoring with `ewp-phase0-lexical-v1` normalization. It ignores case, punctuation, whitespace, and sentence-line layout while preserving Polish diacritics, spoken content, and number forms. Focused tests are in [`tests/tools/test_phase0_score_transcript.py`](tests/tools/test_phase0_score_transcript.py). Next, prepare the candidate-model acquisition and batch comparison runbook.
+
+Decision-trace update: [`docs/adr/0007-accurate-preset-asr-model.md`](docs/adr/0007-accurate-preset-asr-model.md) is the proposed decision record for the `large-v2` versus `large-v3` comparison. It defines fixed controls, normalization, corpus provenance, per-case and macro metrics, performance evidence, qualitative review, and acceptance criteria. Populate every pending result and change its status to `accepted` only after owner approval.
+
+Comparison-preparation update: [`WSL config/PREPARE_PHASE0_MODEL_COMPARISON.md`](WSL%20config/PREPARE_PHASE0_MODEL_COMPARISON.md) now verifies the six external corpus inputs, guards against speaker-label metadata, captures audio/reference hashes, checks the existing pinned `large-v3` snapshot, and explicitly inspects and downloads the additional `large-v2` candidate. Resume there; do not start inference until its stop point passes and ADR-0007 records the new revision.
+
+Comparison-input result: **PASS**. All six corpus inputs and both immutable model snapshots are present; the speaker-label guard passed; audio/reference hashes are recorded in ADR-0007; and `large-v2` revision `f0fe81560cb8b68660e564f55dd99207059c092e` matched the metadata query. The next step is the automated six-run ASR benchmark under identical local-only settings.
+
+Comparison-execution update: [`tools/phase0_compare_asr_models.py`](tools/phase0_compare_asr_models.py) verifies the six recorded corpus hashes and both model revisions, generates fresh ASR-only hypotheses for both models across P0-01/P0-02/P0-03, scores each with `ewp-phase0-lexical-v1`, and emits per-case plus macro results without printing transcript text. The operational procedure is [`WSL config/RUN_PHASE0_MODEL_COMPARISON.md`](WSL%20config/RUN_PHASE0_MODEL_COMPARISON.md). Resume there.
 
 ## Decisions still intentionally open
 

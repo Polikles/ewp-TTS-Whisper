@@ -71,9 +71,13 @@ Run stages sequentially and observe whether model references and GPU allocations
 
 First run the complete single-job sequence in [`RUN_PHASE0_INTEGRATED.md`](RUN_PHASE0_INTEGRATED.md). A subsequent gate repeats the job to test second-run stability.
 
+Use [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md) for the second-process stability and determinism check.
+
 ### 7. Offline replay
 
 Repeat the smoke case with local models, no token, offline environment variables, and outbound access disabled. Missing local resources must fail instead of downloading.
+
+Use [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md) for the target workstation's reversible Hyper-V Firewall procedure.
 
 ### 8. Freeze and document
 
@@ -85,6 +89,10 @@ Only after all stages pass:
 - record the validated batch size and peak VRAM;
 - document any required compatibility constraints;
 - retain a reusable GPU smoke-test case reference.
+
+Before selecting the accurate-preset model, prepare the controlled `large-v2` versus `large-v3` comparison with [`PREPARE_PHASE0_MODEL_COMPARISON.md`](PREPARE_PHASE0_MODEL_COMPARISON.md) and record the decision in [`../docs/adr/0007-accurate-preset-asr-model.md`](../docs/adr/0007-accurate-preset-asr-model.md).
+
+After preparation passes, execute the six-run benchmark with [`RUN_PHASE0_MODEL_COMPARISON.md`](RUN_PHASE0_MODEL_COMPARISON.md).
 
 ## Exit criteria
 

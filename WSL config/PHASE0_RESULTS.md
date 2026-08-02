@@ -77,9 +77,6 @@ This confirms that TorchCodec 0.7.0 can load the installed Ubuntu FFmpeg shared 
 
 ## Remaining gates
 
-- diarization and exclusive-diarization smoke test;
-- sequential model unloading and second-run stability;
-- network-blocked offline replay;
 - preliminary model comparison and accurate-preset decision;
 - promotion of the approved dependency definition and lockfile.
 
@@ -236,3 +233,147 @@ Community-1 loaded from the immutable local snapshot without a token or network 
 The TF32 warning is expected and accepted. Pyannote also emitted a `std()` degrees-of-freedom warning from its statistics-pooling block. It did not interrupt inference or produce invalid structural output, so it is retained as a compatibility observation for repeat-run monitoring rather than treated as a failure.
 
 The interval JSON files intentionally contain no transcript text. Because the available reference transcript has no timestamps, it cannot validate speaker-boundary accuracy or the reported 59.012 seconds of regular overlap. Those quality questions remain open for the integrated speaker-labelled transcript and, later, a timestamped speaker reference. In particular, the known presence of three audible overlap regions does not by itself prove that 59.012 seconds of detected overlap is accurate.
+
+## Gate I — integrated ASR, alignment, and speaker assignment
+
+Status: **TECHNICAL PASS; non-overlapping quality PASS; mixed-overlap reconstruction FAIL**.
+
+```text
+case=P0-03
+idle_memory_used_mib=3528
+idle_gpu_utilization_percent=21
+language=pl
+compute_type=float16
+batch_size=4
+vad_method=pyannote
+requested_speakers=2
+asr_load_seconds=3.251
+asr_seconds=19.865
+alignment_load_seconds=0.944
+alignment_seconds=4.647
+diarization_load_seconds=0.328
+diarization_seconds=7.749
+asr_torch_peak_mib=248.7
+alignment_torch_peak_mib=1750.1
+diarization_torch_peak_mib=1629.8
+after_asr_unload_torch_mib=8.1
+after_alignment_unload_torch_mib=8.1
+after_diarization_unload_torch_mib=8.1
+segments=49
+words=956
+untimed_words=0
+unassigned_segments=0
+unassigned_words=0
+segment_speakers=2
+word_speakers=2
+SPEAKER_00_words=408
+SPEAKER_01_words=548
+word_speaker_changes=20
+exclusive_intervals=50
+integrated_json_sha256=03776be4ca8d26afb9813c2713448557adc108295c27043e5ea232897d6203f7
+integrated_text_sha256=c4ca51d75c7416db6a75d1e8d61b2433c1fcbcf0162c6bf48014342ced98e6c1
+```
+
+All three models loaded from immutable local resources without a token or download. Every word was timestamped and assigned, both speaker labels propagated to segments and words, and PyTorch allocations returned to 8.1 MiB after every stage. The TF32, in-memory Lightning checkpoint upgrade, and statistics-pooling warnings matched the already accepted component behavior.
+
+Manual review found essentially correct speaker labelling and transcription in non-overlapping speech, apart from one hallucination on a word cut at the fixture boundary. Overlapping regions were reconstructed poorly: simultaneous mixed-mono speech led to omitted utterances and unusable combined content even though the resulting words all had labels. This is a quality failure for overlap reconstruction, not a diarization execution failure.
+
+The result confirms the documented MVP limitation in [`../docs/07-results-data-model.md`](../docs/07-results-data-model.md): detecting two active speakers in one mixed waveform cannot guarantee recovery of both utterances. The implementation must preserve overlap metadata and emit `OVERLAPPING_SPEECH`; it must not imply that both voices were transcribed completely. Separate channels or source tracks remain the preferred path when available. Source separation is not added to the MVP by this finding.
+
+## Gate J — second integrated run
+
+Status: **PASS**.
+
+```text
+idle_memory_used_mib=3619
+idle_gpu_utilization_percent=17
+asr_load_seconds=3.439
+asr_seconds=20.332
+alignment_load_seconds=0.950
+alignment_seconds=4.743
+diarization_load_seconds=0.247
+diarization_seconds=8.026
+asr_torch_peak_mib=248.7
+alignment_torch_peak_mib=1750.1
+diarization_torch_peak_mib=1629.8
+after_asr_unload_torch_mib=8.1
+after_alignment_unload_torch_mib=8.1
+after_diarization_unload_torch_mib=8.1
+segments=49
+words=956
+untimed_words=0
+unassigned_segments=0
+unassigned_words=0
+word_speaker_changes=20
+exclusive_intervals=50
+run2_json_sha256=03776be4ca8d26afb9813c2713448557adc108295c27043e5ea232897d6203f7
+run2_text_sha256=c4ca51d75c7416db6a75d1e8d61b2433c1fcbcf0162c6bf48014342ced98e6c1
+```
+
+The second job reproduced every structural count, speaker distribution, allocation measurement, and output byte-for-byte. Both transcript-bearing SHA-256 values match the first run. Timing differences were small and consistent with changing desktop/GPU load. The accepted warnings were identical to the first integrated run.
+
+## Gate K — environment-level network-blocked replay
+
+Status: **PASS**.
+
+Block and restoration evidence:
+
+```text
+Hyper-V_Firewall_support=PASS
+WSL_outbound_HTTPS_block=PASS
+blocked_request_result=curl_timeout_after_8000ms
+Windows_host_HTTPS_during_block=PASS
+temporary_firewall_rule_removed=PASS
+WSL_network_restored=PASS
+```
+
+The named Hyper-V Firewall rule blocked WSL while the Windows host independently reached `huggingface.co:443`. This proves that the test did not merely coincide with an upstream or workstation-wide outage.
+
+Blocked-run measurements:
+
+```text
+idle_memory_used_mib=3705
+idle_gpu_utilization_percent=18
+asr_load_seconds=3.336
+asr_seconds=19.824
+alignment_load_seconds=0.945
+alignment_seconds=4.644
+diarization_load_seconds=0.282
+diarization_seconds=7.813
+asr_torch_peak_mib=248.7
+alignment_torch_peak_mib=1750.1
+diarization_torch_peak_mib=1629.8
+after_asr_unload_torch_mib=8.1
+after_alignment_unload_torch_mib=8.1
+after_diarization_unload_torch_mib=8.1
+segments=49
+words=956
+untimed_words=0
+unassigned_segments=0
+unassigned_words=0
+word_speaker_changes=20
+exclusive_intervals=50
+blocked_json_sha256=03776be4ca8d26afb9813c2713448557adc108295c27043e5ea232897d6203f7
+blocked_text_sha256=c4ca51d75c7416db6a75d1e8d61b2433c1fcbcf0162c6bf48014342ced98e6c1
+```
+
+The complete ASR, alignment, VAD, diarization, and speaker-assignment sequence loaded from local resources with no token, download, retry, or fallback. Output hashes match both connected runs byte-for-byte. Accepted warnings were unchanged. The temporary firewall rule was removed before artifact review, and WSL connectivity was explicitly verified afterward.
+
+This closes the Phase 0 offline/reproducibility gate for Candidate A.
+
+## Gate L — ASR comparison preparation
+
+Status: **PASS**.
+
+The three audio fixtures and three manually verified untimestamped references are present, their speaker-label guard passed, and their SHA-256 values are recorded in ADR-0007. The additional public candidate was acquired explicitly:
+
+```text
+repo=Systran/faster-whisper-large-v2
+revision=f0fe81560cb8b68660e564f55dd99207059c092e
+files=6
+known_size_bytes=3089582354
+snapshot_revision_match=PASS
+HF_TOKEN_absent=PASS
+```
+
+The existing `large-v3` snapshot was also re-verified. No comparison inference has been accepted yet.
