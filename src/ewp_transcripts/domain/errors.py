@@ -11,3 +11,15 @@ class MissingCapabilityError(ApplicationError):
 
 class InvalidConfigurationError(ApplicationError):
     """Raised when a configuration source cannot be read or validated."""
+
+
+class InputNotFoundError(ApplicationError):
+    """Raised when the supplied input path does not exist."""
+
+
+class UnsupportedInputError(ApplicationError):
+    """Raised when the supplied input is neither a regular file nor directory."""
+
+
+class SymlinkInputError(ApplicationError):
+    """Raised when a symbolic link is supplied as the direct input."""

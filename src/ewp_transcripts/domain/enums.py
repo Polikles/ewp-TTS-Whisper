@@ -27,3 +27,10 @@ class ChannelMode(StrEnum):
     DUAL_MONO = "dual-mono"
     SPLIT_SPEAKERS = "split-speakers"
     MIXED_STEREO = "mixed-stereo"
+
+
+class DiscoverySkipReason(StrEnum):
+    """Reason a directory entry was not selected for inspection."""
+
+    SYMLINK = "symlink"
+    UNSUPPORTED_EXTENSION = "unsupported-extension"

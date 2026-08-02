@@ -39,7 +39,7 @@ class GeneralConfig(StrictConfigModel):
 
 class InputConfig(StrictConfigModel):
     recursive: bool = False
-    follow_symlinks: bool = False
+    follow_symlinks: Literal[False] = False
     supported_audio: tuple[str, ...] = ("wav", "mp3", "flac", "m4a", "ogg", "opus")
 
 

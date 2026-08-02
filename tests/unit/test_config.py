@@ -61,6 +61,13 @@ def test_invalid_threshold_order_is_rejected(tmp_path: Path) -> None:
         load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
 
 
+def test_following_symlinks_cannot_be_enabled_in_mvp(tmp_path: Path) -> None:
+    selected = _write(tmp_path / "selected.toml", "[input]\nfollow_symlinks = true\n")
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
 def test_missing_explicit_file_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(InvalidConfigurationError, match="does not exist"):
         load_config(
