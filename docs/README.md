@@ -32,6 +32,7 @@
 - [ADR-0004: SHA-256 and non-destructive versioning](adr/0004-hashing-and-versioning.md)
 - [ADR-0005: No audio repair in the MVP](adr/0005-no-audio-repair-in-mvp.md)
 - [ADR-0006: Interface-independent application core](adr/0006-interface-independent-core.md)
+- [ADR-0007: Accurate-preset ASR model selection](adr/0007-accurate-preset-asr-model.md)
 
 ## Implementation guidance
 
