@@ -31,9 +31,11 @@ The prepared files and probe results are recorded in [`PHASE0_MEDIA_INVENTORY.md
 
 The first dependency hypothesis is documented in [`DEPENDENCY_CANDIDATE_MATRIX.md`](DEPENDENCY_CANDIDATE_MATRIX.md).
 
-Prepare and validate the isolated environment with [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.md). The separate future production installation guide is [`INSTALL_APPLICATION.md`](INSTALL_APPLICATION.md).
+Prepare and validate the isolated environment with [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.md). Install and verify the current production scaffold with [`INSTALL_APPLICATION.md`](INSTALL_APPLICATION.md).
 
 Accepted evidence is accumulated in [`PHASE0_RESULTS.md`](PHASE0_RESULTS.md). After the environment passes, acquire models with [`PREPARE_PHASE0_MODELS.md`](PREPARE_PHASE0_MODELS.md), run the P0-01 ASR/alignment gate with [`RUN_PHASE0_ASR_ALIGNMENT.md`](RUN_PHASE0_ASR_ALIGNMENT.md), run the P0-03 Community-1 component gate with [`RUN_PHASE0_DIARIZATION.md`](RUN_PHASE0_DIARIZATION.md), then combine all stages with [`RUN_PHASE0_INTEGRATED.md`](RUN_PHASE0_INTEGRATED.md).
+
+The accepted repository-scaffold and quality-gate evidence is recorded in [`PHASE1_RESULTS.md`](PHASE1_RESULTS.md).
 
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 

@@ -1,8 +1,8 @@
 # Install EWP-transcripts in WSL
 
-Status: **planned; not executable yet**.
+Status: **Phase 1 scaffold installation is executable; transcription steps remain pending**.
 
-This will become the clean-machine installation and update guide for actually running EWP-transcripts after the Phase 0 dependency stack and production package exist.
+This guide installs the current EWP-transcripts package from its committed lockfile. The Phase 1 commands (`--help`, `--version`, and `doctor`) are available. Model setup and transcription commands will be added only when their implementation phases are complete.
 
 It is intentionally separate from [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.md):
 
@@ -12,7 +12,38 @@ It is intentionally separate from [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.m
 - gated model downloads will remain explicit;
 - normal transcription will run offline without hidden downloads.
 
-## Planned final flow
+## Current installation
+
+Keep the repository in the WSL Linux filesystem, not under `/mnt/c` or `/mnt/d`:
+
+```bash
+cd ~/transkrypcje
+git clone <REPOSITORY-URL> ewp-transcripts
+cd ewp-transcripts
+uv sync --locked
+```
+
+For an existing checkout:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+uv sync --locked
+```
+
+Verify the installed scaffold:
+
+```bash
+uv run transcriber --help
+uv run transcriber --version
+uv run transcriber doctor
+make check
+uv build
+```
+
+`doctor` does not load Torch, WhisperX, pyannote, or transcription models. A missing required environment capability returns exit code 3. `HF_TOKEN` is reported only as present or missing; its value is never printed.
+
+## Planned complete application flow
 
 1. Verify WSL, Ubuntu, NVIDIA passthrough, and FFmpeg.
 2. Clone a tagged EWP-transcripts release into the Linux filesystem.
@@ -24,4 +55,4 @@ It is intentionally separate from [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.m
 8. Verify offline readiness.
 9. Run the first `inspect`, `dry-run`, and `transcribe` operations.
 
-Do not fill in production commands until the relevant application commands and lockfile exist. Until then, use the base WSL documentation and the Phase 0 spike guide.
+Steps 6–9 are not yet application commands. Use the Phase 0 runbooks only for model/GPU validation until the corresponding production implementation is complete.

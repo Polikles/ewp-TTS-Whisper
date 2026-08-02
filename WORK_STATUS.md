@@ -8,23 +8,22 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phase 0 is complete. Phase 1 — repository scaffold and quality gate — is starting.**
+**Phases 0 and 1 are complete. Phase 2 — input discovery and media inspection — is next.**
 
-No application code or production package scaffold has been created yet. Candidate A passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, environment-level network-blocked, model-comparison, and application-lock promotion tests on the target workstation. The validated lockfile is committed.
+The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Create the smallest installable `src/ewp_transcripts` package and local quality gate described by Phase 1 of [`docs/MVP_IMPLEMENTATION_PLAN.md`](docs/MVP_IMPLEMENTATION_PLAN.md). Use Typer, Pydantic 2, pytest, Ruff, mypy, and build as the accepted tooling stack.
+Begin Phase 2 of [`docs/MVP_IMPLEMENTATION_PLAN.md`](docs/MVP_IMPLEMENTATION_PLAN.md) with deterministic input discovery and path normalization. Do not add ASR, alignment, or diarization behavior in this phase.
 
-The Phase 1 exit commands are `uv sync --locked`, `uv run transcriber --help`, `uv run transcriber --version`, `uv run transcriber doctor`, `make check`, and `uv build`. Help, version, and doctor must not initialize CUDA models.
+The first Phase 2 slice should define typed discovery results and implement single-file plus non-recursive directory discovery, including supported-suffix filtering, Unicode paths, stable natural ordering, and symlink exclusion by default.
 
-Immediate implementation sequence:
+Immediate Phase 2 sequence:
 
-1. add and lock the accepted Phase 1 tooling dependencies;
-2. create the minimal package and stable entry points;
-3. implement lightweight configuration and doctor foundations;
-4. add the local quality gate and focused tests;
-5. validate all Phase 1 exit commands on Python 3.12.
+1. add `discovery.py` and its typed domain results;
+2. cover a single file, a non-recursive directory, Unicode paths, natural ordering, unsupported files, and symlinks;
+3. expose discovery through the application layer without adding CLI `inspect` yet;
+4. then add the ffprobe adapter and media inspection as the next independent slice.
 
 ## Completed before this session
 
