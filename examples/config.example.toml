@@ -26,8 +26,8 @@ dual_mono_min_correlation = 0.995
 dual_mono_max_rms_difference_db = 1.5
 
 [models]
-# Candidate for the accurate preset. E-005 must compare large-v2 and large-v3 on the Polish corpus.
-asr_model = "large-v3"
+# ADR-0007 default for the accurate preset; remains configurable.
+asr_model = "large-v2"
 compute_type = "float16"
 batch_size = 16
 device = "cuda"

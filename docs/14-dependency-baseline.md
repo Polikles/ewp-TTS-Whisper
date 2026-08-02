@@ -1,6 +1,6 @@
 # Dependency Baseline
 
-Verified on **2026-07-29**. This is a starting point, not a substitute for a lockfile and integration tests.
+Verified through Phase 0 on **2026-08-02**. This is a starting point, not a substitute for the promoted lockfile and integration tests.
 
 ## 1. Environment
 
@@ -22,11 +22,11 @@ Ubuntu 26.04 LTS has been released, but 24.04 remains the baseline until the com
 |---|---|
 | WhisperX | 3.8.6, stable PyPI release |
 | WhisperX Python requirement | `>=3.10,<3.14` according to package metadata |
-| ASR model | final choice after a `large-v2` versus `large-v3` spike on the Polish corpus |
+| ASR model | `Systran/faster-whisper-large-v2` revision `f0fe81560cb8b68660e564f55dd99207059c092e` for the `accurate` preset |
 | Diarization | local `pyannote/speaker-diarization-community-1` |
 | Alignment | model selected for `pl`/`en`, then pinned after validation |
 
-`faster-whisper` supports `large-v3`, but the project must select the preset model using its own corpus because Polish accuracy and regression control are the primary criteria.
+ADR-0007 records the three-case `large-v2`/`large-v3` comparison and the initial `large-v2` decision. The corpus is small, so the decision must be reevaluated on the larger manually verified Polish dataset. `large-v3` remains configurable.
 
 ## 3. Recommended application libraries
 

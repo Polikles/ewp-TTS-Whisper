@@ -377,3 +377,25 @@ HF_TOKEN_absent=PASS
 ```
 
 The existing `large-v3` snapshot was also re-verified. No comparison inference has been accepted yet.
+
+## Gate M — `large-v2` versus `large-v3` benchmark
+
+Status: **PASS; owner selected `large-v2`**.
+
+```text
+comparison_report_sha256=9d431afab5332b2c685a6420406052565d5d0c67117bb1c4cf7898dc0a59459d
+large-v2_macro_WER=0.06933812
+large-v3_macro_WER=0.07097451
+large-v2_macro_CER=0.05917788
+large-v3_macro_CER=0.05940508
+large-v2_total_word_errors=225
+large-v3_total_word_errors=224
+large-v2_total_ASR_seconds=38.676
+large-v3_total_ASR_seconds=41.214
+large-v2_after_unload_torch_mib=8.1
+large-v3_after_unload_torch_mib=8.1
+```
+
+Both candidates ran locally under identical WhisperX 3.8.6, PyTorch 2.8.0+cu128, Polish, `float16`, batch-size-4, and bundled-Pyannote-VAD controls. Full per-case scores, hypothesis hashes, timings, qualitative observations, aggregate calculations, and interpretation are preserved in ADR-0007.
+
+`large-v2` has a small macro-average and speed advantage. `large-v3` is quantitatively and qualitatively better on difficult P0-03 and makes one fewer total word error across the corpus. The owner selected `large-v2` for the MVP accurate preset based on the predefined macro comparison, clean-case results, and speed. The corpus has only three cases, so ADR-0007 requires reevaluation on the future larger manually verified dataset.

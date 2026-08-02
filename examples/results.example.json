@@ -97,8 +97,8 @@
     "models": [
       {
         "role": "asr",
-        "name": "large-v3",
-        "revision": null,
+        "name": "large-v2",
+        "revision": "f0fe81560cb8b68660e564f55dd99207059c092e",
         "local_path": "/home/user/.cache/models/asr"
       },
       {

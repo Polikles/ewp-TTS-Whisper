@@ -45,7 +45,7 @@ Complete example: [`../examples/config.example.toml`](../examples/config.example
 
 The MVP preset is optimized for an RTX 3090 and prioritizes quality. It should define:
 
-- a large multilingual model selected through project benchmarks;
+- `large-v2` by default, selected through ADR-0007's initial project benchmark;
 - CUDA `float16`;
 - a batch size validated by an OOM stability test;
 - word alignment;
@@ -54,6 +54,8 @@ The MVP preset is optimized for an RTX 3090 and prioritizes quality. It should d
 - no automatic audio repair.
 
 The ASR model and batch size must remain configurable.
+
+The selection is provisional because the comparison corpus contained only three cases. A larger manually verified corpus may justify changing the default through a new or superseding ADR.
 
 ## 5. Validation
 
