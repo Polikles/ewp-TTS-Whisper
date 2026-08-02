@@ -35,3 +35,15 @@ class NoAudioStreamError(MediaProbeError):
 
 class AmbiguousGroupError(ApplicationError):
     """Raised when filename conventions cannot produce a unique episode group."""
+
+
+class MultipleAudioStreamsError(ApplicationError):
+    """Raised when an input has multiple audio streams and none was selected."""
+
+
+class SampleRateMismatchError(ApplicationError):
+    """Raised when grouped sources do not share a sample rate."""
+
+
+class DurationMismatchError(ApplicationError):
+    """Raised when grouped-source duration drift exceeds the allowed threshold."""

@@ -34,3 +34,15 @@ class DiscoverySkipReason(StrEnum):
 
     SYMLINK = "symlink"
     UNSUPPORTED_EXTENSION = "unsupported-extension"
+
+
+class WarningSeverity(StrEnum):
+    """Severity of a non-destructive application warning."""
+
+    WARNING = "warning"
+
+
+class WarningCode(StrEnum):
+    """Warning codes introduced by current implementation phases."""
+
+    INPUT_DURATION_MISMATCH = "INPUT_DURATION_MISMATCH"

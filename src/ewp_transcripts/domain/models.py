@@ -5,7 +5,13 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ewp_transcripts.domain.enums import DiagnosticStatus, DiscoverySkipReason
+from ewp_transcripts.domain.enums import (
+    ChannelMode,
+    DiagnosticStatus,
+    DiscoverySkipReason,
+    WarningCode,
+    WarningSeverity,
+)
 
 
 class DiagnosticCheck(BaseModel):
@@ -112,3 +118,40 @@ class EpisodeCandidate(BaseModel):
 
     job_id: str = Field(min_length=1)
     sources: tuple[GroupedSource, ...] = Field(min_length=1)
+
+
+class ApplicationWarning(BaseModel):
+    """Structured warning that does not modify source media."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    code: WarningCode
+    severity: WarningSeverity = WarningSeverity.WARNING
+    message: str = Field(min_length=1)
+    context: dict[str, Any] = Field(default_factory=dict)
+
+
+class InspectedSource(BaseModel):
+    """Fingerprinted source paired with one selected audio stream."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    fingerprint: SourceFingerprint
+    stream: AudioStream
+    duration_ms: int = Field(ge=0)
+    channel_mode: ChannelMode = ChannelMode.AUTO
+    speaker_id: str = Field(pattern=r"^speaker_[0-9]{3,}$")
+    speaker_label: str | None = None
+
+
+class EpisodeInspection(BaseModel):
+    """Validated grouped-source metadata before channel classification."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    job_id: str = Field(min_length=1)
+    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    duration_ms: int = Field(ge=0)
+    sample_rate_hz: int = Field(gt=0)
+    sources: tuple[InspectedSource, ...] = Field(min_length=1)
+    warnings: tuple[ApplicationWarning, ...] = ()
