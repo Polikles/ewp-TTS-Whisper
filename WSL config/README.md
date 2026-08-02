@@ -43,6 +43,8 @@ After technical reproducibility passes, prepare the accurate-preset benchmark wi
 
 Run the prepared benchmark with [`RUN_PHASE0_MODEL_COMPARISON.md`](RUN_PHASE0_MODEL_COMPARISON.md).
 
+After ADR-0007 selects the default model, promote the validated dependency lock with [`PROMOTE_PHASE0_DEPENDENCIES.md`](PROMOTE_PHASE0_DEPENDENCIES.md).
+
 ## Safety rules
 
 - Do not install a Linux NVIDIA display driver inside WSL.

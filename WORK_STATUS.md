@@ -14,7 +14,9 @@ No application code or production package scaffold has been created yet. Candida
 
 ## Authoritative resume point
 
-Resume with [`WSL config/RUN_PHASE0_MODEL_COMPARISON.md`](WSL%20config/RUN_PHASE0_MODEL_COMPARISON.md), starting at section 1. Candidate A itself is technically reproducible and offline-capable.
+Resume with dependency-definition and lockfile promotion using `large-v2` as the accepted MVP accurate-preset default. Candidate A is technically reproducible and offline-capable.
+
+Follow [`WSL config/PROMOTE_PHASE0_DEPENDENCIES.md`](WSL%20config/PROMOTE_PHASE0_DEPENDENCIES.md), starting at section 1. It copies the accepted external spike lock, changes only root-project metadata offline, and verifies a separate locked application environment before the lock is committed.
 
 Required owner input before quality comparison:
 
@@ -208,6 +210,10 @@ Comparison-preparation update: [`WSL config/PREPARE_PHASE0_MODEL_COMPARISON.md`]
 Comparison-input result: **PASS**. All six corpus inputs and both immutable model snapshots are present; the speaker-label guard passed; audio/reference hashes are recorded in ADR-0007; and `large-v2` revision `f0fe81560cb8b68660e564f55dd99207059c092e` matched the metadata query. The next step is the automated six-run ASR benchmark under identical local-only settings.
 
 Comparison-execution update: [`tools/phase0_compare_asr_models.py`](tools/phase0_compare_asr_models.py) verifies the six recorded corpus hashes and both model revisions, generates fresh ASR-only hypotheses for both models across P0-01/P0-02/P0-03, scores each with `ewp-phase0-lexical-v1`, and emits per-case plus macro results without printing transcript text. The operational procedure is [`WSL config/RUN_PHASE0_MODEL_COMPARISON.md`](WSL%20config/RUN_PHASE0_MODEL_COMPARISON.md). Resume there.
+
+ASR comparison result: measured and recorded in ADR-0007. `large-v2` has a very small macro WER/CER advantage and ran about 6.6% faster in this single ordered benchmark. `large-v3` made one fewer total word error and was materially better on difficult P0-03 according to both counts and manual review, while both models remained excellent on clean P0-01/P0-02. These trade-offs were presented to the owner before the decision. LLM punctuation repair remains outside the MVP.
+
+Accurate-preset decision: **`large-v2` selected**. ADR-0007 is accepted and records the exact revision, complete evidence, contrary P0-03 result, and rationale. The comparison corpus contains only three cases, so this is an initial baseline rather than a permanent model ranking; rerun the automated comparison after building the larger manually verified dataset. Next, promote the validated dependency definition and lockfile into the application repository.
 
 ## Decisions still intentionally open
 
