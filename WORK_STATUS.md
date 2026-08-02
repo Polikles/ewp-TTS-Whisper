@@ -8,22 +8,23 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-The project is at the **Phase 0 closeout: commit the validated application lockfile**.
+**Phase 0 is complete. Phase 1 — repository scaffold and quality gate — is starting.**
 
-No application code or production package scaffold has been created yet. Candidate A has passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, environment-level network-blocked, model-comparison, and application-lock promotion tests on the target workstation.
+No application code or production package scaffold has been created yet. Candidate A passed dependency, CUDA, model-acquisition, ASR/alignment, diarization, integrated, repeatability, environment-level network-blocked, model-comparison, and application-lock promotion tests on the target workstation. The validated lockfile is committed.
 
 ## Authoritative resume point
 
-Commit the already generated and validated `uv.lock` as a single-file change. Candidate A is technically reproducible and offline-capable, and `large-v2` is the accepted MVP accurate-preset default.
+Create the smallest installable `src/ewp_transcripts` package and local quality gate described by Phase 1 of [`docs/MVP_IMPLEMENTATION_PLAN.md`](docs/MVP_IMPLEMENTATION_PLAN.md). Use Typer, Pydantic 2, pytest, Ruff, mypy, and build as the accepted tooling stack.
 
-The promotion procedure in [`WSL config/PROMOTE_PHASE0_DEPENDENCIES.md`](WSL%20config/PROMOTE_PHASE0_DEPENDENCIES.md) passed. The promoted lock hash is `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`; offline sync, compatibility checks, import checks, and all 11 exact-version checks passed.
+The Phase 1 exit commands are `uv sync --locked`, `uv run transcriber --help`, `uv run transcriber --version`, `uv run transcriber doctor`, `make check`, and `uv build`. Help, version, and doctor must not initialize CUDA models.
 
-Immediate next action in the target WSL clone:
+Immediate implementation sequence:
 
-1. fast-forward to the documentation commit;
-2. confirm the generated `uv.lock` still has the accepted promoted hash;
-3. commit and push only `uv.lock`;
-4. confirm the application repository is clean apart from explicitly excluded local files.
+1. add and lock the accepted Phase 1 tooling dependencies;
+2. create the minimal package and stable entry points;
+3. implement lightweight configuration and doctor foundations;
+4. add the local quality gate and focused tests;
+5. validate all Phase 1 exit commands on Python 3.12.
 
 ## Completed before this session
 
