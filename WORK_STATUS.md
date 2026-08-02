@@ -14,16 +14,21 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Begin Phase 2 of [`docs/MVP_IMPLEMENTATION_PLAN.md`](docs/MVP_IMPLEMENTATION_PLAN.md) with deterministic input discovery and path normalization. Do not add ASR, alignment, or diarization behavior in this phase.
+Resume Phase 2 at channel-classification calibration. Deterministic discovery, path normalization, ffprobe inspection, source hashing, filename grouping, duration/sample-rate validation, audio-stream selection, stable speaker IDs, and episode signatures are implemented and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
 
-The first Phase 2 slice should define typed discovery results and implement single-file plus non-recursive directory discovery, including supported-suffix filtering, Unicode paths, stable natural ordering, and symlink exclusion by default.
+The current local quality gate passes 51 unit tests; the self-contained real FFmpeg/ffprobe integration test passed on the target WSL workstation. The latest implementation commit is `347ae02 Add grouped media validation`.
 
-Immediate Phase 2 sequence:
+Required owner input before the next implementation slice:
 
-1. add `discovery.py` and its typed domain results;
-2. cover a single file, a non-recursive directory, Unicode paths, natural ordering, unsupported files, and symlinks;
-3. expose discovery through the application layer without adding CLI `inspect` yet;
-4. then add the ffprobe adapter and media inspection as the next independent slice.
+1. true-mono fixture, 30–60 seconds; P0-01 may be reused;
+2. exact or near-identical dual-mono fixture, 30–60 seconds; existing material may be reused;
+3. split-speaker stereo fixture, 60–120 seconds, with one speaker per channel, solo regions for each speaker, and at least one overlap;
+4. mixed-stereo fixture, 60–120 seconds, with both speakers audible in both channels and genuine stereo differences;
+5. filenames and sanitized ffprobe output for each fixture.
+
+Prefer 48 kHz, 16-bit PCM WAV. Keep all audio in the external test-data repository. An ambiguous-stereo fixture is optional initially and may be derived after measuring the known cases.
+
+Tomorrow's first action is to record the prepared fixture inventory and measurements, then implement measurable channel features and calibrate `mono`, `dual-mono`, `split-speakers`, `mixed-stereo`, and `ambiguous` decisions. Do not invent split/mixed thresholds before examining the fixtures. After channel classification, expose the complete `transcriber inspect` vertical slice and close Phase 2.
 
 ## Completed before this session
 
