@@ -6,12 +6,24 @@ from __future__ import annotations
 import argparse
 import gc
 import hashlib
+import importlib.util
 from importlib.metadata import version
 import json
 from pathlib import Path
+import sys
 import time
 
-from phase0_score_transcript import score
+
+SCORER_PATH = Path(__file__).resolve().with_name("phase0_score_transcript.py")
+SCORER_SPEC = importlib.util.spec_from_file_location(
+    "ewp_phase0_score_transcript", SCORER_PATH
+)
+if SCORER_SPEC is None or SCORER_SPEC.loader is None:
+    raise ImportError(f"Cannot load Phase 0 scorer from {SCORER_PATH}")
+SCORER = importlib.util.module_from_spec(SCORER_SPEC)
+sys.modules[SCORER_SPEC.name] = SCORER
+SCORER_SPEC.loader.exec_module(SCORER)
+score = SCORER.score
 
 
 CASES = {
