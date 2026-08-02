@@ -23,3 +23,11 @@ class UnsupportedInputError(ApplicationError):
 
 class SymlinkInputError(ApplicationError):
     """Raised when a symbolic link is supplied as the direct input."""
+
+
+class MediaProbeError(ApplicationError):
+    """Raised when ffprobe cannot inspect or normalize an input."""
+
+
+class NoAudioStreamError(MediaProbeError):
+    """Raised when an inspected input contains no supported audio stream."""

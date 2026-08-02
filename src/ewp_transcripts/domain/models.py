@@ -57,3 +57,29 @@ class DiscoveryResult(BaseModel):
     recursive: bool
     files: tuple[DiscoveredFile, ...]
     skipped: tuple[SkippedPath, ...]
+
+
+class AudioStream(BaseModel):
+    """Normalized metadata for one audio stream reported by ffprobe."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    index: int = Field(ge=0)
+    codec: str = Field(min_length=1)
+    sample_rate_hz: int = Field(gt=0)
+    channels: int = Field(gt=0)
+    channel_layout: str | None = None
+    duration_ms: int | None = Field(default=None, ge=0)
+    language: str | None = None
+    title: str | None = None
+
+
+class MediaProbeResult(BaseModel):
+    """Normalized, non-destructive media inspection result."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    path: Path
+    format_names: tuple[str, ...]
+    duration_ms: int = Field(ge=0)
+    audio_streams: tuple[AudioStream, ...]
