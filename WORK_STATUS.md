@@ -6,16 +6,16 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 through 4 are complete. Phase 5 — single-file, single-speaker transcription
-— is underway.**
+**Phases 0 through 5 are complete. Phase 6 — sequential batch processing — is next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 5 by running its final controlled target gate in
-[`WSL config/RUN_PHASE5_FAILURE_RESTART.md`](WSL%20config/RUN_PHASE5_FAILURE_RESTART.md).
-Do not begin Phase 6 batch processing until this failure/restart criterion is accepted.
+Begin Phase 6 with a CPU/fake-engine batch application service: deterministic natural
+episode order, one job at a time, continue-after-error policy, and a stable final summary.
+Keep the existing single-job lifecycle as the per-episode boundary. Add cancellation and
+CLI behavior only after the batch service tests are stable.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -71,10 +71,17 @@ forced local-only inference run published a coordinated v2 set. Both runs contai
 segments and 226 timestamped words with pinned model provenance. V1/v2 TXT, SRT, and VTT
 were byte-identical; terminal state and workdir cleanup passed; the WSL worktree was
 clean. ADR-0002 records all eight artifact hashes. The only remaining Phase 5 exit gate
-is a controlled failed-state and successful-restart exercise.
+was a controlled failed-state and successful-restart exercise.
 
-Owner input is required only to execute the prepared controlled failure/restart gate on
-the target WSL workstation and return sanitized evidence.
+The controlled failure/restart target gate is also **accepted**. A missing pinned ASR
+snapshot produced sanitized exit code 4, immutable v1 failed state, no final/partial
+result, and one retained owned workspace. Correcting only the config restarted the job
+from the beginning and safely selected v2; canonical JSON and all exports passed, the v1
+failed hash remained unchanged, duplicate skip was non-mutating, and marker cleanup left
+no job workdirs. ADR-0004 records the five artifact hashes and versioning decision. All
+Phase 5 exit criteria now pass.
+
+No owner input is currently required for the CPU-testable Phase 6 batch scaffold.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 

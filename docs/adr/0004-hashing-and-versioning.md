@@ -117,3 +117,39 @@ d3cfbe6df477b47fd6bd9e27ddafc7243e62d622d3813aba5da2df68c6dc22ee  S01E01_segment
 7bb305e38d7a5df65c0ec5c83eb6c4398de3b8d8a8fe7f12cd3eaced7844be58  S01E01_subtitles_v002.vtt
 16b0993ded8a17bc1bfc934a6c9ea97b3adc5671e36130e25b643e1674d045e3  S01E01_transcript_v002.txt
 ```
+
+## Phase 5 failed-state restart evidence
+
+On 2026-08-03, the final Phase 5 target gate deliberately configured a nonexistent ASR
+snapshot while retaining the correct immutable revision name. The production command:
+
+- exited with the documented application error code 4;
+- printed only `Pinned local ASR model snapshot is unavailable`, without a traceback,
+  transcript text, token, or internal path discovery;
+- atomically replaced running state with a v1 `failed` record using failure code
+  `SPEECH_ENGINE_ERROR`;
+- created no completed result and left no partial state;
+- retained its marker-owned workspace and prepared working WAV for diagnostics.
+
+After changing only the sandbox configuration to the valid local snapshot, the next
+offline invocation restarted inspection and inference from the beginning. Because the v1
+failed diagnostic occupied that coordinated output set, allocation safely advanced to
+v2 without overwriting evidence. The restart published schema-valid canonical JSON plus
+TXT/SRT/VTT, with 13 segments and 226 words. A subsequent invocation skipped the v2
+result and all exports without model loading. The v1 failed-state hash remained unchanged,
+and its workspace was then removed through marker-verified cleanup. No partial, temporary,
+or job workdir remained; the WSL worktree was clean.
+
+External evidence hashes:
+
+```text
+f1384e7c04300492ad78a946d663c137eacf63f61ebe063e4e804c211c8626ed  p0-01-single-short_results.failed.json
+d978cf9745c4b344e4e1d14fd03c57b2289eab0b6a1950915d65e3f8bbc142cf  p0-01-single-short_results_v002.json
+689dfa9328a8351ae5839773aeb95e76552840f861e4114d00557e623b60cb74  p0-01-single-short_subtitles_v002.srt
+b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  p0-01-single-short_subtitles_v002.vtt
+127eea14b247d8a6c6b32cf79c82ae7159a69ddfd964e4b5b2a1e9521eca9e1b  p0-01-single-short_transcript_v002.txt
+```
+
+This accepts the Phase 5 rule that failed attempts are immutable diagnostics rather than
+resumable checkpoints. A corrected run starts over and uses the first wholly unoccupied
+coordinated version.
