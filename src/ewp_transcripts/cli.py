@@ -6,8 +6,9 @@ from typing import Annotated
 
 import typer
 
-from ewp_transcripts.application import application_version, doctor, inspect_input
+from ewp_transcripts.application import application_version, doctor, dry_run, inspect_input
 from ewp_transcripts.config import load_config
+from ewp_transcripts.domain import JobOutputPlan
 from ewp_transcripts.domain.enums import ChannelMode
 from ewp_transcripts.domain.errors import (
     ApplicationError,
@@ -183,6 +184,113 @@ def inspect_command(
                 f"processing={classification.processing_mode.value}"
             )
         for warning in episode.warnings:
+            typer.echo(f"  WARNING {warning.code.value}: {warning.message}")
+
+
+def _planned_paths(job: JobOutputPlan) -> tuple[Path, ...]:
+    if job.outputs is None:
+        return ()
+    return tuple(
+        path
+        for path in (
+            job.outputs.results,
+            job.outputs.transcript,
+            job.outputs.subtitles_srt,
+            job.outputs.subtitles_vtt,
+            job.outputs.segments,
+        )
+        if path is not None
+    )
+
+
+@app.command("dry-run")
+def dry_run_command(
+    input_path: Annotated[
+        Path,
+        typer.Argument(help="Audio file or directory to plan.", metavar="INPUT"),
+    ],
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Plan final outputs in this directory."),
+    ] = None,
+    recursive: Annotated[
+        bool | None,
+        typer.Option("--recursive", help="Inspect supported files in subdirectories."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    channel_mode: Annotated[
+        RequestedChannelMode | None,
+        typer.Option("--channel-mode", help="Override automatic channel classification."),
+    ] = None,
+    speaker_count: Annotated[
+        str | None,
+        typer.Option("--speaker-count", help="Expected speakers: 'auto' or a positive integer."),
+    ] = None,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Plan a new result version even for a duplicate."),
+    ] = False,
+    allow_duration_mismatch: Annotated[
+        bool,
+        typer.Option(
+            "--allow-duration-mismatch",
+            help="Allow grouped-source duration differences above the error threshold.",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the complete execution plan as JSON."),
+    ] = False,
+) -> None:
+    """Plan a run without creating outputs, workdirs, or loading models."""
+
+    try:
+        parsed_speaker_count = _speaker_count(speaker_count)
+        config = load_config(
+            explicit_path=config_path,
+            cli_overrides=_inspection_overrides(
+                recursive=recursive,
+                channel_mode=channel_mode,
+                speaker_count=parsed_speaker_count,
+            ),
+        )
+        result = dry_run(
+            input_path,
+            config=config,
+            output_directory=output_directory,
+            force=force,
+            allow_duration_mismatch=allow_duration_mismatch,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+
+    if json_output:
+        typer.echo(result.model_dump_json(indent=2))
+        return
+
+    typer.echo(f"Output directory: {result.output_directory}")
+    episodes = {episode.job_id: episode for episode in result.inspection.episodes}
+    for job in result.jobs:
+        episode = episodes[job.job_id]
+        typer.echo(f"\n{job.decision.value.upper()} {job.job_id}")
+        typer.echo(f"  language: {result.language.value}")
+        for source in episode.sources:
+            speaker = source.speaker_label or source.speaker_id
+            typer.echo(f"  source: {source.fingerprint.filename} ({speaker})")
+            typer.echo(
+                f"    channels: detected={source.channel_classification.detected_mode.value}, "
+                f"processing={source.channel_classification.processing_mode.value}"
+            )
+        if job.outputs is not None:
+            typer.echo(f"  result version: {job.outputs.result_version}")
+            for path in _planned_paths(job):
+                typer.echo(f"  output: {path}")
+        elif job.existing_result is not None:
+            typer.echo(f"  existing result: {job.existing_result.path}")
+        for warning in (*episode.warnings, *job.warnings):
             typer.echo(f"  WARNING {warning.code.value}: {warning.message}")
 
 

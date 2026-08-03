@@ -49,6 +49,7 @@ def test_dry_run_composes_inspection_and_output_planning(
     )
 
     assert result.output_directory == destination
+    assert result.language.value == "pl"
     assert result.output_directory.exists() is False
     assert len(result.jobs) == 1
     assert result.jobs[0].decision is PlanDecision.PROCESS

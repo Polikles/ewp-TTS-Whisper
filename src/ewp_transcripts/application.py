@@ -108,5 +108,6 @@ def dry_run(
     return DryRunResult(
         inspection=inspection,
         output_directory=destination,
+        language=effective_config.general.language,
         jobs=jobs,
     )

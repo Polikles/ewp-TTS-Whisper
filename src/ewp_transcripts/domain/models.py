@@ -9,6 +9,7 @@ from ewp_transcripts.domain.enums import (
     ChannelMode,
     DiagnosticStatus,
     DiscoverySkipReason,
+    LanguageMode,
     PlanDecision,
     WarningCode,
     WarningSeverity,
@@ -261,4 +262,5 @@ class DryRunResult(BaseModel):
 
     inspection: InspectionResult
     output_directory: Path
+    language: LanguageMode
     jobs: tuple[JobOutputPlan, ...]
