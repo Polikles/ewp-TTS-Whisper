@@ -1,35 +1,33 @@
 # EWP-transcripts work status
 
-Last updated: **2026-07-31**.
-
-Latest resume update: **2026-08-03**.
+Last updated: **2026-08-03**.
 
 Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0, 1, 2, and 3 are complete. Phase 4 — canonical results and derived exporters
+**Phases 0 through 4 are complete. Phase 5 — single-file, single-speaker transcription
 — is next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 4 by reconciling the accepted `results.schema.json` and example with strict
-canonical domain models. Implement validated canonical serialization first, then TXT,
-SRT, VTT, and optional segments exporters that consume only canonical results. Finally
-add `transcriber export` without reading source audio or loading ML models.
+Resume Phase 5 by designing the smallest production single-file/single-speaker pipeline:
+working-audio preparation, local large-v2 ASR, Polish alignment, canonical normalization,
+and safe final-result publication. Reuse the accepted model revisions and Phase 3
+reservation/workdir primitives; do not add diarization or multi-source branching yet.
 
-The target WSL workstation and development VM both pass all 75 tests with FFmpeg
-integration enabled. The WSL worktree was clean. The complete five-fixture production
-inspection gate passed, and the normal and offline P2-03 reports were byte-for-byte
-identical. ADR-0003 records all classifications and report hashes.
+The target WSL workstation passes all 150 tests with a clean worktree. Phase 4 generated
+and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA was hidden
+and model libraries were offline. Repeat without `--force` was non-mutating; forced
+export created one coordinated v2 set. ADR-0002 records canonical/export evidence and
+ADR-0004 records versioning evidence and hashes.
 
-No owner input is currently required. ADR-0004 records read-only and mutable Phase 3
-evidence, including the clean 122-test WSL gate. Cross-process locking, atomic running and
-terminal states, marker-guarded workdirs, and scoped cleanup are validated. The WSL
-repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as an
-intentionally untracked file in the development VM.
+No owner input is currently required for the initial Phase 5 design and CPU-testable
+scaffold. GPU validation will later require the owner to run the prepared WSL procedure.
+The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
+an intentionally untracked file in the development VM.
 
 ## Completed before this session
 

@@ -90,3 +90,30 @@ f840aee698cb5a730ddaae3e74af2d5e89937e454981181f444644b3d8567e85  state-output/c
 Lock-file hashes are evidence for this run only because acquisition metadata contains a
 PID and timestamp. The retained failed and partial records are controlled mechanics
 artifacts, not resumable transcription checkpoints. A later run must restart the job.
+
+## Phase 4 repeated-export validation evidence
+
+On 2026-08-03, the target WSL workstation validated derived-export versioning at commit
+`9c00f8c`:
+
+- a first run created TXT, SRT, VTT, and segments JSON at result version 1;
+- repeating all four formats without `--force` reported four `SKIP` decisions and left
+  every existing file byte-for-byte unchanged;
+- repeating with `--force` selected one coordinated version 2 and created all four
+  `_v002` paths;
+- version-1 and version-2 TXT, SRT, and VTT hashes matched because their content is a
+  deterministic transformation of the same canonical transcript and configuration;
+- segments hashes differed only because that schema intentionally records the export's
+  `generated_at` provenance timestamp;
+- the canonical result hash remained
+  `6ab17f931db9037d9ca982f7a111336ae931c1ee6368f2a6bcfb0ba575323b0c`;
+- no temporary file remained and the repository worktree was clean.
+
+The forced export hashes were:
+
+```text
+d3cfbe6df477b47fd6bd9e27ddafc7243e62d622d3813aba5da2df68c6dc22ee  S01E01_segments_v002.json
+0c61b0cdf2ff00dcf63ed254b8e3d686613ad32bfadef2d65aef94abcaac5b1d  S01E01_subtitles_v002.srt
+7bb305e38d7a5df65c0ec5c83eb6c4398de3b8d8a8fe7f12cd3eaced7844be58  S01E01_subtitles_v002.vtt
+16b0993ded8a17bc1bfc934a6c9ea97b3adc5671e36130e25b643e1674d045e3  S01E01_transcript_v002.txt
+```
