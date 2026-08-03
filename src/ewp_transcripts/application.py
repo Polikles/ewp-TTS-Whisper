@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from typing import Literal
 from uuid import UUID, uuid4
 
 from ewp_transcripts import __version__
@@ -49,6 +50,7 @@ __all__ = [
     "dry_run",
     "export_result",
     "inspect_input",
+    "transcribe_batch",
     "transcribe_one",
 ]
 
@@ -64,6 +66,38 @@ class TranscriptionOutcome:
     job_id: str
     result_path: Path
     exports: ExportOutcome | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchJobOutcome:
+    """Stable summary entry for one episode in a sequential batch."""
+
+    job_id: str
+    status: Literal["completed", "skipped", "failed"]
+    result_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchTranscriptionOutcome:
+    """Deterministically ordered summary of one sequential batch."""
+
+    output_directory: Path
+    jobs: tuple[BatchJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def completed(self) -> int:
+        return sum(job.status == "completed" for job in self.jobs)
+
+    @property
+    def skipped(self) -> int:
+        return sum(job.status == "skipped" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
 
 
 def application_version() -> str:
@@ -191,10 +225,94 @@ def transcribe_one(
         config=config.outputs,
         explicit_directory=output_directory,
     )
+    return _transcribe_episode(
+        episode,
+        destination=destination,
+        config=config,
+        force=force,
+        run_id=run_id or uuid4(),
+        asr_factory=asr_factory or _whisperx_asr,
+        alignment_factory=alignment_factory or _whisperx_alignment,
+    )
+
+
+def transcribe_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    output_directory: Path | None = None,
+    force: bool = False,
+    allow_duration_mismatch: bool = False,
+    asr_factory: AsrFactory | None = None,
+    alignment_factory: AlignmentFactory | None = None,
+) -> BatchTranscriptionOutcome:
+    """Process inspected episodes sequentially and isolate per-job failures."""
+
+    if config.diarization.speaker_count != 1:
+        raise UnsupportedPipelineScopeError("Phase 6 batch requires speaker_count = 1")
+    inspected = inspect_input(
+        input_path,
+        config=config,
+        allow_duration_mismatch=allow_duration_mismatch,
+    )
+    destination = resolve_output_directory(
+        inspected.discovery,
+        config=config.outputs,
+        explicit_directory=output_directory,
+    )
+    jobs: list[BatchJobOutcome] = []
+    stopped_early = False
+    for episode in inspected.episodes:
+        try:
+            outcome = _transcribe_episode(
+                episode,
+                destination=destination,
+                config=config,
+                force=force,
+                run_id=uuid4(),
+                asr_factory=asr_factory or _whisperx_asr,
+                alignment_factory=alignment_factory or _whisperx_alignment,
+            )
+            jobs.append(
+                BatchJobOutcome(
+                    job_id=outcome.job_id,
+                    status=("skipped" if outcome.decision is PlanDecision.SKIP else "completed"),
+                    result_path=outcome.result_path,
+                )
+            )
+        except Exception as error:
+            jobs.append(
+                BatchJobOutcome(
+                    job_id=episode.job_id,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchTranscriptionOutcome(
+        output_directory=destination,
+        jobs=tuple(jobs),
+        stopped_early=stopped_early,
+    )
+
+
+def _transcribe_episode(
+    episode: EpisodeInspection,
+    *,
+    destination: Path,
+    config: ApplicationConfig,
+    force: bool,
+    run_id: UUID,
+    asr_factory: AsrFactory,
+    alignment_factory: AlignmentFactory,
+) -> TranscriptionOutcome:
     reservation = reserve_job(
         episode,
         output_directory=destination,
-        run_id=run_id or uuid4(),
+        run_id=run_id,
         force=force,
         config=config.outputs,
         lock_timeout_seconds=config.runtime.lock_timeout_seconds,
@@ -223,8 +341,8 @@ def transcribe_one(
         episode,
         reservation,
         config=config,
-        asr_factory=asr_factory or _whisperx_asr,
-        alignment_factory=alignment_factory or _whisperx_alignment,
+        asr_factory=asr_factory,
+        alignment_factory=alignment_factory,
     )
 
 
