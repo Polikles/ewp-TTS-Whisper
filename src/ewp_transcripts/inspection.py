@@ -7,9 +7,11 @@ from collections.abc import Callable, Mapping
 from hashlib import sha256
 from pathlib import Path
 
+from ewp_transcripts.config import ChannelsConfig
 from ewp_transcripts.domain import (
     ApplicationWarning,
     AudioStream,
+    ChannelMetrics,
     EpisodeCandidate,
     EpisodeInspection,
     InspectedSource,
@@ -21,9 +23,11 @@ from ewp_transcripts.domain.errors import (
     MultipleAudioStreamsError,
     SampleRateMismatchError,
 )
-from ewp_transcripts.media import probe_media
+from ewp_transcripts.media import measure_file_channels, probe_media
+from ewp_transcripts.media.channels import classify_channels
 
 MediaProbe = Callable[[Path], MediaProbeResult]
+ChannelAnalyzer = Callable[[Path], ChannelMetrics]
 
 
 def _select_audio_stream(
@@ -78,6 +82,8 @@ def inspect_episode(
     *,
     probe: MediaProbe = probe_media,
     selected_streams: Mapping[Path, int] | None = None,
+    channel_analyzer: ChannelAnalyzer = measure_file_channels,
+    channels_config: ChannelsConfig | None = None,
     duration_warning_ms: int = 100,
     duration_error_ms: int = 500,
     allow_duration_mismatch: bool = False,
@@ -87,10 +93,19 @@ def inspect_episode(
     if duration_warning_ms < 0 or duration_error_ms < duration_warning_ms:
         raise ValueError("invalid duration thresholds")
     stream_selection = selected_streams or {}
+    effective_channels_config = channels_config or ChannelsConfig()
     inspected: list[InspectedSource] = []
+    channel_warnings: list[ApplicationWarning] = []
     for position, grouped_source in enumerate(episode.sources, start=1):
         result = probe(grouped_source.fingerprint.path)
         stream = _select_audio_stream(result, stream_selection)
+        metrics = channel_analyzer(result.path) if stream.channels == 2 else None
+        classification = classify_channels(
+            original_channels=stream.channels,
+            metrics=metrics,
+            config=effective_channels_config,
+        )
+        channel_warnings.extend(classification.warnings)
         inspected.append(
             InspectedSource(
                 fingerprint=grouped_source.fingerprint,
@@ -98,6 +113,8 @@ def inspect_episode(
                 duration_ms=(
                     stream.duration_ms if stream.duration_ms is not None else result.duration_ms
                 ),
+                channel_mode=classification.processing_mode,
+                channel_classification=classification,
                 speaker_id=f"speaker_{position:03d}",
                 speaker_label=grouped_source.speaker_label,
             )
@@ -116,9 +133,9 @@ def inspect_episode(
             f"Grouped-source duration difference exceeds {duration_error_ms} ms: {episode.job_id}"
         )
 
-    warnings: tuple[ApplicationWarning, ...] = ()
+    warnings: list[ApplicationWarning] = list(channel_warnings)
     if duration_difference > duration_warning_ms:
-        warnings = (
+        warnings.append(
             ApplicationWarning(
                 code=WarningCode.INPUT_DURATION_MISMATCH,
                 message="Grouped sources have different durations.",
@@ -126,7 +143,7 @@ def inspect_episode(
                     "difference_ms": duration_difference,
                     "override_used": duration_difference > duration_error_ms,
                 },
-            ),
+            )
         )
 
     sources = tuple(inspected)
@@ -136,5 +153,5 @@ def inspect_episode(
         duration_ms=max(durations),
         sample_rate_hz=next(iter(sample_rates)),
         sources=sources,
-        warnings=warnings,
+        warnings=tuple(warnings),
     )

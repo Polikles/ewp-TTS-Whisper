@@ -131,32 +131,6 @@ class ApplicationWarning(BaseModel):
     context: dict[str, Any] = Field(default_factory=dict)
 
 
-class InspectedSource(BaseModel):
-    """Fingerprinted source paired with one selected audio stream."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    fingerprint: SourceFingerprint
-    stream: AudioStream
-    duration_ms: int = Field(ge=0)
-    channel_mode: ChannelMode = ChannelMode.AUTO
-    speaker_id: str = Field(pattern=r"^speaker_[0-9]{3,}$")
-    speaker_label: str | None = None
-
-
-class EpisodeInspection(BaseModel):
-    """Validated grouped-source metadata before channel classification."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    job_id: str = Field(min_length=1)
-    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    duration_ms: int = Field(ge=0)
-    sample_rate_hz: int = Field(gt=0)
-    sources: tuple[InspectedSource, ...] = Field(min_length=1)
-    warnings: tuple[ApplicationWarning, ...] = ()
-
-
 class ChannelMetrics(BaseModel):
     """Measured stereo similarity and windowed channel activity."""
 
@@ -188,4 +162,31 @@ class ChannelClassification(BaseModel):
     detected_mode: ChannelMode
     processing_mode: ChannelMode
     selected_channel_index: int | None = Field(default=None, ge=0)
+    warnings: tuple[ApplicationWarning, ...] = ()
+
+
+class InspectedSource(BaseModel):
+    """Fingerprinted source paired with one selected audio stream."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    fingerprint: SourceFingerprint
+    stream: AudioStream
+    duration_ms: int = Field(ge=0)
+    channel_mode: ChannelMode
+    channel_classification: ChannelClassification
+    speaker_id: str = Field(pattern=r"^speaker_[0-9]{3,}$")
+    speaker_label: str | None = None
+
+
+class EpisodeInspection(BaseModel):
+    """Validated grouped-source metadata and channel-processing decisions."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    job_id: str = Field(min_length=1)
+    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    duration_ms: int = Field(ge=0)
+    sample_rate_hz: int = Field(gt=0)
+    sources: tuple[InspectedSource, ...] = Field(min_length=1)
     warnings: tuple[ApplicationWarning, ...] = ()

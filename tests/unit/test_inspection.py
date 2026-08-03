@@ -6,7 +6,13 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.discovery import discover_input, group_discovered_files
-from ewp_transcripts.domain import AudioStream, EpisodeCandidate, MediaProbeResult
+from ewp_transcripts.domain import (
+    AudioStream,
+    ChannelMetrics,
+    EpisodeCandidate,
+    MediaProbeResult,
+)
+from ewp_transcripts.domain.enums import ChannelMode
 from ewp_transcripts.domain.errors import (
     DurationMismatchError,
     MultipleAudioStreamsError,
@@ -25,6 +31,7 @@ def _episode(tmp_path: Path) -> EpisodeCandidate:
 def _probe(
     durations: dict[str, int],
     sample_rates: dict[str, int] | None = None,
+    channels: int = 1,
 ) -> Callable[[Path], MediaProbeResult]:
     def probe(path: Path) -> MediaProbeResult:
         sample_rate = (sample_rates or {}).get(path.name, 48000)
@@ -32,7 +39,7 @@ def _probe(
             index=0,
             codec="pcm_s16le",
             sample_rate_hz=sample_rate,
-            channels=1,
+            channels=channels,
             duration_ms=durations[path.name],
         )
         return MediaProbeResult(
@@ -142,3 +149,39 @@ def test_episode_signature_is_stable_and_source_order_sensitive(tmp_path: Path) 
     )
     assert calculate_episode_signature("renamed", result.sources) != result.episode_signature_sha256
     assert [source.speaker_id for source in result.sources] == ["speaker_001", "speaker_002"]
+
+
+def test_stereo_metrics_are_classified_and_enter_the_signature(tmp_path: Path) -> None:
+    episode = _episode(tmp_path)
+    metrics = ChannelMetrics(
+        sample_rate_hz=16000,
+        analyzed_samples_per_channel=160000,
+        window_ms=500,
+        windows=20,
+        correlation=-0.001,
+        normalized_difference_rms=1.3,
+        left_rms_dbfs=-27.0,
+        right_rms_dbfs=-28.0,
+        channel_rms_difference_db=1.0,
+        left_activity_threshold_dbfs=-50.0,
+        right_activity_threshold_dbfs=-50.0,
+        left_only_ratio=0.5,
+        right_only_ratio=0.4,
+        both_active_ratio=0.05,
+        neither_active_ratio=0.05,
+    )
+
+    result = inspect_episode(
+        episode,
+        probe=_probe(
+            {"episode-anna.wav": 1000, "episode-jan.wav": 1000},
+            channels=2,
+        ),
+        channel_analyzer=lambda path: metrics,
+    )
+
+    assert all(
+        source.channel_classification.detected_mode is ChannelMode.SPLIT_SPEAKERS
+        for source in result.sources
+    )
+    assert all(source.channel_mode is ChannelMode.SPLIT_SPEAKERS for source in result.sources)
