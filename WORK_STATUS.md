@@ -12,11 +12,11 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 6 by preparing its target WSL batch runbook. Validate a naturally ordered
-two-file mono batch, duplicate replay, and sequential GPU behavior. In a separate sandbox,
-place an unsupported mixed-stereo case before a valid mono case to prove failed-state
-isolation, continue-after-error behavior, exit code 5, and cleanup. Do not begin Phase 7
-multi-source/stereo implementation until these batch gates pass.
+Resume Phase 6 by running the target WSL batch gate in
+[`WSL config/RUN_PHASE6_BATCH.md`](WSL%20config/RUN_PHASE6_BATCH.md). It validates a
+naturally ordered two-file mono batch and duplicate replay, then an unsupported
+mixed-stereo job followed by a valid mono job for continue-after-error isolation. Do not
+begin Phase 7 multi-source/stereo implementation until these gates pass.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -82,7 +82,8 @@ failed hash remained unchanged, duplicate skip was non-mutating, and marker clea
 no job workdirs. ADR-0004 records the five artifact hashes and versioning decision. All
 Phase 5 exit criteria now pass.
 
-No owner input is currently required for the CPU-testable Phase 6 batch scaffold.
+Owner input is required only to execute the prepared Phase 6 batch gate on the target WSL
+workstation and return sanitized evidence.
 
 Commits `fe5d32a` and `46691da` implement the Phase 6 sequential batch boundary and CLI.
 Directory input is inspected once and processed in deterministic episode order with one

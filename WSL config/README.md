@@ -62,6 +62,9 @@ Complete Phase 5 by validating a controlled failed state, retained diagnostics, 
 successful versioned restart using
 [`RUN_PHASE5_FAILURE_RESTART.md`](RUN_PHASE5_FAILURE_RESTART.md).
 
+Validate Phase 6 natural ordering, sequential GPU execution, duplicate replay, and
+continue-after-error isolation using [`RUN_PHASE6_BATCH.md`](RUN_PHASE6_BATCH.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
