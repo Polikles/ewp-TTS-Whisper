@@ -219,3 +219,14 @@ class PlannedOutputPaths(BaseModel):
     subtitles_srt: Path | None = None
     subtitles_vtt: Path | None = None
     segments: Path | None = None
+
+
+class ExistingResult(BaseModel):
+    """Minimal trusted metadata read from one completed canonical result."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    path: Path
+    job_id: str = Field(min_length=1)
+    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    result_version: int = Field(ge=1)

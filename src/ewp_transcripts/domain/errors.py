@@ -55,3 +55,7 @@ class ChannelAnalysisError(ApplicationError):
 
 class UnsafeOutputNameError(ApplicationError):
     """Raised when a job identifier cannot safely become one output filename."""
+
+
+class InvalidExistingResultError(ApplicationError):
+    """Raised when completed-result metadata is unreadable or inconsistent."""

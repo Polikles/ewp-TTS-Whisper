@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import json
+import re
 from pathlib import Path
+from typing import Any
 
 from ewp_transcripts.config import OutputsConfig
-from ewp_transcripts.domain import DiscoveryResult, PlannedOutputPaths
-from ewp_transcripts.domain.errors import UnsafeOutputNameError
+from ewp_transcripts.domain import DiscoveryResult, ExistingResult, PlannedOutputPaths
+from ewp_transcripts.domain.errors import InvalidExistingResultError, UnsafeOutputNameError
+
+_FINAL_RESULT_NAME = re.compile(r"^.+_results(?:_v[0-9]{3,})?\.json$")
 
 
 def resolve_output_directory(
@@ -67,3 +72,55 @@ def plan_output_paths(
         subtitles_vtt=optional(config.generate_vtt, "subtitles", "vtt"),
         segments=optional(config.generate_segments_json, "segments", "json"),
     )
+
+
+def _required(data: dict[str, Any], key: str, expected: type) -> Any:
+    value = data.get(key)
+    if not isinstance(value, expected) or isinstance(value, bool):
+        raise InvalidExistingResultError(f"Completed result has invalid {key!r}")
+    return value
+
+
+def read_existing_result(path: Path) -> ExistingResult:
+    """Read only identity/version metadata from one completed canonical result."""
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise InvalidExistingResultError(f"Cannot read completed result: {path}") from error
+    if not isinstance(data, dict) or data.get("status") != "completed":
+        raise InvalidExistingResultError(f"Result is not a completed object: {path}")
+    episode = data.get("episode")
+    if not isinstance(episode, dict):
+        raise InvalidExistingResultError(f"Completed result has invalid 'episode': {path}")
+    try:
+        return ExistingResult(
+            path=path,
+            job_id=_required(data, "job_id", str),
+            episode_signature_sha256=_required(episode, "episode_signature_sha256", str),
+            result_version=_required(data, "result_version", int),
+        )
+    except (ValueError, InvalidExistingResultError) as error:
+        if isinstance(error, InvalidExistingResultError):
+            raise
+        raise InvalidExistingResultError(f"Invalid completed result metadata: {path}") from error
+
+
+def find_existing_results(output_directory: Path) -> tuple[ExistingResult, ...]:
+    """Index final result files deterministically without reading partial/failed states."""
+
+    if not output_directory.exists():
+        return ()
+    if not output_directory.is_dir():
+        raise InvalidExistingResultError(
+            f"Output destination is not a directory: {output_directory}"
+        )
+    paths = sorted(
+        (
+            path
+            for path in output_directory.iterdir()
+            if path.is_file() and _FINAL_RESULT_NAME.fullmatch(path.name)
+        ),
+        key=lambda path: path.name.casefold(),
+    )
+    return tuple(read_existing_result(path) for path in paths)
