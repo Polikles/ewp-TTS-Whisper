@@ -13,11 +13,10 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 with the lazy local WhisperX large-v2/Polish-alignment adapter, followed by
-the application/CLI lifecycle that connects inspection, reservation, workdir allocation,
-the completed fake-tested pipeline, final publication, exports, and cleanup. Prepare the
-target WSL GPU gate before accepting the real adapter. Do not add diarization, batch, or
-multi-source branching yet.
+Resume Phase 5 by running the target WSL production gate in
+[`WSL config/RUN_PHASE5_SINGLE_SPEAKER.md`](WSL%20config/RUN_PHASE5_SINGLE_SPEAKER.md).
+Do not add diarization, batch, or multi-source branching until this real P0-01 gate is
+accepted.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -49,8 +48,18 @@ identity. Finalization re-verifies the persisted running reservation under lock,
 the canonical JSON exclusively, then removes the partial state. Identity mismatches and
 occupied final paths are non-mutating. The development-VM gate now passes all 170 tests.
 
-No owner input is currently required for the initial Phase 5 design and CPU-testable
-scaffold. GPU validation will later require the owner to run the prepared WSL procedure.
+Commit `5bb30db` adds lazy, local-only WhisperX adapters for the accepted large-v2 and
+Polish-alignment snapshots. Commit `a8d97e5` makes both repository IDs, immutable
+revisions, and exact snapshot directories explicit in strict configuration; runtime does
+not discover a cache or download a missing model. Commit `1f36037` exposes the complete
+single-speaker lifecycle as `transcriber transcribe`: inspect, reserve, allocate, run ASR
+then alignment, normalize, publish canonical JSON, create configured exports, clean a
+successful workspace, retain an errored workspace, and skip duplicates. CPU/fake-engine
+tests cover success and failure state handling. The development-VM gate passes all 179
+tests.
+
+Owner input is now required only to execute the prepared Phase 5 GPU procedure on the
+target WSL workstation and return its sanitized evidence.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 
