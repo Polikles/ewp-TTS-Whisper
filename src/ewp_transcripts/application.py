@@ -212,17 +212,17 @@ def transcribe_one(
     asr_factory: AsrFactory | None = None,
     alignment_factory: AlignmentFactory | None = None,
 ) -> TranscriptionOutcome:
-    """Run one Phase 5 single-source/single-speaker job through safe publication."""
+    """Run one single-source/single-speaker job through safe publication."""
 
     if config.diarization.speaker_count != 1:
-        raise UnsupportedPipelineScopeError("Phase 5 transcribe requires speaker_count = 1")
+        raise UnsupportedPipelineScopeError("Single-file transcribe requires speaker_count = 1")
     inspected = inspect_input(
         input_path,
         config=config,
         allow_duration_mismatch=allow_duration_mismatch,
     )
     if len(inspected.episodes) != 1:
-        raise UnsupportedPipelineScopeError("Phase 5 transcribe requires exactly one episode")
+        raise UnsupportedPipelineScopeError("Single-file transcribe requires exactly one episode")
     episode = inspected.episodes[0]
     destination = resolve_output_directory(
         inspected.discovery,
@@ -253,7 +253,7 @@ def transcribe_batch(
     """Process inspected episodes sequentially and isolate per-job failures."""
 
     if config.diarization.speaker_count != 1:
-        raise UnsupportedPipelineScopeError("Phase 6 batch requires speaker_count = 1")
+        raise UnsupportedPipelineScopeError("Single-speaker batch requires speaker_count = 1")
     inspected = inspect_input(
         input_path,
         config=config,

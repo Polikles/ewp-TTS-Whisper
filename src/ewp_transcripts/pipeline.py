@@ -48,7 +48,7 @@ def run_single_speaker_pipeline(
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
-    """Run the Phase 5 one-source/one-speaker path and return a completed result."""
+    """Run the one-source/one-speaker path and return a completed result."""
 
     source = _validate_scope(inspection, reservation, workspace, config)
     state = reservation.state
@@ -150,19 +150,25 @@ def _validate_scope(
     config: ApplicationConfig,
 ) -> InspectedSource:
     if len(inspection.sources) != 1:
-        raise UnsupportedPipelineScopeError("Phase 5 requires exactly one source")
+        raise UnsupportedPipelineScopeError("Single-speaker pipeline requires exactly one source")
     if config.diarization.speaker_count != 1:
-        raise UnsupportedPipelineScopeError("Phase 5 requires speaker_count = 1")
+        raise UnsupportedPipelineScopeError("Single-speaker pipeline requires speaker_count = 1")
     source = inspection.sources[0]
     if source.channel_classification.processing_mode not in {
         ChannelMode.MONO,
         ChannelMode.DUAL_MONO,
     }:
-        raise UnsupportedPipelineScopeError("Phase 5 supports mono or one selected working channel")
+        raise UnsupportedPipelineScopeError(
+            "Single-speaker pipeline supports mono or one selected working channel"
+        )
     if reservation.state is None or reservation.plan.outputs is None:
-        raise UnsupportedPipelineScopeError("Phase 5 requires a processing reservation")
+        raise UnsupportedPipelineScopeError(
+            "Single-speaker pipeline requires a processing reservation"
+        )
     if reservation.state.status is not JobStateStatus.RUNNING:
-        raise UnsupportedPipelineScopeError("Phase 5 requires a running reservation")
+        raise UnsupportedPipelineScopeError(
+            "Single-speaker pipeline requires a running reservation"
+        )
     if (
         reservation.state.job_id != inspection.job_id
         or reservation.state.episode_signature_sha256 != inspection.episode_signature_sha256
