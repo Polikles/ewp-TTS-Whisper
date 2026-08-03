@@ -1,14 +1,15 @@
 """Typed foundational domain models."""
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ewp_transcripts.domain.enums import (
     ChannelMode,
     DiagnosticStatus,
     DiscoverySkipReason,
+    PlanDecision,
     WarningCode,
     WarningSeverity,
 )
@@ -230,3 +231,24 @@ class ExistingResult(BaseModel):
     job_id: str = Field(min_length=1)
     episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     result_version: int = Field(ge=1)
+
+
+class JobOutputPlan(BaseModel):
+    """Read-only process/skip and version decision for one inspected episode."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    job_id: str = Field(min_length=1)
+    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    decision: PlanDecision
+    outputs: PlannedOutputPaths | None = None
+    existing_result: ExistingResult | None = None
+    warnings: tuple[ApplicationWarning, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_decision_payload(self) -> Self:
+        if self.decision is PlanDecision.PROCESS and self.outputs is None:
+            raise ValueError("process decisions require planned outputs")
+        if self.decision is PlanDecision.SKIP and self.existing_result is None:
+            raise ValueError("skip decisions require an existing result")
+        return self

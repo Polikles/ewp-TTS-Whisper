@@ -3,6 +3,7 @@
 from ewp_transcripts.domain.enums import (
     DiagnosticStatus,
     DiscoverySkipReason,
+    PlanDecision,
     WarningCode,
     WarningSeverity,
 )
@@ -21,6 +22,7 @@ from ewp_transcripts.domain.models import (
     GroupedSource,
     InspectedSource,
     InspectionResult,
+    JobOutputPlan,
     MediaProbeResult,
     PlannedOutputPaths,
     SkippedPath,
@@ -44,8 +46,10 @@ __all__ = [
     "GroupedSource",
     "InspectionResult",
     "InspectedSource",
+    "JobOutputPlan",
     "MediaProbeResult",
     "PlannedOutputPaths",
+    "PlanDecision",
     "SkippedPath",
     "SourceFingerprint",
     "WarningCode",

@@ -8,7 +8,16 @@ from pathlib import Path
 from typing import Any
 
 from ewp_transcripts.config import OutputsConfig
-from ewp_transcripts.domain import DiscoveryResult, ExistingResult, PlannedOutputPaths
+from ewp_transcripts.domain import (
+    ApplicationWarning,
+    DiscoveryResult,
+    EpisodeInspection,
+    ExistingResult,
+    JobOutputPlan,
+    PlannedOutputPaths,
+    WarningCode,
+)
+from ewp_transcripts.domain.enums import PlanDecision
 from ewp_transcripts.domain.errors import InvalidExistingResultError, UnsafeOutputNameError
 
 _FINAL_RESULT_NAME = re.compile(r"^.+_results(?:_v[0-9]{3,})?\.json$")
@@ -124,3 +133,100 @@ def find_existing_results(output_directory: Path) -> tuple[ExistingResult, ...]:
         key=lambda path: path.name.casefold(),
     )
     return tuple(read_existing_result(path) for path in paths)
+
+
+def _output_files(paths: PlannedOutputPaths) -> tuple[Path, ...]:
+    return tuple(
+        path
+        for path in (
+            paths.results,
+            paths.partial_results,
+            paths.failed_results,
+            paths.transcript,
+            paths.subtitles_srt,
+            paths.subtitles_vtt,
+            paths.segments,
+        )
+        if path is not None
+    )
+
+
+def _available_output_paths(
+    output_directory: Path,
+    *,
+    job_id: str,
+    first_version: int,
+    config: OutputsConfig,
+) -> PlannedOutputPaths:
+    version = first_version
+    while True:
+        paths = plan_output_paths(
+            output_directory,
+            job_id=job_id,
+            version=version,
+            config=config,
+        )
+        if not any(path.exists() for path in _output_files(paths)):
+            return paths
+        version += 1
+
+
+def plan_job_outputs(
+    inspection: EpisodeInspection,
+    *,
+    output_directory: Path,
+    existing_results: tuple[ExistingResult, ...],
+    force: bool,
+    config: OutputsConfig,
+) -> JobOutputPlan:
+    """Decide skip/process and allocate the first currently available output set."""
+
+    matching_signature = tuple(
+        result
+        for result in existing_results
+        if result.episode_signature_sha256 == inspection.episode_signature_sha256
+    )
+    if matching_signature and not force:
+        existing = max(matching_signature, key=lambda item: item.result_version)
+        return JobOutputPlan(
+            job_id=inspection.job_id,
+            episode_signature_sha256=inspection.episode_signature_sha256,
+            decision=PlanDecision.SKIP,
+            existing_result=existing,
+            warnings=(
+                ApplicationWarning(
+                    code=WarningCode.EXISTING_RESULT_SKIPPED,
+                    message="A completed result with the same episode signature exists.",
+                    context={"existing_result": str(existing.path)},
+                ),
+            ),
+        )
+
+    same_job = tuple(result for result in existing_results if result.job_id == inspection.job_id)
+    first_version = 1
+    warnings: tuple[ApplicationWarning, ...] = ()
+    if matching_signature and force:
+        first_version = max(2, max(item.result_version for item in matching_signature) + 1)
+    elif same_job:
+        first_version = max(item.result_version for item in same_job) + 1
+        warnings = (
+            ApplicationWarning(
+                code=WarningCode.SOURCE_NAME_COLLISION,
+                message="The job ID exists with a different episode signature.",
+                context={"existing_versions": sorted(item.result_version for item in same_job)},
+            ),
+        )
+
+    outputs = _available_output_paths(
+        output_directory,
+        job_id=inspection.job_id,
+        first_version=first_version,
+        config=config,
+    )
+    return JobOutputPlan(
+        job_id=inspection.job_id,
+        episode_signature_sha256=inspection.episode_signature_sha256,
+        decision=PlanDecision.PROCESS,
+        outputs=outputs,
+        warnings=warnings,
+    )

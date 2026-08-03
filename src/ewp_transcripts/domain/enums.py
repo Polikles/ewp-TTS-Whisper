@@ -53,3 +53,12 @@ class WarningCode(StrEnum):
     AUDIO_LOW_LEVEL = "AUDIO_LOW_LEVEL"
     AUDIO_CHANNEL_IMBALANCE = "AUDIO_CHANNEL_IMBALANCE"
     AUDIO_HIGH_SILENCE_RATIO = "AUDIO_HIGH_SILENCE_RATIO"
+    EXISTING_RESULT_SKIPPED = "EXISTING_RESULT_SKIPPED"
+    SOURCE_NAME_COLLISION = "SOURCE_NAME_COLLISION"
+
+
+class PlanDecision(StrEnum):
+    """Non-mutating decision produced for one inspected episode."""
+
+    PROCESS = "process"
+    SKIP = "skip"
