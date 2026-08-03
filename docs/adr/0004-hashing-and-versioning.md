@@ -60,6 +60,6 @@ d3ba4825760b731c25a741d211cc76b9fbceea21d2cc1cd7339b310c7ad186e8  forced.json
 909d3a45b1ef2ec9388a7589f0d9807a19e6211df7ff817e7e477ae6f78cbdbd  new-job.json
 ```
 
-This validates the read-only planner, not concurrent reservation. Locking remains required
-before mutable result allocation is safe. The WSL repository test summary for this exact
-dry-run revision remains to be recorded.
+This validates the read-only planner, not concurrent reservation. The target WSL
+workstation passed all 101 tests with a clean worktree. Locking remains required before
+mutable result allocation is safe.

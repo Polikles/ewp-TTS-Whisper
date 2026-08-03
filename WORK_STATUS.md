@@ -15,9 +15,8 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume by obtaining the omitted WSL `make check` summary for commit `30094d9` or later.
-Then implement output-directory locking and atomic version reservation before any mutable
-result operation. Pure output naming, completed-result indexing, signature-based
+Resume by implementing output-directory locking and atomic version reservation before
+any mutable result operation. Pure output naming, completed-result indexing, signature-based
 PROCESS/SKIP decisions, collision warnings, version selection, and human/JSON
 `transcriber dry-run` are implemented and pushed. Dry-run must remain non-mutating and
 must not load ASR, alignment, or diarization models.
@@ -27,9 +26,9 @@ integration enabled. The WSL worktree was clean. The complete five-fixture produ
 inspection gate passed, and the normal and offline P2-03 reports were byte-for-byte
 identical. ADR-0003 records all classifications and report hashes.
 
-Owner input is needed only for the omitted WSL test summary. ADR-0004 records the four
-dry-run decisions, unchanged controlled-state evidence, and external report hashes. The
-WSL repository is clean and does not contain `LICENSE_SKETCH.TXT`; that owner file exists
+No owner input is currently required. ADR-0004 records the four dry-run decisions,
+unchanged controlled-state evidence, external report hashes, and the clean 101-test WSL
+gate. The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists
 only as an intentionally untracked file in the development VM.
 
 ## Completed before this session
