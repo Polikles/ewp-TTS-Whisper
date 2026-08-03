@@ -29,6 +29,10 @@ class MediaProbeError(ApplicationError):
     """Raised when ffprobe cannot inspect or normalize an input."""
 
 
+class AudioPreparationError(ApplicationError):
+    """Raised when FFmpeg cannot create a safe working-audio file."""
+
+
 class NoAudioStreamError(MediaProbeError):
     """Raised when an inspected input contains no supported audio stream."""
 
