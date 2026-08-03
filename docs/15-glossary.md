@@ -5,17 +5,20 @@
 - **Cue** — one SRT/VTT subtitle unit containing a time range and text.
 - **DER** — Diarization Error Rate.
 - **Diarization** — determining which anonymous speaker is active at a given time.
-- **Dual mono** — two identical or nearly identical channels.
+- **Channel topology** — the relationship between encoded channels and their content; distinct from merely having one or two channels. See [Input, Grouping, and Channel Classification](04-input-and-grouping.md#6-channel-classification).
+- **Dual mono** — two encoded channels containing identical or near-identical copies of the same complete waveform; the application uses one channel.
 - **Episode job** — one processing unit: a single file or a file group.
 - **Episode signature** — SHA-256 of the canonical description of all sources and assignments.
 - **Ground truth** — a manually verified reference transcript or annotation.
-- **Mixed stereo** — stereo containing substantially the same mix on both channels.
+- **Mixed stereo** — two materially different channels in which the relevant speakers or program mix remain present in both; the application creates one working downmix.
+- **Mono** — one encoded audio channel, which may itself contain one or many speakers.
 - **Overlap** — simultaneous speech from at least two speakers.
 - **Results JSON** — the complete canonical transcription result.
 - **Segments JSON** — an optional lightweight derived export.
 - **Speaker ID** — stable technical identifier such as `speaker_001`.
 - **Speaker label** — display name such as `jan` or `Speaker1`.
-- **Split speakers** — one speaker per channel or per file in a group.
+- **Split speakers** — isolated speakers or sources assigned to separate channels or files and processed independently before timeline merge.
+- **Stereo** — a two-channel stream or container layout; by itself this does not distinguish dual mono, split speakers, mixed stereo, or ambiguous content.
 - **Timestamp source** — how a word time was obtained: alignment, interpolation, or segment fallback.
 - **VAD** — voice activity detection.
 - **WER/CER** — word/character error measures against ground truth.
