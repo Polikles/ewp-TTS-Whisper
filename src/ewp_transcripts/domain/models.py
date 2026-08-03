@@ -252,3 +252,13 @@ class JobOutputPlan(BaseModel):
         if self.decision is PlanDecision.SKIP and self.existing_result is None:
             raise ValueError("skip decisions require an existing result")
         return self
+
+
+class DryRunResult(BaseModel):
+    """Complete non-mutating execution plan for one input batch."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    inspection: InspectionResult
+    output_directory: Path
+    jobs: tuple[JobOutputPlan, ...]

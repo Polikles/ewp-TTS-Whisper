@@ -6,9 +6,14 @@ from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.discovery import discover_input, group_discovered_files
 from ewp_transcripts.doctor import run_doctor
-from ewp_transcripts.domain import DiscoveryResult, DoctorResult, InspectionResult
+from ewp_transcripts.domain import DiscoveryResult, DoctorResult, DryRunResult, InspectionResult
 from ewp_transcripts.inspection import inspect_episode
 from ewp_transcripts.media import measure_file_channels
+from ewp_transcripts.storage import (
+    find_existing_results,
+    plan_job_outputs,
+    resolve_output_directory,
+)
 
 
 def application_version() -> str:
@@ -66,3 +71,42 @@ def inspect_input(
         for episode in episodes
     )
     return InspectionResult(discovery=discovery, episodes=inspections)
+
+
+def dry_run(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig | None = None,
+    output_directory: Path | None = None,
+    force: bool = False,
+    allow_duration_mismatch: bool = False,
+) -> DryRunResult:
+    """Build a complete batch execution plan without creating outputs or workdirs."""
+
+    effective_config = load_config() if config is None else config
+    inspection = inspect_input(
+        input_path,
+        config=effective_config,
+        allow_duration_mismatch=allow_duration_mismatch,
+    )
+    destination = resolve_output_directory(
+        inspection.discovery,
+        config=effective_config.outputs,
+        explicit_directory=output_directory,
+    )
+    existing = find_existing_results(destination)
+    jobs = tuple(
+        plan_job_outputs(
+            episode,
+            output_directory=destination,
+            existing_results=existing,
+            force=force,
+            config=effective_config.outputs,
+        )
+        for episode in inspection.episodes
+    )
+    return DryRunResult(
+        inspection=inspection,
+        output_directory=destination,
+        jobs=jobs,
+    )
