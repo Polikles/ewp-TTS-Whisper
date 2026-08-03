@@ -157,6 +157,8 @@ Implement:
 
 ## Phase 3 — Dry-run, workdirs, storage, and versioning
 
+Status: **complete and validated on 2026-08-03**.
+
 ### Goal
 
 Make the complete execution plan deterministic before adding models.

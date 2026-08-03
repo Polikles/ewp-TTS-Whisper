@@ -8,28 +8,28 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0, 1, and 2 are complete. Phase 3 read-only planning is implemented and
-functionally validated; locking, mutable state, workdirs, and cleanup remain.**
+**Phases 0, 1, 2, and 3 are complete. Phase 4 — canonical results and derived exporters
+— is next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume by implementing output-directory locking and atomic version reservation before
-any mutable result operation. Pure output naming, completed-result indexing, signature-based
-PROCESS/SKIP decisions, collision warnings, version selection, and human/JSON
-`transcriber dry-run` are implemented and pushed. Dry-run must remain non-mutating and
-must not load ASR, alignment, or diarization models.
+Resume Phase 4 by reconciling the accepted `results.schema.json` and example with strict
+canonical domain models. Implement validated canonical serialization first, then TXT,
+SRT, VTT, and optional segments exporters that consume only canonical results. Finally
+add `transcriber export` without reading source audio or loading ML models.
 
 The target WSL workstation and development VM both pass all 75 tests with FFmpeg
 integration enabled. The WSL worktree was clean. The complete five-fixture production
 inspection gate passed, and the normal and offline P2-03 reports were byte-for-byte
 identical. ADR-0003 records all classifications and report hashes.
 
-No owner input is currently required. ADR-0004 records the four dry-run decisions,
-unchanged controlled-state evidence, external report hashes, and the clean 101-test WSL
-gate. The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists
-only as an intentionally untracked file in the development VM.
+No owner input is currently required. ADR-0004 records read-only and mutable Phase 3
+evidence, including the clean 122-test WSL gate. Cross-process locking, atomic running and
+terminal states, marker-guarded workdirs, and scoped cleanup are validated. The WSL
+repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as an
+intentionally untracked file in the development VM.
 
 ## Completed before this session
 

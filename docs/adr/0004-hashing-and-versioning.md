@@ -63,3 +63,30 @@ d3ba4825760b731c25a741d211cc76b9fbceea21d2cc1cd7339b310c7ad186e8  forced.json
 This validates the read-only planner, not concurrent reservation. The target WSL
 workstation passed all 101 tests with a clean worktree. Locking remains required before
 mutable result allocation is safe.
+
+## Phase 3 mutable-storage validation evidence
+
+On 2026-08-03, commit `292e1ea` passed the target WSL mutable-storage gate:
+
+- a second process was denied while the output lock was held;
+- the lock was immediately reusable after release;
+- atomic running reservations selected versions 1 and 2 without collision;
+- version 1 transitioned from `running` to a complete `failed` record;
+- no state temporary file remained;
+- an isolated owner-marked workdir was allocated and removed;
+- cleanup preserved a sibling model-like file;
+- all 122 tests passed and the repository worktree was clean.
+
+Retained external evidence hashes:
+
+```text
+68adc3a0d0354f17324e5c00e9f5995ca0eb1919086cbad9756659cb2f87b607  locked-output/.ewp-transcripts.lock
+32f6f8e665589a598a552b122aa25080d4e06ec8f5d86fbe0e230b88d62effda  state-output/.ewp-transcripts.lock
+f840aee698cb5a730ddaae3e74af2d5e89937e454981181f444644b3d8567e85  state-output/controlled-job_results.failed.json
+6d6b48717800d31b217df636ac540b0fc1eaa974e2fef093209dcf9b580238b6  state-output/controlled-job_results_v002.partial.json
+8b893f618d203777879e2479dfddc0a758ae742203940cddb74955180aa46469  work-root/model-cache-must-remain/model.bin
+```
+
+Lock-file hashes are evidence for this run only because acquisition metadata contains a
+PID and timestamp. The retained failed and partial records are controlled mechanics
+artifacts, not resumable transcription checkpoints. A later run must restart the job.
