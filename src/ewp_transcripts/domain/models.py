@@ -144,6 +144,9 @@ class ChannelMetrics(BaseModel):
     normalized_difference_rms: float = Field(ge=0.0)
     left_rms_dbfs: float
     right_rms_dbfs: float
+    left_peak_dbfs: float
+    right_peak_dbfs: float
+    clipping_sample_ratio: float = Field(ge=0.0, le=1.0)
     channel_rms_difference_db: float = Field(ge=0.0)
     left_activity_threshold_dbfs: float
     right_activity_threshold_dbfs: float

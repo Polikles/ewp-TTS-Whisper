@@ -15,7 +15,19 @@ def test_exact_dual_mono_has_perfect_similarity() -> None:
     assert metrics.correlation == 1.0
     assert metrics.normalized_difference_rms == 0.0
     assert metrics.channel_rms_difference_db == 0.0
+    assert metrics.left_peak_dbfs < 0.0
+    assert metrics.clipping_sample_ratio == 0.0
     assert metrics.both_active_ratio == 1.0
+
+
+def test_clipping_ratio_counts_samples_near_pcm_full_scale() -> None:
+    samples = [(32767, -32768), (1000, -1000)]
+
+    metrics = measure_stereo_channels(samples, sample_rate_hz=2)
+
+    assert metrics.left_peak_dbfs < 0.0
+    assert metrics.right_peak_dbfs == 0.0
+    assert metrics.clipping_sample_ratio == 0.5
 
 
 def test_split_activity_states_are_measured_per_window() -> None:

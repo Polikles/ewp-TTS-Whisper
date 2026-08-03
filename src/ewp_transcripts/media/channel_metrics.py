@@ -18,6 +18,12 @@ def _dbfs(sum_squares: float, count: int) -> float:
     return max(_DBFS_FLOOR, 20.0 * math.log10(rms))
 
 
+def _peak_dbfs(peak: int) -> float:
+    if peak <= 0:
+        return _DBFS_FLOOR
+    return max(_DBFS_FLOOR, 20.0 * math.log10(peak / _PCM16_FULL_SCALE))
+
+
 def measure_stereo_channels(
     samples: Iterable[tuple[int, int]],
     *,
@@ -38,6 +44,9 @@ def measure_stereo_channels(
     sum_right_squares = 0.0
     sum_products = 0.0
     sum_difference_squares = 0.0
+    peak_left_sample = 0
+    peak_right_sample = 0
+    clipping_samples = 0
     window_count = 0
     window_left_squares = 0.0
     window_right_squares = 0.0
@@ -55,6 +64,9 @@ def measure_stereo_channels(
         sum_products += left_value * right_value
         difference = left_value - right_value
         sum_difference_squares += difference * difference
+        peak_left_sample = max(peak_left_sample, abs(left))
+        peak_right_sample = max(peak_right_sample, abs(right))
+        clipping_samples += int(abs(left) >= 32760) + int(abs(right) >= 32760)
         window_left_squares += left_value * left_value
         window_right_squares += right_value * right_value
         if window_count == window_size:
@@ -117,6 +129,9 @@ def measure_stereo_channels(
         normalized_difference_rms=normalized_difference,
         left_rms_dbfs=left_rms,
         right_rms_dbfs=right_rms,
+        left_peak_dbfs=_peak_dbfs(peak_left_sample),
+        right_peak_dbfs=_peak_dbfs(peak_right_sample),
+        clipping_sample_ratio=clipping_samples / (2 * count),
         channel_rms_difference_db=abs(left_rms - right_rms),
         left_activity_threshold_dbfs=left_threshold,
         right_activity_threshold_dbfs=right_threshold,
