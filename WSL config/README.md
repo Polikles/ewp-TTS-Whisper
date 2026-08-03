@@ -51,6 +51,9 @@ states using [`RUN_PHASE3_DRY_RUN.md`](RUN_PHASE3_DRY_RUN.md).
 Validate Phase 3 cross-process locking, atomic state transitions, and marker-guarded
 workdir cleanup using [`RUN_PHASE3_STORAGE_STATE.md`](RUN_PHASE3_STORAGE_STATE.md).
 
+Validate Phase 4 model-free canonical TXT, SRT, VTT, and segments exports plus repeated
+export versioning using [`RUN_PHASE4_EXPORTS.md`](RUN_PHASE4_EXPORTS.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
