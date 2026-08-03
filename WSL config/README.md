@@ -48,6 +48,9 @@ Validate all four warning-only audio diagnostics with generated mechanics fixtur
 Validate read-only Phase 3 process/skip/version planning with controlled external result
 states using [`RUN_PHASE3_DRY_RUN.md`](RUN_PHASE3_DRY_RUN.md).
 
+Validate Phase 3 cross-process locking, atomic state transitions, and marker-guarded
+workdir cleanup using [`RUN_PHASE3_STORAGE_STATE.md`](RUN_PHASE3_STORAGE_STATE.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
