@@ -24,6 +24,13 @@ It may contain decoded WAV files, extracted channels, raw backend output, and di
 6. Validate it against the schema.
 7. Atomically rename it to `_results.json`.
 
+The Phase 3 reservation implementation publishes the initial running state with an
+exclusive same-filesystem hard link from a fully written and `fsync`ed temporary file.
+This provides no-overwrite semantics unavailable from a normal replacing rename. The
+directory is then `fsync`ed before the temporary link is removed. Reservation is planned
+again while holding the output-directory lock, so a stale dry-run decision is never used
+for mutation.
+
 On filesystems or mounts without reliable atomic rename semantics, the implementation must emit a warning and use a safe copy-and-verify strategy.
 
 ## 3. Existing-result lookup

@@ -1,7 +1,9 @@
 """Typed foundational domain models."""
 
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Literal, Self
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -9,6 +11,7 @@ from ewp_transcripts.domain.enums import (
     ChannelMode,
     DiagnosticStatus,
     DiscoverySkipReason,
+    JobStateStatus,
     LanguageMode,
     PlanDecision,
     WarningCode,
@@ -264,3 +267,36 @@ class DryRunResult(BaseModel):
     output_directory: Path
     language: LanguageMode
     jobs: tuple[JobOutputPlan, ...]
+
+
+class JobStateRecord(BaseModel):
+    """Small persistent envelope for a non-completed job state."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    state_schema_version: Literal["1.0"] = "1.0"
+    application_version: str = Field(min_length=1)
+    run_id: UUID
+    job_id: str = Field(min_length=1)
+    episode_signature_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    result_version: int = Field(ge=1)
+    status: JobStateStatus
+    created_at: datetime
+    updated_at: datetime
+
+
+class JobReservation(BaseModel):
+    """Locked planning result and optional atomically published running state."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    plan: JobOutputPlan
+    state: JobStateRecord | None = None
+    state_path: Path | None = None
+
+    @model_validator(mode="after")
+    def validate_reservation_payload(self) -> Self:
+        processing = self.plan.decision is PlanDecision.PROCESS
+        if processing != (self.state is not None and self.state_path is not None):
+            raise ValueError("only process decisions may contain a state reservation")
+        return self

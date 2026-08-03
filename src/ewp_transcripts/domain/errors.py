@@ -63,3 +63,7 @@ class InvalidExistingResultError(ApplicationError):
 
 class OutputLockUnavailableError(ApplicationError):
     """Raised when an output directory cannot be locked within the configured timeout."""
+
+
+class OutputReservationError(ApplicationError):
+    """Raised when a planned running-state filename cannot be reserved safely."""

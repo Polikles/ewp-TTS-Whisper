@@ -62,3 +62,11 @@ class PlanDecision(StrEnum):
 
     PROCESS = "process"
     SKIP = "skip"
+
+
+class JobStateStatus(StrEnum):
+    """Persistent non-completed job states used before final result promotion."""
+
+    RUNNING = "running"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
