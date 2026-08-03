@@ -59,3 +59,7 @@ class UnsafeOutputNameError(ApplicationError):
 
 class InvalidExistingResultError(ApplicationError):
     """Raised when completed-result metadata is unreadable or inconsistent."""
+
+
+class OutputLockUnavailableError(ApplicationError):
+    """Raised when an output directory cannot be locked within the configured timeout."""

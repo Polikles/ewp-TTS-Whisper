@@ -105,4 +105,12 @@ Logs MUST NOT contain:
 
 ## 8. Locks
 
-The application MUST prevent concurrent writes to the same job ID in the same output directory. A stale lock may be removed only after PID/time verification and an explicit diagnostic message.
+The application MUST prevent concurrent writes to the same output directory.
+
+Mutable storage operations use a persistent `.ewp-transcripts.lock` file in the resolved
+output directory and an exclusive Linux/WSL `flock`. The lock file stores only the holder
+PID and acquisition timestamp. It is not deleted on release: retaining one inode avoids a
+race in which a waiter holds the old inode while a new process locks a replacement file.
+Kernel lock ownership is authoritative, so a leftover metadata timestamp does not itself
+mean the directory is locked. The configured timeout controls how long acquisition waits;
+the MVP default of zero fails immediately.
