@@ -53,3 +53,38 @@ Automatic classification is evaluated in this order:
 5. otherwise → `ambiguous`, warn, and use one channel.
 
 Forced modes remain visible and produce a warning when structurally implausible. These thresholds are accepted only as a conservative MVP baseline. The calibration corpus contains one confirmed split-speaker case, one confirmed mixed-stereo case, two effective dual-mono cases, and one structural mono case. Recalibration on the future larger dataset is mandatory.
+
+## Integrated production validation
+
+On 2026-08-03, commit `1ac0f1d` passed the complete target-WSL gate through the
+production `transcriber inspect` command. The locked environment remained compatible,
+all 69 repository tests passed, and the worktree remained clean. The five fixtures were
+classified as follows:
+
+| Fixture | Detected | Processing |
+|---|---|---|
+| P0-01 | `mono` | `mono` |
+| P0-04 | `dual-mono` | `dual-mono` |
+| P2-01 | `split-speakers` | `split-speakers` |
+| P2-02 | `dual-mono` | `dual-mono` |
+| P2-03 | `mixed-stereo` | `mixed-stereo` |
+
+The human-readable P2-01 report also exposed the expected split-speaker decision. The
+P2-03 report generated with Hugging Face and Transformers offline controls was
+byte-for-byte identical to the normal report. This confirms that production inspection
+uses only local media inspection and channel analysis, without model access.
+
+External JSON report hashes:
+
+```text
+ebea4d78404b4ced1b6e5d0f953a731694053d1c8147a64c437b296734757c57  p0-01-single-short.inspect.json
+0b6f7d857f9a57b4c3fbdd7529c3361a5a69f497e232fd7ce76a290c220ad81e  p0-04-two-speakers-dual-mono.inspect.json
+a551f61ae4f361e28af93abb5562c566ad78a6f8716285150d4d270669bc2654  p2-01-split-speakers.inspect.json
+46c8805854d2bbc2bb1f4f75e65fe3140894c6998e7bd5a3ec11f2d2e6d6f1d9  p2-02-mixed-stereo.inspect.json
+fc274ce32bb3d98f97018a17251893cd7c05aadab0d2fc013c632d4ec35d78d6  p2-03-mixed-stereo.inspect.json
+fc274ce32bb3d98f97018a17251893cd7c05aadab0d2fc013c632d4ec35d78d6  p2-03-mixed-stereo.offline.inspect.json
+```
+
+The reports stay in the external test-data workspace because they contain absolute local
+paths and fixture-derived metadata. Their hashes, decisions, and provenance are retained
+here as the repository decision record.

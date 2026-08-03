@@ -2,23 +2,39 @@
 
 Last updated: **2026-07-31**.
 
-Latest resume update: **2026-08-02**.
+Latest resume update: **2026-08-03**.
 
 Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 and 1 are complete. Phase 2 — input discovery and media inspection — is next.**
+**Phases 0 and 1 are complete. The core Phase 2 inspection path is implemented and
+validated; lightweight audio-quality warnings are next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 2 by integrating channel measurement/classification into the inspection service and CLI. Deterministic discovery, path normalization, ffprobe inspection, source hashing, filename grouping, duration/sample-rate validation, audio-stream selection, stable speaker IDs, episode signatures, channel metrics, and the conservative classifier are implemented and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
+Resume Phase 2 by implementing the warning-only audio-quality diagnostics required by
+FR-I00–FR-I02: clipping, low level, channel-level imbalance, and high silence ratio.
+Deterministic discovery, path normalization, FFprobe inspection, source hashing,
+filename grouping, duration/sample-rate validation, audio-stream selection, stable
+speaker IDs, episode signatures, streaming channel metrics, conservative classification,
+the batch inspection service, and human/JSON `transcriber inspect` output are implemented
+and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
 
-The current local quality gate passes 61 unit tests with one FFmpeg integration test skipped; the integration test passes on the target WSL workstation. The latest implementation commit is `007204e Add conservative channel classifier`.
+The current local quality gate passes 68 tests with one FFmpeg integration test skipped
+because this VM lacks FFmpeg. The target WSL workstation passed all 69 tests and the
+complete five-fixture production inspection gate at commit `1ac0f1d`. The normal and
+offline P2-03 reports were byte-for-byte identical. ADR-0003 records all classifications
+and report hashes.
 
-No owner input is currently required. ADR-0003 records the initial metrics, the contrary P2-02 result, valid P2-03 mixed-stereo evidence, provisional thresholds, and the mandatory future recalibration. Next, connect decoded metrics and classification to each inspected source, add the human/JSON `transcriber inspect` adapter, validate it on the external fixtures, and close Phase 2.
+No owner input is currently required for implementation. ADR-0003 records the initial
+metrics, contrary P2-02 result, valid P2-03 mixed-stereo evidence, provisional thresholds,
+production validation, and mandatory future recalibration. Next, add the four
+non-destructive quality diagnostics to the same streaming inspection path, expose their
+structured warnings in both report formats, test them with synthetic fixtures, and run a
+small WSL acceptance gate before closing Phase 2.
 
 ## Completed before this session
 
