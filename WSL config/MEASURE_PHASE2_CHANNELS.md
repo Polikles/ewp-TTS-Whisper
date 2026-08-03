@@ -11,7 +11,7 @@ uv sync --locked
 make check
 ```
 
-Expected baseline after commit `eb07d2b`: 54 tests pass. The FFmpeg integration test may add one passing test depending on how pytest reports the selected suite.
+Expected WSL baseline after commit `eb07d2b`: 55 tests pass, including the real FFmpeg/ffprobe integration test. On a machine without FFmpeg, 54 pass and that integration test is skipped.
 
 ## 2. Set external paths
 
@@ -80,6 +80,6 @@ Send the complete report. It contains no transcript or audio content and is requ
 - P0-01: true one-channel mono.
 - P0-04: two-channel near-identical lossy dual mono; both channels contain the same mix.
 - P2-01: right-only from approximately 0–60 s, left-only from 60–135 s, overlap from 135–141 s, then right-only until approximately 142.4 s.
-- P2-02: both speakers occur on both channels throughout the same edit; no speaker overlap, little overall silence, and neither channel becomes silent.
+- P2-02: submitted as mixed stereo, with both speakers on both channels and no speaker overlap. The first measurement found near-identical channels, so it is retained as contrary evidence and another effective dual-mono case rather than accepted as mixed-stereo calibration.
 
 These four cases are a proof-of-concept calibration set, not a representative final dataset. Record every selected threshold as provisional and rerun calibration after the larger manually verified corpus exists.
