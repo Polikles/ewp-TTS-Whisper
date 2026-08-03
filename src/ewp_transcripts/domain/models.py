@@ -177,3 +177,15 @@ class ChannelMetrics(BaseModel):
     right_only_ratio: float = Field(ge=0.0, le=1.0)
     both_active_ratio: float = Field(ge=0.0, le=1.0)
     neither_active_ratio: float = Field(ge=0.0, le=1.0)
+
+
+class ChannelClassification(BaseModel):
+    """Detected topology and safe processing decision for one audio stream."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    original_channels: int = Field(gt=0)
+    detected_mode: ChannelMode
+    processing_mode: ChannelMode
+    selected_channel_index: int | None = Field(default=None, ge=0)
+    warnings: tuple[ApplicationWarning, ...] = ()

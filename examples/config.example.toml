@@ -24,6 +24,12 @@ mode = "auto"                   # auto | mono | dual-mono | split-speakers | mix
 ambiguous_fallback = "dual-mono"
 dual_mono_min_correlation = 0.995
 dual_mono_max_rms_difference_db = 1.5
+dual_mono_max_normalized_difference = 0.1
+split_max_correlation = 0.5
+split_min_each_exclusive_ratio = 0.05
+split_min_total_exclusive_ratio = 0.5
+mixed_min_both_active_ratio = 0.8
+mixed_min_normalized_difference = 0.1
 
 [models]
 # ADR-0007 default for the accurate preset; remains configurable.

@@ -62,6 +62,20 @@ class ChannelsConfig(StrictConfigModel):
     ambiguous_fallback: ChannelMode = ChannelMode.DUAL_MONO
     dual_mono_min_correlation: float = Field(default=0.995, ge=0.0, le=1.0)
     dual_mono_max_rms_difference_db: float = Field(default=1.5, ge=0.0)
+    dual_mono_max_normalized_difference: float = Field(default=0.1, ge=0.0)
+    split_max_correlation: float = Field(default=0.5, ge=-1.0, le=1.0)
+    split_min_each_exclusive_ratio: float = Field(default=0.05, ge=0.0, le=1.0)
+    split_min_total_exclusive_ratio: float = Field(default=0.5, ge=0.0, le=1.0)
+    mixed_min_both_active_ratio: float = Field(default=0.8, ge=0.0, le=1.0)
+    mixed_min_normalized_difference: float = Field(default=0.1, ge=0.0)
+
+    @model_validator(mode="after")
+    def validate_channel_modes(self) -> ChannelsConfig:
+        if self.mode is ChannelMode.AMBIGUOUS:
+            raise ValueError("ambiguous is a detected mode and cannot be forced")
+        if self.ambiguous_fallback is not ChannelMode.DUAL_MONO:
+            raise ValueError("the MVP ambiguous fallback must use one channel")
+        return self
 
 
 class ModelsConfig(StrictConfigModel):

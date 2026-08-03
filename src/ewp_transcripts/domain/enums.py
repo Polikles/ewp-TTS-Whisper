@@ -27,6 +27,7 @@ class ChannelMode(StrEnum):
     DUAL_MONO = "dual-mono"
     SPLIT_SPEAKERS = "split-speakers"
     MIXED_STEREO = "mixed-stereo"
+    AMBIGUOUS = "ambiguous"
 
 
 class DiscoverySkipReason(StrEnum):
@@ -46,3 +47,5 @@ class WarningCode(StrEnum):
     """Warning codes introduced by current implementation phases."""
 
     INPUT_DURATION_MISMATCH = "INPUT_DURATION_MISMATCH"
+    CHANNEL_CLASSIFICATION_AMBIGUOUS = "CHANNEL_CLASSIFICATION_AMBIGUOUS"
+    CHANNEL_MODE_OVERRIDE_IMPLAUSIBLE = "CHANNEL_MODE_OVERRIDE_IMPLAUSIBLE"

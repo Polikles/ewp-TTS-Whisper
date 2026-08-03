@@ -9,6 +9,7 @@ from ewp_transcripts.domain.enums import (
 from ewp_transcripts.domain.models import (
     ApplicationWarning,
     AudioStream,
+    ChannelClassification,
     ChannelMetrics,
     DiagnosticCheck,
     DiscoveredFile,
@@ -26,6 +27,7 @@ from ewp_transcripts.domain.models import (
 __all__ = [
     "ApplicationWarning",
     "AudioStream",
+    "ChannelClassification",
     "ChannelMetrics",
     "DiagnosticCheck",
     "DiagnosticStatus",
