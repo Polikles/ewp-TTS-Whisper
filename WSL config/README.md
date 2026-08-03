@@ -42,6 +42,9 @@ Measure the initial mono, dual-mono, split-speaker, and mixed-stereo calibration
 Validate the integrated production inspection command and accepted channel classifications
 with [`RUN_PHASE2_INSPECT.md`](RUN_PHASE2_INSPECT.md).
 
+Validate all four warning-only audio diagnostics with generated mechanics fixtures using
+[`RUN_PHASE2_QUALITY_DIAGNOSTICS.md`](RUN_PHASE2_QUALITY_DIAGNOSTICS.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
