@@ -13,7 +13,8 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 by running the target WSL production gate in
+Resume Phase 5 by pulling the subtitle-boundary fix and continuing the existing target
+WSL sandbox through the recovery subsection and section 3 of
 [`WSL config/RUN_PHASE5_SINGLE_SPEAKER.md`](WSL%20config/RUN_PHASE5_SINGLE_SPEAKER.md).
 Do not add diarization, batch, or multi-source branching until this real P0-01 gate is
 accepted.
@@ -57,6 +58,14 @@ then alignment, normalize, publish canonical JSON, create configured exports, cl
 successful workspace, retain an errored workspace, and skip duplicates. CPU/fake-engine
 tests cover success and failure state handling. The development-VM gate passes all 179
 tests.
+
+The first real P0-01 command passed all environment/model checks and completed local ASR,
+alignment, normalization, and canonical publication. It then exposed a derived-export
+boundary: a real word sequence fit the nominal subtitle character capacity but required
+more than two lines at word boundaries. The fix chunks against the actual wrapper,
+accounts for speaker-label width, repairs missing exports from an existing duplicate
+without rerunning ML, and sanitizes residual rendering errors. ADR-0002 records the
+finding. The development-VM gate now passes all 181 tests; target replay is pending.
 
 Owner input is now required only to execute the prepared Phase 5 GPU procedure on the
 target WSL workstation and return its sanitized evidence.

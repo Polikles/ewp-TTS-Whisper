@@ -89,6 +89,40 @@ WhisperX/Pyannote may repeat the already accepted Lightning checkpoint and TF32
 warnings. A download, token request, missing-snapshot fallback, traceback, or CUDA OOM
 is a failure.
 
+### Recovery from the pre-fix subtitle failure
+
+The first target run at commit `0a54411` completed ASR/alignment and published canonical
+JSON, then failed because one real segment needed more than two wrapped subtitle lines.
+If continuing that same sandbox after pulling the fix, rerun the command above. It must
+report `SKIP`, retain the existing canonical result, and write the missing TXT/SRT/VTT
+exports without loading models. Then remove only the marker-verified retained workspace:
+
+```bash
+uv run --locked python - "$EWP_P5_ROOT" <<'PY'
+import sys
+from pathlib import Path
+
+from ewp_transcripts.domain import WorkDirectory, load_canonical_result
+from ewp_transcripts.workdirs import MARKER_FILENAME, cleanup_work_directory
+
+root = Path(sys.argv[1])
+result = load_canonical_result(root / "output/p0-01-single-short_results.json")
+path = root / "work" / str(result.run_id) / result.job_id
+workspace = WorkDirectory(
+    work_root=root / "work",
+    run_id=result.run_id,
+    job_id=result.job_id,
+    path=path,
+    marker_path=path / MARKER_FILENAME,
+)
+cleanup_work_directory(workspace)
+print("retained failed-export workspace cleanup: PASS")
+PY
+```
+
+Do not delete the sandbox or canonical result. A fresh sandbox does not need this
+recovery subsection.
+
 ## 3. Validate canonical output and exports
 
 ```bash

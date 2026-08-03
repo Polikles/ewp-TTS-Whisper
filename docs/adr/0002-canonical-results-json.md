@@ -48,3 +48,30 @@ The controlled external artifact hashes were:
 
 This gate proves export behavior against the controlled canonical example. Subtitle
 tuning against longer live Polish results remains part of later end-to-end phases.
+
+## Phase 5 first production finding
+
+On 2026-08-03, the first P0-01 production run at commit `0a54411` passed the locked
+environment, pinned-snapshot, local-only, GPU visibility, ASR, alignment, normalization,
+and canonical-publication stages. The accepted Lightning checkpoint-upgrade notice and
+TF32 reproducibility warning recurred. No download, token request, CUDA OOM, or ML-stage
+error occurred.
+
+The command then failed while deriving subtitles: one live Polish ASR segment had a
+total character count within the nominal `max_lines * max_chars_per_line` capacity but
+its word boundaries still required more than two lines. This demonstrates that nominal
+capacity is not equivalent to a valid wrap. Canonical JSON had already been published,
+as required by this ADR, while derived exports remained absent.
+
+The corrective decision is:
+
+- validate chunk candidates using the actual word-wrap constraint, including any
+  displayed speaker-label width;
+- retain strict line-count and line-length limits by splitting at timed word boundaries;
+- on a duplicate completed result, create only missing configured exports without
+  rerunning ML or replacing canonical JSON;
+- convert remaining rendering `ValueError` failures into a sanitized application error
+  instead of exposing a terminal traceback.
+
+The target gate remains incomplete until the repaired exports, duplicate behavior,
+forced offline replay, final state, and artifact hashes pass.
