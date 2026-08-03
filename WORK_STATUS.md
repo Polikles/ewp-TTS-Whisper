@@ -12,10 +12,11 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Begin Phase 6 with a CPU/fake-engine batch application service: deterministic natural
-episode order, one job at a time, continue-after-error policy, and a stable final summary.
-Keep the existing single-job lifecycle as the per-episode boundary. Add cancellation and
-CLI behavior only after the batch service tests are stable.
+Resume Phase 6 by preparing its target WSL batch runbook. Validate a naturally ordered
+two-file mono batch, duplicate replay, and sequential GPU behavior. In a separate sandbox,
+place an unsupported mixed-stereo case before a valid mono case to prove failed-state
+isolation, continue-after-error behavior, exit code 5, and cleanup. Do not begin Phase 7
+multi-source/stereo implementation until these batch gates pass.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -82,6 +83,15 @@ no job workdirs. ADR-0004 records the five artifact hashes and versioning decisi
 Phase 5 exit criteria now pass.
 
 No owner input is currently required for the CPU-testable Phase 6 batch scaffold.
+
+Commits `fe5d32a` and `46691da` implement the Phase 6 sequential batch boundary and CLI.
+Directory input is inspected once and processed in deterministic episode order with one
+job active at a time. Completed, skipped, failed, and cancelled counts are stable;
+configured failures either continue or stop the queue; unexpected details are sanitized.
+`KeyboardInterrupt` transitions the current pre-publication reservation to durable
+`cancelled` state, retains its owned workspace, stops later jobs, and maps to exit code 6.
+Partial batch failure maps to exit code 5. Single-file CLI output is unchanged. The
+development-VM gate passes all 186 tests.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 
