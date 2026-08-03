@@ -37,6 +37,10 @@ class TranscriptNormalizationError(ApplicationError):
     """Raised when engine timing cannot form a valid canonical timeline."""
 
 
+class UnsupportedPipelineScopeError(ApplicationError):
+    """Raised when a job is outside the currently implemented pipeline slice."""
+
+
 class NoAudioStreamError(MediaProbeError):
     """Raised when an inspected input contains no supported audio stream."""
 
