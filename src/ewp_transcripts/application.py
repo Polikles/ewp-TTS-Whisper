@@ -202,10 +202,21 @@ def transcribe_one(
     if reservation.plan.decision is PlanDecision.SKIP:
         existing = reservation.plan.existing_result
         assert existing is not None
+        formats = _configured_export_formats(config)
+        exports = (
+            export_result(
+                existing.path,
+                formats=formats,
+                subtitles_config=config.subtitles,
+            )
+            if formats
+            else None
+        )
         return TranscriptionOutcome(
             decision=PlanDecision.SKIP,
             job_id=episode.job_id,
             result_path=existing.path,
+            exports=exports,
         )
 
     return _process_reservation(

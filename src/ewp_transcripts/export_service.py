@@ -75,14 +75,17 @@ def export_result(
         }
         skipped = tuple(path for path in paths.values() if path.exists()) if not force else ()
         pending = tuple((format_, path) for format_, path in paths.items() if path not in skipped)
-        rendered = _render_exports(
-            result,
-            pending,
-            results_path=results_path,
-            results_sha256=hashlib.sha256(payload).hexdigest(),
-            subtitles_config=subtitles_config or SubtitlesConfig(),
-            generated_at=generated_at or datetime.now(UTC),
-        )
+        try:
+            rendered = _render_exports(
+                result,
+                pending,
+                results_path=results_path,
+                results_sha256=hashlib.sha256(payload).hexdigest(),
+                subtitles_config=subtitles_config or SubtitlesConfig(),
+                generated_at=generated_at or datetime.now(UTC),
+            )
+        except ValueError as error:
+            raise InvalidCanonicalResultError("Cannot render configured exports") from error
         for path, content in rendered:
             _publish_exclusive(path, content)
         return ExportOutcome(

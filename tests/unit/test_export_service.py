@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from ewp_transcripts import export_service
 from ewp_transcripts.domain.errors import InvalidCanonicalResultError
 from ewp_transcripts.export_service import ExportFormat, export_result
 
@@ -97,3 +98,18 @@ def test_export_rejects_unsafe_canonical_job_id(tmp_path: Path) -> None:
 
     with pytest.raises(InvalidCanonicalResultError, match="unsafe"):
         export_result(path, formats=(ExportFormat.TXT,))
+
+
+def test_export_sanitizes_rendering_value_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result_path = tmp_path / "S01E01_results.json"
+    result_path.write_bytes(EXAMPLE_PATH.read_bytes())
+
+    def fail(*args, **kwargs):
+        raise ValueError("internal rendering detail")
+
+    monkeypatch.setattr(export_service, "build_subtitle_cues", fail)
+
+    with pytest.raises(InvalidCanonicalResultError, match="Cannot render configured exports"):
+        export_result(result_path, formats=(ExportFormat.SRT,))

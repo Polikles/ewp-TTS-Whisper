@@ -46,6 +46,9 @@ def test_transcribe_publishes_exports_cleans_workspace_and_then_skips(
         config=config,
         output_directory=destination,
     )
+    assert first.exports is not None
+    missing_export = next(path for path in first.exports.written if path.suffix == ".srt")
+    missing_export.unlink()
     second = transcribe_one(
         inspection.discovery.input_path,
         config=config,
@@ -54,10 +57,12 @@ def test_transcribe_publishes_exports_cleans_workspace_and_then_skips(
 
     assert first.decision is PlanDecision.PROCESS
     assert first.result_path.is_file()
-    assert first.exports is not None
     assert {path.suffix for path in first.exports.written} == {".txt", ".srt", ".vtt"}
     assert second.decision is PlanDecision.SKIP
     assert second.result_path == first.result_path
+    assert second.exports is not None
+    assert second.exports.written == (missing_export,)
+    assert len(second.exports.skipped) == 2
     assert calls == 1
     assert not list(config.runtime.work_root.glob("*/*"))
     assert not list(destination.glob("*.partial.json"))

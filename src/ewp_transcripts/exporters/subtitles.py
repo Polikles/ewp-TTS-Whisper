@@ -33,7 +33,22 @@ def build_subtitle_cues(
 
     for segment in result.transcript.segments:
         speaker_id = _effective_speaker(segment)
-        chunks = _segment_chunks(segment, settings)
+        first_show_label = _show_speaker_label(
+            settings.speaker_labels,
+            multiple_speakers=multiple_speakers,
+            speaker_id=speaker_id,
+            previous_speaker=previous_speaker,
+            first_chunk=True,
+        )
+        label = labels[speaker_id] if speaker_id is not None else "Unknown"
+        first_prefix = f"{label}: " if first_show_label else ""
+        repeated_prefix = f"{label}: " if settings.speaker_labels == "always" else ""
+        chunks = _segment_chunks(
+            segment,
+            settings,
+            first_prefix=first_prefix,
+            repeated_prefix=repeated_prefix,
+        )
         for index, (start_ms, end_ms, text) in enumerate(chunks):
             show_label = _show_speaker_label(
                 settings.speaker_labels,
@@ -114,20 +129,25 @@ def wrap_subtitle_text(text: str, *, max_lines: int, max_chars_per_line: int) ->
 
 
 def _segment_chunks(
-    segment: CanonicalSegment, settings: SubtitlesConfig
+    segment: CanonicalSegment,
+    settings: SubtitlesConfig,
+    *,
+    first_prefix: str,
+    repeated_prefix: str,
 ) -> list[tuple[int, int, str]]:
     if not segment.words:
         return [(segment.start_ms, segment.end_ms, segment.text.strip())]
     chunks: list[tuple[int, int, str]] = []
     current: list[CanonicalWord] = []
-    capacity = settings.max_lines * settings.max_chars_per_line
     for word in segment.words:
         candidate = [*current, word]
         text = _word_text(candidate)
+        prefix = first_prefix if not chunks else repeated_prefix
+        displayed_text = f"{prefix}{text}"
         duration_ms = candidate[-1].end_ms - candidate[0].start_ms
         chars_per_second = len(text) * 1000 / max(duration_ms, 1)
         exceeds = (
-            len(text) > capacity
+            not _fits_line_limits(displayed_text, settings)
             or duration_ms > settings.max_duration_ms
             or chars_per_second > settings.max_chars_per_second
         )
@@ -145,6 +165,18 @@ def _segment_chunks(
     if current:
         chunks.append(_word_chunk(current))
     return chunks
+
+
+def _fits_line_limits(text: str, settings: SubtitlesConfig) -> bool:
+    try:
+        wrap_subtitle_text(
+            text,
+            max_lines=settings.max_lines,
+            max_chars_per_line=settings.max_chars_per_line,
+        )
+    except ValueError:
+        return False
+    return True
 
 
 def _word_chunk(words: list[CanonicalWord]) -> tuple[int, int, str]:

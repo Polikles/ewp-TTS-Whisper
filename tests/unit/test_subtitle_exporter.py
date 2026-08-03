@@ -99,6 +99,45 @@ def test_short_cue_extension_stops_before_next_cue() -> None:
     assert cues[1].start_ms == 1600
 
 
+def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    original = result.transcript.segments[0]
+    texts = ("a" * 30, "b" * 30, "c" * 30)
+    words = tuple(
+        original.words[0].model_copy(
+            update={
+                "word_id": f"word_test_{index}",
+                "text": text,
+                "start_ms": 1000 + index * 2000,
+                "end_ms": 3000 + index * 2000,
+            }
+        )
+        for index, text in enumerate(texts)
+    )
+    segment = original.model_copy(
+        update={
+            "start_ms": 1000,
+            "end_ms": 7000,
+            "text": " ".join(texts),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (segment,)})}
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert len(cues) == 2
+    assert tuple(line for cue in cues for line in cue.lines) == (
+        f"jan: {texts[0]}",
+        texts[1],
+        texts[2],
+    )
+    assert all(len(cue.lines) <= 2 for cue in cues)
+    assert all(len(line) <= 46 for cue in cues for line in cue.lines)
+
+
 def test_serializers_reject_accidental_overlap_but_allow_explicit_overlap() -> None:
     ordinary = (
         SubtitleCue(1000, 2000, ("First",), "speaker_001"),
