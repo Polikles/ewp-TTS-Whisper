@@ -96,6 +96,24 @@ def test_transcribe_failure_publishes_failed_state_and_retains_workspace(
     assert not list(destination.glob("*.partial.json"))
     assert len(list(config.runtime.work_root.glob("*/*"))) == 1
 
+    monkeypatch.setattr(
+        application,
+        "run_single_speaker_pipeline",
+        lambda episode, reservation, workspace, **kwargs: _matching_result(reservation),
+    )
+    restarted = transcribe_one(
+        inspection.discovery.input_path,
+        config=config,
+        output_directory=destination,
+    )
+
+    assert restarted.decision is PlanDecision.PROCESS
+    assert restarted.result_path.name == "episode_results_v002.json"
+    assert restarted.result_path.is_file()
+    assert failed_paths[0].is_file()
+    assert not list(destination.glob("*.partial.json"))
+    assert len(list(config.runtime.work_root.glob("*/*"))) == 1
+
 
 def _config(tmp_path: Path) -> ApplicationConfig:
     return ApplicationConfig(
