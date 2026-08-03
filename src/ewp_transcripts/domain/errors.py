@@ -41,6 +41,10 @@ class UnsupportedPipelineScopeError(ApplicationError):
     """Raised when a job is outside the currently implemented pipeline slice."""
 
 
+class SpeechEngineError(ApplicationError):
+    """Raised when a speech backend cannot load or return valid normalized output."""
+
+
 class NoAudioStreamError(MediaProbeError):
     """Raised when an inspected input contains no supported audio stream."""
 
