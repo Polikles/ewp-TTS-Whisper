@@ -8,28 +8,29 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0, 1, and 2 are complete. Phase 3 — dry-run, work directories, storage, and
-versioning — is next.**
+**Phases 0, 1, and 2 are complete. Phase 3 read-only planning is implemented and
+functionally validated; locking, mutable state, workdirs, and cleanup remain.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 3 by defining deterministic planning models and output-directory rules
-before creating any files. Then implement existing-result lookup, signature-based skip
-decisions, collision-safe version allocation, work-directory boundaries, partial/failed
-state naming, safe cleanup, and human/JSON `dry-run` output. Do not load ASR, alignment,
-or diarization models during dry-run.
+Resume by obtaining the omitted WSL `make check` summary for commit `30094d9` or later.
+Then implement output-directory locking and atomic version reservation before any mutable
+result operation. Pure output naming, completed-result indexing, signature-based
+PROCESS/SKIP decisions, collision warnings, version selection, and human/JSON
+`transcriber dry-run` are implemented and pushed. Dry-run must remain non-mutating and
+must not load ASR, alignment, or diarization models.
 
 The target WSL workstation and development VM both pass all 75 tests with FFmpeg
 integration enabled. The WSL worktree was clean. The complete five-fixture production
 inspection gate passed, and the normal and offline P2-03 reports were byte-for-byte
 identical. ADR-0003 records all classifications and report hashes.
 
-No owner input is currently required. ADR-0005 records all four diagnostic passes,
-unchanged before/after source hashes, the external report hash, the clean 75-test WSL
-gate, and the limitation of synthetic mechanics fixtures. Start Phase 3 with planning and
-storage policy models, keeping each implementation commit small and independently tested.
+Owner input is needed only for the omitted WSL test summary. ADR-0004 records the four
+dry-run decisions, unchanged controlled-state evidence, and external report hashes. The
+WSL repository is clean and does not contain `LICENSE_SKETCH.TXT`; that owner file exists
+only as an intentionally untracked file in the development VM.
 
 ## Completed before this session
 
