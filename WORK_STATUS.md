@@ -28,7 +28,7 @@ Required owner input before the next implementation slice:
 
 Prefer 48 kHz, 16-bit PCM WAV. Keep all audio in the external test-data repository. An ambiguous-stereo fixture is optional initially and may be derived after measuring the known cases.
 
-Tomorrow's first action is to record the prepared fixture inventory and measurements, then implement measurable channel features and calibrate `mono`, `dual-mono`, `split-speakers`, `mixed-stereo`, and `ambiguous` decisions. Do not invent split/mixed thresholds before examining the fixtures. After channel classification, expose the complete `transcriber inspect` vertical slice and close Phase 2.
+The split-speaker and mixed-stereo fixtures are prepared and recorded in [`WSL config/MEASURE_PHASE2_CHANNELS.md`](WSL%20config/MEASURE_PHASE2_CHANNELS.md). The measurement-only implementation is commit `eb07d2b`; its local gate passes 54 tests. Resume by running that channel-metrics runbook on P0-01, P0-04, P2-01, and P2-02, then calibrate `mono`, `dual-mono`, `split-speakers`, `mixed-stereo`, and `ambiguous` decisions from the report. Do not invent split/mixed thresholds before examining the fixtures. After channel classification, expose the complete `transcriber inspect` vertical slice and close Phase 2.
 
 ## Completed before this session
 

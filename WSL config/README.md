@@ -37,6 +37,8 @@ Accepted evidence is accumulated in [`PHASE0_RESULTS.md`](PHASE0_RESULTS.md). Af
 
 The accepted repository-scaffold and quality-gate evidence is recorded in [`PHASE1_RESULTS.md`](PHASE1_RESULTS.md).
 
+Measure the initial mono, dual-mono, split-speaker, and mixed-stereo calibration fixtures with [`MEASURE_PHASE2_CHANNELS.md`](MEASURE_PHASE2_CHANNELS.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
