@@ -45,6 +45,9 @@ with [`RUN_PHASE2_INSPECT.md`](RUN_PHASE2_INSPECT.md).
 Validate all four warning-only audio diagnostics with generated mechanics fixtures using
 [`RUN_PHASE2_QUALITY_DIAGNOSTICS.md`](RUN_PHASE2_QUALITY_DIAGNOSTICS.md).
 
+Validate read-only Phase 3 process/skip/version planning with controlled external result
+states using [`RUN_PHASE3_DRY_RUN.md`](RUN_PHASE3_DRY_RUN.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
