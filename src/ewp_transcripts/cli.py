@@ -6,14 +6,24 @@ from typing import Annotated
 
 import typer
 
-from ewp_transcripts.application import application_version, doctor, dry_run, inspect_input
+from ewp_transcripts.application import (
+    ExportFormat,
+    application_version,
+    doctor,
+    dry_run,
+    export_result,
+    inspect_input,
+)
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain import JobOutputPlan
 from ewp_transcripts.domain.enums import ChannelMode
 from ewp_transcripts.domain.errors import (
     ApplicationError,
+    InvalidCanonicalResultError,
     InvalidConfigurationError,
     MissingCapabilityError,
+    OutputLockUnavailableError,
+    OutputReservationError,
 )
 
 app = typer.Typer(
@@ -31,6 +41,16 @@ class RequestedChannelMode(StrEnum):
     DUAL_MONO = "dual-mono"
     SPLIT_SPEAKERS = "split-speakers"
     MIXED_STEREO = "mixed-stereo"
+
+
+class RequestedSpeakerLabels(StrEnum):
+    ON_CHANGE = "on-change"
+    ALWAYS = "always"
+    NEVER = "never"
+
+
+class RequestedSubtitlePreset(StrEnum):
+    YOUTUBE = "youtube"
 
 
 def _version_callback(value: bool) -> None:
@@ -108,6 +128,10 @@ def _expected_error(error: ApplicationError) -> None:
         raise typer.Exit(code=2) from error
     if isinstance(error, MissingCapabilityError):
         raise typer.Exit(code=3) from error
+    if isinstance(error, (OutputLockUnavailableError, OutputReservationError)):
+        raise typer.Exit(code=7) from error
+    if isinstance(error, InvalidCanonicalResultError):
+        raise typer.Exit(code=8) from error
     raise typer.Exit(code=4) from error
 
 
@@ -292,6 +316,82 @@ def dry_run_command(
             typer.echo(f"  existing result: {job.existing_result.path}")
         for warning in (*episode.warnings, *job.warnings):
             typer.echo(f"  WARNING {warning.code.value}: {warning.message}")
+
+
+@app.command("export")
+def export_command(
+    results_json: Annotated[
+        Path,
+        typer.Argument(help="Completed canonical results JSON.", metavar="RESULTS_JSON"),
+    ],
+    formats: Annotated[
+        list[ExportFormat] | None,
+        typer.Option("--format", help="Export format; may be repeated."),
+    ] = None,
+    segments: Annotated[
+        bool,
+        typer.Option("--segments", help="Generate the optional segments JSON export."),
+    ] = False,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write exports to this directory."),
+    ] = None,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Create the first free later export version."),
+    ] = False,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    subtitle_preset: Annotated[
+        RequestedSubtitlePreset,
+        typer.Option("--subtitle-preset", help="Subtitle readability preset."),
+    ] = RequestedSubtitlePreset.YOUTUBE,
+    speaker_labels: Annotated[
+        RequestedSpeakerLabels | None,
+        typer.Option("--speaker-labels", help="Subtitle speaker-label behavior."),
+    ] = None,
+) -> None:
+    """Regenerate exports from canonical JSON without opening source audio."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        subtitles_config = config.subtitles.model_copy(
+            update={
+                "preset": subtitle_preset.value,
+                **({"speaker_labels": speaker_labels.value} if speaker_labels is not None else {}),
+            }
+        )
+        requested = list(formats or [])
+        if segments:
+            requested.append(ExportFormat.SEGMENTS)
+        if not requested:
+            requested = [
+                format_
+                for enabled, format_ in (
+                    (config.outputs.generate_txt, ExportFormat.TXT),
+                    (config.outputs.generate_srt, ExportFormat.SRT),
+                    (config.outputs.generate_vtt, ExportFormat.VTT),
+                    (config.outputs.generate_segments_json, ExportFormat.SEGMENTS),
+                )
+                if enabled
+            ]
+        outcome = export_result(
+            results_json,
+            formats=tuple(requested),
+            output_directory=output_directory,
+            force=force,
+            subtitles_config=subtitles_config,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+
+    typer.echo(f"Export version: {outcome.result_version}")
+    for path in outcome.written:
+        typer.echo(f"WROTE {path}")
+    for path in outcome.skipped:
+        typer.echo(f"SKIP {path}")
 
 
 def main() -> None:

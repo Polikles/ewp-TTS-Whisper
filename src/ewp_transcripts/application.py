@@ -7,6 +7,9 @@ from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.discovery import discover_input, group_discovered_files
 from ewp_transcripts.doctor import run_doctor
 from ewp_transcripts.domain import DiscoveryResult, DoctorResult, DryRunResult, InspectionResult
+
+# Re-exported here to keep user interfaces on the application boundary.
+from ewp_transcripts.export_service import ExportFormat, ExportOutcome, export_result
 from ewp_transcripts.inspection import inspect_episode
 from ewp_transcripts.media import measure_file_channels
 from ewp_transcripts.storage import (
@@ -14,6 +17,17 @@ from ewp_transcripts.storage import (
     plan_job_outputs,
     resolve_output_directory,
 )
+
+__all__ = [
+    "ExportFormat",
+    "ExportOutcome",
+    "application_version",
+    "discover",
+    "doctor",
+    "dry_run",
+    "export_result",
+    "inspect_input",
+]
 
 
 def application_version() -> str:
