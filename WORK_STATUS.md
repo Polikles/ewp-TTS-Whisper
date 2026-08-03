@@ -6,17 +6,17 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 through 5 are complete. Phase 6 — sequential batch processing — is next.**
+**Phases 0 through 6 are complete. Phase 7 — synchronized sources and stereo modes — is
+next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 6 by running the target WSL batch gate in
-[`WSL config/RUN_PHASE6_BATCH.md`](WSL%20config/RUN_PHASE6_BATCH.md). It validates a
-naturally ordered two-file mono batch and duplicate replay, then an unsupported
-mixed-stereo job followed by a valid mono job for continue-after-error isolation. Do not
-begin Phase 7 multi-source/stereo implementation until these gates pass.
+Begin Phase 7 with CPU/fake-engine timeline composition for grouped mono sources and
+split-speaker stereo. Preserve independent speaker streams and overlaps; do not introduce
+cross-channel transcript deduplication or diarization. Reuse the established per-stage
+engine lifecycle and canonical publication boundary.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -82,8 +82,7 @@ failed hash remained unchanged, duplicate skip was non-mutating, and marker clea
 no job workdirs. ADR-0004 records the five artifact hashes and versioning decision. All
 Phase 5 exit criteria now pass.
 
-Owner input is required only to execute the prepared Phase 6 batch gate on the target WSL
-workstation and return sanitized evidence.
+No owner input is currently required for the CPU-testable Phase 7 composition scaffold.
 
 Commits `fe5d32a` and `46691da` implement the Phase 6 sequential batch boundary and CLI.
 Directory input is inspected once and processed in deterministic episode order with one
@@ -93,6 +92,13 @@ configured failures either continue or stop the queue; unexpected details are sa
 `cancelled` state, retains its owned workspace, stops later jobs, and maps to exit code 6.
 Partial batch failure maps to exit code 5. Single-file CLI output is unchanged. The
 development-VM gate passes all 186 tests.
+
+The target Phase 6 gate is **accepted**. A naturally ordered two-file batch completed
+sequentially with 226 and 614 words, schema-valid results, default exports, cleanup, and
+non-mutating duplicate replay. A separate mixed-stereo/mono batch returned exit code 5,
+preserved isolated failed state for the unsupported first job, continued to a successful
+later job, sanitized errors, and cleaned all owned workdirs. ADR-0004 records all 13
+artifact hashes. All Phase 6 exit criteria now pass.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 

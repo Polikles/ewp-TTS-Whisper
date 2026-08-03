@@ -153,3 +153,50 @@ b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  p0-01-single-s
 This accepts the Phase 5 rule that failed attempts are immutable diagnostics rather than
 resumable checkpoints. A corrected run starts over and uses the first wholly unoccupied
 coordinated version.
+
+## Phase 6 sequential batch evidence
+
+On 2026-08-03, the target WSL workstation passed the Phase 6 batch gate at commit
+`ea0dcbb` with all 186 repository tests passing:
+
+- dry-run and execution used numeric natural order: `episode2`, then `episode10`;
+- two Polish mono jobs ran sequentially and produced schema-valid canonical results with
+  226 and 614 words plus all default exports;
+- both successful workdirs were cleaned and no failed/partial state remained;
+- duplicate replay skipped both canonical results and all six exports without model
+  loading or mutation;
+- a separate batch processed unsupported mixed stereo first and valid mono second;
+- the first job produced sanitized `UNSUPPORTED_PIPELINE_SCOPE_ERROR` failed state;
+- the later mono job still completed, proving job isolation and continue-after-error;
+- the CLI returned exit code 5 with summary
+  `completed=1 skipped=0 failed=1 cancelled=0`;
+- the retained failed workspace was removed through marker-verified cleanup;
+- no partial or temporary file remained and the repository worktree was clean.
+
+Successful-batch artifact hashes:
+
+```text
+8e8cdffd6d41d821c760262129eac283e3da4699f00ddfbd7671af9e7c529e69  episode10_results.json
+f4093a4321c8f2df41556dc8a1d09db95457f764678b387e4938194b371003cf  episode10_subtitles.srt
+e2e43fc7e49dde3c0a5a128a10d181bde996b04f5cb1190cf60149a1c5cf3ab0  episode10_subtitles.vtt
+58e52795a49a2c9cf73b9a189aa5e34fabd0aff7147a15bd592f5c145fafea63  episode10_transcript.txt
+1f6ccf1f720d4e516523b0acb5a352efe46d517b1869993833d8dd1acbde4e9e  episode2_results.json
+689dfa9328a8351ae5839773aeb95e76552840f861e4114d00557e623b60cb74  episode2_subtitles.srt
+b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  episode2_subtitles.vtt
+127eea14b247d8a6c6b32cf79c82ae7159a69ddfd964e4b5b2a1e9521eca9e1b  episode2_transcript.txt
+```
+
+Controlled partial-failure artifact hashes:
+
+```text
+ec6677ee85400f96e7f9991af3340883a0db7f1b16f98d15ca97af5f0138de06  episode10_mono_results.json
+689dfa9328a8351ae5839773aeb95e76552840f861e4114d00557e623b60cb74  episode10_mono_subtitles.srt
+b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  episode10_mono_subtitles.vtt
+127eea14b247d8a6c6b32cf79c82ae7159a69ddfd964e4b5b2a1e9521eca9e1b  episode10_mono_transcript.txt
+8a350ee8238decddb8dd6a251d723771656a7d4a1b029446d9651f869f8a6c23  episode2_mixed_results.failed.json
+```
+
+This accepts deterministic sequential batching: completed, skipped, and failed jobs have
+independent durable state, and one failure does not broaden or corrupt another job's
+scope. Cancellation remains covered by automated lifecycle/CLI tests and maps to durable
+`cancelled` state plus exit code 6.
