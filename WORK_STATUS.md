@@ -13,10 +13,11 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Begin Phase 7 with CPU/fake-engine timeline composition for grouped mono sources and
-split-speaker stereo. Preserve independent speaker streams and overlaps; do not introduce
-cross-channel transcript deduplication or diarization. Reuse the established per-stage
-engine lifecycle and canonical publication boundary.
+Resume Phase 7 with the multi-stream pipeline that prepares and transcribes each grouped
+source or split channel independently, closes GPU models between passes, assigns stable
+source/speaker IDs, and feeds normalized streams into the completed timeline composer.
+Preserve overlaps; do not introduce cross-channel transcript deduplication or diarization.
+Reuse the established canonical publication boundary.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -99,6 +100,12 @@ non-mutating duplicate replay. A separate mixed-stereo/mono batch returned exit 
 preserved isolated failed state for the unsupported first job, continued to a successful
 later job, sanitized errors, and cleaned all owned workdirs. ADR-0004 records all 13
 artifact hashes. All Phase 6 exit criteria now pass.
+
+Commit `2bc1312` begins Phase 7 with a backend-independent speaker timeline composer.
+It deterministically merges normalized streams, preserves repeated cross-channel text,
+renumbers segment/word IDs globally, treats touching boundaries as non-overlap, marks
+intersections with all active speaker IDs, and rejects mixed transcript languages. The
+development-VM gate passes all 189 tests.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 
