@@ -13,6 +13,7 @@ from ewp_transcripts.application import (
     dry_run,
     export_result,
     inspect_input,
+    transcribe_one,
 )
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain import JobOutputPlan
@@ -392,6 +393,66 @@ def export_command(
         typer.echo(f"WROTE {path}")
     for path in outcome.skipped:
         typer.echo(f"SKIP {path}")
+
+
+@app.command("transcribe")
+def transcribe_command(
+    input_path: Annotated[
+        Path,
+        typer.Argument(help="One audio file to transcribe.", metavar="INPUT"),
+    ],
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write results and exports to this directory."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    channel_mode: Annotated[
+        RequestedChannelMode | None,
+        typer.Option("--channel-mode", help="Override automatic channel classification."),
+    ] = None,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Create a new result version for a duplicate input."),
+    ] = False,
+    allow_duration_mismatch: Annotated[
+        bool,
+        typer.Option(
+            "--allow-duration-mismatch",
+            help="Allow grouped-source duration differences above the error threshold.",
+        ),
+    ] = False,
+) -> None:
+    """Transcribe one single-speaker source with pinned local models."""
+
+    try:
+        config = load_config(
+            explicit_path=config_path,
+            cli_overrides=_inspection_overrides(
+                recursive=False,
+                channel_mode=channel_mode,
+                speaker_count=1,
+            ),
+        )
+        outcome = transcribe_one(
+            input_path,
+            config=config,
+            output_directory=output_directory,
+            force=force,
+            allow_duration_mismatch=allow_duration_mismatch,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+
+    typer.echo(f"{outcome.decision.value.upper()} {outcome.job_id}")
+    typer.echo(f"RESULT {outcome.result_path}")
+    if outcome.exports is not None:
+        for path in outcome.exports.written:
+            typer.echo(f"WROTE {path}")
+        for path in outcome.exports.skipped:
+            typer.echo(f"SKIP {path}")
 
 
 def main() -> None:
