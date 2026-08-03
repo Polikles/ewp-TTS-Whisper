@@ -16,6 +16,7 @@ from ewp_transcripts.domain import (
     JobReservation,
     JobStateRecord,
 )
+from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.enums import JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import InvalidJobStateError, OutputReservationError
 from ewp_transcripts.output_lock import output_directory_lock
@@ -202,3 +203,64 @@ def transition_job_state(
                 f"{reservation.state_path}"
             ) from error
         return transitioned
+
+
+def finalize_job_result(
+    reservation: JobReservation,
+    result: CanonicalResult,
+    *,
+    lock_timeout_seconds: float = 0,
+) -> Path:
+    """Publish one completed canonical result and retire its running state under lock."""
+
+    if reservation.state is None or reservation.state_path is None:
+        raise InvalidJobStateError("Only a processing reservation can be finalized")
+    outputs = reservation.plan.outputs
+    if outputs is None:
+        raise InvalidJobStateError("Reservation has no output paths")
+    expected = reservation.state
+    result_identity = (
+        result.run_id,
+        result.job_id,
+        result.episode.episode_signature_sha256,
+        result.result_version,
+    )
+    expected_identity = (
+        expected.run_id,
+        expected.job_id,
+        expected.episode_signature_sha256,
+        expected.result_version,
+    )
+    if result.status != "completed" or result_identity != expected_identity:
+        raise InvalidJobStateError("Completed result does not match its reservation")
+
+    with output_directory_lock(
+        outputs.output_directory,
+        timeout_seconds=lock_timeout_seconds,
+    ):
+        persisted = _read_state(reservation.state_path)
+        persisted_identity = (
+            persisted.run_id,
+            persisted.job_id,
+            persisted.episode_signature_sha256,
+            persisted.result_version,
+        )
+        if (
+            persisted_identity != expected_identity
+            or persisted.status is not JobStateStatus.RUNNING
+        ):
+            raise InvalidJobStateError("Persisted running state does not match reservation")
+        _publish_exclusive_json(
+            outputs.results,
+            result.model_dump_json(indent=2) + "\n",
+            run_id=result.run_id,
+        )
+        try:
+            reservation.state_path.unlink()
+            _fsync_directory(outputs.output_directory)
+        except OSError as error:
+            raise InvalidJobStateError(
+                f"Final result was published but running state could not be removed: "
+                f"{reservation.state_path}"
+            ) from error
+        return outputs.results
