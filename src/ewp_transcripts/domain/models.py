@@ -155,3 +155,25 @@ class EpisodeInspection(BaseModel):
     sample_rate_hz: int = Field(gt=0)
     sources: tuple[InspectedSource, ...] = Field(min_length=1)
     warnings: tuple[ApplicationWarning, ...] = ()
+
+
+class ChannelMetrics(BaseModel):
+    """Measured stereo similarity and windowed channel activity."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    sample_rate_hz: int = Field(gt=0)
+    analyzed_samples_per_channel: int = Field(gt=0)
+    window_ms: int = Field(gt=0)
+    windows: int = Field(gt=0)
+    correlation: float = Field(ge=-1.0, le=1.0)
+    normalized_difference_rms: float = Field(ge=0.0)
+    left_rms_dbfs: float
+    right_rms_dbfs: float
+    channel_rms_difference_db: float = Field(ge=0.0)
+    left_activity_threshold_dbfs: float
+    right_activity_threshold_dbfs: float
+    left_only_ratio: float = Field(ge=0.0, le=1.0)
+    right_only_ratio: float = Field(ge=0.0, le=1.0)
+    both_active_ratio: float = Field(ge=0.0, le=1.0)
+    neither_active_ratio: float = Field(ge=0.0, le=1.0)
