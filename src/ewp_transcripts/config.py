@@ -80,16 +80,43 @@ class ChannelsConfig(StrictConfigModel):
 
 class ModelsConfig(StrictConfigModel):
     asr_model: str = "large-v2"
+    asr_repository: str = "Systran/faster-whisper-large-v2"
+    asr_revision: str = "f0fe81560cb8b68660e564f55dd99207059c092e"
+    asr_snapshot_path: Path = Path(
+        "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v2/"
+        "snapshots/f0fe81560cb8b68660e564f55dd99207059c092e"
+    )
+    alignment_model: str = "jonatasgrosman/wav2vec2-large-xlsr-53-polish"
+    alignment_revision: str = "6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
+    alignment_snapshot_path: Path = Path(
+        "~/.cache/huggingface/hub/"
+        "models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/"
+        "snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
+    )
     compute_type: Literal["float16"] = "float16"
     batch_size: int = Field(default=4, ge=1)
     device: Literal["cuda"] = "cuda"
-    model_cache_dir: Path = Path("~/.cache/ewp-transcripts/models")
     allow_network_downloads_during_transcription: bool = False
 
-    @field_validator("model_cache_dir", mode="after")
+    @field_validator("asr_snapshot_path", "alignment_snapshot_path", mode="after")
     @classmethod
-    def expand_model_cache_dir(cls, value: Path) -> Path:
+    def expand_snapshot_path(cls, value: Path) -> Path:
         return value.expanduser()
+
+    @model_validator(mode="after")
+    def validate_snapshot_revisions(self) -> ModelsConfig:
+        snapshots = (
+            ("asr_snapshot_path", self.asr_snapshot_path, self.asr_revision),
+            (
+                "alignment_snapshot_path",
+                self.alignment_snapshot_path,
+                self.alignment_revision,
+            ),
+        )
+        for field_name, path, revision in snapshots:
+            if path.name != revision:
+                raise ValueError(f"{field_name} must end with its configured revision")
+        return self
 
 
 class DiarizationConfig(StrictConfigModel):

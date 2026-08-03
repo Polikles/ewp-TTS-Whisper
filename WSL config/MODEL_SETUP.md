@@ -46,6 +46,14 @@ hf download <pinned-model-id> --revision <pinned-revision>
 
 Source: [Hugging Face — Download files from the Hub](https://huggingface.co/docs/huggingface_hub/en/guides/download).
 
+The accepted MVP model revisions are recorded in `docs/14-dependency-baseline.md`.
+After download, set `models.asr_snapshot_path` and
+`models.alignment_snapshot_path` in configuration to their exact snapshot directories.
+Each directory name must be the corresponding revision hash. The packaged defaults
+match the standard cache created under `$HOME/.cache/huggingface`; override the paths
+when `HF_HOME` points elsewhere. Runtime transcription uses these paths directly and
+does not download or discover models.
+
 ## Input needed later
 
 Before gated-model verification, confirm only that the required terms have been accepted, a read-only token exists, and it is available as `HF_TOKEN` in the spike shell.

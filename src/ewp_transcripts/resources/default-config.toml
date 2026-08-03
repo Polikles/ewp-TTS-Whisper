@@ -32,10 +32,15 @@ mixed_min_normalized_difference = 0.1
 
 [models]
 asr_model = "large-v2"
+asr_repository = "Systran/faster-whisper-large-v2"
+asr_revision = "f0fe81560cb8b68660e564f55dd99207059c092e"
+asr_snapshot_path = "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v2/snapshots/f0fe81560cb8b68660e564f55dd99207059c092e"
+alignment_model = "jonatasgrosman/wav2vec2-large-xlsr-53-polish"
+alignment_revision = "6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
+alignment_snapshot_path = "~/.cache/huggingface/hub/models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
 compute_type = "float16"
 batch_size = 4
 device = "cuda"
-model_cache_dir = "~/.cache/ewp-transcripts/models"
 allow_network_downloads_during_transcription = false
 
 [diarization]

@@ -72,6 +72,20 @@ The MVP preset is optimized for an RTX 3090 and prioritizes quality. It should d
 
 The ASR model and batch size must remain configurable.
 
+Model selection is separate from local artifact resolution. The `[models]` section
+records, for both ASR and Polish word alignment:
+
+- the model or repository identifier;
+- the exact immutable revision;
+- the explicit local snapshot directory.
+
+The snapshot path is authoritative at transcription time. EWP-transcripts does not
+search an arbitrary Hugging Face cache, resolve a moving branch, or download a missing
+artifact while transcribing. Each snapshot path must end with its configured revision;
+existence and model compatibility are checked by the runtime operation that loads it.
+The packaged paths assume the standard `~/.cache/huggingface` location established by
+the WSL setup guide. Installations with a different `HF_HOME` must override both paths.
+
 The selection is provisional because the comparison corpus contained only three cases. A larger manually verified corpus may justify changing the default through a new or superseding ADR.
 
 ## 5. Validation
