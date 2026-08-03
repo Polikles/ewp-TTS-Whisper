@@ -190,3 +190,12 @@ class EpisodeInspection(BaseModel):
     sample_rate_hz: int = Field(gt=0)
     sources: tuple[InspectedSource, ...] = Field(min_length=1)
     warnings: tuple[ApplicationWarning, ...] = ()
+
+
+class InspectionResult(BaseModel):
+    """Complete non-destructive inspection of one file or directory input."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    discovery: DiscoveryResult
+    episodes: tuple[EpisodeInspection, ...]
