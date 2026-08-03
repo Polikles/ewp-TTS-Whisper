@@ -13,10 +13,9 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 by implementing and running its final controlled target gate: force one
-pre-publication model failure, verify sanitized failed state plus retained workdir, then
-correct the configuration and prove a clean from-the-beginning restart. Do not begin
-Phase 6 batch processing until this failure/restart criterion is accepted.
+Resume Phase 5 by running its final controlled target gate in
+[`WSL config/RUN_PHASE5_FAILURE_RESTART.md`](WSL%20config/RUN_PHASE5_FAILURE_RESTART.md).
+Do not begin Phase 6 batch processing until this failure/restart criterion is accepted.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -74,8 +73,8 @@ were byte-identical; terminal state and workdir cleanup passed; the WSL worktree
 clean. ADR-0002 records all eight artifact hashes. The only remaining Phase 5 exit gate
 is a controlled failed-state and successful-restart exercise.
 
-No owner input is required while the controlled failure/restart implementation and
-runbook are prepared. Executing that gate will require the target WSL workstation.
+Owner input is required only to execute the prepared controlled failure/restart gate on
+the target WSL workstation and return sanitized evidence.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 

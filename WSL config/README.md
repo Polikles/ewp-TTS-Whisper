@@ -58,6 +58,10 @@ Validate the Phase 5 production single-speaker path, duplicate handling, cleanup
 forced offline replay using
 [`RUN_PHASE5_SINGLE_SPEAKER.md`](RUN_PHASE5_SINGLE_SPEAKER.md).
 
+Complete Phase 5 by validating a controlled failed state, retained diagnostics, and a
+successful versioned restart using
+[`RUN_PHASE5_FAILURE_RESTART.md`](RUN_PHASE5_FAILURE_RESTART.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
