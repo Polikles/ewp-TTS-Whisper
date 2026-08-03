@@ -73,5 +73,37 @@ The corrective decision is:
 - convert remaining rendering `ValueError` failures into a sanitized application error
   instead of exposing a terminal traceback.
 
-The target gate remains incomplete until the repaired exports, duplicate behavior,
-forced offline replay, final state, and artifact hashes pass.
+### Corrected target result
+
+The corrected target gate passed later on 2026-08-03:
+
+- the existing canonical result validated against the authoritative schema with 13
+  segments and 226 completely timestamped, single-speaker words;
+- the result recorded the exact accepted ASR and Polish-alignment revisions;
+- duplicate recovery generated the three missing exports without loading ML or replacing
+  canonical JSON;
+- a subsequent duplicate invocation skipped the completed result and all existing
+  exports without mutation;
+- a forced local-only replay ran ASR and alignment again and consistently published one
+  coordinated v2 canonical/TXT/SRT/VTT set;
+- v1 and v2 TXT, SRT, and VTT were byte-for-byte identical;
+- no partial, failed, or temporary output state remained;
+- the marker-verified retained workspace from the original export failure was safely
+  removed, both successful workspaces were cleaned, and the repository was clean.
+
+The controlled external artifact hashes were:
+
+```text
+d7d5c183c7e7dc6eb85765adbecfad56cab6dada430d7b43ae568ce44cc8478b  p0-01-single-short_results.json
+b98ffdc33c66677df50b340803858a71fe2086d3145a05eba9e63718a26abb17  p0-01-single-short_results_v002.json
+689dfa9328a8351ae5839773aeb95e76552840f861e4114d00557e623b60cb74  p0-01-single-short_subtitles.srt
+b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  p0-01-single-short_subtitles.vtt
+689dfa9328a8351ae5839773aeb95e76552840f861e4114d00557e623b60cb74  p0-01-single-short_subtitles_v002.srt
+b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  p0-01-single-short_subtitles_v002.vtt
+127eea14b247d8a6c6b32cf79c82ae7159a69ddfd964e4b5b2a1e9521eca9e1b  p0-01-single-short_transcript.txt
+127eea14b247d8a6c6b32cf79c82ae7159a69ddfd964e4b5b2a1e9521eca9e1b  p0-01-single-short_transcript_v002.txt
+```
+
+Canonical v1/v2 hashes intentionally differ because run IDs, timestamps, and stage
+durations are execution metadata. The matching derived hashes prove deterministic
+transcript and subtitle rendering from equivalent inference output.

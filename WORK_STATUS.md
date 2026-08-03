@@ -13,11 +13,10 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 by pulling the subtitle-boundary fix and continuing the existing target
-WSL sandbox through the recovery subsection and section 3 of
-[`WSL config/RUN_PHASE5_SINGLE_SPEAKER.md`](WSL%20config/RUN_PHASE5_SINGLE_SPEAKER.md).
-Do not add diarization, batch, or multi-source branching until this real P0-01 gate is
-accepted.
+Resume Phase 5 by implementing and running its final controlled target gate: force one
+pre-publication model failure, verify sanitized failed state plus retained workdir, then
+correct the configuration and prove a clean from-the-beginning restart. Do not begin
+Phase 6 batch processing until this failure/restart criterion is accepted.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -65,10 +64,18 @@ boundary: a real word sequence fit the nominal subtitle character capacity but r
 more than two lines at word boundaries. The fix chunks against the actual wrapper,
 accounts for speaker-label width, repairs missing exports from an existing duplicate
 without rerunning ML, and sanitizes residual rendering errors. ADR-0002 records the
-finding. The development-VM gate now passes all 181 tests; target replay is pending.
+finding. The development-VM gate now passes all 181 tests.
 
-Owner input is now required only to execute the prepared Phase 5 GPU procedure on the
-target WSL workstation and return its sanitized evidence.
+The corrected P0-01 target replay is **accepted**. Recovery generated the missing exports
+from canonical JSON without ML, the next duplicate run was wholly non-mutating, and a
+forced local-only inference run published a coordinated v2 set. Both runs contained 13
+segments and 226 timestamped words with pinned model provenance. V1/v2 TXT, SRT, and VTT
+were byte-identical; terminal state and workdir cleanup passed; the WSL worktree was
+clean. ADR-0002 records all eight artifact hashes. The only remaining Phase 5 exit gate
+is a controlled failed-state and successful-restart exercise.
+
+No owner input is required while the controlled failure/restart implementation and
+runbook are prepared. Executing that gate will require the target WSL workstation.
 The WSL repository does not contain `LICENSE_SKETCH.TXT`; that owner file exists only as
 an intentionally untracked file in the development VM.
 
