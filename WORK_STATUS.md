@@ -14,21 +14,11 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 2 at channel-classification calibration. Deterministic discovery, path normalization, ffprobe inspection, source hashing, filename grouping, duration/sample-rate validation, audio-stream selection, stable speaker IDs, and episode signatures are implemented and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
+Resume Phase 2 by integrating channel measurement/classification into the inspection service and CLI. Deterministic discovery, path normalization, ffprobe inspection, source hashing, filename grouping, duration/sample-rate validation, audio-stream selection, stable speaker IDs, episode signatures, channel metrics, and the conservative classifier are implemented and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
 
-The current local quality gate passes 51 unit tests; the self-contained real FFmpeg/ffprobe integration test passed on the target WSL workstation. The latest implementation commit is `347ae02 Add grouped media validation`.
+The current local quality gate passes 61 unit tests with one FFmpeg integration test skipped; the integration test passes on the target WSL workstation. The latest implementation commit is `007204e Add conservative channel classifier`.
 
-Required owner input before the next implementation slice:
-
-1. true-mono fixture, 30–60 seconds; P0-01 may be reused;
-2. exact or near-identical dual-mono fixture, 30–60 seconds; existing material may be reused;
-3. split-speaker stereo fixture, 60–120 seconds, with one speaker per channel, solo regions for each speaker, and at least one overlap;
-4. mixed-stereo fixture, 60–120 seconds, with both speakers audible in both channels and genuine stereo differences;
-5. filenames and sanitized ffprobe output for each fixture.
-
-Prefer 48 kHz, 16-bit PCM WAV. Keep all audio in the external test-data repository. An ambiguous-stereo fixture is optional initially and may be derived after measuring the known cases.
-
-The first channel report is complete at SHA-256 `9afe3e7306ef0436b754a047846da27f9f289904ff29d653080edf11627c3426` and is recorded in ADR-0003. P2-01 strongly matches split-speaker ground truth. P2-02 does not provide mixed-stereo evidence: its channels are even more similar than dual-mono control P0-04, so it is treated as effective dual mono. The WSL gate passes 55 tests. Resume by preparing and measuring a genuinely different-channel mixed-stereo fixture; do not invent split/mixed thresholds before it exists. After channel classification, expose the complete `transcriber inspect` vertical slice and close Phase 2.
+No owner input is currently required. ADR-0003 records the initial metrics, the contrary P2-02 result, valid P2-03 mixed-stereo evidence, provisional thresholds, and the mandatory future recalibration. Next, connect decoded metrics and classification to each inspected source, add the human/JSON `transcriber inspect` adapter, validate it on the external fixtures, and close Phase 2.
 
 ## Completed before this session
 
