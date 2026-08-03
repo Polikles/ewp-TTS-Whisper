@@ -184,4 +184,5 @@ def test_stereo_metrics_are_classified_and_enter_the_signature(tmp_path: Path) -
         source.channel_classification.detected_mode is ChannelMode.SPLIT_SPEAKERS
         for source in result.sources
     )
+    assert all(source.channel_metrics == metrics for source in result.sources)
     assert all(source.channel_mode is ChannelMode.SPLIT_SPEAKERS for source in result.sources)

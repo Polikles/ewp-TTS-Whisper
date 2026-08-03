@@ -174,6 +174,7 @@ class InspectedSource(BaseModel):
     stream: AudioStream
     duration_ms: int = Field(ge=0)
     channel_mode: ChannelMode
+    channel_metrics: ChannelMetrics | None = None
     channel_classification: ChannelClassification
     speaker_id: str = Field(pattern=r"^speaker_[0-9]{3,}$")
     speaker_label: str | None = None

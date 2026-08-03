@@ -114,6 +114,7 @@ def inspect_episode(
                     stream.duration_ms if stream.duration_ms is not None else result.duration_ms
                 ),
                 channel_mode=classification.processing_mode,
+                channel_metrics=metrics,
                 channel_classification=classification,
                 speaker_id=f"speaker_{position:03d}",
                 speaker_label=grouped_source.speaker_label,
