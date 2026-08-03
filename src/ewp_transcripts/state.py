@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import stat
 from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
@@ -16,7 +17,7 @@ from ewp_transcripts.domain import (
     JobStateRecord,
 )
 from ewp_transcripts.domain.enums import JobStateStatus, PlanDecision
-from ewp_transcripts.domain.errors import OutputReservationError
+from ewp_transcripts.domain.errors import InvalidJobStateError, OutputReservationError
 from ewp_transcripts.output_lock import output_directory_lock
 from ewp_transcripts.storage import find_existing_results, plan_job_outputs
 
@@ -36,6 +37,28 @@ def _fsync_directory(path: Path) -> None:
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+def _read_state(path: Path, *, maximum_bytes: int = 1024 * 1024) -> JobStateRecord:
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+        try:
+            metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_size > maximum_bytes:
+                raise InvalidJobStateError(f"Job state is not a safe regular file: {path}")
+            payload = bytearray()
+            while chunk := os.read(descriptor, 64 * 1024):
+                payload.extend(chunk)
+        finally:
+            os.close(descriptor)
+        return JobStateRecord.model_validate_json(payload)
+    except InvalidJobStateError:
+        raise
+    except (OSError, ValueError) as error:
+        raise InvalidJobStateError(f"Cannot read trusted job state: {path}") from error
 
 
 def _publish_exclusive_json(path: Path, payload: str, *, run_id: UUID) -> None:
@@ -62,6 +85,7 @@ def _publish_exclusive_json(path: Path, payload: str, *, run_id: UUID) -> None:
         if created:
             with suppress(FileNotFoundError):
                 temporary.unlink()
+            _fsync_directory(path.parent)
 
 
 def reserve_job(
@@ -113,3 +137,68 @@ def reserve_job(
             state=state,
             state_path=plan.outputs.partial_results,
         )
+
+
+def transition_job_state(
+    reservation: JobReservation,
+    *,
+    status: JobStateStatus,
+    failure_code: str,
+    failure_message: str,
+    lock_timeout_seconds: float = 0,
+) -> JobStateRecord:
+    """Atomically publish failed/cancelled state after verifying reservation ownership."""
+
+    if status not in {JobStateStatus.FAILED, JobStateStatus.CANCELLED}:
+        raise ValueError("transition target must be failed or cancelled")
+    if reservation.state is None or reservation.state_path is None:
+        raise InvalidJobStateError("Only a processing reservation can transition state")
+    outputs = reservation.plan.outputs
+    if outputs is None:
+        raise InvalidJobStateError("Reservation has no output paths")
+
+    with output_directory_lock(
+        outputs.output_directory,
+        timeout_seconds=lock_timeout_seconds,
+    ):
+        persisted = _read_state(reservation.state_path)
+        expected = reservation.state
+        identity = (
+            persisted.run_id,
+            persisted.job_id,
+            persisted.episode_signature_sha256,
+            persisted.result_version,
+        )
+        expected_identity = (
+            expected.run_id,
+            expected.job_id,
+            expected.episode_signature_sha256,
+            expected.result_version,
+        )
+        if identity != expected_identity or persisted.status is not JobStateStatus.RUNNING:
+            raise InvalidJobStateError("Persisted running state does not match reservation")
+
+        transitioned = JobStateRecord.model_validate(
+            persisted.model_copy(
+                update={
+                    "status": status,
+                    "updated_at": datetime.now(UTC),
+                    "failure_code": failure_code,
+                    "failure_message": failure_message,
+                }
+            ).model_dump()
+        )
+        _publish_exclusive_json(
+            outputs.failed_results,
+            transitioned.model_dump_json(indent=2) + "\n",
+            run_id=persisted.run_id,
+        )
+        try:
+            reservation.state_path.unlink()
+            _fsync_directory(outputs.output_directory)
+        except OSError as error:
+            raise InvalidJobStateError(
+                f"Failed state was published but running state could not be removed: "
+                f"{reservation.state_path}"
+            ) from error
+        return transitioned

@@ -283,6 +283,19 @@ class JobStateRecord(BaseModel):
     status: JobStateStatus
     created_at: datetime
     updated_at: datetime
+    failure_code: str | None = Field(default=None, pattern=r"^[A-Z][A-Z0-9_]*$")
+    failure_message: str | None = Field(default=None, min_length=1, max_length=1000)
+
+    @model_validator(mode="after")
+    def validate_failure_details(self) -> Self:
+        has_details = self.failure_code is not None and self.failure_message is not None
+        if self.status is JobStateStatus.RUNNING and (
+            self.failure_code is not None or self.failure_message is not None
+        ):
+            raise ValueError("running state cannot contain failure details")
+        if self.status is not JobStateStatus.RUNNING and not has_details:
+            raise ValueError("failed and cancelled states require code and message")
+        return self
 
 
 class JobReservation(BaseModel):

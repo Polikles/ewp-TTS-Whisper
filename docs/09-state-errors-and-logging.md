@@ -121,3 +121,9 @@ race in which a waiter holds the old inode while a new process locks a replaceme
 Kernel lock ownership is authoritative, so a leftover metadata timestamp does not itself
 mean the directory is locked. The configured timeout controls how long acquisition waits;
 the MVP default of zero fails immediately.
+
+Transitions to `failed` or `cancelled` reacquire the same directory lock and verify the
+persisted run ID, job ID, episode signature, version, and current `running` status against
+the in-memory reservation. A complete terminal record is published exclusively before
+the running record is removed. If cleanup is interrupted, both parseable records may
+remain and the version stays occupied; neither record is overwritten.

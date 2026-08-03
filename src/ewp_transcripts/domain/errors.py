@@ -67,3 +67,7 @@ class OutputLockUnavailableError(ApplicationError):
 
 class OutputReservationError(ApplicationError):
     """Raised when a planned running-state filename cannot be reserved safely."""
+
+
+class InvalidJobStateError(ApplicationError):
+    """Raised when a persisted job state cannot be trusted or transitioned."""
