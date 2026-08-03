@@ -21,6 +21,7 @@ from ewp_transcripts.domain.models import (
     InspectedSource,
     InspectionResult,
     MediaProbeResult,
+    PlannedOutputPaths,
     SkippedPath,
     SourceFingerprint,
 )
@@ -42,6 +43,7 @@ __all__ = [
     "InspectionResult",
     "InspectedSource",
     "MediaProbeResult",
+    "PlannedOutputPaths",
     "SkippedPath",
     "SourceFingerprint",
     "WarningCode",

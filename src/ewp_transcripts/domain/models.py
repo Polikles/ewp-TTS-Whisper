@@ -203,3 +203,19 @@ class InspectionResult(BaseModel):
 
     discovery: DiscoveryResult
     episodes: tuple[EpisodeInspection, ...]
+
+
+class PlannedOutputPaths(BaseModel):
+    """Complete immutable filename set for one planned result version."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    output_directory: Path
+    result_version: int = Field(ge=1)
+    results: Path
+    partial_results: Path
+    failed_results: Path
+    transcript: Path | None = None
+    subtitles_srt: Path | None = None
+    subtitles_vtt: Path | None = None
+    segments: Path | None = None

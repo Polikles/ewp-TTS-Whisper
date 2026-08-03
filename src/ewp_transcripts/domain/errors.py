@@ -51,3 +51,7 @@ class DurationMismatchError(ApplicationError):
 
 class ChannelAnalysisError(ApplicationError):
     """Raised when FFmpeg cannot provide valid channel-analysis samples."""
+
+
+class UnsafeOutputNameError(ApplicationError):
+    """Raised when a job identifier cannot safely become one output filename."""
