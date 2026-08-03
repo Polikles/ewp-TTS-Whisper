@@ -1,5 +1,6 @@
 """Stable domain types used by application services and adapters."""
 
+from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.enums import (
     DiagnosticStatus,
     DiscoverySkipReason,
@@ -39,6 +40,7 @@ __all__ = [
     "AudioStream",
     "ChannelClassification",
     "ChannelMetrics",
+    "CanonicalResult",
     "DiagnosticCheck",
     "DiagnosticStatus",
     "DiscoveredFile",
@@ -56,6 +58,7 @@ __all__ = [
     "JobReservation",
     "JobStateRecord",
     "JobStateStatus",
+    "load_canonical_result",
     "MediaProbeResult",
     "PlannedOutputPaths",
     "PlanDecision",
