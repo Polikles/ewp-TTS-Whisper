@@ -119,6 +119,10 @@ class QualityConfig(StrictConfigModel):
     detect_low_level: bool = True
     detect_channel_imbalance: bool = True
     detect_silence_ratio: bool = True
+    clipping_min_sample_ratio: float = Field(default=0.0001, ge=0.0, le=1.0)
+    low_level_max_rms_dbfs: float = Field(default=-35.0, le=0.0)
+    channel_imbalance_min_rms_difference_db: float = Field(default=6.0, ge=0.0)
+    high_silence_min_ratio: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
 class SubtitlesConfig(StrictConfigModel):

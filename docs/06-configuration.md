@@ -41,6 +41,23 @@ Complete example: [`../examples/config.example.toml`](../examples/config.example
 - `[runtime]` — work directories, temporary files, locks, logging;
 - `[quality]` — diagnostics without audio repair.
 
+### Warning-only quality thresholds
+
+Inspection decodes each source once and reports four lightweight diagnostics. The MVP
+defaults are deliberately conservative:
+
+| Key | Default | Warning condition |
+|---|---:|---|
+| `clipping_min_sample_ratio` | `0.0001` | At least this fraction of decoded PCM samples is at or near full scale. |
+| `low_level_max_rms_dbfs` | `-35.0` | The louder channel's overall RMS is at or below this level. |
+| `channel_imbalance_min_rms_difference_db` | `6.0` | A true two-channel source differs by at least this RMS level. |
+| `high_silence_min_ratio` | `0.5` | At least this fraction of 500 ms windows has neither channel active. |
+
+Individual `detect_*` switches may disable a warning, and `analyze = false` disables all
+four. Diagnostics never normalize, repair, or otherwise modify input audio. These
+thresholds are an initial operational baseline and must be recalibrated on the future
+larger dataset.
+
 ## 4. `accurate` preset
 
 The MVP preset is optimized for an RTX 3090 and prioritizes quality. It should define:
