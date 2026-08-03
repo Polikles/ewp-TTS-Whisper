@@ -47,3 +47,7 @@ class SampleRateMismatchError(ApplicationError):
 
 class DurationMismatchError(ApplicationError):
     """Raised when grouped-source duration drift exceeds the allowed threshold."""
+
+
+class ChannelAnalysisError(ApplicationError):
+    """Raised when FFmpeg cannot provide valid channel-analysis samples."""
