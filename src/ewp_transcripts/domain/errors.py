@@ -61,6 +61,10 @@ class InvalidExistingResultError(ApplicationError):
     """Raised when completed-result metadata is unreadable or inconsistent."""
 
 
+class InvalidCanonicalResultError(ApplicationError):
+    """Raised when a canonical result cannot be safely read or exported."""
+
+
 class OutputLockUnavailableError(ApplicationError):
     """Raised when an output directory cannot be locked within the configured timeout."""
 
