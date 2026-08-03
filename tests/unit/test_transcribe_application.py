@@ -115,6 +115,33 @@ def test_transcribe_failure_publishes_failed_state_and_retains_workspace(
     assert len(list(config.runtime.work_root.glob("*/*"))) == 1
 
 
+def test_transcribe_interrupt_publishes_cancelled_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path)
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+
+    def cancel(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(application, "run_single_speaker_pipeline", cancel)
+    config = _config(tmp_path)
+    destination = tmp_path / "output"
+
+    with pytest.raises(KeyboardInterrupt):
+        transcribe_one(
+            inspection.discovery.input_path,
+            config=config,
+            output_directory=destination,
+        )
+
+    state = next(destination.glob("*.failed.json")).read_text(encoding="utf-8")
+    assert '"status": "cancelled"' in state
+    assert '"failure_code": "USER_CANCELLED"' in state
+    assert not list(destination.glob("*.partial.json"))
+    assert len(list(config.runtime.work_root.glob("*/*"))) == 1
+
+
 def _config(tmp_path: Path) -> ApplicationConfig:
     return ApplicationConfig(
         diarization=DiarizationConfig(speaker_count=1),

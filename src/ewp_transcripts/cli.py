@@ -7,12 +7,15 @@ from typing import Annotated
 import typer
 
 from ewp_transcripts.application import (
+    BatchTranscriptionOutcome,
     ExportFormat,
+    TranscriptionOutcome,
     application_version,
     doctor,
     dry_run,
     export_result,
     inspect_input,
+    transcribe_batch,
     transcribe_one,
 )
 from ewp_transcripts.config import load_config
@@ -405,6 +408,10 @@ def transcribe_command(
         Path | None,
         typer.Option("--output-dir", help="Write results and exports to this directory."),
     ] = None,
+    recursive: Annotated[
+        bool | None,
+        typer.Option("--recursive", help="Include supported files in subdirectories."),
+    ] = None,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -431,21 +438,37 @@ def transcribe_command(
         config = load_config(
             explicit_path=config_path,
             cli_overrides=_inspection_overrides(
-                recursive=False,
+                recursive=recursive if input_path.is_dir() else False,
                 channel_mode=channel_mode,
                 speaker_count=1,
             ),
         )
-        outcome = transcribe_one(
-            input_path,
-            config=config,
-            output_directory=output_directory,
-            force=force,
-            allow_duration_mismatch=allow_duration_mismatch,
-        )
+        if input_path.is_dir():
+            batch = transcribe_batch(
+                input_path,
+                config=config,
+                output_directory=output_directory,
+                force=force,
+                allow_duration_mismatch=allow_duration_mismatch,
+            )
+        else:
+            outcome = transcribe_one(
+                input_path,
+                config=config,
+                output_directory=output_directory,
+                force=force,
+                allow_duration_mismatch=allow_duration_mismatch,
+            )
     except ApplicationError as error:
         _expected_error(error)
 
+    if input_path.is_dir():
+        _print_batch_outcome(batch)
+    else:
+        _print_transcription_outcome(outcome)
+
+
+def _print_transcription_outcome(outcome: TranscriptionOutcome) -> None:
     typer.echo(f"{outcome.decision.value.upper()} {outcome.job_id}")
     typer.echo(f"RESULT {outcome.result_path}")
     if outcome.exports is not None:
@@ -453,6 +476,24 @@ def transcribe_command(
             typer.echo(f"WROTE {path}")
         for path in outcome.exports.skipped:
             typer.echo(f"SKIP {path}")
+
+
+def _print_batch_outcome(outcome: BatchTranscriptionOutcome) -> None:
+    typer.echo(f"Output directory: {outcome.output_directory}")
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.job_id}")
+        if job.result_path is not None:
+            typer.echo(f"  RESULT {job.result_path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY completed={outcome.completed} skipped={outcome.skipped} "
+        f"failed={outcome.failed} cancelled={outcome.cancelled}"
+    )
+    if outcome.cancelled:
+        raise typer.Exit(code=6)
+    if outcome.failed:
+        raise typer.Exit(code=5)
 
 
 def main() -> None:

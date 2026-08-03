@@ -79,6 +79,29 @@ def test_batch_stop_policy_leaves_later_jobs_unstarted(
     assert outcome.stopped_early is True
 
 
+def test_batch_cancellation_stops_queue_and_reports_cancelled(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path, "cancelled", "never-started")
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+
+    def cancel(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(application, "_transcribe_episode", cancel)
+
+    outcome = transcribe_batch(
+        inspection.discovery.input_path,
+        config=_config(tmp_path, continue_after_error=True),
+    )
+
+    assert [job.job_id for job in outcome.jobs] == ["cancelled"]
+    assert outcome.jobs[0].status == "cancelled"
+    assert outcome.jobs[0].failure_code == "USER_CANCELLED"
+    assert outcome.cancelled == 1
+    assert outcome.stopped_early is True
+
+
 def _config(tmp_path: Path, *, continue_after_error: bool) -> ApplicationConfig:
     return ApplicationConfig(
         diarization=DiarizationConfig(speaker_count=1),

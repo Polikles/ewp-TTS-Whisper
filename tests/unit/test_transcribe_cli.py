@@ -6,7 +6,11 @@ import pytest
 from typer.testing import CliRunner
 
 from ewp_transcripts import cli
-from ewp_transcripts.application import TranscriptionOutcome
+from ewp_transcripts.application import (
+    BatchJobOutcome,
+    BatchTranscriptionOutcome,
+    TranscriptionOutcome,
+)
 from ewp_transcripts.cli import app
 from ewp_transcripts.domain.enums import PlanDecision
 
@@ -56,3 +60,40 @@ def test_root_help_lists_transcribe_command() -> None:
 
     assert outcome.exit_code == 0
     assert "transcribe" in outcome.stdout
+
+
+def test_directory_transcribe_prints_stable_summary_and_partial_failure_exit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "input"
+    source.mkdir()
+    destination = tmp_path / "output"
+
+    monkeypatch.setattr(
+        cli,
+        "transcribe_batch",
+        lambda *args, **kwargs: BatchTranscriptionOutcome(
+            output_directory=destination,
+            jobs=(
+                BatchJobOutcome(
+                    job_id="first",
+                    status="completed",
+                    result_path=destination / "first_results.json",
+                ),
+                BatchJobOutcome(
+                    job_id="second",
+                    status="failed",
+                    failure_code="SPEECH_ENGINE_ERROR",
+                    failure_message="controlled failure",
+                ),
+            ),
+        ),
+    )
+
+    outcome = CliRunner().invoke(app, ["transcribe", str(source)])
+
+    assert outcome.exit_code == 5
+    assert "COMPLETED first" in outcome.stdout
+    assert "FAILED second" in outcome.stdout
+    assert "ERROR SPEECH_ENGINE_ERROR: controlled failure" in outcome.stdout
+    assert "SUMMARY completed=1 skipped=0 failed=1 cancelled=0" in outcome.stdout

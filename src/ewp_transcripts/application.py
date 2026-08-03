@@ -73,7 +73,7 @@ class BatchJobOutcome:
     """Stable summary entry for one episode in a sequential batch."""
 
     job_id: str
-    status: Literal["completed", "skipped", "failed"]
+    status: Literal["completed", "skipped", "failed", "cancelled"]
     result_path: Path | None = None
     failure_code: str | None = None
     failure_message: str | None = None
@@ -98,6 +98,10 @@ class BatchTranscriptionOutcome:
     @property
     def failed(self) -> int:
         return sum(job.status == "failed" for job in self.jobs)
+
+    @property
+    def cancelled(self) -> int:
+        return sum(job.status == "cancelled" for job in self.jobs)
 
 
 def application_version() -> str:
@@ -292,6 +296,17 @@ def transcribe_batch(
             if not config.runtime.continue_batch_after_error:
                 stopped_early = True
                 break
+        except KeyboardInterrupt:
+            jobs.append(
+                BatchJobOutcome(
+                    job_id=episode.job_id,
+                    status="cancelled",
+                    failure_code="USER_CANCELLED",
+                    failure_message="Transcription cancelled by user",
+                )
+            )
+            stopped_early = True
+            break
     return BatchTranscriptionOutcome(
         output_directory=destination,
         jobs=tuple(jobs),
@@ -398,6 +413,16 @@ def _process_reservation(
         )
         succeeded = True
         return outcome
+    except KeyboardInterrupt:
+        if not published:
+            transition_job_state(
+                reservation,
+                status=JobStateStatus.CANCELLED,
+                failure_code="USER_CANCELLED",
+                failure_message="Transcription cancelled by user",
+                lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+            )
+        raise
     except Exception as error:
         if not published:
             transition_job_state(
