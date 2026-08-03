@@ -31,6 +31,7 @@ from ewp_transcripts.domain.models import (
     PlannedOutputPaths,
     SkippedPath,
     SourceFingerprint,
+    WorkDirectory,
 )
 
 __all__ = [
@@ -62,4 +63,5 @@ __all__ = [
     "SourceFingerprint",
     "WarningCode",
     "WarningSeverity",
+    "WorkDirectory",
 ]

@@ -14,6 +14,12 @@ It may contain decoded WAV files, extracted channels, raw backend output, and di
 - after failure or cancellation: preserve;
 - only final results are written to the output directory.
 
+Allocation creates an owner-only `<work_root>/<run_id>/<job_id>/` directory with a small
+ownership marker. Cleanup accepts only the exact typed workspace returned by allocation,
+requires the marker to match its run and job identity, rejects symlinks, and removes only
+that job directory. It never recursively removes the work root, run root, output
+directory, model cache, or siblings.
+
 ## 2. Atomic writes
 
 1. Create the work directory.

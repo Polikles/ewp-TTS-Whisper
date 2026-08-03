@@ -313,3 +313,15 @@ class JobReservation(BaseModel):
         if processing != (self.state is not None and self.state_path is not None):
             raise ValueError("only process decisions may contain a state reservation")
         return self
+
+
+class WorkDirectory(BaseModel):
+    """Owned isolated workspace for one job inside one run."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    work_root: Path
+    run_id: UUID
+    job_id: str = Field(min_length=1)
+    path: Path
+    marker_path: Path

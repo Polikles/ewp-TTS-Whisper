@@ -71,3 +71,7 @@ class OutputReservationError(ApplicationError):
 
 class InvalidJobStateError(ApplicationError):
     """Raised when a persisted job state cannot be trusted or transitioned."""
+
+
+class UnsafeWorkDirectoryError(ApplicationError):
+    """Raised when a work directory cannot be allocated or cleaned safely."""
