@@ -111,6 +111,8 @@ uv build
 
 ## Phase 2 — Input discovery and media inspection
 
+Status: **complete and validated on 2026-08-03**.
+
 ### Goal
 
 Implement `inspect` without any ASR or diarization dependency.

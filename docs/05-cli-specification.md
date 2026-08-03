@@ -45,7 +45,7 @@ Does not run ASR. Returns:
 - audio parameters;
 - channel classification;
 - hashes;
-- quality warnings (TODO);
+- structured warning-only audio-quality diagnostics;
 - existing results and the skip/process decision.
 
 Options:

@@ -49,5 +49,6 @@ JSON inspection report has SHA-256:
 
 These synthetic files validate diagnostic mechanics and thresholds, not their precision
 or recall on a representative speech corpus. Threshold recalibration remains required
-after the larger dataset exists. The WSL repository test-count summary for this exact
-diagnostics revision remains to be recorded before Phase 2 is formally closed.
+after the larger dataset exists. The target WSL workstation subsequently passed the full
+repository gate with 75 tests, no skipped FFmpeg test, and a clean worktree. The same 75
+tests also pass on the development VM after installing FFmpeg 8.0.1.
