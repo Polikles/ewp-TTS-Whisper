@@ -8,6 +8,7 @@ from ewp_transcripts.discovery import discover_input, group_discovered_files
 from ewp_transcripts.doctor import run_doctor
 from ewp_transcripts.domain import DiscoveryResult, DoctorResult, InspectionResult
 from ewp_transcripts.inspection import inspect_episode
+from ewp_transcripts.media import measure_file_channels
 
 
 def application_version() -> str:
@@ -55,7 +56,9 @@ def inspect_input(
     inspections = tuple(
         inspect_episode(
             episode,
+            channel_analyzer=measure_file_channels,
             channels_config=effective_config.channels,
+            quality_config=effective_config.quality,
             duration_warning_ms=effective_config.grouping.duration_warning_ms,
             duration_error_ms=effective_config.grouping.duration_error_ms,
             allow_duration_mismatch=allow_duration_mismatch,

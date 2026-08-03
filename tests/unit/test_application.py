@@ -51,11 +51,6 @@ def test_inspect_input_composes_discovery_grouping_and_inspection(
         both_active_ratio=1.0,
         neither_active_ratio=0.0,
     )
-    monkeypatch.setattr("ewp_transcripts.inspection.probe_media", probe)
-    monkeypatch.setattr("ewp_transcripts.inspection.measure_file_channels", lambda path: metrics)
-
-    # Defaults are captured by inspect_episode's function signature, so patch the
-    # application binding used by this composition test.
     from ewp_transcripts import application
 
     original_inspect = application.inspect_episode
@@ -64,11 +59,11 @@ def test_inspect_input_composes_discovery_grouping_and_inspection(
         return original_inspect(
             episode,
             probe=probe,
-            channel_analyzer=lambda path: metrics,
             **kwargs,
         )
 
     monkeypatch.setattr(application, "inspect_episode", inspect_with_adapters)
+    monkeypatch.setattr(application, "measure_file_channels", lambda path: metrics)
     config = ApplicationConfig(
         grouping=GroupingConfig(speaker_suffix_separator="-"),
         channels=ChannelsConfig(),

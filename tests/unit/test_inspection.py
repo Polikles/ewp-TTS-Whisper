@@ -12,7 +12,7 @@ from ewp_transcripts.domain import (
     EpisodeCandidate,
     MediaProbeResult,
 )
-from ewp_transcripts.domain.enums import ChannelMode
+from ewp_transcripts.domain.enums import ChannelMode, WarningCode
 from ewp_transcripts.domain.errors import (
     DurationMismatchError,
     MultipleAudioStreamsError,
@@ -189,3 +189,39 @@ def test_stereo_metrics_are_classified_and_enter_the_signature(tmp_path: Path) -
     )
     assert all(source.channel_metrics == metrics for source in result.sources)
     assert all(source.channel_mode is ChannelMode.SPLIT_SPEAKERS for source in result.sources)
+
+
+def test_quality_warnings_are_attached_to_episode(tmp_path: Path) -> None:
+    episode = _episode(tmp_path)
+    metrics = ChannelMetrics(
+        sample_rate_hz=16000,
+        analyzed_samples_per_channel=16000,
+        window_ms=500,
+        windows=2,
+        correlation=1.0,
+        normalized_difference_rms=0.0,
+        left_rms_dbfs=-40.0,
+        right_rms_dbfs=-40.0,
+        left_peak_dbfs=0.0,
+        right_peak_dbfs=0.0,
+        clipping_sample_ratio=0.01,
+        channel_rms_difference_db=0.0,
+        left_activity_threshold_dbfs=-50.0,
+        right_activity_threshold_dbfs=-50.0,
+        left_only_ratio=0.0,
+        right_only_ratio=0.0,
+        both_active_ratio=0.25,
+        neither_active_ratio=0.75,
+    )
+
+    result = inspect_episode(
+        episode,
+        probe=_probe({"episode-anna.wav": 1000, "episode-jan.wav": 1000}),
+        channel_analyzer=lambda path: metrics,
+    )
+
+    assert {warning.code for warning in result.warnings} == {
+        WarningCode.AUDIO_CLIPPING,
+        WarningCode.AUDIO_LOW_LEVEL,
+        WarningCode.AUDIO_HIGH_SILENCE_RATIO,
+    }

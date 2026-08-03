@@ -101,7 +101,7 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 expected = {
-    "p0-01-single-short": ("mono", "mono", None),
+    "p0-01-single-short": ("mono", "mono", 1),
     "p0-04-two-speakers-dual-mono": ("dual-mono", "dual-mono", 2),
     "p2-01-split-speakers": ("split-speakers", "split-speakers", 2),
     "p2-02-mixed-stereo": ("dual-mono", "dual-mono", 2),
@@ -118,12 +118,8 @@ for stem, (detected, processing, channels) in expected.items():
     assert decision["detected_mode"] == detected, (stem, decision)
     assert decision["processing_mode"] == processing, (stem, decision)
     assert len(source["fingerprint"]["sha256"]) == 64, stem
-    if channels is None:
-        assert source["stream"]["channels"] == 1, stem
-        assert source["channel_metrics"] is None, stem
-    else:
-        assert source["stream"]["channels"] == channels, stem
-        assert source["channel_metrics"] is not None, stem
+    assert source["stream"]["channels"] == channels, stem
+    assert source["channel_metrics"] is not None, stem
     print(f"PASS {stem}: detected={detected}, processing={processing}")
 PY
 ```

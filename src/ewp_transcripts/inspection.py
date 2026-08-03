@@ -7,7 +7,7 @@ from collections.abc import Callable, Mapping
 from hashlib import sha256
 from pathlib import Path
 
-from ewp_transcripts.config import ChannelsConfig
+from ewp_transcripts.config import ChannelsConfig, QualityConfig
 from ewp_transcripts.domain import (
     ApplicationWarning,
     AudioStream,
@@ -23,8 +23,9 @@ from ewp_transcripts.domain.errors import (
     MultipleAudioStreamsError,
     SampleRateMismatchError,
 )
-from ewp_transcripts.media import measure_file_channels, probe_media
+from ewp_transcripts.media import probe_media
 from ewp_transcripts.media.channels import classify_channels
+from ewp_transcripts.media.quality import quality_warnings
 
 MediaProbe = Callable[[Path], MediaProbeResult]
 ChannelAnalyzer = Callable[[Path], ChannelMetrics]
@@ -82,8 +83,9 @@ def inspect_episode(
     *,
     probe: MediaProbe = probe_media,
     selected_streams: Mapping[Path, int] | None = None,
-    channel_analyzer: ChannelAnalyzer = measure_file_channels,
+    channel_analyzer: ChannelAnalyzer | None = None,
     channels_config: ChannelsConfig | None = None,
+    quality_config: QualityConfig | None = None,
     duration_warning_ms: int = 100,
     duration_error_ms: int = 500,
     allow_duration_mismatch: bool = False,
@@ -94,18 +96,27 @@ def inspect_episode(
         raise ValueError("invalid duration thresholds")
     stream_selection = selected_streams or {}
     effective_channels_config = channels_config or ChannelsConfig()
+    effective_quality_config = quality_config or QualityConfig()
     inspected: list[InspectedSource] = []
     channel_warnings: list[ApplicationWarning] = []
     for position, grouped_source in enumerate(episode.sources, start=1):
         result = probe(grouped_source.fingerprint.path)
         stream = _select_audio_stream(result, stream_selection)
-        metrics = channel_analyzer(result.path) if stream.channels == 2 else None
+        metrics = channel_analyzer(result.path) if channel_analyzer is not None else None
         classification = classify_channels(
             original_channels=stream.channels,
             metrics=metrics,
             config=effective_channels_config,
         )
         channel_warnings.extend(classification.warnings)
+        if metrics is not None:
+            channel_warnings.extend(
+                quality_warnings(
+                    metrics,
+                    original_channels=stream.channels,
+                    config=effective_quality_config,
+                )
+            )
         inspected.append(
             InspectedSource(
                 fingerprint=grouped_source.fingerprint,
