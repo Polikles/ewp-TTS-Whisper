@@ -7,7 +7,7 @@ Use this file as the starting point for the next work session.
 ## Current stage
 
 **Phases 0 through 6 are complete. Phase 7 — synchronized sources and stereo modes — is
-next.**
+underway.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
@@ -18,6 +18,48 @@ source or split channel independently, closes GPU models between passes, assigns
 source/speaker IDs, and feeds normalized streams into the completed timeline composer.
 Preserve overlaps; do not introduce cross-channel transcript deduplication or diarization.
 Reuse the established canonical publication boundary.
+
+## End-of-day checkpoint — 2026-08-03
+
+Repository state at handoff:
+
+- `main` and `origin/main` include commit `4b6b246`;
+- the complete local gate passes: formatting, lint, strict typing, and **189 tests**;
+- Phases 0–6 are accepted, with target WSL evidence recorded in ADR-0002, ADR-0004,
+  and ADR-0007;
+- Phase 7 currently contains only the pure timeline composer in
+  `src/ewp_transcripts/composition.py` plus its tests;
+- `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
+
+Start tomorrow with these implementation steps, in order:
+
+1. Define an internal stream-work description for each independently transcribed source
+   or selected channel: input path, stream/channel selection, stable `source_id`, stable
+   `speaker_id`, and label provenance.
+2. Extract the existing prepare → ASR → unload → alignment → unload → normalize sequence
+   so it can run once per stream inside one reserved job and isolated workdir.
+3. Support grouped mono sources first, then map split-speaker stereo to two independent
+   channel streams from the same source file.
+4. Compose normalized streams with `merge_speaker_transcripts`, then assemble one
+   schema-valid canonical episode with all sources, speakers, warnings, stages, model
+   provenance, and `file_group` or `split_channels` topology.
+5. Add fake-engine tests for deterministic attribution, partial overlap, repeated text
+   preservation, engine cleanup between streams, and failure before publication.
+6. Connect the multi-stream pipeline to the existing reservation/application boundary.
+   Only after CPU tests pass, prepare a WSL gate using P2-01 and a grouped-source fixture.
+
+Constraints to preserve:
+
+- do not load diarization for grouped-source or split-channel paths;
+- do not deduplicate matching text across sources/channels;
+- dual mono continues to transcribe one selected channel;
+- mixed-stereo multi-speaker processing remains Phase 8;
+- models remain pinned, explicit, local-only, and unloaded between GPU stages;
+- canonical JSON is published before derived exports and existing files are never
+  overwritten.
+
+No owner input is needed at the start of the next session. Input will be needed only when
+the Phase 7 WSL fixture/runbook is ready for execution.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
