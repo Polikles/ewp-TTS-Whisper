@@ -13,12 +13,11 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 with fake-engine pipeline orchestration and complete canonical-result
-assembly. Working-audio preparation, backend-neutral ASR/alignment protocols, and
-single-speaker transcript normalization are already implemented. After the fake-engine
-orchestration is deterministic, add the lazy local WhisperX large-v2/Polish-alignment
-adapter and prepare its WSL GPU gate. Reuse the accepted model revisions and Phase 3
-reservation/workdir primitives; do not add diarization or multi-source branching yet.
+Resume Phase 5 with the lazy local WhisperX large-v2/Polish-alignment adapter, followed by
+the application/CLI lifecycle that connects inspection, reservation, workdir allocation,
+the completed fake-tested pipeline, final publication, exports, and cleanup. Prepare the
+target WSL GPU gate before accepting the real adapter. Do not add diarization, batch, or
+multi-source branching yet.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -40,6 +39,15 @@ Normalization preserves aligned word times, deterministically interpolates parti
 uses containing-segment fallback when all word timing is absent, retains every word, and
 records `WORD_ALIGNMENT_MISSING` / `WORD_TIMESTAMP_INTERPOLATED` warnings. The
 development-VM gate now passes all 164 tests.
+
+Commits `6de55e4` and `53f56cf` complete the CPU/fake-engine orchestration and atomic
+canonical-result publication boundary. The Phase 5 pipeline enforces exactly one source,
+one speaker, and mono/one-selected-channel processing; prepares audio; runs and closes ASR
+before alignment; normalizes the transcript; and builds a schema-valid completed result
+with stages, environment, models, source/channel metadata, warnings, and stable speaker
+identity. Finalization re-verifies the persisted running reservation under lock, publishes
+the canonical JSON exclusively, then removes the partial state. Identity mismatches and
+occupied final paths are non-mutating. The development-VM gate now passes all 170 tests.
 
 No owner input is currently required for the initial Phase 5 design and CPU-testable
 scaffold. GPU validation will later require the owner to run the prepared WSL procedure.
