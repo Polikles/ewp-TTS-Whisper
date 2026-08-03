@@ -33,6 +33,10 @@ class AudioPreparationError(ApplicationError):
     """Raised when FFmpeg cannot create a safe working-audio file."""
 
 
+class TranscriptNormalizationError(ApplicationError):
+    """Raised when engine timing cannot form a valid canonical timeline."""
+
+
 class NoAudioStreamError(MediaProbeError):
     """Raised when an inspected input contains no supported audio stream."""
 
