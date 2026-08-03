@@ -13,12 +13,12 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 5 with backend-neutral ASR/alignment protocols and canonical single-speaker
-normalization under fake CPU engines. Working-audio preparation is already implemented.
-After the fake-engine orchestration is deterministic, add the lazy local WhisperX
-large-v2/Polish-alignment adapter and prepare its WSL GPU gate. Reuse the accepted model
-revisions and Phase 3 reservation/workdir primitives; do not add diarization or
-multi-source branching yet.
+Resume Phase 5 with fake-engine pipeline orchestration and complete canonical-result
+assembly. Working-audio preparation, backend-neutral ASR/alignment protocols, and
+single-speaker transcript normalization are already implemented. After the fake-engine
+orchestration is deterministic, add the lazy local WhisperX large-v2/Polish-alignment
+adapter and prepare its WSL GPU gate. Reuse the accepted model revisions and Phase 3
+reservation/workdir primitives; do not add diarization or multi-source branching yet.
 
 The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
 generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
@@ -32,6 +32,14 @@ destination. Unit tests cover command construction, downmix behavior, overwrite 
 and sanitized failures. A real local FFmpeg/FFprobe integration test verifies the output
 codec, rate, channel count, and source preservation. The development-VM gate passes all
 155 tests. This new slice has not yet required a separate target-WSL gate.
+
+Commits `b1f5c3d` and `d9771ce` add strict backend-neutral ASR/alignment contracts and
+canonical single-speaker normalization. Engine modules import no Torch, WhisperX, or
+pyannote packages eagerly and expose separate lifecycle hooks for staged GPU release.
+Normalization preserves aligned word times, deterministically interpolates partial gaps,
+uses containing-segment fallback when all word timing is absent, retains every word, and
+records `WORD_ALIGNMENT_MISSING` / `WORD_TIMESTAMP_INTERPOLATED` warnings. The
+development-VM gate now passes all 164 tests.
 
 No owner input is currently required for the initial Phase 5 design and CPU-testable
 scaffold. GPU validation will later require the owner to run the prepared WSL procedure.
