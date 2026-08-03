@@ -7,22 +7,31 @@ Use this file as the starting point for the next work session.
 ## Current stage
 
 **Phases 0 through 4 are complete. Phase 5 — single-file, single-speaker transcription
-— is next.**
+— is underway.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 5 by designing the smallest production single-file/single-speaker pipeline:
-working-audio preparation, local large-v2 ASR, Polish alignment, canonical normalization,
-and safe final-result publication. Reuse the accepted model revisions and Phase 3
-reservation/workdir primitives; do not add diarization or multi-source branching yet.
+Resume Phase 5 with backend-neutral ASR/alignment protocols and canonical single-speaker
+normalization under fake CPU engines. Working-audio preparation is already implemented.
+After the fake-engine orchestration is deterministic, add the lazy local WhisperX
+large-v2/Polish-alignment adapter and prepare its WSL GPU gate. Reuse the accepted model
+revisions and Phase 3 reservation/workdir primitives; do not add diarization or
+multi-source branching yet.
 
-The target WSL workstation passes all 150 tests with a clean worktree. Phase 4 generated
-and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA was hidden
-and model libraries were offline. Repeat without `--force` was non-mutating; forced
-export created one coordinated v2 set. ADR-0002 records canonical/export evidence and
-ADR-0004 records versioning evidence and hashes.
+The target WSL workstation passes all 150 Phase 4 tests with a clean worktree. Phase 4
+generated and validated TXT, SRT, VTT, and segments JSON from canonical JSON while CUDA
+was hidden and model libraries were offline. Repeat without `--force` was non-mutating;
+forced export created one coordinated v2 set. ADR-0002 records canonical/export evidence
+and ADR-0004 records versioning evidence and hashes.
+
+Commit `a4b7d39` begins Phase 5 with a safe FFmpeg adapter that creates a new 16 kHz mono
+PCM working WAV using explicit stream/channel selection and never overwrites its
+destination. Unit tests cover command construction, downmix behavior, overwrite safety,
+and sanitized failures. A real local FFmpeg/FFprobe integration test verifies the output
+codec, rate, channel count, and source preservation. The development-VM gate passes all
+155 tests. This new slice has not yet required a separate target-WSL gate.
 
 No owner input is currently required for the initial Phase 5 design and CPU-testable
 scaffold. GPU validation will later require the owner to run the prepared WSL procedure.
