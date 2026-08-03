@@ -8,33 +8,31 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 and 1 are complete. The core Phase 2 inspection path is implemented and
-validated; lightweight audio-quality warnings are next.**
+**Phases 0 and 1 are complete. Phase 2 implementation is complete; one WSL test-summary
+confirmation remains before formal closure.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 2 by implementing the warning-only audio-quality diagnostics required by
-FR-I00–FR-I02: clipping, low level, channel-level imbalance, and high silence ratio.
-Deterministic discovery, path normalization, FFprobe inspection, source hashing,
-filename grouping, duration/sample-rate validation, audio-stream selection, stable
-speaker IDs, episode signatures, streaming channel metrics, conservative classification,
-the batch inspection service, and human/JSON `transcriber inspect` output are implemented
-and pushed. Do not add ASR, alignment, or diarization behavior in this phase.
+Resume by obtaining the omitted `make check` summary for commit `22a8d11` or later. Once
+the WSL gate confirms zero failures and no skipped FFmpeg test, record it and formally
+close Phase 2. The four warning-only diagnostics required by FR-I00–FR-I02—clipping, low
+level, channel-level imbalance, and high silence ratio—are implemented in the same
+bounded-memory analysis pass and validated end to end. Do not add ASR, alignment, or
+diarization behavior until Phase 3 planning begins.
 
-The current local quality gate passes 68 tests with one FFmpeg integration test skipped
+The current local quality gate passes 74 tests with one FFmpeg integration test skipped
 because this VM lacks FFmpeg. The target WSL workstation passed all 69 tests and the
 complete five-fixture production inspection gate at commit `1ac0f1d`. The normal and
 offline P2-03 reports were byte-for-byte identical. ADR-0003 records all classifications
 and report hashes.
 
-No owner input is currently required for implementation. ADR-0003 records the initial
-metrics, contrary P2-02 result, valid P2-03 mixed-stereo evidence, provisional thresholds,
-production validation, and mandatory future recalibration. Next, add the four
-non-destructive quality diagnostics to the same streaming inspection path, expose their
-structured warnings in both report formats, test them with synthetic fixtures, and run a
-small WSL acceptance gate before closing Phase 2.
+Owner input is needed only for the omitted WSL `make check` summary. ADR-0005 records all
+four diagnostic passes, unchanged before/after source hashes, the external report hash,
+and the limitation of synthetic mechanics fixtures. After the test summary is confirmed,
+update the Phase 2 acceptance state and prepare the Phase 3 step-by-step plan for dry-run,
+work directories, storage, and versioning.
 
 ## Completed before this session
 
