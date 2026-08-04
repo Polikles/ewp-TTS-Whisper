@@ -96,14 +96,14 @@ This supersedes the original promoted Phase 0 hash after schema-validation devel
 dependencies were added; the accepted runtime ML versions did not change. Stop if the
 current hash differs.
 
-## 3. Create a fresh venv and synchronize locked dependencies offline
+## 3. Create a fresh venv and synchronize native locked dependencies offline
 
 ```bash
 uv venv --python /usr/bin/python3 "$EWP_P9_WHEEL_VENV"
 
-uv pip sync "$EWP_P9_WHEEL_REQUIREMENTS" \
-    --python "$EWP_P9_WHEEL_VENV/bin/python" \
-    --offline --require-hashes --strict
+VIRTUAL_ENV="$EWP_P9_WHEEL_VENV" \
+    uv sync --project "$EWP_REPO" --active \
+    --locked --offline --no-dev --no-install-project
 
 uv pip install "$EWP_P9_WHEEL_PATH" \
     --python "$EWP_P9_WHEEL_VENV/bin/python" \
@@ -112,8 +112,15 @@ uv pip install "$EWP_P9_WHEEL_PATH" \
 uv pip check --python "$EWP_P9_WHEEL_VENV/bin/python"
 ```
 
-No package may be resolved or downloaded from the network. The application wheel is
-installed only after exact dependencies and cannot mutate them.
+`uv sync` must report that it is using the external venv. It consumes native `uv.lock`
+metadata, including per-package PyTorch index selection, and deliberately omits the
+source project. No package may be resolved or downloaded from the network. The
+application wheel is installed only after exact dependencies and cannot mutate them.
+
+Do not use `uv pip sync` with the exported requirements for this gate. In offline mode,
+that pip-compatible projection can lack cached simple-index resolution metadata even
+when the native lock and artifacts are present. The export remains useful as immutable
+release evidence, while native `uv sync` is authoritative for installation.
 
 ## 4. Prove wheel provenance outside the checkout
 
