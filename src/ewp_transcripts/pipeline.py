@@ -12,6 +12,7 @@ from typing import Literal
 from ewp_transcripts import __version__
 from ewp_transcripts.composition import merge_speaker_transcripts
 from ewp_transcripts.config import ApplicationConfig
+from ewp_transcripts.diarization import reconcile_diarization
 from ewp_transcripts.domain import EpisodeInspection, InspectedSource, JobReservation, WorkDirectory
 from ewp_transcripts.domain.canonical import (
     CanonicalAudioQuality,
@@ -27,8 +28,16 @@ from ewp_transcripts.domain.canonical import (
     CanonicalWarning,
 )
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus
-from ewp_transcripts.domain.errors import UnsupportedPipelineScopeError
-from ewp_transcripts.engines import AlignmentEngine, AsrEngine, EngineModelInfo
+from ewp_transcripts.domain.errors import (
+    TranscriptNormalizationError,
+    UnsupportedPipelineScopeError,
+)
+from ewp_transcripts.engines import (
+    AlignmentEngine,
+    AsrEngine,
+    DiarizationEngine,
+    EngineModelInfo,
+)
 from ewp_transcripts.media import prepare_working_audio
 from ewp_transcripts.normalization import NormalizedTranscript, normalize_single_speaker
 from ewp_transcripts.streams import SpeakerStream, plan_speaker_streams
@@ -48,6 +57,142 @@ class ProcessedSpeakerStream:
     asr_model: EngineModelInfo
     alignment_model: EngineModelInfo
     stages: tuple[CanonicalStage, ...]
+
+
+def run_diarization_pipeline(
+    inspection: EpisodeInspection,
+    reservation: JobReservation,
+    workspace: WorkDirectory,
+    *,
+    config: ApplicationConfig,
+    environment: CanonicalEnvironment,
+    asr_engine: AsrEngine,
+    alignment_engine: AlignmentEngine,
+    diarization_engine: DiarizationEngine,
+    audio_preparer: AudioPreparer = prepare_working_audio,
+    clock: Clock = time.perf_counter,
+    now: Now = lambda: datetime.now(UTC),
+) -> CanonicalResult:
+    """Run ASR, alignment, and diarization for one mixed-speaker source."""
+
+    source = _validate_diarization_scope(inspection, reservation, workspace, config)
+    state = reservation.state
+    outputs = reservation.plan.outputs
+    assert state is not None and outputs is not None
+    stages: list[CanonicalStage] = []
+    working_audio = workspace.path / "source_001-working.wav"
+    channel_index = (
+        None
+        if source.channel_classification.processing_mode is ChannelMode.MIXED_STEREO
+        else source.channel_classification.selected_channel_index
+    )
+    start = clock()
+    audio_preparer(
+        source.fingerprint.path,
+        working_audio,
+        stream_index=source.stream.index,
+        channel_index=channel_index,
+    )
+    stages.append(_completed_stage("prepare_audio", start, clock))
+
+    asr_info = asr_engine.model_info
+    start = clock()
+    try:
+        draft = asr_engine.transcribe(
+            working_audio,
+            language=config.general.language.value,
+            batch_size=config.models.batch_size,
+        )
+    finally:
+        asr_engine.close()
+    stages.append(_completed_stage("transcribe", start, clock))
+
+    alignment_info = alignment_engine.model_info
+    start = clock()
+    try:
+        aligned = alignment_engine.align(working_audio, draft, language=draft.language)
+    finally:
+        alignment_engine.close()
+    stages.append(_completed_stage("align", start, clock))
+
+    start = clock()
+    normalized = normalize_single_speaker(
+        aligned,
+        speaker_id="speaker_001",
+        source_id="source_001",
+    )
+    stages.append(_completed_stage("normalize", start, clock))
+
+    diarization_info = diarization_engine.model_info
+    requested_speakers = config.diarization.speaker_count
+    start = clock()
+    try:
+        diarization = diarization_engine.diarize(
+            working_audio,
+            speaker_count=(requested_speakers if isinstance(requested_speakers, int) else None),
+        )
+    finally:
+        diarization_engine.close()
+    stages.append(_completed_stage("diarize", start, clock))
+
+    start = clock()
+    reconciled = reconcile_diarization(
+        normalized.transcript,
+        diarization,
+        source_id="source_001",
+        use_exclusive_for_words=config.diarization.use_exclusive_for_word_assignment,
+    )
+    stages.append(_completed_stage("reconcile_speakers", start, clock))
+    if not reconciled.speakers:
+        raise TranscriptNormalizationError("Diarization returned no speakers")
+
+    return CanonicalResult(
+        schema_version="1.0",
+        application_version=__version__,
+        run_id=state.run_id,
+        job_id=inspection.job_id,
+        status="completed",
+        created_at=state.created_at,
+        completed_at=now(),
+        result_version=outputs.result_version,
+        episode=CanonicalEpisode(
+            episode_id=inspection.job_id,
+            episode_signature_sha256=inspection.episode_signature_sha256,
+            source_topology="single_file",
+            language=config.general.language.value,
+            detected_language=reconciled.transcript.language,
+        ),
+        sources=(_canonical_source(source, channel_selection=channel_index),),
+        speakers=tuple(
+            CanonicalSpeaker(
+                speaker_id=speaker.speaker_id,
+                speaker_label=speaker.speaker_label,
+                speaker_source="diarization",
+                first_seen_ms=speaker.first_seen_ms,
+                source_ids=("source_001",),
+            )
+            for speaker in reconciled.speakers
+        ),
+        processing=CanonicalProcessing(
+            preset=config.general.preset,
+            effective_config=config.model_dump(mode="json"),
+            environment=environment,
+            models=(
+                _model_reference(asr_info),
+                _model_reference(alignment_info),
+                _model_reference(diarization_info),
+            ),
+            channel_analysis=_channel_analysis(source, config),
+            audio_quality=_audio_quality(source),
+            stages=tuple(stages),
+        ),
+        transcript=reconciled.transcript,
+        warnings=(
+            *_inspection_warnings(inspection),
+            *normalized.warnings,
+            *reconciled.warnings,
+        ),
+    )
 
 
 def run_source_speaker_pipeline(
@@ -341,6 +486,31 @@ def _validate_scope(
     }:
         raise UnsupportedPipelineScopeError(
             "Single-speaker pipeline supports mono or one selected working channel"
+        )
+    _validate_job_identity(inspection, reservation, workspace)
+    return source
+
+
+def _validate_diarization_scope(
+    inspection: EpisodeInspection,
+    reservation: JobReservation,
+    workspace: WorkDirectory,
+    config: ApplicationConfig,
+) -> InspectedSource:
+    if len(inspection.sources) != 1:
+        raise UnsupportedPipelineScopeError("Diarization pipeline requires exactly one source")
+    if config.diarization.speaker_count == 1:
+        raise UnsupportedPipelineScopeError(
+            "Diarization pipeline requires automatic or multi-speaker count"
+        )
+    source = inspection.sources[0]
+    if source.channel_classification.processing_mode not in {
+        ChannelMode.MONO,
+        ChannelMode.DUAL_MONO,
+        ChannelMode.MIXED_STEREO,
+    }:
+        raise UnsupportedPipelineScopeError(
+            "Diarization pipeline supports mono, dual mono, or mixed stereo"
         )
     _validate_job_identity(inspection, reservation, workspace)
     return source

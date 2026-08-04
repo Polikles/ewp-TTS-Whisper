@@ -28,12 +28,15 @@ from ewp_transcripts.engines import (
     AlignedSegment,
     AlignedTranscript,
     AlignedWord,
+    DiarizationResult,
+    DiarizationTurn,
     EngineModelInfo,
     TranscriptionDraft,
     TranscriptionSegment,
 )
 from ewp_transcripts.pipeline import (
     process_speaker_stream,
+    run_diarization_pipeline,
     run_single_speaker_pipeline,
     run_source_speaker_pipeline,
 )
@@ -101,6 +104,31 @@ class FakeAlignment:
         self.events.append("align:close")
 
 
+class FakeDiarization:
+    model_info = EngineModelInfo(
+        role="diarization", name="community-1", revision="diarization-revision"
+    )
+
+    def __init__(self, events: list[str]) -> None:
+        self.events = events
+
+    def diarize(self, audio_path: Path, *, speaker_count: int | None) -> DiarizationResult:
+        self.events.append(f"diarize:{audio_path.name}:{speaker_count}")
+        return DiarizationResult(
+            turns=(
+                DiarizationTurn(start_ms=0, end_ms=500, speaker_label="A"),
+                DiarizationTurn(start_ms=350, end_ms=1000, speaker_label="B"),
+            ),
+            exclusive_turns=(
+                DiarizationTurn(start_ms=0, end_ms=450, speaker_label="A"),
+                DiarizationTurn(start_ms=450, end_ms=1000, speaker_label="B"),
+            ),
+        )
+
+    def close(self) -> None:
+        self.events.append("diarize:close")
+
+
 def test_fake_pipeline_builds_schema_valid_completed_result(tmp_path: Path) -> None:
     inspection, reservation, workspace = _job(tmp_path)
     events: list[str] = []
@@ -141,6 +169,76 @@ def test_fake_pipeline_builds_schema_valid_completed_result(tmp_path: Path) -> N
         "asr:close",
         "align:source_001-working.wav:pl:1",
         "align:close",
+    ]
+
+
+def test_diarization_pipeline_builds_schema_valid_overlapping_result(tmp_path: Path) -> None:
+    inspection, reservation, workspace = _job(tmp_path)
+    source = inspection.sources[0].model_copy(
+        update={
+            "stream": inspection.sources[0].stream.model_copy(update={"channels": 2}),
+            "channel_mode": ChannelMode.MIXED_STEREO,
+            "channel_classification": ChannelClassification(
+                original_channels=2,
+                detected_mode=ChannelMode.MIXED_STEREO,
+                processing_mode=ChannelMode.MIXED_STEREO,
+            ),
+        }
+    )
+    inspection = inspection.model_copy(update={"sources": (source,)})
+    events: list[str] = []
+
+    def prepare(source_path: Path, destination: Path, **kwargs: object) -> Path:
+        events.append(f"prepare:{kwargs['channel_index']}")
+        destination.write_bytes(b"working audio")
+        return destination
+
+    result = run_diarization_pipeline(
+        inspection,
+        reservation,
+        workspace,
+        config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=2)),
+        environment=_environment(),
+        asr_engine=FakeAsr(events),
+        alignment_engine=FakeAlignment(events),
+        diarization_engine=FakeDiarization(events),
+        audio_preparer=prepare,
+        now=lambda: COMPLETED_AT,
+    )
+
+    _assert_schema_valid(result.model_dump(mode="json"))
+    assert result.episode.source_topology == "single_file"
+    assert result.sources[0].channel_selection == "all"
+    assert result.sources[0].speaker_id is None
+    assert [speaker.speaker_source for speaker in result.speakers] == [
+        "diarization",
+        "diarization",
+    ]
+    segment = result.transcript.segments[0]
+    assert [word.speaker_id for word in segment.words] == ["speaker_001", "speaker_002"]
+    assert segment.overlap is True
+    assert segment.active_speaker_ids == ("speaker_001", "speaker_002")
+    assert [model.role for model in result.processing.models] == [
+        "asr",
+        "alignment",
+        "diarization",
+    ]
+    assert [stage.name for stage in result.processing.stages] == [
+        "prepare_audio",
+        "transcribe",
+        "align",
+        "normalize",
+        "diarize",
+        "reconcile_speakers",
+    ]
+    assert events == [
+        "prepare:None",
+        "asr:source_001-working.wav:pl:4",
+        "asr:close",
+        "align:source_001-working.wav:pl:1",
+        "align:close",
+        "diarize:source_001-working.wav:2",
+        "diarize:close",
     ]
 
 
