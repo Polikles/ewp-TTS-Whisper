@@ -40,6 +40,9 @@ Repository state at this checkpoint:
   subtitle chunks across overlapping speaker segments; `33060f6` globally orders cue
   candidates before applying on-change labels, and the runbook now resumes through
   model-free export recovery;
+- target recovery has passed for both topologies with 18 segments and 314 words each;
+  the pre-fix processes retained their owned workdirs as designed, so the runbook now
+  includes marker-verified cleanup before final evidence collection;
 - `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
 
 The next owner input is execution output from the Phase 7 WSL runbook. No new recording

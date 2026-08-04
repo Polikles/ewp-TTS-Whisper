@@ -167,7 +167,9 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 
 Both jobs must report the canonical `RESULT` as `SKIP`/`SKIPPED` and the three missing
 exports as `WROTE`, without model-loading logs. This demonstrates the canonical-first
-publication boundary and model-free export recovery. Continue with section 5 afterward.
+publication boundary and model-free export recovery. Batch output summarizes the grouped
+job but does not list its individually recovered exports; section 5 verifies those files.
+Continue with section 5 afterward.
 
 ## 5. Validate canonical results and labelled exports
 
@@ -257,6 +259,45 @@ test -z "$(find "$EWP_P7_SPLIT/work" "$EWP_P7_GROUP/work" \
 
 Both canonical results and all six exports must report `SKIP`, without model-loading
 logs. No job workdir may remain.
+
+If this sandbox experienced the pre-fix export failure, the original processes correctly
+retained their marker-owned workdirs for diagnostics. Duplicate recovery does not own and
+therefore does not remove those older directories. Clean only the two workdirs identified
+by their published canonical results:
+
+```bash
+uv run --locked python - "$EWP_P7_ROOT" <<'PY'
+import sys
+from pathlib import Path
+
+from ewp_transcripts.domain import WorkDirectory, load_canonical_result
+from ewp_transcripts.workdirs import MARKER_FILENAME, cleanup_work_directory
+
+root = Path(sys.argv[1])
+cases = (
+    (root / "split/work", root / "split/output/p2-01-split-speakers_results.json"),
+    (root / "group/work", root / "group/output/p7-group_results.json"),
+)
+for work_root, result_path in cases:
+    result = load_canonical_result(result_path)
+    path = work_root / str(result.run_id) / result.job_id
+    cleanup_work_directory(
+        WorkDirectory(
+            work_root=work_root,
+            run_id=result.run_id,
+            job_id=result.job_id,
+            path=path,
+            marker_path=path / MARKER_FILENAME,
+        )
+    )
+    print(f"cleaned retained workdir: {result.job_id}")
+print("retained Phase 7 workdir cleanup: PASS")
+PY
+
+test -z "$(find "$EWP_P7_SPLIT/work" "$EWP_P7_GROUP/work" \
+    -mindepth 2 -maxdepth 2 -type d -print)" \
+    && echo "Phase 7 workdir cleanup: PASS"
+```
 
 ## 7. Record evidence
 
