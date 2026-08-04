@@ -12,12 +12,18 @@ from uuid import UUID, uuid4
 
 from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig, load_config
-from ewp_transcripts.discovery import discover_input, group_discovered_files
+from ewp_transcripts.discovery import (
+    discover_explicit_group,
+    discover_input,
+    group_discovered_files,
+    group_explicit_files,
+)
 from ewp_transcripts.doctor import run_doctor
 from ewp_transcripts.domain import (
     DiscoveryResult,
     DoctorResult,
     DryRunResult,
+    EpisodeCandidate,
     EpisodeInspection,
     InspectionResult,
     JobReservation,
@@ -176,16 +182,33 @@ def inspect_input(
     *,
     config: ApplicationConfig | None = None,
     allow_duration_mismatch: bool = False,
+    explicit_group_paths: tuple[Path, ...] | None = None,
+    explicit_group_id: str | None = None,
 ) -> InspectionResult:
     """Discover, group, probe, and classify input without loading ML models."""
 
     effective_config = load_config() if config is None else config
-    discovery = discover(input_path, config=effective_config)
-    episodes = group_discovered_files(
-        discovery.files,
-        separator=effective_config.grouping.speaker_suffix_separator,
-        speaker_count=effective_config.diarization.speaker_count,
-    )
+    episodes: tuple[EpisodeCandidate, ...]
+    if explicit_group_paths is not None:
+        if explicit_group_id is None:
+            raise UnsupportedPipelineScopeError("An explicit group requires a group ID")
+        discovery = discover_explicit_group(explicit_group_paths)
+        episodes = (
+            group_explicit_files(
+                discovery.files,
+                job_id=explicit_group_id,
+                separator=effective_config.grouping.speaker_suffix_separator,
+            ),
+        )
+    else:
+        if explicit_group_id is not None:
+            raise UnsupportedPipelineScopeError("A group ID requires explicit group sources")
+        discovery = discover(input_path, config=effective_config)
+        episodes = group_discovered_files(
+            discovery.files,
+            separator=effective_config.grouping.speaker_suffix_separator,
+            speaker_count=effective_config.diarization.speaker_count,
+        )
     inspections = tuple(
         inspect_episode(
             episode,
@@ -208,6 +231,8 @@ def dry_run(
     output_directory: Path | None = None,
     force: bool = False,
     allow_duration_mismatch: bool = False,
+    explicit_group_paths: tuple[Path, ...] | None = None,
+    explicit_group_id: str | None = None,
 ) -> DryRunResult:
     """Build a complete batch execution plan without creating outputs or workdirs."""
 
@@ -216,6 +241,8 @@ def dry_run(
         input_path,
         config=effective_config,
         allow_duration_mismatch=allow_duration_mismatch,
+        explicit_group_paths=explicit_group_paths,
+        explicit_group_id=explicit_group_id,
     )
     destination = resolve_output_directory(
         inspection.discovery,
@@ -254,12 +281,16 @@ def transcribe_one(
     diarization_factory: DiarizationFactory | None = None,
     speaker_label: str | None = None,
     speaker_map: dict[str, str] | None = None,
+    explicit_group_paths: tuple[Path, ...] | None = None,
+    explicit_group_id: str | None = None,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
     inspected = inspect_input(
         input_path,
         config=config,
         allow_duration_mismatch=allow_duration_mismatch,
+        explicit_group_paths=explicit_group_paths,
+        explicit_group_id=explicit_group_id,
     )
     inspected = apply_explicit_speaker_labels(
         inspected,

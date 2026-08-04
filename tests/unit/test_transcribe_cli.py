@@ -32,6 +32,8 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
         allow_duration_mismatch,
         speaker_label,
         speaker_map,
+        explicit_group_paths,
+        explicit_group_id,
     ):
         observed.update(
             input_path=input_path,
@@ -41,6 +43,8 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
             allow_duration_mismatch=allow_duration_mismatch,
             speaker_label=speaker_label,
             speaker_map=speaker_map,
+            explicit_group_paths=explicit_group_paths,
+            explicit_group_id=explicit_group_id,
         )
         return TranscriptionOutcome(
             decision=PlanDecision.PROCESS,
@@ -65,6 +69,8 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
         "allow_duration_mismatch": False,
         "speaker_label": None,
         "speaker_map": {},
+        "explicit_group_paths": None,
+        "explicit_group_id": None,
     }
 
 
@@ -94,6 +100,58 @@ def test_transcribe_cli_passes_explicit_speaker_label_and_map(
     assert label.exit_code == 0
     assert mapping.exit_code == 0
     assert observed == [("Damian", {}), (None, {"episode.wav": "Szymon"})]
+
+
+def test_transcribe_cli_passes_explicit_group_and_required_id(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first = tmp_path / "left.wav"
+    second = tmp_path / "right.wav"
+    first.write_bytes(b"left")
+    second.write_bytes(b"right")
+    observed: dict[str, object] = {}
+
+    def run(input_path, **kwargs):
+        observed.update(input_path=input_path, **kwargs)
+        return TranscriptionOutcome(
+            decision=PlanDecision.PROCESS,
+            job_id="episode-safe",
+            result_path=tmp_path / "episode-safe_results.json",
+        )
+
+    monkeypatch.setattr(cli, "transcribe_one", run)
+
+    outcome = CliRunner().invoke(
+        app,
+        [
+            "transcribe",
+            "--group",
+            str(first),
+            "--group",
+            str(second),
+            "--group-id",
+            "episode-safe",
+        ],
+    )
+
+    assert outcome.exit_code == 0
+    assert observed["input_path"] == first
+    assert observed["explicit_group_paths"] == (first, second)
+    assert observed["explicit_group_id"] == "episode-safe"
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["--group", "first.wav", "--group", "second.wav"],
+        ["input.wav", "--group-id", "episode"],
+        ["input.wav", "--group", "first.wav", "--group", "second.wav", "--group-id", "x"],
+    ],
+)
+def test_transcribe_cli_rejects_incomplete_or_conflicting_group(arguments: list[str]) -> None:
+    outcome = CliRunner().invoke(app, ["transcribe", *arguments])
+
+    assert outcome.exit_code == 2
 
 
 @pytest.mark.parametrize("value", ["episode.wav", "=Damian", "episode.wav="])

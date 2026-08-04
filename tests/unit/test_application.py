@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ewp_transcripts.application import inspect_input
 from ewp_transcripts.config import ApplicationConfig, ChannelsConfig, GroupingConfig
-from ewp_transcripts.domain import AudioStream, ChannelMetrics, MediaProbeResult
+from ewp_transcripts.domain import AudioStream, ChannelMetrics, EpisodeInspection, MediaProbeResult
 from ewp_transcripts.domain.enums import ChannelMode
 
 
@@ -77,3 +77,37 @@ def test_inspect_input_composes_discovery_grouping_and_inspection(
     assert all(
         source.channel_mode is ChannelMode.DUAL_MONO for source in result.episodes[0].sources
     )
+
+
+def test_inspect_input_explicit_group_overrides_unrelated_filenames(
+    tmp_path: Path, monkeypatch
+) -> None:
+    first = tmp_path / "unrelated-Ada.wav"
+    second = tmp_path / "different-Jan.wav"
+    first.write_bytes(b"ada")
+    second.write_bytes(b"jan")
+    captured = []
+
+    def inspect_stub(episode, **kwargs):
+        captured.append(episode)
+        return EpisodeInspection.model_construct(
+            job_id=episode.job_id,
+            episode_signature_sha256="a" * 64,
+            duration_ms=1000,
+            sample_rate_hz=48000,
+            sources=(),
+            warnings=(),
+        )
+
+    monkeypatch.setattr("ewp_transcripts.application.inspect_episode", inspect_stub)
+
+    result = inspect_input(
+        first,
+        config=ApplicationConfig(),
+        explicit_group_paths=(first, second),
+        explicit_group_id="safe-episode",
+    )
+
+    assert result.discovery.input_path == first
+    assert [episode.job_id for episode in captured] == ["safe-episode"]
+    assert [source.speaker_label for source in captured[0].sources] == ["Ada", "Jan"]

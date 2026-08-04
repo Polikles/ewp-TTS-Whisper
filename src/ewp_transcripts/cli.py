@@ -224,6 +224,27 @@ def _expected_error(error: ApplicationError) -> None:
     raise typer.Exit(code=4) from error
 
 
+def _input_selection(
+    input_path: Path | None,
+    group_paths: list[Path] | None,
+    group_id: str | None,
+) -> tuple[Path, tuple[Path, ...] | None, str | None]:
+    explicit = tuple(group_paths or ())
+    if explicit:
+        if input_path is not None:
+            raise typer.BadParameter("INPUT cannot be combined with --group")
+        if len(explicit) < 2:
+            raise typer.BadParameter("--group must be repeated for at least two files")
+        if group_id is None or not group_id.strip():
+            raise typer.BadParameter("--group-id is required with --group")
+        return explicit[0], explicit, group_id.strip()
+    if group_id is not None:
+        raise typer.BadParameter("--group-id requires --group")
+    if input_path is None:
+        raise typer.BadParameter("provide INPUT or an explicit --group")
+    return input_path, None, None
+
+
 @app.command("clean")
 def clean_command(
     target: Annotated[
@@ -277,9 +298,17 @@ def clean_command(
 @app.command("inspect")
 def inspect_command(
     input_path: Annotated[
-        Path,
+        Path | None,
         typer.Argument(help="Audio file or directory to inspect.", metavar="INPUT"),
-    ],
+    ] = None,
+    group_paths: Annotated[
+        list[Path] | None,
+        typer.Option("--group", help="Explicit source file; repeat for each group member."),
+    ] = None,
+    group_id: Annotated[
+        str | None,
+        typer.Option("--group-id", help="Collision-safe output identity for an explicit group."),
+    ] = None,
     recursive: Annotated[
         bool | None,
         typer.Option("--recursive", help="Inspect supported files in subdirectories."),
@@ -315,6 +344,9 @@ def inspect_command(
     """Inspect and classify audio without loading transcription models."""
 
     try:
+        selected_input, explicit_group_paths, explicit_group_id = _input_selection(
+            input_path, group_paths, group_id
+        )
         parsed_speaker_count = _speaker_count(speaker_count)
         config = load_config(
             explicit_path=config_path,
@@ -326,9 +358,11 @@ def inspect_command(
             ),
         )
         result = inspect_input(
-            input_path,
+            selected_input,
             config=config,
             allow_duration_mismatch=allow_duration_mismatch,
+            explicit_group_paths=explicit_group_paths,
+            explicit_group_id=explicit_group_id,
         )
     except ApplicationError as error:
         _expected_error(error)
@@ -374,9 +408,17 @@ def _planned_paths(job: JobOutputPlan) -> tuple[Path, ...]:
 @app.command("dry-run")
 def dry_run_command(
     input_path: Annotated[
-        Path,
+        Path | None,
         typer.Argument(help="Audio file or directory to plan.", metavar="INPUT"),
-    ],
+    ] = None,
+    group_paths: Annotated[
+        list[Path] | None,
+        typer.Option("--group", help="Explicit source file; repeat for each group member."),
+    ] = None,
+    group_id: Annotated[
+        str | None,
+        typer.Option("--group-id", help="Collision-safe output identity for an explicit group."),
+    ] = None,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Plan final outputs in this directory."),
@@ -423,6 +465,9 @@ def dry_run_command(
     """Plan a run without creating outputs, workdirs, or loading models."""
 
     try:
+        selected_input, explicit_group_paths, explicit_group_id = _input_selection(
+            input_path, group_paths, group_id
+        )
         parsed_speaker_count = _speaker_count(speaker_count)
         config = load_config(
             explicit_path=config_path,
@@ -434,11 +479,13 @@ def dry_run_command(
             ),
         )
         result = dry_run(
-            input_path,
+            selected_input,
             config=config,
             output_directory=output_directory,
             force=force,
             allow_duration_mismatch=allow_duration_mismatch,
+            explicit_group_paths=explicit_group_paths,
+            explicit_group_id=explicit_group_id,
         )
     except ApplicationError as error:
         _expected_error(error)
@@ -549,9 +596,17 @@ def export_command(
 @app.command("transcribe")
 def transcribe_command(
     input_path: Annotated[
-        Path,
-        typer.Argument(help="One audio file to transcribe.", metavar="INPUT"),
-    ],
+        Path | None,
+        typer.Argument(help="Audio file or directory to transcribe.", metavar="INPUT"),
+    ] = None,
+    group_paths: Annotated[
+        list[Path] | None,
+        typer.Option("--group", help="Explicit source file; repeat for each group member."),
+    ] = None,
+    group_id: Annotated[
+        str | None,
+        typer.Option("--group-id", help="Collision-safe output identity for an explicit group."),
+    ] = None,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Write results and exports to this directory."),
@@ -625,18 +680,21 @@ def transcribe_command(
     """Transcribe audio with pinned local models."""
 
     try:
+        selected_input, explicit_group_paths, explicit_group_id = _input_selection(
+            input_path, group_paths, group_id
+        )
         parsed_speaker_count = _speaker_count(speaker_count)
         parsed_speaker_map = _speaker_mapping(speaker_maps)
         if speaker is not None and not speaker.strip():
             raise typer.BadParameter("speaker label must not be empty")
-        if speaker is not None and input_path.is_dir():
+        if speaker is not None and (selected_input.is_dir() or explicit_group_paths is not None):
             raise typer.BadParameter("--speaker requires one input file")
         if speaker is not None and parsed_speaker_count not in {None, 1}:
             raise typer.BadParameter("--speaker requires --speaker-count 1")
         config = load_config(
             explicit_path=config_path,
             cli_overrides=_transcribe_overrides(
-                recursive=bool(recursive) if input_path.is_dir() else False,
+                recursive=bool(recursive) if selected_input.is_dir() else False,
                 language=language,
                 channel_mode=channel_mode,
                 speaker_count=1 if parsed_speaker_count is None else parsed_speaker_count,
@@ -647,9 +705,9 @@ def transcribe_command(
                 non_interactive=non_interactive,
             ),
         )
-        if input_path.is_dir():
+        if selected_input.is_dir() and explicit_group_paths is None:
             batch = transcribe_batch(
-                input_path,
+                selected_input,
                 config=config,
                 output_directory=output_directory,
                 force=force,
@@ -658,18 +716,20 @@ def transcribe_command(
             )
         else:
             outcome = transcribe_one(
-                input_path,
+                selected_input,
                 config=config,
                 output_directory=output_directory,
                 force=force,
                 allow_duration_mismatch=allow_duration_mismatch,
                 speaker_label=speaker.strip() if speaker is not None else None,
                 speaker_map=parsed_speaker_map,
+                explicit_group_paths=explicit_group_paths,
+                explicit_group_id=explicit_group_id,
             )
     except ApplicationError as error:
         _expected_error(error)
 
-    if input_path.is_dir():
+    if selected_input.is_dir() and explicit_group_paths is None:
         _print_batch_outcome(batch)
     else:
         _print_transcription_outcome(outcome)

@@ -125,15 +125,25 @@ participate in the episode signature.
 
 ## 6. Explicit file group
 
-Recommended contract:
+Contract:
 
 ```text
-transcriber transcribe --group FILE1 FILE2 [FILE3 ...]
+transcriber transcribe \
+    --group FILE1 \
+    --group FILE2 \
+    [--group FILE3 ...] \
+    --group-id JOB_ID
 ```
 
-`--group` creates exactly one job. Speaker labels may come from suffixes or `--speaker-map`.
+`--group` is repeatable and creates exactly one job from at least two regular files.
+`--group-id` is mandatory and supplies the collision-safe output identity; it is never
+guessed from unrelated filenames. A positional `INPUT` cannot be combined with
+`--group`. Speaker labels may come from each filename's final suffix or
+`--speaker-map`.
 
-An implementation may alternatively support a manifest, but the syntax choice must not change domain rules.
+`inspect` and `dry-run` accept the same explicit-group options. Without `--output-dir`,
+outputs are written beside the first listed source. Explicit source order is preserved
+in identity and provenance.
 
 ## 7. `export`
 

@@ -131,6 +131,33 @@ def discover_input(
     )
 
 
+def discover_explicit_group(
+    supplied_paths: Iterable[str | Path],
+    *,
+    cwd: Path | None = None,
+) -> DiscoveryResult:
+    """Discover an ordered, explicitly supplied set of regular source files."""
+
+    paths = tuple(normalize_input_path(path, cwd=cwd) for path in supplied_paths)
+    if len(paths) < 2:
+        raise UnsupportedInputError("An explicit group requires at least two source files")
+    if len(set(paths)) != len(paths):
+        raise AmbiguousGroupError("An explicit group must not repeat a source path")
+    for path in paths:
+        if path.is_symlink():
+            raise SymlinkInputError(f"Explicit group source must not be a symbolic link: {path}")
+        if not path.exists():
+            raise InputNotFoundError(f"Explicit group source does not exist: {path}")
+        if not path.is_file():
+            raise UnsupportedInputError(f"Explicit group source must be a regular file: {path}")
+    return DiscoveryResult(
+        input_path=paths[0],
+        recursive=False,
+        files=tuple(_candidate(path) for path in paths),
+        skipped=(),
+    )
+
+
 def fingerprint_file(path: Path, *, chunk_size: int = 1024 * 1024) -> SourceFingerprint:
     """Calculate a streaming SHA-256 identity for one regular, non-symlink file."""
 
@@ -160,11 +187,16 @@ def _speaker_suffix(stem: str, separator: str) -> tuple[str, str] | None:
     return base, label
 
 
-def _grouped_source(file: DiscoveredFile, speaker_label: str | None) -> GroupedSource:
+def _grouped_source(
+    file: DiscoveredFile,
+    speaker_label: str | None,
+    *,
+    speaker_source: Literal["filename", "default"] | None = None,
+) -> GroupedSource:
     return GroupedSource(
         fingerprint=fingerprint_file(file.path),
         speaker_label=speaker_label,
-        speaker_source="filename" if speaker_label else "default",
+        speaker_source=speaker_source or ("filename" if speaker_label else "default"),
     )
 
 
@@ -224,3 +256,40 @@ def group_discovered_files(
 
     episodes.sort(key=lambda episode: natural_path_key(Path(episode.job_id)))
     return tuple(episodes)
+
+
+def group_explicit_files(
+    files: Iterable[DiscoveredFile],
+    *,
+    job_id: str,
+    separator: str = "-",
+) -> EpisodeCandidate:
+    """Create exactly one ordered episode from an explicitly supplied file set."""
+
+    if not job_id or job_id in {".", ".."} or Path(job_id).name != job_id or "\x00" in job_id:
+        raise AmbiguousGroupError(f"Explicit group ID is unsafe: {job_id!r}")
+    ordered = tuple(files)
+    if len(ordered) < 2:
+        raise UnsupportedInputError("An explicit group requires at least two source files")
+
+    parsed_labels = [
+        parsed[1] if (parsed := _speaker_suffix(file.path.stem, separator)) else None
+        for file in ordered
+    ]
+    filename_labels = {
+        unicodedata.normalize("NFC", label).casefold()
+        for label in parsed_labels
+        if label is not None
+    }
+    if len(filename_labels) != sum(label is not None for label in parsed_labels):
+        raise AmbiguousGroupError(f"Duplicate speaker label in explicit group: {job_id}")
+
+    sources = tuple(
+        _grouped_source(
+            file,
+            label or f"Speaker{index}",
+            speaker_source="filename" if label else "default",
+        )
+        for index, (file, label) in enumerate(zip(ordered, parsed_labels, strict=True), start=1)
+    )
+    return EpisodeCandidate(job_id=job_id, sources=sources)

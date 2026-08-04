@@ -28,6 +28,11 @@ rule but which the user knows share one episode timeline. Files such as
 form an automatic group. An explicit group still undergoes sample-rate, duration,
 decodability, speaker-assignment, and channel validation.
 
+The caller must provide a safe `group_id`; the application does not derive an output
+identity from unrelated filenames. At least two `--group` values are required, the same
+path cannot be repeated, and symbolic links remain forbidden. Unless an output directory
+is explicit, the first listed source determines the destination directory.
+
 ## 2. Supported formats
 
 Official MVP test matrix:

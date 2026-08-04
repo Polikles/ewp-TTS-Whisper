@@ -5,7 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from ewp_transcripts.discovery import discover_input, fingerprint_file, group_discovered_files
+from ewp_transcripts.discovery import (
+    discover_explicit_group,
+    discover_input,
+    fingerprint_file,
+    group_discovered_files,
+    group_explicit_files,
+)
 from ewp_transcripts.domain import DiscoveredFile
 from ewp_transcripts.domain.errors import AmbiguousGroupError
 
@@ -82,3 +88,44 @@ def test_duplicate_speaker_labels_are_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(AmbiguousGroupError, match="Duplicate speaker"):
         group_discovered_files(_files(tmp_path))
+
+
+def test_explicit_group_preserves_order_and_forces_one_job(tmp_path: Path) -> None:
+    first = _touch(tmp_path, "unrelated-Damian.wav")
+    second = _touch(tmp_path, "different-Szymon.wav")
+
+    discovery = discover_explicit_group((second, first))
+    episode = group_explicit_files(discovery.files, job_id="S01E01")
+
+    assert discovery.input_path == second
+    assert episode.job_id == "S01E01"
+    assert [source.fingerprint.path for source in episode.sources] == [second, first]
+    assert [source.speaker_label for source in episode.sources] == ["Szymon", "Damian"]
+
+
+def test_explicit_group_assigns_defaults_without_filename_suffixes(tmp_path: Path) -> None:
+    first = _touch(tmp_path, "left.wav")
+    second = _touch(tmp_path, "right.wav")
+
+    discovery = discover_explicit_group((first, second))
+    episode = group_explicit_files(discovery.files, job_id="episode")
+
+    assert [source.speaker_label for source in episode.sources] == ["Speaker1", "Speaker2"]
+    assert [source.speaker_source for source in episode.sources] == ["default", "default"]
+
+
+@pytest.mark.parametrize("job_id", ["", ".", "..", "../escape", "dir/escape"])
+def test_explicit_group_rejects_unsafe_job_id(tmp_path: Path, job_id: str) -> None:
+    first = _touch(tmp_path, "left.wav")
+    second = _touch(tmp_path, "right.wav")
+    discovery = discover_explicit_group((first, second))
+
+    with pytest.raises(AmbiguousGroupError, match="group ID is unsafe"):
+        group_explicit_files(discovery.files, job_id=job_id)
+
+
+def test_explicit_group_rejects_repeated_source(tmp_path: Path) -> None:
+    source = _touch(tmp_path, "source.wav")
+
+    with pytest.raises(AmbiguousGroupError, match="repeat"):
+        discover_explicit_group((source, source))
