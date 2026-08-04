@@ -101,6 +101,9 @@ Validate the final lightweight CUDA and pinned-model readiness diagnostics using
 Prepare the language-specific offline snapshot for `en` and `auto` using
 [`PREPARE_ENGLISH_ALIGNMENT.md`](PREPARE_ENGLISH_ALIGNMENT.md).
 
+Validate caller-forced multi-file grouping with a mandatory collision-safe job identity
+using [`RUN_RELEASE_EXPLICIT_GROUP.md`](RUN_RELEASE_EXPLICIT_GROUP.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
