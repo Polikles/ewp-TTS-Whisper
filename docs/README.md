@@ -37,6 +37,7 @@
 - [ADR-0008: Mixed-source speaker diarization](adr/0008-mixed-source-diarization.md)
 - [ADR-0009: Long-duration operational baseline](adr/0009-long-duration-operational-baseline.md)
 - [ADR-0010: Isolated wheel installation procedure](adr/0010-isolated-wheel-installation.md)
+- [ADR-0011: Language-specific offline alignment selection](adr/0011-multilingual-alignment-selection.md)
 
 ## Implementation guidance
 
