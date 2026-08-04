@@ -36,6 +36,7 @@
 - [ADR-0007: Accurate-preset ASR model selection](adr/0007-accurate-preset-asr-model.md)
 - [ADR-0008: Mixed-source speaker diarization](adr/0008-mixed-source-diarization.md)
 - [ADR-0009: Long-duration operational baseline](adr/0009-long-duration-operational-baseline.md)
+- [ADR-0010: Isolated wheel installation procedure](adr/0010-isolated-wheel-installation.md)
 
 ## Implementation guidance
 
