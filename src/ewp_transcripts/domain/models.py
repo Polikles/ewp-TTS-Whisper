@@ -114,6 +114,7 @@ class GroupedSource(BaseModel):
 
     fingerprint: SourceFingerprint
     speaker_label: str | None = None
+    speaker_source: Literal["explicit", "filename", "channel_metadata", "default"] = "default"
 
 
 class EpisodeCandidate(BaseModel):
@@ -186,6 +187,7 @@ class InspectedSource(BaseModel):
     channel_classification: ChannelClassification
     speaker_id: str = Field(pattern=r"^speaker_[0-9]{3,}$")
     speaker_label: str | None = None
+    speaker_source: Literal["explicit", "filename", "channel_metadata", "default"] = "default"
 
 
 class EpisodeInspection(BaseModel):

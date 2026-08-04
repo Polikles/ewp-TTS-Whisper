@@ -31,7 +31,7 @@ from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAs
 
 # Re-exported here to keep user interfaces on the application boundary.
 from ewp_transcripts.export_service import ExportFormat, ExportOutcome, export_result
-from ewp_transcripts.inspection import inspect_episode
+from ewp_transcripts.inspection import apply_explicit_speaker_labels, inspect_episode
 from ewp_transcripts.media import measure_file_channels
 from ewp_transcripts.pipeline import (
     run_diarization_pipeline,
@@ -252,12 +252,19 @@ def transcribe_one(
     asr_factory: AsrFactory | None = None,
     alignment_factory: AlignmentFactory | None = None,
     diarization_factory: DiarizationFactory | None = None,
+    speaker_label: str | None = None,
+    speaker_map: dict[str, str] | None = None,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
     inspected = inspect_input(
         input_path,
         config=config,
         allow_duration_mismatch=allow_duration_mismatch,
+    )
+    inspected = apply_explicit_speaker_labels(
+        inspected,
+        speaker_label=speaker_label,
+        speaker_map=speaker_map,
     )
     if len(inspected.episodes) != 1:
         raise UnsupportedPipelineScopeError("Single-file transcribe requires exactly one episode")
@@ -289,6 +296,7 @@ def transcribe_batch(
     asr_factory: AsrFactory | None = None,
     alignment_factory: AlignmentFactory | None = None,
     diarization_factory: DiarizationFactory | None = None,
+    speaker_map: dict[str, str] | None = None,
 ) -> BatchTranscriptionOutcome:
     """Process inspected episodes sequentially and isolate per-job failures."""
 
@@ -297,6 +305,7 @@ def transcribe_batch(
         config=config,
         allow_duration_mismatch=allow_duration_mismatch,
     )
+    inspected = apply_explicit_speaker_labels(inspected, speaker_map=speaker_map)
     destination = resolve_output_directory(
         inspected.discovery,
         config=config.outputs,

@@ -338,7 +338,7 @@ def run_single_speaker_pipeline(
             source_id="source_001",
             speaker_id="speaker_001",
             speaker_label=source.speaker_label or "Speaker1",
-            speaker_source="filename" if source.speaker_label else "default",
+            speaker_source=source.speaker_source,
             channel_index=source.channel_classification.selected_channel_index or 0,
         ),
         workspace,
@@ -384,7 +384,7 @@ def run_single_speaker_pipeline(
             CanonicalSpeaker(
                 speaker_id="speaker_001",
                 speaker_label=speaker_label,
-                speaker_source="filename" if source.speaker_label else "default",
+                speaker_source=source.speaker_source,
                 first_seen_ms=first_seen_ms,
                 source_ids=("source_001",),
             ),

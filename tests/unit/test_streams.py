@@ -54,7 +54,10 @@ def test_split_stereo_creates_two_default_speakers_for_one_source() -> None:
     assert [stream.source_id for stream in streams] == ["source_001", "source_001"]
     assert [stream.speaker_id for stream in streams] == ["speaker_001", "speaker_002"]
     assert [stream.speaker_label for stream in streams] == ["Speaker1", "Speaker2"]
-    assert [stream.speaker_source for stream in streams] == ["default", "default"]
+    assert [stream.speaker_source for stream in streams] == [
+        "channel_metadata",
+        "channel_metadata",
+    ]
     assert [stream.channel_index for stream in streams] == [0, 1]
 
 
@@ -134,4 +137,5 @@ def _source(
         ),
         speaker_id=speaker_id,
         speaker_label=label,
+        speaker_source="filename" if label is not None else "default",
     )

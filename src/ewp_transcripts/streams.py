@@ -18,7 +18,7 @@ class SpeakerStream:
     source_id: str
     speaker_id: str
     speaker_label: str
-    speaker_source: Literal["filename", "channel_metadata", "default"]
+    speaker_source: Literal["explicit", "filename", "channel_metadata", "default"]
     channel_index: int
 
 
@@ -38,7 +38,7 @@ def plan_speaker_streams(inspection: EpisodeInspection) -> tuple[SpeakerStream, 
                     source_id="source_001",
                     speaker_id=f"speaker_{channel + 1:03d}",
                     speaker_label=f"Speaker{channel + 1}",
-                    speaker_source="default",
+                    speaker_source="channel_metadata",
                     channel_index=channel,
                 )
                 for channel in range(2)
@@ -67,6 +67,6 @@ def _source_stream(source: InspectedSource, *, position: int) -> SpeakerStream:
         source_id=f"source_{position:03d}",
         speaker_id=f"speaker_{position:03d}",
         speaker_label=label,
-        speaker_source="filename" if source.speaker_label else "default",
+        speaker_source=source.speaker_source,
         channel_index=channel_index,
     )

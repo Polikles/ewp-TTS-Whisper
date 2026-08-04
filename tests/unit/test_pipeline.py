@@ -327,7 +327,11 @@ def test_processes_one_selected_channel_with_stream_specific_identity(tmp_path: 
 def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -> None:
     inspection, reservation, workspace = _job(tmp_path)
     first = inspection.sources[0].model_copy(
-        update={"speaker_label": "Damian", "speaker_id": "speaker_001"}
+        update={
+            "speaker_label": "Damian",
+            "speaker_id": "speaker_001",
+            "speaker_source": "explicit",
+        }
     )
     second_path = tmp_path / "episode-Szymon.wav"
     second_path.write_bytes(b"second")
@@ -342,6 +346,7 @@ def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -
             ),
             "speaker_label": "Szymon",
             "speaker_id": "speaker_002",
+            "speaker_source": "filename",
         }
     )
     inspection = inspection.model_copy(update={"sources": (first, second)})
@@ -369,6 +374,7 @@ def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -
     assert [source.source_id for source in result.sources] == ["source_001", "source_002"]
     assert [source.speaker_label for source in result.sources] == ["Damian", "Szymon"]
     assert [speaker.speaker_label for speaker in result.speakers] == ["Damian", "Szymon"]
+    assert [speaker.speaker_source for speaker in result.speakers] == ["explicit", "filename"]
     assert len(result.transcript.segments) == 2
     assert [segment.text for segment in result.transcript.segments] == [
         "Dzień dobry.",

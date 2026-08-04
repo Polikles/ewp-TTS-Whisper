@@ -164,6 +164,7 @@ def _grouped_source(file: DiscoveredFile, speaker_label: str | None) -> GroupedS
     return GroupedSource(
         fingerprint=fingerprint_file(file.path),
         speaker_label=speaker_label,
+        speaker_source="filename" if speaker_label else "default",
     )
 
 

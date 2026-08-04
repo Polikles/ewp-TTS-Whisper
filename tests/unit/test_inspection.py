@@ -9,7 +9,9 @@ from ewp_transcripts.discovery import discover_input, group_discovered_files
 from ewp_transcripts.domain import (
     AudioStream,
     ChannelMetrics,
+    DiscoveryResult,
     EpisodeCandidate,
+    InspectionResult,
     MediaProbeResult,
 )
 from ewp_transcripts.domain.enums import ChannelMode, WarningCode
@@ -18,7 +20,11 @@ from ewp_transcripts.domain.errors import (
     MultipleAudioStreamsError,
     SampleRateMismatchError,
 )
-from ewp_transcripts.inspection import calculate_episode_signature, inspect_episode
+from ewp_transcripts.inspection import (
+    apply_explicit_speaker_labels,
+    calculate_episode_signature,
+    inspect_episode,
+)
 
 
 def _episode(tmp_path: Path) -> EpisodeCandidate:
@@ -149,6 +155,33 @@ def test_episode_signature_is_stable_and_source_order_sensitive(tmp_path: Path) 
     )
     assert calculate_episode_signature("renamed", result.sources) != result.episode_signature_sha256
     assert [source.speaker_id for source in result.sources] == ["speaker_001", "speaker_002"]
+
+
+def test_explicit_speaker_map_changes_label_provenance_and_signature(tmp_path: Path) -> None:
+    episode = _episode(tmp_path)
+    inspected = inspect_episode(
+        episode,
+        probe=_probe({"episode-anna.wav": 1000, "episode-jan.wav": 1000}),
+    )
+    result = InspectionResult(
+        discovery=DiscoveryResult(
+            input_path=tmp_path,
+            recursive=False,
+            files=(),
+            skipped=(),
+        ),
+        episodes=(inspected,),
+    )
+
+    updated = apply_explicit_speaker_labels(
+        result,
+        speaker_map={"episode-anna.wav": "Damian"},
+    )
+
+    assert updated.episodes[0].sources[0].speaker_label == "Damian"
+    assert updated.episodes[0].sources[0].speaker_source == "explicit"
+    assert updated.episodes[0].sources[1].speaker_source == "filename"
+    assert updated.episodes[0].episode_signature_sha256 != inspected.episode_signature_sha256
 
 
 def test_stereo_metrics_are_classified_and_enter_the_signature(tmp_path: Path) -> None:

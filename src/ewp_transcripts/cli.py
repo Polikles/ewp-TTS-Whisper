@@ -125,6 +125,20 @@ def _speaker_count(value: str | None) -> str | int | None:
     return parsed
 
 
+def _speaker_mapping(values: list[str] | None) -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for value in values or []:
+        source, separator, label = value.partition("=")
+        source = source.strip()
+        label = label.strip()
+        if not separator or not source or not label:
+            raise typer.BadParameter("speaker maps must use SOURCE=NAME")
+        if source in mapping:
+            raise typer.BadParameter(f"speaker map source repeated: {source}")
+        mapping[source] = label
+    return mapping
+
+
 def _inspection_overrides(
     *,
     recursive: bool | None,
@@ -530,6 +544,17 @@ def transcribe_command(
             help="Use one speaker, an exact positive count, or 'auto'.",
         ),
     ] = None,
+    speaker: Annotated[
+        str | None,
+        typer.Option("--speaker", help="Explicit label for one single-speaker source."),
+    ] = None,
+    speaker_maps: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--speaker-map",
+            help="Explicit SOURCE=NAME label; SOURCE is an exact filename; may be repeated.",
+        ),
+    ] = None,
     preset: Annotated[
         RequestedPreset,
         typer.Option("--preset", help="Select the transcription preset."),
@@ -566,6 +591,13 @@ def transcribe_command(
 
     try:
         parsed_speaker_count = _speaker_count(speaker_count)
+        parsed_speaker_map = _speaker_mapping(speaker_maps)
+        if speaker is not None and not speaker.strip():
+            raise typer.BadParameter("speaker label must not be empty")
+        if speaker is not None and input_path.is_dir():
+            raise typer.BadParameter("--speaker requires one input file")
+        if speaker is not None and parsed_speaker_count not in {None, 1}:
+            raise typer.BadParameter("--speaker requires --speaker-count 1")
         config = load_config(
             explicit_path=config_path,
             cli_overrides=_transcribe_overrides(
@@ -586,6 +618,7 @@ def transcribe_command(
                 output_directory=output_directory,
                 force=force,
                 allow_duration_mismatch=allow_duration_mismatch,
+                speaker_map=parsed_speaker_map,
             )
         else:
             outcome = transcribe_one(
@@ -594,6 +627,8 @@ def transcribe_command(
                 output_directory=output_directory,
                 force=force,
                 allow_duration_mismatch=allow_duration_mismatch,
+                speaker_label=speaker.strip() if speaker is not None else None,
+                speaker_map=parsed_speaker_map,
             )
     except ApplicationError as error:
         _expected_error(error)

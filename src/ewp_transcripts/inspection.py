@@ -15,11 +15,14 @@ from ewp_transcripts.domain import (
     EpisodeCandidate,
     EpisodeInspection,
     InspectedSource,
+    InspectionResult,
     MediaProbeResult,
     WarningCode,
 )
+from ewp_transcripts.domain.enums import ChannelMode
 from ewp_transcripts.domain.errors import (
     DurationMismatchError,
+    InvalidConfigurationError,
     MultipleAudioStreamsError,
     SampleRateMismatchError,
 )
@@ -65,6 +68,7 @@ def calculate_episode_signature(
                 "speaker_id": source.speaker_id,
                 "speaker_label": source.speaker_label,
                 "stream_index": source.stream.index,
+                **({"speaker_source": "explicit"} if source.speaker_source == "explicit" else {}),
             }
             for source in sources
         ],
@@ -76,6 +80,67 @@ def calculate_episode_signature(
         sort_keys=True,
     ).encode("utf-8")
     return sha256(serialized).hexdigest()
+
+
+def apply_explicit_speaker_labels(
+    inspection: InspectionResult,
+    *,
+    speaker_label: str | None = None,
+    speaker_map: dict[str, str] | None = None,
+) -> InspectionResult:
+    """Apply explicit labels before planning so signatures retain their provenance."""
+
+    mapping = speaker_map or {}
+    if speaker_label is not None and mapping:
+        raise InvalidConfigurationError("--speaker and --speaker-map cannot be combined")
+    if speaker_label is not None:
+        if len(inspection.episodes) != 1 or len(inspection.episodes[0].sources) != 1:
+            raise InvalidConfigurationError("--speaker requires exactly one source")
+        source = inspection.episodes[0].sources[0]
+        if source.channel_classification.processing_mode is ChannelMode.SPLIT_SPEAKERS:
+            raise InvalidConfigurationError("--speaker cannot label a split-speaker source")
+        mapping = {source.fingerprint.filename: speaker_label}
+    if not mapping:
+        return inspection
+
+    source_counts: dict[str, int] = {}
+    for episode in inspection.episodes:
+        for source in episode.sources:
+            filename = source.fingerprint.filename
+            source_counts[filename] = source_counts.get(filename, 0) + 1
+    unknown = sorted(set(mapping) - set(source_counts))
+    if unknown:
+        raise InvalidConfigurationError(f"Speaker map source was not found: {unknown[0]}")
+    ambiguous = sorted(name for name in mapping if source_counts[name] != 1)
+    if ambiguous:
+        raise InvalidConfigurationError(f"Speaker map source is ambiguous: {ambiguous[0]}")
+
+    episodes: list[EpisodeInspection] = []
+    for episode in inspection.episodes:
+        sources: list[InspectedSource] = []
+        for source in episode.sources:
+            label = mapping.get(source.fingerprint.filename)
+            if label is not None:
+                if source.channel_classification.processing_mode is ChannelMode.SPLIT_SPEAKERS:
+                    raise InvalidConfigurationError(
+                        "--speaker-map cannot assign one label to a split-speaker source"
+                    )
+                source = source.model_copy(
+                    update={"speaker_label": label, "speaker_source": "explicit"}
+                )
+            sources.append(source)
+        updated_sources = tuple(sources)
+        episodes.append(
+            episode.model_copy(
+                update={
+                    "sources": updated_sources,
+                    "episode_signature_sha256": calculate_episode_signature(
+                        episode.job_id, updated_sources
+                    ),
+                }
+            )
+        )
+    return inspection.model_copy(update={"episodes": tuple(episodes)})
 
 
 def inspect_episode(
@@ -129,6 +194,7 @@ def inspect_episode(
                 channel_classification=classification,
                 speaker_id=f"speaker_{position:03d}",
                 speaker_label=grouped_source.speaker_label,
+                speaker_source=grouped_source.speaker_source,
             )
         )
 

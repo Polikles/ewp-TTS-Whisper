@@ -23,13 +23,24 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
     result_path = tmp_path / "output" / "episode_results.json"
     observed = {}
 
-    def run(input_path, *, config, output_directory, force, allow_duration_mismatch):
+    def run(
+        input_path,
+        *,
+        config,
+        output_directory,
+        force,
+        allow_duration_mismatch,
+        speaker_label,
+        speaker_map,
+    ):
         observed.update(
             input_path=input_path,
             speaker_count=config.diarization.speaker_count,
             output_directory=output_directory,
             force=force,
             allow_duration_mismatch=allow_duration_mismatch,
+            speaker_label=speaker_label,
+            speaker_map=speaker_map,
         )
         return TranscriptionOutcome(
             decision=PlanDecision.PROCESS,
@@ -52,7 +63,47 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
         "output_directory": tmp_path / "output",
         "force": False,
         "allow_duration_mismatch": False,
+        "speaker_label": None,
+        "speaker_map": {},
     }
+
+
+def test_transcribe_cli_passes_explicit_speaker_label_and_map(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+    observed: list[tuple[str | None, dict[str, str]]] = []
+
+    def run(input_path, *, speaker_label, speaker_map, **kwargs):
+        observed.append((speaker_label, speaker_map))
+        return TranscriptionOutcome(
+            decision=PlanDecision.PROCESS,
+            job_id="episode",
+            result_path=tmp_path / "episode_results.json",
+        )
+
+    monkeypatch.setattr(cli, "transcribe_one", run)
+
+    label = CliRunner().invoke(app, ["transcribe", str(source), "--speaker", "Damian"])
+    mapping = CliRunner().invoke(
+        app,
+        ["transcribe", str(source), "--speaker-map", "episode.wav=Szymon"],
+    )
+
+    assert label.exit_code == 0
+    assert mapping.exit_code == 0
+    assert observed == [("Damian", {}), (None, {"episode.wav": "Szymon"})]
+
+
+@pytest.mark.parametrize("value", ["episode.wav", "=Damian", "episode.wav="])
+def test_transcribe_cli_rejects_invalid_speaker_map(tmp_path: Path, value: str) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+
+    outcome = CliRunner().invoke(app, ["transcribe", str(source), "--speaker-map", value])
+
+    assert outcome.exit_code == 2
 
 
 def test_root_help_lists_transcribe_command() -> None:
