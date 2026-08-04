@@ -65,6 +65,10 @@ successful versioned restart using
 Validate Phase 6 natural ordering, sequential GPU execution, duplicate replay, and
 continue-after-error isolation using [`RUN_PHASE6_BATCH.md`](RUN_PHASE6_BATCH.md).
 
+Validate Phase 7 grouped-source and split-channel speaker processing, shared-timeline
+overlap, deterministic attribution, labelled exports, and duplicate replay using
+[`RUN_PHASE7_SOURCE_SPEAKERS.md`](RUN_PHASE7_SOURCE_SPEAKERS.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).

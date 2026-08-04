@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-03**.
+Last updated: **2026-08-04**.
 
 Use this file as the starting point for the next work session.
 
@@ -13,11 +13,34 @@ The installable `ewp_transcripts` package, `transcriber` entry point, lightweigh
 
 ## Authoritative resume point
 
-Resume Phase 7 with the multi-stream pipeline that prepares and transcribes each grouped
-source or split channel independently, closes GPU models between passes, assigns stable
-source/speaker IDs, and feeds normalized streams into the completed timeline composer.
-Preserve overlaps; do not introduce cross-channel transcript deduplication or diarization.
-Reuse the established canonical publication boundary.
+Resume Phase 7 at the target WSL gate in
+[`WSL config/RUN_PHASE7_SOURCE_SPEAKERS.md`](WSL%20config/RUN_PHASE7_SOURCE_SPEAKERS.md).
+The CPU/fake-engine implementation and application routing are complete. Run P2-01 once
+as split-speaker stereo and once as a derived two-file mono group, then record the target
+evidence in the ADRs before closing the phase.
+
+## 2026-08-04 checkpoint
+
+Repository state at this checkpoint:
+
+- `main` and `origin/main` include commit `6b9c86b`;
+- the complete development-VM gate passes formatting, lint, strict typing, and **198
+  tests**;
+- source/channel work items have stable source IDs, speaker IDs, label provenance, and
+  selected channel indices;
+- each stream runs prepare → ASR/unload → alignment/unload → normalize with fresh engine
+  factories before the next stream;
+- grouped and split-channel results compose a shared timeline without deduplication,
+  retain overlap, and validate against the canonical schema;
+- grouped results use `file_group`; split-channel results use `split_channels` and one
+  physical source referenced by two speakers;
+- the application preserves the established single-speaker path and routes only planned
+  multi-stream jobs to the new pipeline;
+- `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
+
+The next owner input is execution output from the Phase 7 WSL runbook. No new recording
+or reference transcript is required: the runbook derives the grouped fixture losslessly
+from the existing P2-01 split-speaker recording.
 
 ## End-of-day checkpoint — 2026-08-03
 
