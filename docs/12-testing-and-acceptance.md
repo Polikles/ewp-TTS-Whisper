@@ -40,7 +40,7 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [ ] Mono.
 - [ ] Identical dual mono.
 - [ ] Nearly identical dual mono.
-- [ ] Split speakers.
+- [x] Split speakers.
 - [ ] Mixed stereo.
 - [ ] Ambiguous input uses one channel and emits a warning.
 - [ ] Forced channel mode.
@@ -66,22 +66,22 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [ ] Output write error.
 - [ ] Corrupt partial result.
 - [x] Restart processes the file from the beginning.
-- [ ] One failed job does not stop the batch.
-- [ ] Temporary files are preserved after failure.
-- [ ] Temporary files are removed after success.
+- [x] One failed job does not stop the batch.
+- [x] Temporary files are preserved after failure.
+- [x] Temporary files are removed after success.
 - [ ] `--keep-temp`.
-- [ ] `clean --dry-run`.
+- [x] `clean --dry-run`.
 
 ### JSON
 
-- [ ] Conformance to JSON Schema.
-- [ ] `schema_version` and `application_version` present.
+- [x] Conformance to JSON Schema.
+- [x] `schema_version` and `application_version` present.
 - [ ] Monotonic timestamps.
-- [ ] No secrets.
-- [ ] Complete effective-configuration snapshot.
-- [ ] Correct `timestamp_source` values.
-- [ ] Overlap and active-speaker metadata.
-- [ ] Final JSON exists only for `completed` status.
+- [x] No secrets.
+- [x] Complete effective-configuration snapshot.
+- [x] Correct `timestamp_source` values.
+- [x] Overlap and active-speaker metadata.
+- [x] Final JSON exists only for `completed` status.
 
 ### Exports
 
@@ -89,23 +89,23 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [ ] One sentence per line.
 - [ ] Speaker blocks.
 - [ ] No label for a single speaker.
-- [ ] SRT is syntactically valid.
-- [ ] VTT is syntactically valid.
-- [ ] No more than two lines per cue.
-- [ ] `on-change` labels.
-- [ ] Regeneration without source audio.
-- [ ] Optional `segments.json`.
-- [ ] Fast speech does not create unintended overlapping cues.
+- [x] SRT is syntactically valid.
+- [x] VTT is syntactically valid.
+- [x] No more than two lines per cue.
+- [x] `on-change` labels.
+- [x] Regeneration without source audio.
+- [x] Optional `segments.json`.
+- [x] Fast speech does not create unintended overlapping cues.
 
 ### Environment
 
 - [ ] `doctor` without a GPU.
-- [ ] `doctor` with RTX 3090.
+- [x] `doctor` with RTX 3090.
 - [ ] Missing FFmpeg.
-- [ ] Missing model.
+- [x] Missing model.
 - [ ] Missing `HF_TOKEN` before model download.
-- [ ] Complete offline readiness.
-- [ ] Token is not written to logs.
+- [x] Complete offline readiness.
+- [x] Token is not written to logs.
 
 ### Performance and resources
 
@@ -117,25 +117,25 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 ## 2. Audio-material matrix
 
-- [ ] Clean Polish podcast, one speaker.
-- [ ] Polish podcast, two speakers mixed to mono.
+- [x] Clean Polish podcast, one speaker.
+- [x] Polish podcast, two speakers mixed to mono.
 - [ ] Polish material with three speakers.
 - [ ] Polish speech with English technical terms.
 - [ ] Full English recording.
-- [ ] Split-speaker stereo.
-- [ ] Audacity dual mono.
-- [ ] Two separate mono files.
-- [ ] Overlap on separate tracks.
-- [ ] Overlap in mixed mono.
+- [x] Split-speaker stereo.
+- [x] Audacity dual mono.
+- [x] Two separate mono files.
+- [x] Overlap on separate tracks.
+- [x] Overlap in mixed mono.
 - [ ] Fast speech.
-- [ ] Long pauses.
+- [x] Long pauses.
 - [ ] Intro/outro music.
 - [ ] Light recorder noise.
-- [ ] Clipping.
-- [ ] Unequal channel levels.
-- [ ] WAV 44.1 kHz.
-- [ ] WAV 48 kHz.
-- [ ] MP3.
+- [x] Clipping.
+- [x] Unequal channel levels.
+- [x] WAV 44.1 kHz.
+- [x] WAV 48 kHz.
+- [x] MP3.
 - [ ] FLAC.
 - [ ] M4A/AAC.
 - [ ] Opus.
