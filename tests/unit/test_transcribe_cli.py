@@ -1,6 +1,8 @@
 """Tests for the Phase 5 transcribe terminal adapter."""
 
+import json
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from typer.testing import CliRunner
@@ -12,6 +14,7 @@ from ewp_transcripts.application import (
     TranscriptionOutcome,
 )
 from ewp_transcripts.cli import app
+from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
 from ewp_transcripts.domain.enums import LanguageMode, PlanDecision
 
 
@@ -71,6 +74,54 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
         "speaker_map": {},
         "explicit_group_paths": None,
         "explicit_group_id": None,
+    }
+
+
+def test_transcribe_cli_emits_safe_jsonl_when_configured(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+    run_id = UUID("123e4567-e89b-12d3-a456-426614174000")
+    monkeypatch.setattr(
+        cli,
+        "load_config",
+        lambda **kwargs: ApplicationConfig(runtime=RuntimeConfig(log_format="jsonl")),
+    )
+
+    def run(*args, **kwargs):
+        print("backend chatter")
+        return TranscriptionOutcome(
+            decision=PlanDecision.PROCESS,
+            job_id="episode",
+            result_path=tmp_path / "episode_results.json",
+            run_id=run_id,
+            elapsed_ms=321,
+        )
+
+    monkeypatch.setattr(cli, "transcribe_one", run)
+
+    outcome = CliRunner().invoke(app, ["transcribe", str(source)])
+
+    assert outcome.exit_code == 0
+    assert "backend chatter" not in outcome.stdout
+    assert "backend chatter" in outcome.stderr
+    record = json.loads(outcome.stdout)
+    assert record == {
+        "timestamp": record["timestamp"],
+        "level": "info",
+        "event": "TRANSCRIPTION_COMPLETED",
+        "run_id": str(run_id),
+        "job_id": "episode",
+        "source": None,
+        "stage": "complete",
+        "elapsed_ms": 321,
+        "context": {
+            "decision": "process",
+            "result_path": str(tmp_path / "episode_results.json"),
+            "exports_written": [],
+            "exports_skipped": [],
+        },
     }
 
 

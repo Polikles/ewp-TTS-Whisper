@@ -1,5 +1,9 @@
 """Terminal adapter for EWP-transcripts."""
 
+import json
+import sys
+from contextlib import nullcontext, redirect_stdout
+from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
@@ -21,7 +25,7 @@ from ewp_transcripts.application import (
 )
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain import JobOutputPlan
-from ewp_transcripts.domain.enums import ChannelMode, LanguageMode
+from ewp_transcripts.domain.enums import ChannelMode, LanguageMode, PlanDecision
 from ewp_transcripts.domain.errors import (
     ApplicationError,
     InvalidCanonicalResultError,
@@ -679,6 +683,7 @@ def transcribe_command(
 ) -> None:
     """Transcribe audio with pinned local models."""
 
+    config = None
     try:
         selected_input, explicit_group_paths, explicit_group_id = _input_selection(
             input_path, group_paths, group_id
@@ -705,37 +710,79 @@ def transcribe_command(
                 non_interactive=non_interactive,
             ),
         )
-        if selected_input.is_dir() and explicit_group_paths is None:
-            batch = transcribe_batch(
-                selected_input,
-                config=config,
-                output_directory=output_directory,
-                force=force,
-                allow_duration_mismatch=allow_duration_mismatch,
-                speaker_map=parsed_speaker_map,
-            )
-        else:
-            outcome = transcribe_one(
-                selected_input,
-                config=config,
-                output_directory=output_directory,
-                force=force,
-                allow_duration_mismatch=allow_duration_mismatch,
-                speaker_label=speaker.strip() if speaker is not None else None,
-                speaker_map=parsed_speaker_map,
-                explicit_group_paths=explicit_group_paths,
-                explicit_group_id=explicit_group_id,
-            )
+        output_guard = (
+            redirect_stdout(sys.stderr) if config.runtime.log_format == "jsonl" else nullcontext()
+        )
+        with output_guard:
+            if selected_input.is_dir() and explicit_group_paths is None:
+                batch = transcribe_batch(
+                    selected_input,
+                    config=config,
+                    output_directory=output_directory,
+                    force=force,
+                    allow_duration_mismatch=allow_duration_mismatch,
+                    speaker_map=parsed_speaker_map,
+                )
+            else:
+                outcome = transcribe_one(
+                    selected_input,
+                    config=config,
+                    output_directory=output_directory,
+                    force=force,
+                    allow_duration_mismatch=allow_duration_mismatch,
+                    speaker_label=speaker.strip() if speaker is not None else None,
+                    speaker_map=parsed_speaker_map,
+                    explicit_group_paths=explicit_group_paths,
+                    explicit_group_id=explicit_group_id,
+                )
     except ApplicationError as error:
+        if config is not None and config.runtime.log_format == "jsonl":
+            _emit_jsonl(
+                level="error",
+                event="TRANSCRIPTION_FAILED",
+                run_id=None,
+                job_id=None,
+                stage="complete",
+                elapsed_ms=None,
+                context={
+                    "error_type": type(error).__name__,
+                    "message": str(error),
+                },
+            )
         _expected_error(error)
 
+    assert config is not None
     if selected_input.is_dir() and explicit_group_paths is None:
-        _print_batch_outcome(batch)
+        _print_batch_outcome(batch, log_format=config.runtime.log_format)
     else:
-        _print_transcription_outcome(outcome)
+        _print_transcription_outcome(outcome, log_format=config.runtime.log_format)
 
 
-def _print_transcription_outcome(outcome: TranscriptionOutcome) -> None:
+def _print_transcription_outcome(
+    outcome: TranscriptionOutcome, *, log_format: str = "text"
+) -> None:
+    if log_format == "jsonl":
+        _emit_jsonl(
+            level="info",
+            event="TRANSCRIPTION_COMPLETED"
+            if outcome.decision is PlanDecision.PROCESS
+            else "TRANSCRIPTION_SKIPPED",
+            run_id=outcome.run_id,
+            job_id=outcome.job_id,
+            stage="complete",
+            elapsed_ms=outcome.elapsed_ms,
+            context={
+                "decision": outcome.decision.value,
+                "result_path": str(outcome.result_path),
+                "exports_written": [str(path) for path in outcome.exports.written]
+                if outcome.exports is not None
+                else [],
+                "exports_skipped": [str(path) for path in outcome.exports.skipped]
+                if outcome.exports is not None
+                else [],
+            },
+        )
+        return
     typer.echo(f"{outcome.decision.value.upper()} {outcome.job_id}")
     typer.echo(f"RESULT {outcome.result_path}")
     if outcome.exports is not None:
@@ -745,7 +792,42 @@ def _print_transcription_outcome(outcome: TranscriptionOutcome) -> None:
             typer.echo(f"SKIP {path}")
 
 
-def _print_batch_outcome(outcome: BatchTranscriptionOutcome) -> None:
+def _print_batch_outcome(outcome: BatchTranscriptionOutcome, *, log_format: str = "text") -> None:
+    if log_format == "jsonl":
+        for job in outcome.jobs:
+            _emit_jsonl(
+                level="error" if job.status == "failed" else "info",
+                event=f"JOB_{job.status.upper()}",
+                run_id=job.run_id,
+                job_id=job.job_id,
+                stage="complete",
+                elapsed_ms=job.elapsed_ms,
+                context={
+                    "result_path": str(job.result_path) if job.result_path is not None else None,
+                    "failure_code": job.failure_code,
+                    "failure_message": job.failure_message,
+                },
+            )
+        _emit_jsonl(
+            level="error" if outcome.failed else "info",
+            event="BATCH_SUMMARY",
+            run_id=None,
+            job_id=None,
+            stage="complete",
+            elapsed_ms=sum(job.elapsed_ms or 0 for job in outcome.jobs),
+            context={
+                "output_directory": str(outcome.output_directory),
+                "completed": outcome.completed,
+                "skipped": outcome.skipped,
+                "failed": outcome.failed,
+                "cancelled": outcome.cancelled,
+            },
+        )
+        if outcome.cancelled:
+            raise typer.Exit(code=6)
+        if outcome.failed:
+            raise typer.Exit(code=5)
+        return
     typer.echo(f"Output directory: {outcome.output_directory}")
     for job in outcome.jobs:
         typer.echo(f"{job.status.upper()} {job.job_id}")
@@ -761,6 +843,35 @@ def _print_batch_outcome(outcome: BatchTranscriptionOutcome) -> None:
         raise typer.Exit(code=6)
     if outcome.failed:
         raise typer.Exit(code=5)
+
+
+def _emit_jsonl(
+    *,
+    level: str,
+    event: str,
+    run_id: object,
+    job_id: str | None,
+    stage: str,
+    elapsed_ms: int | None,
+    context: dict[str, object],
+) -> None:
+    typer.echo(
+        json.dumps(
+            {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "level": level,
+                "event": event,
+                "run_id": str(run_id) if run_id is not None else None,
+                "job_id": job_id,
+                "source": None,
+                "stage": stage,
+                "elapsed_ms": elapsed_ms,
+                "context": context,
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+    )
 
 
 def main() -> None:

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import platform
 import sys
+import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Literal
@@ -84,6 +85,8 @@ class TranscriptionOutcome:
     job_id: str
     result_path: Path
     exports: ExportOutcome | None = None
+    run_id: UUID | None = None
+    elapsed_ms: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +98,8 @@ class BatchJobOutcome:
     result_path: Path | None = None
     failure_code: str | None = None
     failure_message: str | None = None
+    run_id: UUID | None = None
+    elapsed_ms: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -286,6 +291,7 @@ def transcribe_one(
     explicit_group_id: str | None = None,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
+    started = time.perf_counter()
     inspected = inspect_input(
         input_path,
         config=config,
@@ -306,7 +312,7 @@ def transcribe_one(
         config=config.outputs,
         explicit_directory=output_directory,
     )
-    return _transcribe_episode(
+    outcome = _transcribe_episode(
         episode,
         destination=destination,
         config=config,
@@ -316,6 +322,7 @@ def transcribe_one(
         alignment_factory=alignment_factory or _whisperx_alignment,
         diarization_factory=diarization_factory or _pyannote_diarization,
     )
+    return replace(outcome, elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)))
 
 
 def transcribe_batch(
@@ -346,13 +353,15 @@ def transcribe_batch(
     jobs: list[BatchJobOutcome] = []
     stopped_early = False
     for episode in inspected.episodes:
+        job_run_id = uuid4()
+        started = time.perf_counter()
         try:
             outcome = _transcribe_episode(
                 episode,
                 destination=destination,
                 config=config,
                 force=force,
-                run_id=uuid4(),
+                run_id=job_run_id,
                 asr_factory=asr_factory or _whisperx_asr,
                 alignment_factory=alignment_factory or _whisperx_alignment,
                 diarization_factory=diarization_factory or _pyannote_diarization,
@@ -362,6 +371,8 @@ def transcribe_batch(
                     job_id=outcome.job_id,
                     status=("skipped" if outcome.decision is PlanDecision.SKIP else "completed"),
                     result_path=outcome.result_path,
+                    run_id=outcome.run_id,
+                    elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)),
                 )
             )
         except Exception as error:
@@ -371,6 +382,8 @@ def transcribe_batch(
                     status="failed",
                     failure_code=_failure_code(error),
                     failure_message=_failure_message(error),
+                    run_id=job_run_id,
+                    elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)),
                 )
             )
             if not config.runtime.continue_batch_after_error:
@@ -383,6 +396,8 @@ def transcribe_batch(
                     status="cancelled",
                     failure_code="USER_CANCELLED",
                     failure_message="Transcription cancelled by user",
+                    run_id=job_run_id,
+                    elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)),
                 )
             )
             stopped_early = True
@@ -431,6 +446,7 @@ def _transcribe_episode(
             job_id=episode.job_id,
             result_path=existing.path,
             exports=exports,
+            run_id=run_id,
         )
 
     return _process_reservation(
@@ -522,6 +538,7 @@ def _process_reservation(
             job_id=episode.job_id,
             result_path=result_path,
             exports=exports,
+            run_id=state.run_id,
         )
         succeeded = True
         return outcome

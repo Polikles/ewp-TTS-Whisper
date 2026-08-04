@@ -97,6 +97,12 @@ NON_ATOMIC_OUTPUT_FILESYSTEM
 
 Default format: human-readable text. Optional format: JSON Lines.
 
+For `transcribe`, `runtime.log_format = "jsonl"` makes application outcome records on
+standard output valid JSON Lines. Incidental backend/model output is redirected to standard error
+so it cannot corrupt a machine-readable stdout stream. Single-job completion/skip records and
+per-job plus batch-summary records include elapsed milliseconds; detailed stage durations and the
+observed PyTorch CUDA allocation peak remain in the canonical result JSON.
+
 Every structured record should include:
 
 - timestamp;
