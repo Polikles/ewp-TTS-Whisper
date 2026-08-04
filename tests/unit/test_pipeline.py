@@ -104,6 +104,38 @@ class FakeAlignment:
         self.events.append("align:close")
 
 
+class TimedAlignment(FakeAlignment):
+    def __init__(self, events: list[str], start_ms: int) -> None:
+        super().__init__(events)
+        self.start_ms = start_ms
+
+    def align(
+        self,
+        audio_path: Path,
+        transcription: TranscriptionDraft,
+        *,
+        language: str,
+    ) -> AlignedTranscript:
+        self.events.append(f"align:{audio_path.name}:{language}:{len(transcription.segments)}")
+        return AlignedTranscript(
+            language="pl",
+            segments=(
+                AlignedSegment(
+                    text="Dzień dobry.",
+                    start_ms=self.start_ms,
+                    end_ms=self.start_ms + 500,
+                    words=(
+                        AlignedWord(
+                            text="Dzień dobry.",
+                            start_ms=self.start_ms,
+                            end_ms=self.start_ms + 500,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+
 class FakeDiarization:
     model_info = EngineModelInfo(
         role="diarization", name="community-1", revision="diarization-revision"
@@ -393,6 +425,66 @@ def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -
         "channel_index": 0,
     }
     assert events.index("align:close") < events.index("prepare:episode-Szymon.wav:0")
+
+
+def test_grouped_default_speakers_are_numbered_by_first_appearance(tmp_path: Path) -> None:
+    inspection, reservation, workspace = _job(tmp_path)
+    first = inspection.sources[0].model_copy(
+        update={"speaker_label": None, "speaker_source": "default"}
+    )
+    second_path = tmp_path / "second.wav"
+    second_path.write_bytes(b"second")
+    second = first.model_copy(
+        update={
+            "fingerprint": first.fingerprint.model_copy(
+                update={
+                    "path": second_path,
+                    "filename": second_path.name,
+                    "sha256": "c" * 64,
+                }
+            )
+        }
+    )
+    inspection = inspection.model_copy(update={"sources": (first, second)})
+    starts = iter((700, 100))
+
+    result = run_source_speaker_pipeline(
+        inspection,
+        reservation,
+        workspace,
+        config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=2)),
+        environment=_environment(),
+        asr_engine_factory=lambda: FakeAsr([]),
+        alignment_engine_factory=lambda: TimedAlignment([], next(starts)),
+        audio_preparer=lambda source, destination, **kwargs: _write_audio(destination),
+        now=lambda: COMPLETED_AT,
+    )
+
+    _assert_schema_valid(result.model_dump(mode="json"))
+    speaker_details = [
+        (speaker.speaker_id, speaker.speaker_label, speaker.first_seen_ms)
+        for speaker in result.speakers
+    ]
+    assert speaker_details == [
+        ("speaker_001", "Speaker1", 100),
+        ("speaker_002", "Speaker2", 700),
+    ]
+    source_details = [
+        (source.source_id, source.speaker_id, source.speaker_label) for source in result.sources
+    ]
+    assert source_details == [
+        ("source_001", "speaker_002", "Speaker2"),
+        ("source_002", "speaker_001", "Speaker1"),
+    ]
+    assert [segment.speaker_id for segment in result.transcript.segments] == [
+        "speaker_001",
+        "speaker_002",
+    ]
+
+
+def _write_audio(destination: Path) -> Path:
+    destination.write_bytes(b"working audio")
+    return destination
 
 
 def test_split_channel_pipeline_uses_one_source_and_two_speakers(tmp_path: Path) -> None:

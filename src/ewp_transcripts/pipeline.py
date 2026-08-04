@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
@@ -241,6 +241,7 @@ def run_source_speaker_pipeline(
             stage.model_copy(update={"details": stage_details}) for stage in stream_result.stages
         )
 
+    streams, processed, stages = _order_source_speakers(streams, processed, stages)
     transcript = merge_speaker_transcripts(
         tuple(stream_result.normalized.transcript for stream_result in processed)
     )
@@ -274,7 +275,10 @@ def run_source_speaker_pipeline(
             ),
             source_ids=(stream.source_id,),
         )
-        for stream, stream_result in zip(streams, processed, strict=True)
+        for stream, stream_result in sorted(
+            zip(streams, processed, strict=True),
+            key=lambda item: item[0].speaker_id,
+        )
     )
     warnings = (
         *_inspection_warnings(inspection),
@@ -311,6 +315,84 @@ def run_source_speaker_pipeline(
         transcript=transcript,
         warnings=warnings,
     )
+
+
+def _order_source_speakers(
+    streams: tuple[SpeakerStream, ...],
+    processed: list[ProcessedSpeakerStream],
+    stages: list[CanonicalStage],
+) -> tuple[tuple[SpeakerStream, ...], list[ProcessedSpeakerStream], list[CanonicalStage]]:
+    """Assign canonical speaker numbers by first chronological appearance."""
+
+    chronological = sorted(
+        range(len(streams)),
+        key=lambda index: (
+            processed[index].normalized.transcript.segments[0].start_ms
+            if processed[index].normalized.transcript.segments
+            else 10**18,
+            index,
+        ),
+    )
+    ranks = {stream_index: rank for rank, stream_index in enumerate(chronological, start=1)}
+    speaker_ids = {
+        stream.speaker_id: f"speaker_{ranks[index]:03d}" for index, stream in enumerate(streams)
+    }
+
+    def mapped_speaker_id(value: str | None) -> str | None:
+        return speaker_ids.get(value, value) if value is not None else None
+
+    ordered_streams: list[SpeakerStream] = []
+    ordered_processed: list[ProcessedSpeakerStream] = []
+    for index, (stream, stream_result) in enumerate(zip(streams, processed, strict=True)):
+        rank = ranks[index]
+        speaker_id = speaker_ids[stream.speaker_id]
+        speaker_label = (
+            f"Speaker{rank}"
+            if stream.speaker_source in {"default", "channel_metadata"}
+            else stream.speaker_label
+        )
+        ordered_streams.append(replace(stream, speaker_id=speaker_id, speaker_label=speaker_label))
+        transcript = stream_result.normalized.transcript
+        segments = tuple(
+            segment.model_copy(
+                update={
+                    "speaker_id": mapped_speaker_id(segment.speaker_id),
+                    "active_speaker_ids": tuple(
+                        speaker_ids.get(value, value) for value in segment.active_speaker_ids
+                    ),
+                    "words": tuple(
+                        word.model_copy(update={"speaker_id": mapped_speaker_id(word.speaker_id)})
+                        for word in segment.words
+                    ),
+                }
+            )
+            for segment in transcript.segments
+        )
+        ordered_processed.append(
+            replace(
+                stream_result,
+                normalized=replace(
+                    stream_result.normalized,
+                    transcript=transcript.model_copy(update={"segments": segments}),
+                ),
+            )
+        )
+
+    ordered_stages = [
+        stage.model_copy(
+            update={
+                "details": {
+                    **stage.details,
+                    "speaker_id": speaker_ids.get(
+                        str(stage.details.get("speaker_id")),
+                        stage.details.get("speaker_id"),
+                    ),
+                }
+            }
+        )
+        for stage in stages
+    ]
+    return tuple(ordered_streams), ordered_processed, ordered_stages
 
 
 def run_single_speaker_pipeline(
