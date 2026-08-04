@@ -7,7 +7,7 @@
 | R-003 | Incorrect overlap diarization | high | medium | warnings, preserve overlap, prefer separate channels |
 | R-004 | Incorrect stereo classification | medium | high | conservative fallback, manual override, Audacity fixtures |
 | R-005 | Output filename collision | medium | high | SHA-256, episode signature, versioning, locks |
-| R-006 | OOM or VRAM leak during batch processing | medium | high | staged model release, ten-file test, peak VRAM metrics |
+| R-006 | OOM or VRAM leak during batch processing | low/medium | high | staged model release, peak metrics, accepted 151-minute RTX 3090 endurance baseline |
 | R-007 | Poor recognition of Polish proper names | high | medium | ground truth, v2 dictionary, model comparison |
 | R-008 | Slow I/O through `/mnt/d` | medium | low/medium | workdir/cache in WSL ext4, sequential source reads |
 | R-009 | Unintended network access | low | high | offline mode, local model paths, network-block tests |
