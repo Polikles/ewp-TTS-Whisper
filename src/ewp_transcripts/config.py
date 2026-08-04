@@ -121,7 +121,12 @@ class ModelsConfig(StrictConfigModel):
 
 class DiarizationConfig(StrictConfigModel):
     model: str = "pyannote/speaker-diarization-community-1"
-    local_model_path: Path = Path("~/.cache/ewp-transcripts/models/pyannote-community-1")
+    model_revision: str = "3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
+    local_model_path: Path = Path(
+        "~/.cache/huggingface/hub/"
+        "models--pyannote--speaker-diarization-community-1/"
+        "snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
+    )
     speaker_count: Literal["auto"] | int = "auto"
     preserve_overlap: bool = True
     use_exclusive_for_word_assignment: bool = True
@@ -137,6 +142,12 @@ class DiarizationConfig(StrictConfigModel):
     @classmethod
     def expand_local_model_path(cls, value: Path) -> Path:
         return value.expanduser()
+
+    @model_validator(mode="after")
+    def validate_snapshot_revision(self) -> DiarizationConfig:
+        if self.local_model_path.name != self.model_revision:
+            raise ValueError("local_model_path must end with model_revision")
+        return self
 
 
 class QualityConfig(StrictConfigModel):

@@ -24,6 +24,7 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.models.asr_revision == "f0fe81560cb8b68660e564f55dd99207059c092e"
     assert config.models.asr_snapshot_path.name == config.models.asr_revision
     assert config.models.alignment_snapshot_path.name == config.models.alignment_revision
+    assert config.diarization.local_model_path.name == config.diarization.model_revision
     assert config.models.compute_type == "float16"
     assert config.models.batch_size == 4
     assert config.outputs.batch_output_directory_name == "output-ewp-transcripts"
@@ -85,6 +86,16 @@ def test_snapshot_path_must_end_with_configured_revision(tmp_path: Path) -> None
     selected = _write(
         tmp_path / "selected.toml",
         '[models]\nasr_snapshot_path = "/models/wrong-revision"\n',
+    )
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+def test_diarization_path_must_end_with_configured_revision(tmp_path: Path) -> None:
+    selected = _write(
+        tmp_path / "selected.toml",
+        '[diarization]\nlocal_model_path = "/models/wrong-revision"\n',
     )
 
     with pytest.raises(InvalidConfigurationError, match="validation failed"):

@@ -45,7 +45,8 @@ allow_network_downloads_during_transcription = false
 
 [diarization]
 model = "pyannote/speaker-diarization-community-1"
-local_model_path = "~/.cache/ewp-transcripts/models/pyannote-community-1"
+model_revision = "3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
+local_model_path = "~/.cache/huggingface/hub/models--pyannote--speaker-diarization-community-1/snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
 speaker_count = "auto"
 preserve_overlap = true
 use_exclusive_for_word_assignment = true
