@@ -32,33 +32,44 @@ The log must contain commit `3ea48f0` or later. At that commit, 217 tests should
 uv run --locked python - "$EWP_P9_WORK" <<'PY'
 import os
 import sys
+import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
+from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.workdirs import MARKER_FILENAME, allocate_work_directory
 
 root = Path(sys.argv[1])
-old = allocate_work_directory(
-    root,
-    run_id=UUID("123e4567-e89b-12d3-a456-426614174000"),
-    job_id="old-private-job",
-)
-recent = allocate_work_directory(
-    root,
-    run_id=UUID("223e4567-e89b-12d3-a456-426614174000"),
-    job_id="recent-private-job",
-)
+
+def ensure_workspace(run_id_text: str, job_id: str) -> WorkDirectory:
+    run_id = UUID(run_id_text)
+    path = root / str(run_id) / job_id
+    marker_path = path / MARKER_FILENAME
+    if not path.exists():
+        return allocate_work_directory(root, run_id=run_id, job_id=job_id)
+    expected = {"marker_version": "1.0", "run_id": str(run_id), "job_id": job_id}
+    assert json.loads(marker_path.read_text(encoding="utf-8")) == expected
+    return WorkDirectory(
+        work_root=root,
+        run_id=run_id,
+        job_id=job_id,
+        path=path,
+        marker_path=marker_path,
+    )
+
+old = ensure_workspace("123e4567-e89b-12d3-a456-426614174000", "old-private-job")
+recent = ensure_workspace("223e4567-e89b-12d3-a456-426614174000", "recent-private-job")
 (old.path / "private-audio.wav").write_bytes(b"old private diagnostic")
 (recent.path / "private-audio.wav").write_bytes(b"recent private diagnostic")
 old_time = (datetime.now(UTC) - timedelta(days=10)).timestamp()
 os.utime(old.marker_path, (old_time, old_time))
 
 model = root / "models-must-remain"
-model.mkdir()
+model.mkdir(exist_ok=True)
 (model / "model.bin").write_bytes(b"model")
 invalid = root / "323e4567-e89b-12d3-a456-426614174000" / "invalid-marker"
-invalid.mkdir(parents=True)
+invalid.mkdir(parents=True, exist_ok=True)
 (invalid / MARKER_FILENAME).write_text("{}", encoding="utf-8")
 print(f"old={old.path}")
 print(f"recent={recent.path}")
@@ -71,7 +82,9 @@ sha256sum "$EWP_P9_WORK/models-must-remain/model.bin"
 ```
 
 There must be two valid workspaces, one invalid-marker directory, and one model-like
-sibling. All are synthetic mechanics fixtures inside the external sandbox.
+sibling. All are synthetic mechanics fixtures inside the external sandbox. The setup is
+safe to repeat in the same sandbox: it validates and reuses only the exact controlled
+markers instead of asking the production allocator to reuse an existing workspace.
 
 ## 2. Preview the age-filtered cleanup
 

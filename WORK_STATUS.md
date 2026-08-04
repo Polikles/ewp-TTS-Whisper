@@ -40,6 +40,9 @@ Repository state at this checkpoint:
   repository status;
 - ADR-0008 records the model decision, limitations, counts, and all accepted external
   artifact hashes;
+- the MVP `clean all-workdirs` command and target WSL gate are accepted: age-filtered
+  preview/removal touched only valid owned workspaces, preserved an invalid marker, and
+  preserved a model-like sibling byte-for-byte; ADR-0004 records the evidence;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
   selected channel indices;
 - each stream runs prepare → ASR/unload → alignment/unload → normalize with fresh engine

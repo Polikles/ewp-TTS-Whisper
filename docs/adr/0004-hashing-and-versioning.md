@@ -218,3 +218,24 @@ uncommitted repository change remained.
 
 This accepts canonical-first recovery for multi-stream jobs and confirms that recovery
 does not implicitly delete an older process's retained diagnostics.
+
+## Phase 9 privacy-oriented workdir cleanup evidence
+
+On 2026-08-04, commit `5449c1b` passed the target WSL cleanup gate with all 217 automated
+tests passing. A controlled ten-day-old workspace and a recent workspace were allocated
+through the production marker writer beside an invalid marker and a model-like unknown
+directory.
+
+- `--older-than 5 --dry-run` selected only the old workspace and removed nothing;
+- the confirmed age-filtered command removed exactly that old workspace;
+- an unfiltered confirmed command then removed exactly the remaining recent workspace;
+- the invalid marker was never trusted or removed;
+- the unknown model-like sibling was never selected, and its hash remained
+  `9372c470eeadd5ecd9c3c74c2b3cb633f8e2f2fad799250a0f70d652b6b825e4`;
+- no result, export, model, configuration, or unowned path was modified.
+
+This accepts the MVP `clean all-workdirs` boundary: exactly one of `--dry-run` or `--yes`
+is mandatory, age filtering is based on the ownership marker, and deletion revalidates
+ownership immediately before removing each workspace. Retention-reason filters remain
+deferred until versioned marker metadata can distinguish failed, cancelled, and
+deliberately retained successful jobs.
