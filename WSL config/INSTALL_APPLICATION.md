@@ -1,8 +1,10 @@
 # Install EWP-transcripts in WSL
 
-Status: **Phase 1 scaffold installation is executable; transcription steps remain pending**.
+Status: **MVP source-checkout installation is executable; release-wheel validation is
+documented separately**.
 
-This guide installs the current EWP-transcripts package from its committed lockfile. The Phase 1 commands (`--help`, `--version`, and `doctor`) are available. Model setup and transcription commands will be added only when their implementation phases are complete.
+This guide installs the current EWP-transcripts package from its committed lockfile.
+`doctor`, `inspect`, `dry-run`, `transcribe`, `export`, and `clean` are available.
 
 It is intentionally separate from [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.md):
 
@@ -43,7 +45,7 @@ uv build
 
 `doctor` does not load Torch, WhisperX, pyannote, or transcription models. A missing required environment capability returns exit code 3. `HF_TOKEN` is reported only as present or missing; its value is never printed.
 
-## Planned complete application flow
+## Complete application flow
 
 1. Verify WSL, Ubuntu, NVIDIA passthrough, and FFmpeg.
 2. Clone a tagged EWP-transcripts release into the Linux filesystem.
@@ -51,8 +53,11 @@ uv build
 4. Run `uv sync --locked` using the committed production lockfile.
 5. Run `transcriber doctor` without loading full models.
 6. Explicitly download pinned ASR, alignment, and diarization models.
-7. Run an optional deep GPU/model check.
+7. Run the GPU/model checks from the model-setup guide.
 8. Verify offline readiness.
-9. Run the first `inspect`, `dry-run`, and `transcribe` operations.
+9. Run `inspect` and `dry-run`, then the first production `transcribe` operation.
 
-Steps 6–9 are not yet application commands. Use the Phase 0 runbooks only for model/GPU validation until the corresponding production implementation is complete.
+For release evidence, build and install the distributable artifact into an isolated
+environment using [`RUN_PHASE9_WHEEL_INSTALL.md`](RUN_PHASE9_WHEEL_INSTALL.md). That
+procedure prevents the source checkout from satisfying imports and installs the exact
+locked CUDA runtime dependency set before the wheel.

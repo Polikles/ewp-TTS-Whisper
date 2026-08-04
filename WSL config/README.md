@@ -91,6 +91,10 @@ Validate real `SIGINT` cancellation, durable cancelled state, queue stop, versio
 restart, duplicate replay, and retained-workspace cleanup using
 [`RUN_PHASE9_INTERRUPT_RESTART.md`](RUN_PHASE9_INTERRUPT_RESTART.md).
 
+Build and install the wheel into a fresh external Python environment, prove installed
+import provenance, and run a short offline GPU transcription using
+[`RUN_PHASE9_WHEEL_INSTALL.md`](RUN_PHASE9_WHEEL_INSTALL.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
