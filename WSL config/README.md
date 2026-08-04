@@ -69,6 +69,10 @@ Validate Phase 7 grouped-source and split-channel speaker processing, shared-tim
 overlap, deterministic attribution, labelled exports, and duplicate replay using
 [`RUN_PHASE7_SOURCE_SPEAKERS.md`](RUN_PHASE7_SOURCE_SPEAKERS.md).
 
+Validate Phase 8 exact-count and automatic mixed-source diarization, offline pinned-model
+execution, overlap representation, labelled exports, and duplicate replay using
+[`RUN_PHASE8_DIARIZATION.md`](RUN_PHASE8_DIARIZATION.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
