@@ -9,134 +9,22 @@ from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Sequence, TypeVar
-import unicodedata
 
-
-NORMALIZATION_VERSION = "ewp-phase0-lexical-v1"
-Item = TypeVar("Item")
-
-
-@dataclass(frozen=True)
-class ErrorCounts:
-    substitutions: int
-    deletions: int
-    insertions: int
-    reference_units: int
-
-    @property
-    def errors(self) -> int:
-        return self.substitutions + self.deletions + self.insertions
-
-    @property
-    def rate(self) -> float:
-        if self.reference_units == 0:
-            raise ValueError("Cannot score an empty normalized reference")
-        return self.errors / self.reference_units
-
-
-def normalize_transcript(text: str) -> str:
-    """Normalize lexical content while preserving letters, digits, and symbols."""
-
-    normalized = unicodedata.normalize("NFC", text).casefold()
-    characters = [
-        " " if character.isspace() or unicodedata.category(character).startswith("P")
-        else character
-        for character in normalized
-    ]
-    return " ".join("".join(characters).split())
-
-
-def error_counts(reference: Sequence[Item], hypothesis: Sequence[Item]) -> ErrorCounts:
-    """Return deterministic Levenshtein substitution/deletion/insertion counts."""
-
-    # Each cell is (total errors, substitutions, deletions, insertions).
-    previous = [(index, 0, index, 0) for index in range(len(reference) + 1)]
-    for hypothesis_index, hypothesis_item in enumerate(hypothesis, start=1):
-        current = [(hypothesis_index, 0, 0, hypothesis_index)]
-        for reference_index, reference_item in enumerate(reference, start=1):
-            if reference_item == hypothesis_item:
-                current.append(previous[reference_index - 1])
-                continue
-
-            diagonal = previous[reference_index - 1]
-            substitution = (
-                diagonal[0] + 1,
-                diagonal[1] + 1,
-                diagonal[2],
-                diagonal[3],
-            )
-            left = current[reference_index - 1]
-            deletion = (left[0] + 1, left[1], left[2] + 1, left[3])
-            above = previous[reference_index]
-            insertion = (above[0] + 1, above[1], above[2], above[3] + 1)
-
-            # Prefer substitutions, then deletions, then insertions when several
-            # optimal paths have the same total error count.
-            current.append(
-                min(
-                    (substitution, deletion, insertion),
-                    key=lambda value: (value[0], value[2] + value[3], value[3]),
-                )
-            )
-        previous = current
-
-    _, substitutions, deletions, insertions = previous[-1]
-    return ErrorCounts(
-        substitutions=substitutions,
-        deletions=deletions,
-        insertions=insertions,
-        reference_units=len(reference),
-    )
-
-
-def score(reference_text: str, hypothesis_text: str) -> dict[str, object]:
-    reference = normalize_transcript(reference_text)
-    hypothesis = normalize_transcript(hypothesis_text)
-    if not reference:
-        raise ValueError("Normalized reference transcript is empty")
-
-    word_counts = error_counts(reference.split(), hypothesis.split())
-    character_counts = error_counts(list(reference), list(hypothesis))
-
-    return {
-        "normalization": NORMALIZATION_VERSION,
-        "wer": round(word_counts.rate, 8),
-        "cer": round(character_counts.rate, 8),
-        "word_errors": asdict(word_counts) | {"errors": word_counts.errors},
-        "character_errors": asdict(character_counts)
-        | {"errors": character_counts.errors},
-        "hypothesis_words": len(hypothesis.split()),
-        "hypothesis_characters": len(hypothesis),
-    }
+from ewp_transcripts.quality import (
+    NORMALIZATION_VERSION,
+    error_counts,
+    extract_json_text,
+    normalize_transcript,
+    read_hypothesis,
+    score,
+)
 
 
 def extract_segment_text(serialized: str) -> str:
     """Extract ordered segment text from WhisperX-style result JSON."""
 
-    document = json.loads(serialized)
-    if not isinstance(document, dict) or not isinstance(document.get("segments"), list):
-        raise ValueError("Hypothesis JSON must contain a 'segments' list")
-
-    text_parts: list[str] = []
-    for index, segment in enumerate(document["segments"]):
-        if not isinstance(segment, dict) or not isinstance(segment.get("text"), str):
-            raise ValueError(f"Hypothesis segment {index} must contain string 'text'")
-        text_parts.append(segment["text"])
-    return " ".join(text_parts)
-
-
-def read_hypothesis(path: Path, hypothesis_format: str) -> tuple[str, str]:
-    selected_format = hypothesis_format
-    if selected_format == "auto":
-        selected_format = "whisperx-json" if path.suffix.casefold() == ".json" else "text"
-
-    serialized = path.read_text(encoding="utf-8")
-    if selected_format == "whisperx-json":
-        return extract_segment_text(serialized), selected_format
-    return serialized, selected_format
+    return extract_json_text(serialized, "whisperx-json")
 
 
 def parse_args() -> argparse.Namespace:
