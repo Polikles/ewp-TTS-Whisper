@@ -146,7 +146,11 @@ class WhisperXAsrEngine:
 
     def _require_snapshot(self, role: str) -> None:
         if not self._snapshot.is_dir() or self._snapshot.name != self._model_info.revision:
-            raise SpeechEngineError(f"Pinned local {role} model snapshot is unavailable")
+            raise SpeechEngineError(
+                f"Pinned local {role} model snapshot is unavailable; "
+                "prepare it using docs/10-wsl2-installation.md, then run "
+                "`transcriber doctor --config <path>`"
+            )
 
 
 class WhisperXAlignmentEngine:
@@ -249,7 +253,11 @@ class WhisperXAlignmentEngine:
     @staticmethod
     def _require_snapshot(snapshot: Path, revision: str) -> None:
         if not snapshot.is_dir() or snapshot.name != revision:
-            raise SpeechEngineError("Pinned local alignment model snapshot is unavailable")
+            raise SpeechEngineError(
+                "Pinned local alignment model snapshot is unavailable; "
+                "prepare it using docs/10-wsl2-installation.md, then run "
+                "`transcriber doctor --config <path>`"
+            )
 
 
 def _transcription_draft(

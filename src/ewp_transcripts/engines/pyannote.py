@@ -143,7 +143,11 @@ class PyannoteDiarizationEngine:
             or self._snapshot.name != self._model_info.revision
             or not (self._snapshot / "config.yaml").is_file()
         ):
-            raise SpeechEngineError("Pinned local diarization model snapshot is unavailable")
+            raise SpeechEngineError(
+                "Pinned local diarization model snapshot is unavailable; "
+                "accept the model terms and prepare it using docs/10-wsl2-installation.md, "
+                "then run `transcriber doctor --config <path>`"
+            )
 
 
 def _turns(annotation: _Annotation) -> tuple[DiarizationTurn, ...]:

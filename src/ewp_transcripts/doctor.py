@@ -198,7 +198,7 @@ def _model_check(
             if available
             else (
                 f"Pinned local {role} model snapshot is missing; "
-                "follow the model preparation steps in WSL config/README.md."
+                "follow the model preparation steps in docs/10-wsl2-installation.md."
             )
         ),
         context={"path": str(path), "revision": revision},

@@ -137,7 +137,7 @@ def test_missing_snapshot_fails_before_module_import(tmp_path: Path) -> None:
         torch_loader=lambda: Torch([]),
     )
 
-    with pytest.raises(SpeechEngineError, match="snapshot is unavailable"):
+    with pytest.raises(SpeechEngineError, match="docs/10-wsl2-installation.md"):
         engine.diarize(tmp_path / "episode.wav", speaker_count=2)
 
     assert imported is False
