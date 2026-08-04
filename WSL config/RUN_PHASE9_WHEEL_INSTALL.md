@@ -86,13 +86,15 @@ whisperx==3.8.6
 pyannote-audio==4.0.7
 ```
 
-The accepted `uv.lock` hash remains:
+The current committed `uv.lock` hash is:
 
 ```text
-c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359
+b4bdea1f4c28aa66ce36a3820e33ba2ab81d4edc70d89b19c0f84de42c3faf61
 ```
 
-Stop if it differs.
+This supersedes the original promoted Phase 0 hash after schema-validation development
+dependencies were added; the accepted runtime ML versions did not change. Stop if the
+current hash differs.
 
 ## 3. Create a fresh venv and synchronize locked dependencies offline
 

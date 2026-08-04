@@ -1,6 +1,12 @@
 # Dependency Baseline
 
-Verified through Phase 0 on **2026-08-02**. The promoted application lock has SHA-256 `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`; integration tests remain required as application code is added.
+The Phase 0 runtime dependency set was verified on **2026-08-02**. Its initially
+promoted application lock had SHA-256
+`c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`.
+Later schema-validation development tooling added `jsonschema` and its lock-only
+transitive packages without changing the accepted runtime ML versions. The current
+committed `uv.lock` SHA-256 is
+`b4bdea1f4c28aa66ce36a3820e33ba2ab81d4edc70d89b19c0f84de42c3faf61`.
 
 ## 1. Environment
 
