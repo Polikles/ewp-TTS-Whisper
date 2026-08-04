@@ -6,26 +6,40 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 through 7 are complete. Phase 8 — mixed-source multi-speaker diarization — is
-next.**
+**Phases 0 through 8 are complete. Phase 9 — hardening, quality evaluation, and the MVP
+release gate — is next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Begin Phase 8 with backend-neutral diarization contracts, a lazy local-only pyannote
-adapter, and deterministic word/segment speaker reconciliation under fake-engine tests.
-Preserve the Phase 7 source-based routing: diarization is only for a single
-mono/dual-mono/mixed-stereo source containing multiple speakers. Do not load pyannote for
-grouped files or split channels.
+Begin Phase 9 by auditing the MVP acceptance checklist and turning its remaining items
+into bounded gates. Start with quality-report tooling and a manifest for the external
+public corpus, while retaining the existing lexical WER/CER normalization. Timing and
+diarization quality require new timestamped annotations and must not be inferred from the
+current plain-text references.
 
 ## 2026-08-04 checkpoint
 
 Repository state at this checkpoint:
 
-- `main` and `origin/main` include commit `e81bdd8`;
-- the complete development-VM gate passes formatting, lint, strict typing, and **199
-  tests**;
+- `main` and `origin/main` include the Phase 8 implementation and validation runbook
+  through commit `d32d9a5`;
+- the complete development-VM and target-WSL gates pass formatting, lint, strict typing,
+  and **214 tests**;
+- the production diarization branch supports exact positive counts and automatic count
+  estimation for one mono, dual-mono, or mixed-stereo source;
+- the pinned Community-1 adapter is lazy and local-only, normalizes cluster identities by
+  first appearance, preserves regular overlap, and uses exclusive turns for word
+  attribution;
+- exact-two P2-03 completed with 2 speakers, 16 segments, and 249 words;
+- automatic P0-03 completed with 2 speakers, 51 segments, 965 words, and 11 overlapping
+  segments;
+- both cases produced schema-valid canonical JSON and labelled TXT/SRT/VTT, then passed
+  model-free duplicate replay, workdir cleanup, temporary-file checks, and clean WSL
+  repository status;
+- ADR-0008 records the model decision, limitations, counts, and all accepted external
+  artifact hashes;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
   selected channel indices;
 - each stream runs prepare → ASR/unload → alignment/unload → normalize with fresh engine
@@ -45,11 +59,11 @@ Repository state at this checkpoint:
   includes marker-verified cleanup before final evidence collection;
 - `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
 
-Phase 7 target validation is now accepted. Both topologies produced two speakers, 18
-segments, and 314 words; model-free export recovery, duplicate replay, cleanup, hashes,
-temporary-file checks, and clean repository status passed. ADR-0002, ADR-0003, and
-ADR-0004 contain the decision evidence. No owner input is needed for the initial Phase 8
-CPU implementation.
+Phase 8 target validation is accepted. The current evidence proves integration and
+offline reproducibility, not general diarization accuracy: the two-case corpus is small
+and lacks speaker-timestamp annotations. Phase 9 must build the larger manifest-driven
+evaluation and release gates. No owner input is needed for the initial acceptance audit
+and tooling scaffold.
 
 ## End-of-day checkpoint — 2026-08-03
 
