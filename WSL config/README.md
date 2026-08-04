@@ -80,6 +80,10 @@ Establish the initial three-case production large-v2 WER/CER baseline with stric
 reference provenance using
 [`RUN_PHASE9_LEXICAL_BASELINE.md`](RUN_PHASE9_LEXICAL_BASELINE.md).
 
+Validate realistic 21.5- to 151-minute Polish recordings, long silence, resource use,
+offline execution, duplicate replay, and endurance stability using
+[`RUN_PHASE9_LONG_DURATION.md`](RUN_PHASE9_LONG_DURATION.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
