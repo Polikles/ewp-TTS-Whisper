@@ -23,7 +23,7 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [ ] Single hyphenated file with `speaker_count=1`.
 - [ ] Base file plus suffixed file.
 - [ ] Ambiguous names are not grouped.
-- [ ] Explicit group overrides automatic detection.
+- [x] Explicit group overrides automatic detection.
 
 ### Timeline validation
 
