@@ -335,6 +335,11 @@ The test suite must not depend on arbitrary filename discovery inside the datase
 
 Once multiple manually verified transcripts exist, add a corpus comparison runner to the local test suite. It should execute selected presets against manifest cases, apply the documented normalization policy, produce machine-readable per-case and aggregate WER/CER, and retain a human-readable word-diff report for error review. Candidate output must always be compared with an independent manually verified reference, never with another model's uncorrected transcript.
 
+The manifest-driven lexical evaluator is documented in
+[`18-quality-evaluation.md`](18-quality-evaluation.md). Its JSON report records strict
+reference and hypothesis provenance plus per-case, macro, and micro results. The
+error-only word diff remains external because it contains transcript-derived content.
+
 The Phase 0 lexical scorer is [`../tools/phase0_score_transcript.py`](../tools/phase0_score_transcript.py). Its `ewp-phase0-lexical-v1` normalization joins line-wrapped sentences, applies Unicode NFC and case folding, replaces Unicode punctuation with spaces, and collapses whitespace. It preserves Polish diacritics, filler words, repetitions, symbols, and the original digit-versus-written-number form. Primary WER/CER therefore ignores capitalization, punctuation, and sentence layout without erasing lexical differences. For a `.json` hypothesis, the scorer concatenates ordered `segments[].text` values and ignores timestamps, words, confidence values, and speaker metadata. The scorer never prints normalized or source transcript text.
 
 ## 5. Synthetic repository fixtures

@@ -21,6 +21,7 @@
 | [15 - Glossary](15-glossary.md) | Standardized terminology |
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
 | [17 - Definition of Done](17-definition-of-done-mvp.md) | MVP completion criteria |
+| [18 - Quality evaluation](18-quality-evaluation.md) | Manifest-driven WER/CER reports and review diffs |
 | [99 - Version 2 roadmap](99-roadmap-v2.md) | GUI, audio repair, LLMs, benchmarks, and Docker |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 

@@ -294,7 +294,10 @@ At the end of today, documentation link validation and `git diff --check` passed
 ## Backlog
 
 - Review `LICENSE_SKETCH.TXT`, select and finalize the future repository license, then replace the sketch with the appropriately named final license file in a dedicated change. Do not commit the sketch as the repository license without that review.
-- Build the manifest-driven corpus WER/CER runner and human-readable transcript diff after additional manually verified references are available.
+- Expand the initial manifest-driven WER/CER evaluator from the three manually verified
+  Phase 0 references to the larger licensed Phase 9 corpus, then establish regression
+  thresholds. The evaluator implementation is complete; corpus expansion and baseline
+  acceptance remain open.
 - Add versioned workdir-marker metadata with an immutable creation timestamp and a
   terminal retention reason (`failed`, `cancelled`, or `successful-retained`), preserving
   compatibility with version-1 markers. Only then add filtered cleanup commands for
