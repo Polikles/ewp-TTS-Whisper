@@ -32,7 +32,11 @@ from ewp_transcripts.engines import (
     TranscriptionDraft,
     TranscriptionSegment,
 )
-from ewp_transcripts.pipeline import process_speaker_stream, run_single_speaker_pipeline
+from ewp_transcripts.pipeline import (
+    process_speaker_stream,
+    run_single_speaker_pipeline,
+    run_source_speaker_pipeline,
+)
 from ewp_transcripts.streams import SpeakerStream
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -222,6 +226,120 @@ def test_processes_one_selected_channel_with_stream_specific_identity(tmp_path: 
     ]
 
 
+def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -> None:
+    inspection, reservation, workspace = _job(tmp_path)
+    first = inspection.sources[0].model_copy(
+        update={"speaker_label": "Damian", "speaker_id": "speaker_001"}
+    )
+    second_path = tmp_path / "episode-Szymon.wav"
+    second_path.write_bytes(b"second")
+    second = first.model_copy(
+        update={
+            "fingerprint": first.fingerprint.model_copy(
+                update={
+                    "path": second_path,
+                    "filename": second_path.name,
+                    "sha256": "c" * 64,
+                }
+            ),
+            "speaker_label": "Szymon",
+            "speaker_id": "speaker_002",
+        }
+    )
+    inspection = inspection.model_copy(update={"sources": (first, second)})
+    events: list[str] = []
+
+    def prepare(source: Path, destination: Path, **kwargs: object) -> Path:
+        events.append(f"prepare:{source.name}:{kwargs['channel_index']}")
+        destination.write_bytes(b"working audio")
+        return destination
+
+    result = run_source_speaker_pipeline(
+        inspection,
+        reservation,
+        workspace,
+        config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=2)),
+        environment=_environment(),
+        asr_engine_factory=lambda: FakeAsr(events),
+        alignment_engine_factory=lambda: FakeAlignment(events),
+        audio_preparer=prepare,
+        now=lambda: COMPLETED_AT,
+    )
+
+    _assert_schema_valid(result.model_dump(mode="json"))
+    assert result.episode.source_topology == "file_group"
+    assert [source.source_id for source in result.sources] == ["source_001", "source_002"]
+    assert [source.speaker_label for source in result.sources] == ["Damian", "Szymon"]
+    assert [speaker.speaker_label for speaker in result.speakers] == ["Damian", "Szymon"]
+    assert len(result.transcript.segments) == 2
+    assert [segment.text for segment in result.transcript.segments] == [
+        "Dzień dobry.",
+        "Dzień dobry.",
+    ]
+    assert all(segment.overlap for segment in result.transcript.segments)
+    assert all(
+        segment.active_speaker_ids == ("speaker_001", "speaker_002")
+        for segment in result.transcript.segments
+    )
+    assert len(result.processing.stages) == 8
+    assert result.processing.stages[4].details == {
+        "stream_index": 2,
+        "source_id": "source_002",
+        "speaker_id": "speaker_002",
+        "channel_index": 0,
+    }
+    assert events.index("align:close") < events.index("prepare:episode-Szymon.wav:0")
+
+
+def test_split_channel_pipeline_uses_one_source_and_two_speakers(tmp_path: Path) -> None:
+    inspection, reservation, workspace = _job(tmp_path)
+    source = inspection.sources[0].model_copy(
+        update={
+            "stream": inspection.sources[0].stream.model_copy(update={"channels": 2}),
+            "channel_mode": ChannelMode.SPLIT_SPEAKERS,
+            "channel_classification": ChannelClassification(
+                original_channels=2,
+                detected_mode=ChannelMode.SPLIT_SPEAKERS,
+                processing_mode=ChannelMode.SPLIT_SPEAKERS,
+            ),
+        }
+    )
+    inspection = inspection.model_copy(update={"sources": (source,)})
+    channels: list[int] = []
+
+    def prepare(source_path: Path, destination: Path, **kwargs: object) -> Path:
+        channels.append(int(kwargs["channel_index"]))
+        destination.write_bytes(b"working audio")
+        return destination
+
+    result = run_source_speaker_pipeline(
+        inspection,
+        reservation,
+        workspace,
+        config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=2)),
+        environment=_environment(),
+        asr_engine_factory=lambda: FakeAsr([]),
+        alignment_engine_factory=lambda: FakeAlignment([]),
+        audio_preparer=prepare,
+        now=lambda: COMPLETED_AT,
+    )
+
+    _assert_schema_valid(result.model_dump(mode="json"))
+    assert channels == [0, 1]
+    assert result.episode.source_topology == "split_channels"
+    assert len(result.sources) == 1
+    assert result.sources[0].channel_selection == "all"
+    assert result.sources[0].speaker_id is None
+    assert [speaker.source_ids for speaker in result.speakers] == [
+        ("source_001",),
+        ("source_001",),
+    ]
+    assert {segment.speaker_id for segment in result.transcript.segments} == {
+        "speaker_001",
+        "speaker_002",
+    }
+
+
 def _job(tmp_path: Path) -> tuple[EpisodeInspection, JobReservation, WorkDirectory]:
     source_path = tmp_path / "episode.wav"
     source_path.write_bytes(b"source")
@@ -299,3 +417,8 @@ def _environment() -> CanonicalEnvironment:
         compute_type="float16",
         batch_size=4,
     )
+
+
+def _assert_schema_valid(document: dict[str, object]) -> None:
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    assert list(Draft202012Validator(schema).iter_errors(document)) == []
