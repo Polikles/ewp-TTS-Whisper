@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -12,6 +13,55 @@ from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.errors import UnsafeWorkDirectoryError
 
 MARKER_FILENAME = ".ewp-transcripts-work.json"
+
+
+def find_work_directories(
+    work_root: Path,
+    *,
+    older_than_days: int = 0,
+    now: datetime | None = None,
+) -> tuple[WorkDirectory, ...]:
+    """Find only structurally valid, owner-marked workspaces below one root."""
+
+    if older_than_days < 0:
+        raise ValueError("older_than_days must not be negative")
+    if not work_root.exists():
+        return ()
+    if work_root.is_symlink() or not work_root.is_dir():
+        raise UnsafeWorkDirectoryError("Work root must be a regular directory")
+    cutoff = (now or datetime.now(UTC)) - timedelta(days=older_than_days)
+    candidates: list[WorkDirectory] = []
+    try:
+        run_directories = sorted(work_root.iterdir(), key=lambda path: path.name)
+    except OSError as error:
+        raise UnsafeWorkDirectoryError("Cannot inspect work root") from error
+    for run_directory in run_directories:
+        if run_directory.is_symlink() or not run_directory.is_dir():
+            continue
+        try:
+            run_id = UUID(run_directory.name)
+            job_directories = sorted(run_directory.iterdir(), key=lambda path: path.name)
+        except (ValueError, OSError):
+            continue
+        for path in job_directories:
+            marker_path = path / MARKER_FILENAME
+            if path.is_symlink() or not path.is_dir() or marker_path.is_symlink():
+                continue
+            workspace = WorkDirectory(
+                work_root=work_root,
+                run_id=run_id,
+                job_id=path.name,
+                path=path,
+                marker_path=marker_path,
+            )
+            try:
+                _validate_work_directory(workspace)
+                marker_time = datetime.fromtimestamp(marker_path.stat().st_mtime, UTC)
+            except (OSError, UnsafeWorkDirectoryError):
+                continue
+            if marker_time <= cutoff:
+                candidates.append(workspace)
+    return tuple(candidates)
 
 
 def _safe_component(value: str, *, label: str) -> str:
@@ -77,6 +127,16 @@ def allocate_work_directory(
 def cleanup_work_directory(workspace: WorkDirectory) -> None:
     """Delete exactly one verified owned workspace, never its root or siblings."""
 
+    _validate_work_directory(workspace)
+    try:
+        shutil.rmtree(workspace.path)
+    except OSError as error:
+        raise UnsafeWorkDirectoryError(f"Cannot clean work directory: {workspace.path}") from error
+
+
+def _validate_work_directory(workspace: WorkDirectory) -> None:
+    """Verify path structure and marker ownership without changing the workspace."""
+
     expected_path = workspace.work_root / str(workspace.run_id) / workspace.job_id
     if workspace.path != expected_path or workspace.marker_path != expected_path / MARKER_FILENAME:
         raise UnsafeWorkDirectoryError("Work directory paths do not match ownership metadata")
@@ -97,7 +157,3 @@ def cleanup_work_directory(workspace: WorkDirectory) -> None:
     }
     if marker != expected_marker:
         raise UnsafeWorkDirectoryError("Work directory marker does not match ownership")
-    try:
-        shutil.rmtree(workspace.path)
-    except OSError as error:
-        raise UnsafeWorkDirectoryError(f"Cannot clean work directory: {workspace.path}") from error

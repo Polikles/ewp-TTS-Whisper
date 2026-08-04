@@ -44,12 +44,17 @@ from ewp_transcripts.storage import (
     plan_job_outputs,
     resolve_output_directory,
 )
-from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
+from ewp_transcripts.workdirs import (
+    allocate_work_directory,
+    cleanup_work_directory,
+    find_work_directories,
+)
 
 __all__ = [
     "ExportFormat",
     "ExportOutcome",
     "application_version",
+    "clean_all_workdirs",
     "discover",
     "doctor",
     "dry_run",
@@ -108,6 +113,35 @@ class BatchTranscriptionOutcome:
     @property
     def cancelled(self) -> int:
         return sum(job.status == "cancelled" for job in self.jobs)
+
+
+@dataclass(frozen=True, slots=True)
+class CleanupOutcome:
+    """Marker-verified workspaces selected or removed by one cleanup operation."""
+
+    paths: tuple[Path, ...]
+    dry_run: bool
+
+
+def clean_all_workdirs(
+    *,
+    config: ApplicationConfig,
+    older_than_days: int = 0,
+    dry_run: bool,
+) -> CleanupOutcome:
+    """Preview or remove every eligible owned workspace below the configured root."""
+
+    workspaces = find_work_directories(
+        config.runtime.work_root,
+        older_than_days=older_than_days,
+    )
+    if not dry_run:
+        for workspace in workspaces:
+            cleanup_work_directory(workspace)
+    return CleanupOutcome(
+        paths=tuple(workspace.path for workspace in workspaces),
+        dry_run=dry_run,
+    )
 
 
 def application_version() -> str:

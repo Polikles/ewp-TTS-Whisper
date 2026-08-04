@@ -11,6 +11,7 @@ from ewp_transcripts.application import (
     ExportFormat,
     TranscriptionOutcome,
     application_version,
+    clean_all_workdirs,
     doctor,
     dry_run,
     export_result,
@@ -55,6 +56,10 @@ class RequestedSpeakerLabels(StrEnum):
 
 class RequestedSubtitlePreset(StrEnum):
     YOUTUBE = "youtube"
+
+
+class CleanTarget(StrEnum):
+    ALL_WORKDIRS = "all-workdirs"
 
 
 def _version_callback(value: bool) -> None:
@@ -137,6 +142,56 @@ def _expected_error(error: ApplicationError) -> None:
     if isinstance(error, InvalidCanonicalResultError):
         raise typer.Exit(code=8) from error
     raise typer.Exit(code=4) from error
+
+
+@app.command("clean")
+def clean_command(
+    target: Annotated[
+        CleanTarget,
+        typer.Argument(help="Cleanup scope; the MVP supports only all-workdirs."),
+    ],
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="List eligible workspaces without removing them."),
+    ] = False,
+    confirmed: Annotated[
+        bool,
+        typer.Option("--yes", help="Confirm removal of every listed eligible workspace."),
+    ] = False,
+    older_than_days: Annotated[
+        int,
+        typer.Option(
+            "--older-than",
+            min=0,
+            help="Select workspaces at least this many days old.",
+        ),
+    ] = 0,
+) -> None:
+    """Safely preview or remove marker-verified application workspaces."""
+
+    if dry_run == confirmed:
+        raise typer.BadParameter("choose exactly one of --dry-run or --yes")
+    assert target is CleanTarget.ALL_WORKDIRS
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = clean_all_workdirs(
+            config=config,
+            older_than_days=older_than_days,
+            dry_run=dry_run,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    action = "WOULD REMOVE" if outcome.dry_run else "REMOVED"
+    for path in outcome.paths:
+        typer.echo(f"{action} {path}")
+    typer.echo(
+        f"SUMMARY selected={len(outcome.paths)} removed="
+        f"{0 if outcome.dry_run else len(outcome.paths)}"
+    )
 
 
 @app.command("inspect")
