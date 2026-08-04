@@ -53,6 +53,10 @@ The following items do not block the MVP.
 - automatic batch-size selection;
 - bundled or explicitly downloaded licensed audio samples;
 - benchmark of speed, VRAM, WER, timestamps, and diarization;
+- repeatable wall-clock, real-time-factor, per-stage duration, peak process RAM, and
+  sampled peak VRAM measurements for every preset comparison;
+- retain raw measurement provenance so later hardware and dependency baselines can be
+  compared without relying on terminal summaries;
 - HTML/JSON report;
 - hardware comparison.
 

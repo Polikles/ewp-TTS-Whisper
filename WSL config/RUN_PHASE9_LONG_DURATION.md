@@ -151,6 +151,10 @@ run_measured() {
 }
 ```
 
+Defining the function produces no terminal output. Output begins when `run_measured` is
+called in the following sections; the shell's `[1] PID` line identifies the temporary
+background GPU monitor.
+
 The local model snapshots must already be installed. `HF_TOKEN` remains absent, and
 both offline environment variables remain set for every measured run.
 
