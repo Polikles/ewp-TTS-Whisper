@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import platform
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
@@ -28,7 +29,7 @@ from ewp_transcripts.domain import (
     InspectionResult,
     JobReservation,
 )
-from ewp_transcripts.domain.canonical import CanonicalEnvironment
+from ewp_transcripts.domain.canonical import CanonicalEnvironment, CanonicalResult
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import ApplicationError, UnsupportedPipelineScopeError
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
@@ -499,6 +500,7 @@ def _process_reservation(
                 alignment_engine=alignment_factory(config),
                 diarization_engine=diarization_factory(config),
             )
+        result = _record_peak_vram(result)
         result_path = finalize_job_result(
             reservation,
             result,
@@ -602,6 +604,26 @@ def _runtime_environment(config: ApplicationConfig) -> CanonicalEnvironment:
         compute_type=config.models.compute_type,
         batch_size=config.models.batch_size,
     )
+
+
+def _record_peak_vram(result: CanonicalResult) -> CanonicalResult:
+    """Record the process CUDA allocation peak when the ML runtime exposed it."""
+
+    torch = sys.modules.get("torch")
+    cuda = getattr(torch, "cuda", None)
+    if cuda is None:
+        return result
+    try:
+        peak_vram_bytes = int(cuda.max_memory_allocated())
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return result
+    if peak_vram_bytes < 0:
+        return result
+    environment = result.processing.environment.model_copy(
+        update={"peak_vram_bytes": peak_vram_bytes}
+    )
+    processing = result.processing.model_copy(update={"environment": environment})
+    return result.model_copy(update={"processing": processing})
 
 
 def _distribution_version(name: str) -> str | None:

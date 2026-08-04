@@ -1,6 +1,7 @@
 """Tests for the complete Phase 5 application lifecycle without ML models."""
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -66,6 +67,32 @@ def test_transcribe_publishes_exports_cleans_workspace_and_then_skips(
     assert calls == 1
     assert not list(config.runtime.work_root.glob("*/*"))
     assert not list(destination.glob("*.partial.json"))
+
+
+def test_transcribe_records_cuda_peak_in_canonical_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path)
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+    monkeypatch.setitem(
+        application.sys.modules,
+        "torch",
+        SimpleNamespace(cuda=SimpleNamespace(max_memory_allocated=lambda: 123_456)),
+    )
+    monkeypatch.setattr(
+        application,
+        "run_single_speaker_pipeline",
+        lambda episode, reservation, workspace, **kwargs: _matching_result(reservation),
+    )
+
+    outcome = transcribe_one(
+        inspection.discovery.input_path,
+        config=_config(tmp_path),
+        output_directory=tmp_path / "output",
+    )
+
+    result = load_canonical_result(outcome.result_path)
+    assert result.processing.environment.peak_vram_bytes == 123_456
 
 
 def test_transcribe_failure_publishes_failed_state_and_retains_workspace(
