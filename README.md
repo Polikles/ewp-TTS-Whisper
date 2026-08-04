@@ -1,14 +1,22 @@
 # EWP Transcriber
 
-> This repository documents the MVP of EWP-transcripts, a local offline CLI tool for accurate transcription of audio recordings.
+> EWP-transcripts is a local-first CLI application for accurate transcription of audio recordings. The executable is named `transcriber`.
 
 ## Status
 
-- Functional specification: ready for implementation.
+- MVP implementation: feature-complete for the validated Polish workflows; release audit and clean-environment validation remain in progress.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
-- Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM [testing lower spec is in TODO].
-- Primary source language: Polish; English is available as an optional mode.
+- Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
+- Validated source language: Polish.
 - Reference backend: WhisperX with pyannote speaker diarization.
+
+## Known limitations before the first MVP release
+
+- English ASR is available in the multilingual backend, but English word alignment has not been validated against a pinned local alignment model. Full English transcription is therefore not yet a supported release claim.
+- The current manually verified quality corpus contains three Polish cases and has no timestamp or diarization annotations. WER/CER are baselined; timestamp accuracy and DER/JER remain to be baselined after the corpus is expanded.
+- Subtitle syntax and export constraints are covered automatically, but playback review in the target player or a private YouTube upload is still pending.
+- The wheel has passed an isolated offline installation and transcription test on the reference WSL machine. A fresh Ubuntu 24.04 WSL installation test is still pending.
+- Explicit CLI grouping, complete `doctor` model-readiness checks, and the final CLI/documentation conformance pass remain release-audit items.
 
 ## Primary outputs
 
