@@ -109,11 +109,11 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 ### Performance and resources
 
-- [ ] A 60-minute file completes without OOM on RTX 3090.
-- [ ] Peak VRAM is recorded or marked unavailable.
-- [ ] Stage timings are recorded.
-- [ ] VRAM usage does not grow across consecutive batch jobs.
-- [ ] Ten sequential files complete without stability degradation.
+- [x] A 60-minute file completes without OOM on RTX 3090.
+- [x] Peak VRAM is recorded or marked unavailable.
+- [x] Stage timings are recorded.
+- [x] VRAM usage does not grow across consecutive batch jobs.
+- [x] Ten sequential files complete without stability degradation.
 
 ## 2. Audio-material matrix
 

@@ -18,8 +18,8 @@ The MVP is complete when the following conditions are met.
 - [ ] The complete application-test checklist passes.
 - [ ] The representative audio matrix has been executed.
 - [ ] WER/CER/timestamp/DER baselines have been recorded.
-- [ ] A 60-minute file completes on RTX 3090 without OOM.
-- [ ] A batch of at least ten files shows no accumulating VRAM use.
+- [x] A 60-minute file completes on RTX 3090 without OOM.
+- [x] A batch of at least ten files shows no accumulating VRAM use.
 - [ ] SRT and VTT have been reviewed manually in a private YouTube upload.
 
 ## Security and reliability

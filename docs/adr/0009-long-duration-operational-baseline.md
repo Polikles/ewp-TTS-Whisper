@@ -96,3 +96,44 @@ Concatenated files are treated as one continuous episode. Future multi-episode i
 may preserve explicit boundaries, but boundary-aware segmentation is not required for
 the MVP. Proper-name correction remains suitable for later terminology or LLM
 post-processing and must not silently alter canonical timestamps.
+
+## Ten-job batch stability evidence
+
+Also on 2026-08-04, commit `fc43b74` passed the production directory-batch stability
+gate using ten external copies of P0-01 in one CLI process. All inputs retained the
+accepted source hash
+`7c5cc9bd72bb1383ce7e33996b5573521277af7fe5f63f5687fe6768cc380c33`.
+
+The batch:
+
+- planned and completed `episode01` through `episode10` in natural order;
+- reported `completed=10 skipped=0 failed=0 cancelled=0`;
+- validated all ten canonical results and their TXT, SRT, and VTT exports;
+- completed in 100.31 seconds with peak process RSS of 5,182,988 KiB;
+- returned GPU memory from a 3173 MiB pre-run baseline to 3048 MiB post-run;
+- had chronological sampled GPU-memory bin peaks of 3205, 3211, 8908, 8782,
+  8798, 8822, 9014, 8618, 8812, and 8771 MiB;
+- replayed as ten skips without loading models;
+- left no application workdir.
+
+Canonical stage totals in job order were 16,230, 8,899, 9,034, 8,812, 9,086,
+8,375, 8,039, 8,111, 8,208, and 7,952 ms. The first job includes cold-start cost.
+Mean stage time decreased from 10,412.2 ms for jobs 1–5 to 8,137.0 ms for jobs 6–10,
+so there was no timing degradation. The last three GPU bins peaked at 9014 MiB versus
+8908 MiB for the first three, within the accepted 1024 MiB workstation-variation
+tolerance and without an accumulating trend.
+
+External canonical-result hashes:
+
+```text
+5b60b1a14367c72edbf981ff354c9cae1ae3543acf94939ccc76be7343e5c7e0  episode01_results.json
+5d5be5fa31cc606c1d6f918e46a5fb8bff00e21b501ed1182104917aaa3b6921  episode02_results.json
+265c1e4a0e81923fba5e0724a2798650b7dc24925c665d51a930d4fbe2b1964e  episode03_results.json
+5dc40d97e662e489663875eb1938012ce80d3796e6ecfbc4c51e83580a608e88  episode04_results.json
+6137491a82d707e35363530441db498e78d2aaff4f21cef04fb8da2e1401a03f  episode05_results.json
+0efaf4f87b77c0403de5b4bd01b3b228d5fe0a3e703730c38917ba6baef8a614  episode06_results.json
+042fb9733247111d11fb2fef36c49d20ac650b1b85cc06567d0f93901c8207b0  episode07_results.json
+1d499166bb032640e79545461e6857162f419a060ea9901dca5042bad4cac1fa  episode08_results.json
+f08ac58e2c29aefd704c72ac6983b1173eedd7011d37fab885d6093560da00d1  episode09_results.json
+f2d148760993d147f7ae9eca1e9d3077afaad05face5d0a615bdcc51daf6c614  episode10_results.json
+```
