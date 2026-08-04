@@ -98,6 +98,9 @@ import provenance, and run a short offline GPU transcription using
 Validate the final lightweight CUDA and pinned-model readiness diagnostics using
 [`RUN_RELEASE_DOCTOR.md`](RUN_RELEASE_DOCTOR.md).
 
+Prepare the language-specific offline snapshot for `en` and `auto` using
+[`PREPARE_ENGLISH_ALIGNMENT.md`](PREPARE_ENGLISH_ALIGNMENT.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).

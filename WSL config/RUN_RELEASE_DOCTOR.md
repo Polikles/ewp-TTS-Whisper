@@ -53,7 +53,8 @@ from pathlib import Path
 report = json.loads(Path('/tmp/ewp-doctor.json').read_text(encoding='utf-8'))
 expected = {
     'python', 'wsl2', 'distribution', 'ffmpeg', 'ffprobe', 'gpu', 'cuda',
-    'asr_model', 'alignment_model', 'diarization_model', 'hf_token',
+    'asr_model', 'alignment_model', 'english_alignment_model',
+    'diarization_model', 'hf_token',
 }
 checks = {item['code']: item for item in report['checks']}
 assert report['ready'] is True
@@ -86,7 +87,9 @@ models = {
     for item in report['checks']
     if item['code'].endswith('_model')
 }
-assert set(models) == {'asr_model', 'alignment_model', 'diarization_model'}
+assert set(models) == {
+    'asr_model', 'alignment_model', 'english_alignment_model', 'diarization_model'
+}
 print('doctor explicit config: PASS')
 PY
 ```
