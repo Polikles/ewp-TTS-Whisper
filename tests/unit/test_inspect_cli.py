@@ -14,7 +14,7 @@ from ewp_transcripts.domain import (
     InspectionResult,
     SourceFingerprint,
 )
-from ewp_transcripts.domain.enums import ChannelMode
+from ewp_transcripts.domain.enums import ChannelMode, LanguageMode
 
 runner = CliRunner()
 
@@ -98,6 +98,8 @@ def test_inspect_json_applies_cli_overrides(tmp_path: Path, monkeypatch) -> None
             "--recursive",
             "--channel-mode",
             "split-speakers",
+            "--language",
+            "en",
             "--speaker-count",
             "2",
             "--allow-duration-mismatch",
@@ -110,6 +112,7 @@ def test_inspect_json_applies_cli_overrides(tmp_path: Path, monkeypatch) -> None
     config = captured["config"]
     assert config.input.recursive is True
     assert config.channels.mode is ChannelMode.SPLIT_SPEAKERS
+    assert config.general.language is LanguageMode.ENGLISH
     assert config.diarization.speaker_count == 2
     assert captured["allow_duration_mismatch"] is True
 

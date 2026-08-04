@@ -13,6 +13,7 @@ from pathlib import Path
 from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain import DiagnosticCheck, DiagnosticStatus, DoctorResult
+from ewp_transcripts.domain.enums import LanguageMode
 
 CommandRunner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
 ExecutableFinder = Callable[[str], str | None]
@@ -179,11 +180,19 @@ def _cuda_check(runner: CommandRunner) -> DiagnosticCheck:
     )
 
 
-def _model_check(code: str, role: str, path: Path, revision: str) -> DiagnosticCheck:
+def _model_check(
+    code: str,
+    role: str,
+    path: Path,
+    revision: str,
+    *,
+    required: bool = True,
+) -> DiagnosticCheck:
     available = path.is_dir() and path.name == revision
+    missing_status = DiagnosticStatus.FAIL if required else DiagnosticStatus.WARNING
     return DiagnosticCheck(
         code=code,
-        status=DiagnosticStatus.PASS if available else DiagnosticStatus.FAIL,
+        status=DiagnosticStatus.PASS if available else missing_status,
         message=(
             f"Pinned local {role} model snapshot is available."
             if available
@@ -250,9 +259,17 @@ def run_doctor(
         ),
         _model_check(
             "alignment_model",
-            "alignment",
+            "Polish alignment",
             effective_config.models.alignment_snapshot_path,
             effective_config.models.alignment_revision,
+            required=effective_config.general.language is not LanguageMode.ENGLISH,
+        ),
+        _model_check(
+            "english_alignment_model",
+            "English alignment",
+            effective_config.models.english_alignment_snapshot_path,
+            effective_config.models.english_alignment_revision,
+            required=effective_config.general.language is not LanguageMode.POLISH,
         ),
         _model_check(
             "diarization_model",

@@ -12,7 +12,7 @@ from ewp_transcripts.application import (
     TranscriptionOutcome,
 )
 from ewp_transcripts.cli import app
-from ewp_transcripts.domain.enums import PlanDecision
+from ewp_transcripts.domain.enums import LanguageMode, PlanDecision
 
 
 def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
@@ -134,6 +134,36 @@ def test_transcribe_cli_accepts_automatic_speaker_count(
 
     assert outcome.exit_code == 0
     assert observed == ["auto"]
+
+
+@pytest.mark.parametrize(
+    ("requested", "expected"),
+    [("pl", LanguageMode.POLISH), ("en", LanguageMode.ENGLISH), ("auto", LanguageMode.AUTO)],
+)
+def test_transcribe_cli_applies_language_mode(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    requested: str,
+    expected: LanguageMode,
+) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+    observed: list[LanguageMode] = []
+
+    def run(input_path, *, config, **kwargs):
+        observed.append(config.general.language)
+        return TranscriptionOutcome(
+            decision=PlanDecision.PROCESS,
+            job_id="episode",
+            result_path=tmp_path / "episode_results.json",
+        )
+
+    monkeypatch.setattr(cli, "transcribe_one", run)
+
+    outcome = CliRunner().invoke(app, ["transcribe", str(source), "--language", requested])
+
+    assert outcome.exit_code == 0
+    assert observed == [expected]
 
 
 def test_transcribe_cli_applies_output_runtime_and_interaction_overrides(

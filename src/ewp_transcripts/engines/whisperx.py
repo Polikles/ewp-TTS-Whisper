@@ -110,22 +110,28 @@ class WhisperXAsrEngine:
         try:
             module = self._module or self._module_loader()
             self._module = module
+            backend_language = None if language == "auto" else language
             if self._model is None:
+                load_options: dict[str, object] = {
+                    "compute_type": self._compute_type,
+                    "vad_method": self._vad_method,
+                    "local_files_only": True,
+                }
+                if backend_language is not None:
+                    load_options["language"] = backend_language
                 self._model = module.load_model(
                     str(self._snapshot),
                     self._device,
-                    compute_type=self._compute_type,
-                    language=language,
-                    vad_method=self._vad_method,
-                    local_files_only=True,
+                    **load_options,
                 )
             audio = module.load_audio(str(audio_path))
-            result = self._model.transcribe(
-                audio,
-                batch_size=batch_size,
-                language=language,
-                task="transcribe",
-            )
+            transcribe_options: dict[str, object] = {
+                "batch_size": batch_size,
+                "task": "transcribe",
+            }
+            if backend_language is not None:
+                transcribe_options["language"] = backend_language
+            result = self._model.transcribe(audio, **transcribe_options)
             return _transcription_draft(result, requested_language=language)
         except SpeechEngineError:
             raise
@@ -151,10 +157,15 @@ class WhisperXAlignmentEngine:
         snapshot: Path,
         *,
         revision: str,
+        english_snapshot: Path | None = None,
+        english_revision: str | None = None,
         device: str,
         module_loader: ModuleLoader = _load_whisperx,
     ) -> None:
         self._snapshot = snapshot
+        self._revision = revision
+        self._english_snapshot = english_snapshot
+        self._english_revision = english_revision
         self._device = device
         self._module_loader = module_loader
         self._module: _WhisperXModule | None = None
@@ -179,7 +190,15 @@ class WhisperXAlignmentEngine:
         *,
         language: str,
     ) -> AlignedTranscript:
-        self._require_snapshot()
+        snapshot, revision, name = self._select_model(language)
+        self._require_snapshot(snapshot, revision)
+        self._model_info = EngineModelInfo(
+            role="alignment",
+            name=name,
+            revision=revision,
+            local_path=snapshot,
+            library_versions=_library_versions(),
+        )
         try:
             module = self._module or self._module_loader()
             self._module = module
@@ -187,7 +206,7 @@ class WhisperXAlignmentEngine:
                 self._model, self._metadata = module.load_align_model(
                     language_code=language,
                     device=self._device,
-                    model_name=str(self._snapshot),
+                    model_name=str(snapshot),
                     model_cache_only=True,
                 )
             audio = module.load_audio(str(audio_path))
@@ -220,8 +239,16 @@ class WhisperXAlignmentEngine:
         gc.collect()
         _release_cuda()
 
-    def _require_snapshot(self) -> None:
-        if not self._snapshot.is_dir() or self._snapshot.name != self._model_info.revision:
+    def _select_model(self, language: str) -> tuple[Path, str, str]:
+        if language == "pl":
+            return self._snapshot, self._revision, "wav2vec2-large-xlsr-53-polish"
+        if language == "en" and self._english_snapshot is not None and self._english_revision:
+            return self._english_snapshot, self._english_revision, "wav2vec2-base-960h"
+        raise SpeechEngineError(f"No pinned local alignment model is configured for: {language}")
+
+    @staticmethod
+    def _require_snapshot(snapshot: Path, revision: str) -> None:
+        if not snapshot.is_dir() or snapshot.name != revision:
             raise SpeechEngineError("Pinned local alignment model snapshot is unavailable")
 
 

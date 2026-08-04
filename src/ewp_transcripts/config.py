@@ -93,12 +93,23 @@ class ModelsConfig(StrictConfigModel):
         "models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/"
         "snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
     )
+    english_alignment_model: str = "facebook/wav2vec2-base-960h"
+    english_alignment_revision: str = "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+    english_alignment_snapshot_path: Path = Path(
+        "~/.cache/huggingface/hub/models--facebook--wav2vec2-base-960h/"
+        "snapshots/22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+    )
     compute_type: Literal["float16"] = "float16"
     batch_size: int = Field(default=4, ge=1)
     device: Literal["cuda"] = "cuda"
     allow_network_downloads_during_transcription: bool = False
 
-    @field_validator("asr_snapshot_path", "alignment_snapshot_path", mode="after")
+    @field_validator(
+        "asr_snapshot_path",
+        "alignment_snapshot_path",
+        "english_alignment_snapshot_path",
+        mode="after",
+    )
     @classmethod
     def expand_snapshot_path(cls, value: Path) -> Path:
         return value.expanduser()
@@ -111,6 +122,11 @@ class ModelsConfig(StrictConfigModel):
                 "alignment_snapshot_path",
                 self.alignment_snapshot_path,
                 self.alignment_revision,
+            ),
+            (
+                "english_alignment_snapshot_path",
+                self.english_alignment_snapshot_path,
+                self.english_alignment_revision,
             ),
         )
         for field_name, path, revision in snapshots:

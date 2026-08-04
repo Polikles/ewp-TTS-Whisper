@@ -546,6 +546,8 @@ def _whisperx_alignment(config: ApplicationConfig) -> AlignmentEngine:
     return WhisperXAlignmentEngine(
         config.models.alignment_snapshot_path,
         revision=config.models.alignment_revision,
+        english_snapshot=config.models.english_alignment_snapshot_path,
+        english_revision=config.models.english_alignment_revision,
         device=config.models.device,
     )
 

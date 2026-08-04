@@ -104,6 +104,30 @@ def test_asr_loads_pinned_snapshot_locally_and_normalizes_milliseconds(
     assert "torch" not in sys.modules
 
 
+def test_automatic_language_omits_backend_language_override(tmp_path: Path) -> None:
+    revision = "asr-revision"
+    snapshot = tmp_path / revision
+    snapshot.mkdir()
+    calls: list[tuple[str, object]] = []
+    engine = WhisperXAsrEngine(
+        snapshot,
+        revision=revision,
+        device="cuda",
+        compute_type="float16",
+        module_loader=lambda: FakeWhisperX(calls),
+    )
+
+    result = engine.transcribe(tmp_path / "working.wav", language="auto", batch_size=4)
+
+    load_call = next(value for name, value in calls if name == "load_model")
+    transcribe_call = next(value for name, value in calls if name == "transcribe")
+    assert isinstance(load_call, tuple)
+    assert isinstance(transcribe_call, tuple)
+    assert "language" not in load_call[2]
+    assert "language" not in transcribe_call[1]
+    assert result.language == "pl"
+
+
 def test_alignment_uses_local_snapshot_and_preserves_missing_word_times(
     tmp_path: Path,
 ) -> None:
@@ -133,6 +157,51 @@ def test_alignment_uses_local_snapshot_and_preserves_missing_word_times(
     assert isinstance(load_call, tuple)
     assert load_call[2]["model_cache_only"] is True
     assert load_call[2]["model_name"] == str(snapshot)
+
+
+def test_alignment_selects_pinned_english_snapshot(tmp_path: Path) -> None:
+    polish_revision = "polish-revision"
+    english_revision = "english-revision"
+    polish_snapshot = tmp_path / polish_revision
+    english_snapshot = tmp_path / english_revision
+    polish_snapshot.mkdir()
+    english_snapshot.mkdir()
+    calls: list[tuple[str, object]] = []
+    engine = WhisperXAlignmentEngine(
+        polish_snapshot,
+        revision=polish_revision,
+        english_snapshot=english_snapshot,
+        english_revision=english_revision,
+        device="cuda",
+        module_loader=lambda: FakeWhisperX(calls),
+    )
+    draft = TranscriptionDraft(
+        language="en",
+        segments=(TranscriptionSegment(text=" Hello.", start_ms=125, end_ms=1234),),
+    )
+
+    engine.align(tmp_path / "working.wav", draft, language="en")
+
+    load_call = next(value for name, value in calls if name == "load_align_model")
+    assert isinstance(load_call, tuple)
+    assert load_call[0] == "en"
+    assert load_call[2]["model_name"] == str(english_snapshot)
+    assert engine.model_info.revision == english_revision
+    assert engine.model_info.name == "wav2vec2-base-960h"
+
+
+def test_alignment_rejects_language_without_pinned_model(tmp_path: Path) -> None:
+    revision = "polish-revision"
+    snapshot = tmp_path / revision
+    snapshot.mkdir()
+    engine = WhisperXAlignmentEngine(snapshot, revision=revision, device="cuda")
+    draft = TranscriptionDraft(
+        language="de",
+        segments=(TranscriptionSegment(text=" Hallo.", start_ms=0, end_ms=1000),),
+    )
+
+    with pytest.raises(SpeechEngineError, match="No pinned local alignment model"):
+        engine.align(tmp_path / "working.wav", draft, language="de")
 
 
 def test_missing_snapshot_fails_before_module_loading(tmp_path: Path) -> None:

@@ -21,7 +21,7 @@ from ewp_transcripts.application import (
 )
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain import JobOutputPlan
-from ewp_transcripts.domain.enums import ChannelMode
+from ewp_transcripts.domain.enums import ChannelMode, LanguageMode
 from ewp_transcripts.domain.errors import (
     ApplicationError,
     InvalidCanonicalResultError,
@@ -60,6 +60,12 @@ class RequestedSubtitlePreset(StrEnum):
 
 class RequestedPreset(StrEnum):
     ACCURATE = "accurate"
+
+
+class RequestedLanguage(StrEnum):
+    POLISH = "pl"
+    ENGLISH = "en"
+    AUTO = "auto"
 
 
 class RequestedTranscribeFormat(StrEnum):
@@ -150,10 +156,13 @@ def _speaker_mapping(values: list[str] | None) -> dict[str, str]:
 def _inspection_overrides(
     *,
     recursive: bool | None,
+    language: RequestedLanguage | None,
     channel_mode: RequestedChannelMode | None,
     speaker_count: str | int | None,
 ) -> dict[str, object]:
     overrides: dict[str, object] = {}
+    if language is not None:
+        overrides["general"] = {"language": LanguageMode(language.value)}
     if recursive is not None:
         overrides["input"] = {"recursive": recursive}
     if channel_mode is not None:
@@ -166,6 +175,7 @@ def _inspection_overrides(
 def _transcribe_overrides(
     *,
     recursive: bool,
+    language: RequestedLanguage | None,
     channel_mode: RequestedChannelMode | None,
     speaker_count: str | int,
     preset: RequestedPreset,
@@ -176,10 +186,13 @@ def _transcribe_overrides(
 ) -> dict[str, object]:
     overrides = _inspection_overrides(
         recursive=recursive,
+        language=language,
         channel_mode=channel_mode,
         speaker_count=speaker_count,
     )
     general: dict[str, object] = {"preset": preset.value}
+    if language is not None:
+        general["language"] = LanguageMode(language.value)
     if non_interactive:
         general["interactive"] = False
     overrides["general"] = general
@@ -271,6 +284,10 @@ def inspect_command(
         bool | None,
         typer.Option("--recursive", help="Inspect supported files in subdirectories."),
     ] = None,
+    language: Annotated[
+        RequestedLanguage | None,
+        typer.Option("--language", help="Transcription language: pl, en, or auto."),
+    ] = None,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -303,6 +320,7 @@ def inspect_command(
             explicit_path=config_path,
             cli_overrides=_inspection_overrides(
                 recursive=recursive,
+                language=language,
                 channel_mode=channel_mode,
                 speaker_count=parsed_speaker_count,
             ),
@@ -367,6 +385,10 @@ def dry_run_command(
         bool | None,
         typer.Option("--recursive", help="Inspect supported files in subdirectories."),
     ] = None,
+    language: Annotated[
+        RequestedLanguage | None,
+        typer.Option("--language", help="Transcription language: pl, en, or auto."),
+    ] = None,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -406,6 +428,7 @@ def dry_run_command(
             explicit_path=config_path,
             cli_overrides=_inspection_overrides(
                 recursive=recursive,
+                language=language,
                 channel_mode=channel_mode,
                 speaker_count=parsed_speaker_count,
             ),
@@ -541,6 +564,10 @@ def transcribe_command(
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
     ] = None,
+    language: Annotated[
+        RequestedLanguage | None,
+        typer.Option("--language", help="Transcription language: pl, en, or auto."),
+    ] = None,
     channel_mode: Annotated[
         RequestedChannelMode | None,
         typer.Option("--channel-mode", help="Override automatic channel classification."),
@@ -610,6 +637,7 @@ def transcribe_command(
             explicit_path=config_path,
             cli_overrides=_transcribe_overrides(
                 recursive=bool(recursive) if input_path.is_dir() else False,
+                language=language,
                 channel_mode=channel_mode,
                 speaker_count=1 if parsed_speaker_count is None else parsed_speaker_count,
                 preset=preset,

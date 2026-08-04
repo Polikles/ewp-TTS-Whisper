@@ -107,12 +107,12 @@ def run_diarization_pipeline(
         asr_engine.close()
     stages.append(_completed_stage("transcribe", start, clock))
 
-    alignment_info = alignment_engine.model_info
     start = clock()
     try:
         aligned = alignment_engine.align(working_audio, draft, language=draft.language)
     finally:
         alignment_engine.close()
+    alignment_info = alignment_engine.model_info
     stages.append(_completed_stage("align", start, clock))
 
     start = clock()
@@ -442,7 +442,6 @@ def process_speaker_stream(
         asr_engine.close()
     stages.append(_completed_stage("transcribe", start, clock))
 
-    alignment_info = alignment_engine.model_info
     start = clock()
     try:
         aligned = alignment_engine.align(
@@ -452,6 +451,7 @@ def process_speaker_stream(
         )
     finally:
         alignment_engine.close()
+    alignment_info = alignment_engine.model_info
     stages.append(_completed_stage("align", start, clock))
 
     start = clock()

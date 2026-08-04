@@ -32,6 +32,7 @@ def _config_with_models(tmp_path) -> ApplicationConfig:
         "asr": "asr-revision",
         "alignment": "alignment-revision",
         "diarization": "diarization-revision",
+        "english_alignment": "english-alignment-revision",
     }
     paths = {name: tmp_path / revision for name, revision in revisions.items()}
     for path in paths.values():
@@ -42,6 +43,8 @@ def _config_with_models(tmp_path) -> ApplicationConfig:
             asr_snapshot_path=paths["asr"],
             alignment_revision=revisions["alignment"],
             alignment_snapshot_path=paths["alignment"],
+            english_alignment_revision=revisions["english_alignment"],
+            english_alignment_snapshot_path=paths["english_alignment"],
         ),
         diarization=DiarizationConfig(
             model_revision=revisions["diarization"],
