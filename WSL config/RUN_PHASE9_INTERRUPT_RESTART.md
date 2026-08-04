@@ -75,15 +75,17 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
     --output-dir "$EWP_P9_INTERRUPT_OUTPUT" \
     --non-interactive \
     > "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stdout.txt" \
-    2> "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stderr.txt" &
+    2> "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stderr.txt" \
+    < /dev/null &
 export EWP_P9_INTERRUPT_PID=$!
-set -e
 printf 'transcriber pid=%s\n' "$EWP_P9_INTERRUPT_PID"
 ps -o pid=,ppid=,stat=,args= -p "$EWP_P9_INTERRUPT_PID"
 
+export EWP_P9_INTERRUPT_OBSERVED=0
 for attempt in $(seq 1 60); do
     if grep -q 'Performing voice activity detection' \
         "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stdout.txt"; then
+        export EWP_P9_INTERRUPT_OBSERVED=1
         echo "active transcription observed: PASS"
         break
     fi
@@ -94,20 +96,25 @@ for attempt in $(seq 1 60); do
     sleep 1
 done
 
-grep -q 'Performing voice activity detection' \
-    "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stdout.txt" \
-    || { echo "active transcription was not observed" >&2; false; }
-sleep 10
-kill -INT "$EWP_P9_INTERRUPT_PID"
-
-set +e
-wait "$EWP_P9_INTERRUPT_PID"
-export EWP_P9_INTERRUPT_EXIT=$?
-set -e
+if test "$EWP_P9_INTERRUPT_OBSERVED" -eq 1; then
+    sleep 10
+    kill -INT "$EWP_P9_INTERRUPT_PID"
+    wait "$EWP_P9_INTERRUPT_PID"
+    export EWP_P9_INTERRUPT_EXIT=$?
+else
+    echo "STOP: active transcription was not observed; do not continue" >&2
+    export EWP_P9_INTERRUPT_EXIT="not-run"
+fi
 printf 'interrupted exit=%s\n' "$EWP_P9_INTERRUPT_EXIT"
 cat "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stdout.txt"
 cat "$EWP_P9_INTERRUPT_EVIDENCE/interrupted.stderr.txt"
 ```
+
+Redirecting stdin from `/dev/null` is required: a background process that tries to read
+the interactive terminal can otherwise be suspended by shell job control. This block
+leaves shell `errexit` disabled so an expected nonzero cancellation exit cannot close an
+interactive terminal. If observation fails, the block prints `STOP` and does not send a
+signal or enable later validation.
 
 The recorded command must still be alive when signalled. Do not substitute `pkill`,
 `killall`, an unresolved process substitution, or a guessed PID. Expected exit code is
