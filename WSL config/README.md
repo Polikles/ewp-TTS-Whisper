@@ -104,6 +104,10 @@ Prepare the language-specific offline snapshot for `en` and `auto` using
 Validate caller-forced multi-file grouping with a mandatory collision-safe job identity
 using [`RUN_RELEASE_EXPLICIT_GROUP.md`](RUN_RELEASE_EXPLICIT_GROUP.md).
 
+Validate chronological default speakers, JSON Lines isolation, timing/VRAM metrics, and
+missing-model guidance using
+[`RUN_RELEASE_OBSERVABILITY.md`](RUN_RELEASE_OBSERVABILITY.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
