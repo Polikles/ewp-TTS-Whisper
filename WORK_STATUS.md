@@ -45,8 +45,11 @@ Repository state at this checkpoint:
   preserved a model-like sibling byte-for-byte; ADR-0004 records the evidence;
 - the initial three-case production manifest baseline is accepted: fresh canonical
   hypotheses exactly reproduce ADR-0007's large-v2 per-case, macro, and micro WER/CER;
-  the report and error-only diff hashes are recorded, while qualitative diff review and
-  expansion to a larger licensed corpus remain open;
+  the report and error-only diff hashes are recorded; owner review found only minor
+  P0-01/P0-02 errors, overlap-driven P0-03 errors, and no notable hallucinations;
+- the corpus is explicitly provisional and small; after the MVP transcribes the owner's
+  published archive, manually corrected excerpts—not raw model output—will expand the
+  external ground-truth dataset with provenance and licensing metadata;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
   selected channel indices;
 - each stream runs prepare → ASR/unload → alignment/unload → normalize with fresh engine

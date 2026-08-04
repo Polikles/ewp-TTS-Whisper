@@ -212,11 +212,18 @@ External evaluation artifact hashes:
 ```
 
 The error-only review diff contains 230 lines and remains external because it contains
-transcript-derived words. Its qualitative review is still pending. Duplicate replay
-skipped all three canonical results and nine exports without model loading; workdir
-cleanup passed and the repository remained clean.
+transcript-derived words. Owner review found only minor errors in P0-01 and P0-02. P0-03
+errors were predominantly associated with overlapping speech, and no notable
+hallucinations were found. Duplicate replay skipped all three canonical results and nine
+exports without model loading; workdir cleanup passed and the repository remained clean.
 
 Exact agreement between the independent Phase 0 benchmark and fresh production canonical
 extraction validates the scoring migration and current pipeline baseline. It does not
 remove the original limitation: three cases are too small to establish a final release
 threshold or permanent model ranking.
+
+The planned corpus expansion will use the MVP to draft transcripts for the owner's
+already-published audio archive, followed by manual correction. Only the manually
+verified transcripts may become ground truth. Larger corrected excerpts will then be
+added to the external test dataset with provenance and licensing metadata before model
+or regression decisions are revisited.
