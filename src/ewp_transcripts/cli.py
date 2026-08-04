@@ -95,6 +95,10 @@ def root(
 
 @app.command("doctor")
 def doctor_command(
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
     json_output: Annotated[
         bool,
         typer.Option("--json-output", help="Write the diagnostic result as JSON."),
@@ -102,7 +106,11 @@ def doctor_command(
 ) -> None:
     """Check the local environment without loading transcription models."""
 
-    result = doctor()
+    try:
+        config = load_config(explicit_path=config_path)
+        result = doctor(config=config)
+    except ApplicationError as error:
+        _expected_error(error)
     if json_output:
         typer.echo(result.model_dump_json(indent=2))
     else:

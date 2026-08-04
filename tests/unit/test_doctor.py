@@ -8,12 +8,18 @@ import pytest
 from typer.testing import CliRunner
 
 from ewp_transcripts.cli import app
+from ewp_transcripts.config import ApplicationConfig, DiarizationConfig, ModelsConfig
 from ewp_transcripts.doctor import run_doctor
 from ewp_transcripts.domain import DiagnosticStatus
 
 
 def _successful_runner(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    stdout = "NVIDIA GeForce RTX 3090, 24576\n" if "nvidia-smi" in arguments[0] else "ok\n"
+    if "nvidia-smi" in arguments[0]:
+        stdout = "NVIDIA GeForce RTX 3090, 24576\n"
+    elif arguments[0] == sys.executable:
+        stdout = "12.8\n"
+    else:
+        stdout = "ok\n"
     return subprocess.CompletedProcess(arguments, 0, stdout=stdout, stderr="")
 
 
@@ -21,8 +27,32 @@ def _all_executables(name: str) -> str:
     return f"/usr/bin/{name}"
 
 
-def test_doctor_passes_on_validated_baseline_without_importing_ml() -> None:
+def _config_with_models(tmp_path) -> ApplicationConfig:
+    revisions = {
+        "asr": "asr-revision",
+        "alignment": "alignment-revision",
+        "diarization": "diarization-revision",
+    }
+    paths = {name: tmp_path / revision for name, revision in revisions.items()}
+    for path in paths.values():
+        path.mkdir()
+    return ApplicationConfig(
+        models=ModelsConfig(
+            asr_revision=revisions["asr"],
+            asr_snapshot_path=paths["asr"],
+            alignment_revision=revisions["alignment"],
+            alignment_snapshot_path=paths["alignment"],
+        ),
+        diarization=DiarizationConfig(
+            model_revision=revisions["diarization"],
+            local_model_path=paths["diarization"],
+        ),
+    )
+
+
+def test_doctor_passes_on_validated_baseline_without_importing_ml(tmp_path) -> None:
     result = run_doctor(
+        config=_config_with_models(tmp_path),
         finder=_all_executables,
         runner=_successful_runner,
         environ={},
@@ -38,11 +68,12 @@ def test_doctor_passes_on_validated_baseline_without_importing_ml() -> None:
     assert "pyannote.audio" not in sys.modules
 
 
-def test_doctor_fails_when_gpu_is_missing() -> None:
+def test_doctor_fails_when_gpu_is_missing(tmp_path) -> None:
     def finder(name: str) -> str | None:
         return None if name == "nvidia-smi" else f"/usr/bin/{name}"
 
     result = run_doctor(
+        config=_config_with_models(tmp_path),
         finder=finder,
         runner=_successful_runner,
         python_version=(3, 12, 3),
@@ -57,9 +88,11 @@ def test_doctor_fails_when_gpu_is_missing() -> None:
 
 def test_doctor_json_returns_environment_exit_code_without_secrets(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
 ) -> None:
     secret = "test-secret-that-must-not-be-printed"
     diagnostic = run_doctor(
+        config=_config_with_models(tmp_path),
         finder=lambda name: None if name == "nvidia-smi" else f"/usr/bin/{name}",
         runner=_successful_runner,
         environ={"HF_TOKEN": secret},
@@ -67,7 +100,7 @@ def test_doctor_json_returns_environment_exit_code_without_secrets(
         kernel_release="6.18.0-microsoft-standard-WSL2",
         os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
     )
-    monkeypatch.setattr("ewp_transcripts.cli.doctor", lambda: diagnostic)
+    monkeypatch.setattr("ewp_transcripts.cli.doctor", lambda **_kwargs: diagnostic)
     runner = CliRunner()
     result = runner.invoke(app, ["doctor", "--json-output"])
 
@@ -75,3 +108,23 @@ def test_doctor_json_returns_environment_exit_code_without_secrets(
     assert '"ready": false' in result.stdout
     assert "HF_TOKEN is present" in result.stdout
     assert secret not in result.stdout
+
+
+def test_doctor_fails_with_setup_guidance_when_a_model_is_missing(tmp_path) -> None:
+    config = _config_with_models(tmp_path)
+    config.models.asr_snapshot_path.rmdir()
+
+    result = run_doctor(
+        config=config,
+        finder=_all_executables,
+        runner=_successful_runner,
+        environ={},
+        python_version=(3, 12, 3),
+        kernel_release="6.18.0-microsoft-standard-WSL2",
+        os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
+    )
+
+    assert result.ready is False
+    check = next(item for item in result.checks if item.code == "asr_model")
+    assert check.status is DiagnosticStatus.FAIL
+    assert "WSL config/README.md" in check.message

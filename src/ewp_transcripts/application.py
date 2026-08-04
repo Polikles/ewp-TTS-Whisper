@@ -150,10 +150,10 @@ def application_version() -> str:
     return __version__
 
 
-def doctor() -> DoctorResult:
+def doctor(*, config: ApplicationConfig | None = None) -> DoctorResult:
     """Return lightweight, sanitized environment diagnostics."""
 
-    return run_doctor()
+    return run_doctor(config=config)
 
 
 def discover(

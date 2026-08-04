@@ -16,7 +16,7 @@ Working command name: `transcriber`.
 Checks the environment without running transcription.
 
 ```text
-transcriber doctor
+transcriber doctor [--config PATH] [--json-output]
 ```
 
 Checks include:
@@ -25,11 +25,12 @@ Checks include:
 - GPU visibility through `nvidia-smi`;
 - CUDA availability in PyTorch;
 - FFmpeg and ffprobe;
-- Python and lockfile state;
-- free space in the work directory;
+- supported Python version;
 - ASR, alignment, and diarization models;
 - `HF_TOKEN` presence reported only as `present` or `missing`;
-- offline readiness.
+- local model readiness for offline transcription.
+
+The CUDA check runs in a short child Python process. No transcription model is loaded.
 
 ## 3. `inspect`
 

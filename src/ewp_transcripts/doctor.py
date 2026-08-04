@@ -11,6 +11,7 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 from ewp_transcripts import __version__
+from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain import DiagnosticCheck, DiagnosticStatus, DoctorResult
 
 CommandRunner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
@@ -140,6 +141,61 @@ def _gpu_check(finder: ExecutableFinder, runner: CommandRunner) -> DiagnosticChe
     )
 
 
+def _cuda_check(runner: CommandRunner) -> DiagnosticCheck:
+    try:
+        completed = runner(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import torch; "
+                    "print(torch.version.cuda or 'none'); "
+                    "raise SystemExit(0 if torch.cuda.is_available() else 1)"
+                ),
+            ]
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        return DiagnosticCheck(
+            code="cuda",
+            status=DiagnosticStatus.FAIL,
+            message="Unable to verify CUDA availability in PyTorch.",
+            context={"error_type": type(error).__name__},
+        )
+
+    runtime = completed.stdout.strip().splitlines()
+    available = completed.returncode == 0 and bool(runtime)
+    return DiagnosticCheck(
+        code="cuda",
+        status=DiagnosticStatus.PASS if available else DiagnosticStatus.FAIL,
+        message=(
+            "CUDA is available in PyTorch."
+            if available
+            else "CUDA is unavailable in PyTorch; verify the locked environment and WSL GPU setup."
+        ),
+        context={
+            "runtime": runtime[-1] if runtime else "unavailable",
+            "exit_code": completed.returncode,
+        },
+    )
+
+
+def _model_check(code: str, role: str, path: Path, revision: str) -> DiagnosticCheck:
+    available = path.is_dir() and path.name == revision
+    return DiagnosticCheck(
+        code=code,
+        status=DiagnosticStatus.PASS if available else DiagnosticStatus.FAIL,
+        message=(
+            f"Pinned local {role} model snapshot is available."
+            if available
+            else (
+                f"Pinned local {role} model snapshot is missing; "
+                "follow the model preparation steps in WSL config/README.md."
+            )
+        ),
+        context={"path": str(path), "revision": revision},
+    )
+
+
 def _token_check(environ: Mapping[str, str]) -> DiagnosticCheck:
     present = bool(environ.get("HF_TOKEN"))
     return DiagnosticCheck(
@@ -166,6 +222,7 @@ def _read_os_release(path: Path) -> dict[str, str]:
 
 def run_doctor(
     *,
+    config: ApplicationConfig | None = None,
     finder: ExecutableFinder = shutil.which,
     runner: CommandRunner = _run_command,
     environ: Mapping[str, str] = os.environ,
@@ -176,6 +233,7 @@ def run_doctor(
     """Run deterministic lightweight checks without importing ML backends."""
 
     release = _read_os_release(Path("/etc/os-release")) if os_release is None else os_release
+    effective_config = ApplicationConfig() if config is None else config
     checks = (
         _python_check(python_version),
         _wsl_check(kernel_release),
@@ -183,6 +241,25 @@ def run_doctor(
         _command_check("ffmpeg", ["-version"], finder, runner),
         _command_check("ffprobe", ["-version"], finder, runner),
         _gpu_check(finder, runner),
+        _cuda_check(runner),
+        _model_check(
+            "asr_model",
+            "ASR",
+            effective_config.models.asr_snapshot_path,
+            effective_config.models.asr_revision,
+        ),
+        _model_check(
+            "alignment_model",
+            "alignment",
+            effective_config.models.alignment_snapshot_path,
+            effective_config.models.alignment_revision,
+        ),
+        _model_check(
+            "diarization_model",
+            "diarization",
+            effective_config.diarization.local_model_path,
+            effective_config.diarization.model_revision,
+        ),
         _token_check(environ),
     )
     return DoctorResult(
