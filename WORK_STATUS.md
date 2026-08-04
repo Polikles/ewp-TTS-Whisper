@@ -23,10 +23,10 @@ current plain-text references.
 
 Repository state at this checkpoint:
 
-- `main` and `origin/main` include the Phase 8 implementation and validation runbook
-  through commit `d32d9a5`;
+- `main` and `origin/main` include the Phase 9 lexical evaluator and baseline runbook
+  through commit `faec7d4`;
 - the complete development-VM and target-WSL gates pass formatting, lint, strict typing,
-  and **214 tests**;
+  and **224 tests**;
 - the production diarization branch supports exact positive counts and automatic count
   estimation for one mono, dual-mono, or mixed-stereo source;
 - the pinned Community-1 adapter is lazy and local-only, normalizes cluster identities by
@@ -43,6 +43,10 @@ Repository state at this checkpoint:
 - the MVP `clean all-workdirs` command and target WSL gate are accepted: age-filtered
   preview/removal touched only valid owned workspaces, preserved an invalid marker, and
   preserved a model-like sibling byte-for-byte; ADR-0004 records the evidence;
+- the initial three-case production manifest baseline is accepted: fresh canonical
+  hypotheses exactly reproduce ADR-0007's large-v2 per-case, macro, and micro WER/CER;
+  the report and error-only diff hashes are recorded, while qualitative diff review and
+  expansion to a larger licensed corpus remain open;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
   selected channel indices;
 - each stream runs prepare → ASR/unload → alignment/unload → normalize with fresh engine

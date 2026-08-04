@@ -168,3 +168,55 @@ This is an initial baseline, not a permanent model ranking. Reopen this ADR and 
 - The exact `large-v2` revision must be used for reproducible preparation and recorded in results.
 - A larger corpus may reverse this decision; changing the default requires reopening this ADR with new per-case and aggregate evidence.
 - Punctuation remains secondary to lexical accuracy and is not delegated to an LLM in the MVP.
+
+## Phase 9 production-manifest baseline
+
+On 2026-08-04, commit `faec7d4` passed the initial manifest-driven lexical-quality gate
+on the reference Ubuntu 24.04 WSL2 workstation. The locked environment passed all 224
+automated tests, `HF_TOKEN` was absent, and fresh production `transcriber transcribe`
+runs generated canonical hypotheses with pinned local models and offline controls.
+
+The strict external manifest hash was:
+
+```text
+70eb51879b922f56445beb289963756a91d120a34902b52c5aac42083f17d311  phase9-quality-manifest.toml
+```
+
+Production canonical results reproduced the earlier large-v2 benchmark exactly:
+
+| Case | WER | CER | Substitutions | Deletions | Insertions |
+|---|---:|---:|---:|---:|---:|
+| P0-01 | 0.00881057 | 0.00326158 | 1 | 1 | 0 |
+| P0-02 | 0.00814332 | 0.00354359 | 3 | 2 | 0 |
+| P0-03 | 0.19106047 | 0.17072846 | 20 | 187 | 11 |
+| Macro average | 0.06933812 | 0.05917788 | — | — | — |
+| Micro average | 0.11352170 | 0.09807910 | 24 | 190 | 11 |
+
+Across 1,982 reference words, the production results contained 225 word errors. Across
+13,275 normalized reference characters, they contained 1,302 character errors. P0-03
+remains an intentional overlap stress case and accounts for most deletions.
+
+Canonical-result hashes:
+
+```text
+342dc1c13a9fb073c717fe57247d3522c460e6baf5be2b61dbd36c81e9e96500  p0-01-single-short_results.json
+1582b6dd309e7992659c98d4ec8392ee9d7d63cba31dc0b7b9c71225b038b91d  p0-02-single-representative_results.json
+d167ce3d5cff567f07193f4864428cb53c0653edd13deeaebcc4a79e816557ac  p0-03-two-speakers-mixed-overlap_results.json
+```
+
+External evaluation artifact hashes:
+
+```text
+9031eb4192ffbe50354031f41eb2c6ead4d4ccb295e395953289785f2e8c5a93  quality-report.json
+848d5b477ca4a30896a5e3813f6dee270c22a7fd0eb2710fc64888b38d6d027f  quality-errors.diff.txt
+```
+
+The error-only review diff contains 230 lines and remains external because it contains
+transcript-derived words. Its qualitative review is still pending. Duplicate replay
+skipped all three canonical results and nine exports without model loading; workdir
+cleanup passed and the repository remained clean.
+
+Exact agreement between the independent Phase 0 benchmark and fresh production canonical
+extraction validates the scoring migration and current pipeline baseline. It does not
+remove the original limitation: three cases are too small to establish a final release
+threshold or permanent model ranking.
