@@ -22,6 +22,12 @@ Creates jobs from files directly inside the directory. Subdirectories are ignore
 
 Several paths supplied in one grouping operation create one episode. Explicit grouping takes precedence over filename conventions.
 
+This is an override for sources whose filenames do not satisfy the automatic final-hyphen
+rule but which the user knows share one episode timeline. Files such as
+`S01E01-jan.wav` and `S01E01-anna.wav` do not need the override because they already
+form an automatic group. An explicit group still undergoes sample-rate, duration,
+decodability, speaker-assignment, and channel validation.
+
 ## 2. Supported formats
 
 Official MVP test matrix:

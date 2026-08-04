@@ -12,7 +12,7 @@
 
 ## Known limitations before the first MVP release
 
-- English ASR is available in the multilingual backend, but English word alignment has not been validated against a pinned local alignment model. Full English transcription is therefore not yet a supported release claim.
+- English and automatic language selection are part of the MVP contract because large-v2 is multilingual. The complete English path, especially word alignment, still requires validation with an English sample before its quality can be characterized.
 - The current manually verified quality corpus contains three Polish cases and has no timestamp or diarization annotations. WER/CER are baselined; timestamp accuracy and DER/JER remain to be baselined after the corpus is expanded.
 - Subtitle syntax and export constraints are covered automatically, but playback review in the target player or a private YouTube upload is still pending.
 - The wheel has passed an isolated offline installation and transcription test on the reference WSL machine. A fresh Ubuntu 24.04 WSL installation test is still pending.
