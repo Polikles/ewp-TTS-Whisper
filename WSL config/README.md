@@ -95,6 +95,9 @@ Build and install the wheel into a fresh external Python environment, prove inst
 import provenance, and run a short offline GPU transcription using
 [`RUN_PHASE9_WHEEL_INSTALL.md`](RUN_PHASE9_WHEEL_INSTALL.md).
 
+Validate the final lightweight CUDA and pinned-model readiness diagnostics using
+[`RUN_RELEASE_DOCTOR.md`](RUN_RELEASE_DOCTOR.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).

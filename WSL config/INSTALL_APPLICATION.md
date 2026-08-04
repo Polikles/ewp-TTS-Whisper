@@ -43,7 +43,7 @@ make check
 uv build
 ```
 
-`doctor` does not load Torch, WhisperX, pyannote, or transcription models. A missing required environment capability returns exit code 3. `HF_TOKEN` is reported only as present or missing; its value is never printed.
+`doctor` does not load WhisperX, pyannote, or transcription models. It checks CUDA in a short child Python process and verifies the configured pinned model directories. A missing required environment capability or model returns exit code 3. `HF_TOKEN` is reported only as present or missing; its value is never printed.
 
 ## Complete application flow
 
@@ -51,7 +51,7 @@ uv build
 2. Clone a tagged EWP-transcripts release into the Linux filesystem.
 3. Install the documented `uv` version.
 4. Run `uv sync --locked` using the committed production lockfile.
-5. Run `transcriber doctor` without loading full models.
+5. Run `transcriber doctor` without loading transcription models.
 6. Explicitly download pinned ASR, alignment, and diarization models.
 7. Run the GPU/model checks from the model-setup guide.
 8. Verify offline readiness.
