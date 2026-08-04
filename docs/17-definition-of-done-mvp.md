@@ -18,6 +18,11 @@ The MVP is complete when the following conditions are met.
 - [ ] The complete application-test checklist passes.
 - [ ] The representative audio matrix has been executed.
 - [ ] WER/CER/timestamp/DER baselines have been recorded.
+
+The lexical WER/CER portion has an accepted three-case Polish baseline. Timestamp,
+DER/JER, English, and statistically representative thresholds are explicitly deferred by
+[ADR-0014](adr/0014-dataset-dependent-quality-gates.md) until annotated archive-derived
+references exist; the combined checkbox therefore remains open.
 - [x] A 60-minute file completes on RTX 3090 without OOM.
 - [x] A batch of at least ten files shows no accumulating VRAM use.
 - [ ] SRT and VTT have been reviewed manually in a private YouTube upload.

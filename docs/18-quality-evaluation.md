@@ -13,6 +13,8 @@ verified UTF-8 transcripts. It produces:
 The evaluator never treats another model's uncorrected output as ground truth. It does
 not score punctuation, capitalization, sentence layout, timestamps, or speaker labels.
 Timestamp and diarization metrics require separate annotated references.
+Their functional-MVP deferral and concrete reopening criteria are recorded in
+[ADR-0014](adr/0014-dataset-dependent-quality-gates.md).
 
 ## 2. Strict evaluation manifest
 
