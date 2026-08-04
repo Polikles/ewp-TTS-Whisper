@@ -107,3 +107,39 @@ b497918dc89cf1cbd72648ce7c6c66bbb194591fc0cc3b4dca398f4a191da6c8  p0-01-single-s
 Canonical v1/v2 hashes intentionally differ because run IDs, timestamps, and stage
 durations are execution metadata. The matching derived hashes prove deterministic
 transcript and subtitle rendering from equivalent inference output.
+
+## Phase 7 multi-speaker export evidence
+
+On 2026-08-04, the first source-speaker target runs at commit `025e56e` completed two
+local-only ASR/alignment stream passes per job and published schema-valid canonical JSON.
+Derived export rendering then exposed a second canonical-first boundary case: chunks from
+one long speaker segment could extend beyond the start of another overlapping speaker
+segment, so per-segment emission produced non-monotonic subtitle cue order.
+
+Commit `33060f6` changed subtitle generation to build conservative unlabelled candidates,
+sort them on the shared timeline, and only then apply on-change speaker labels. The
+existing canonical results recovered TXT, SRT, and VTT without model loading or canonical
+replacement. Subsequent duplicate runs skipped every result and export.
+
+Both split-channel and grouped-file canonical results passed the authoritative schema and
+contained 18 segments and 314 words, with two deterministic speakers, explicit overlap,
+complete source attribution, and only ASR/alignment model provenance. Labelled TXT/SRT/VTT
+exports passed. No temporary file remained and the WSL worktree was clean.
+
+External artifact hashes:
+
+```text
+eea4031df732216a6807da95ba360383761bc1d5266be93678e9f244d50a6c79  p2-01-split-speakers_results.json
+0ff7c83953fe0f5942932ff2a9ef203c1556616949851c76de9bc8ae32f05e4e  p2-01-split-speakers_subtitles.srt
+4244cd7b47171351e57bd735e1c086c3d61f8a6ee1b0782dd1ba7e0f58c0f44c  p2-01-split-speakers_subtitles.vtt
+25944db0a98edfc1f968aaf0643ef7c0554287c5905cc5f9899765da53feedb0  p2-01-split-speakers_transcript.txt
+5090960a4cb4c76e529b2d27669b054ddf2ce02159c3050ec728e53d37165e35  p7-group_results.json
+7568b675d1044eab813c012de43acfff0aeb23690675a8073d63f4119fd986da  p7-group_subtitles.srt
+5d3b0f63492a5f33276fe504afd8c6731f4109adb1385997c318997869b7129d  p7-group_subtitles.vtt
+fa01eec7eba1c041aac83070da10b4521dc383c3caa80919a87ebaa3ac2bea2c  p7-group_transcript.txt
+```
+
+The two canonical and derived sets are not expected to have equal hashes: they record
+different physical-source topology and labels (`Speaker1`/`Speaker2` versus
+`Left`/`Right`). Their equal segment and word counts support equivalent processing of the
+same losslessly separated P2-01 timeline.

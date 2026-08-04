@@ -6,24 +6,24 @@ Use this file as the starting point for the next work session.
 
 ## Current stage
 
-**Phases 0 through 6 are complete. Phase 7 — synchronized sources and stereo modes — is
-underway.**
+**Phases 0 through 7 are complete. Phase 8 — mixed-source multi-speaker diarization — is
+next.**
 
 The installable `ewp_transcripts` package, `transcriber` entry point, lightweight `doctor`, strict typed configuration, packaged defaults, and local quality gate are implemented. All Phase 1 exit commands passed on the target WSL workstation.
 
 ## Authoritative resume point
 
-Resume Phase 7 at the target WSL gate in
-[`WSL config/RUN_PHASE7_SOURCE_SPEAKERS.md`](WSL%20config/RUN_PHASE7_SOURCE_SPEAKERS.md).
-The CPU/fake-engine implementation and application routing are complete. Run P2-01 once
-as split-speaker stereo and once as a derived two-file mono group, then record the target
-evidence in the ADRs before closing the phase.
+Begin Phase 8 with backend-neutral diarization contracts, a lazy local-only pyannote
+adapter, and deterministic word/segment speaker reconciliation under fake-engine tests.
+Preserve the Phase 7 source-based routing: diarization is only for a single
+mono/dual-mono/mixed-stereo source containing multiple speakers. Do not load pyannote for
+grouped files or split channels.
 
 ## 2026-08-04 checkpoint
 
 Repository state at this checkpoint:
 
-- `main` and `origin/main` include commit `33060f6`;
+- `main` and `origin/main` include commit `e81bdd8`;
 - the complete development-VM gate passes formatting, lint, strict typing, and **199
   tests**;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
@@ -45,9 +45,11 @@ Repository state at this checkpoint:
   includes marker-verified cleanup before final evidence collection;
 - `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
 
-The next owner input is execution output from the Phase 7 WSL runbook. No new recording
-or reference transcript is required: the runbook derives the grouped fixture losslessly
-from the existing P2-01 split-speaker recording.
+Phase 7 target validation is now accepted. Both topologies produced two speakers, 18
+segments, and 314 words; model-free export recovery, duplicate replay, cleanup, hashes,
+temporary-file checks, and clean repository status passed. ADR-0002, ADR-0003, and
+ADR-0004 contain the decision evidence. No owner input is needed for the initial Phase 8
+CPU implementation.
 
 ## End-of-day checkpoint — 2026-08-03
 

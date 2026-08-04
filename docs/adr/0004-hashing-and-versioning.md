@@ -200,3 +200,21 @@ This accepts deterministic sequential batching: completed, skipped, and failed j
 independent durable state, and one failure does not broaden or corrupt another job's
 scope. Cancellation remains covered by automated lifecycle/CLI tests and maps to durable
 `cancelled` state plus exit code 6.
+
+## Phase 7 canonical-first recovery and cleanup evidence
+
+The first split-channel and grouped-source runs on 2026-08-04 published their completed
+canonical JSON before a derived subtitle-ordering error. As required by the storage
+decision, neither result was rolled back, overwritten, or converted into failed canonical
+state. Both processes retained their marker-owned workdirs because the complete command
+had not succeeded.
+
+After commit `33060f6`, ordinary invocation found the identical episode signatures,
+skipped both canonical results, and generated only the missing exports without loading
+models. A further duplicate replay skipped all canonical and derived outputs. The two
+diagnostic workdirs were then removed using the run IDs and job IDs from their canonical
+results plus marker-verified cleanup. No workdir, partial state, temporary file, or
+uncommitted repository change remained.
+
+This accepts canonical-first recovery for multi-stream jobs and confirms that recovery
+does not implicitly delete an older process's retained diagnostics.

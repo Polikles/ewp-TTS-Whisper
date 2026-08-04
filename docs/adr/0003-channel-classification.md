@@ -88,3 +88,33 @@ fc274ce32bb3d98f97018a17251893cd7c05aadab0d2fc013c632d4ec35d78d6  p2-03-mixed-st
 The reports stay in the external test-data workspace because they contain absolute local
 paths and fixture-derived metadata. Their hashes, decisions, and provenance are retained
 here as the repository decision record.
+
+## Phase 7 source-speaker production evidence
+
+On 2026-08-04, P2-01 was processed in two equivalent forms on the target WSL workstation:
+
+- the original stereo file was automatically classified as `split-speakers` and mapped
+  to two channel streams from one canonical source;
+- lossless left/right mono extractions were grouped by filename as one `p7-group` episode
+  with two canonical sources labelled `Left` and `Right`.
+
+The original and copied P2-01 files both had SHA-256
+`868542600305d4cb7514b45130ec67e2cab94bc817e9fa9f6db451c0b999a0a3`.
+The derived 44.1 kHz mono PCM fixtures were exactly 142.442086 seconds long:
+
+```text
+87b13d0226a27a112c0211483eab1c05dab259c22bc737c1bbc880883d1b6d1c  p7-group-Left.wav
+69471eaad337d9eed36ac0f179fa889e05f58236c5b7181ccbe11b118d0b4886  p7-group-Right.wav
+```
+
+Both production results contained two stable speakers, 18 segments, and 314 words. Both
+represented the known simultaneous-speech region with overlap and two active speaker IDs.
+The split case used `split_channels` with one physical source; the grouped case used
+`file_group` with two physical sources. Neither result loaded or recorded a diarization
+model, and no cross-channel text deduplication was applied. The grouped mono tracks
+correctly emitted warning-only `AUDIO_HIGH_SILENCE_RATIO` because each isolated speaker
+track contains the other speaker's long inactive period.
+
+This accepts the Phase 7 policy: confident split speakers and grouped one-speaker sources
+are transcribed independently and composed chronologically without diarization. The
+calibration remains small and must be revisited against the future larger dataset.
