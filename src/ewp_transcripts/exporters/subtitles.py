@@ -20,6 +20,18 @@ class SubtitleCue:
     overlap: bool = False
 
 
+@dataclass(frozen=True, slots=True)
+class _CueDraft:
+    """Unlabelled cue candidate awaiting global timeline ordering."""
+
+    start_ms: int
+    end_ms: int
+    text: str
+    speaker_id: str | None
+    overlap: bool
+    sequence: int
+
+
 def build_subtitle_cues(
     result: CanonicalResult, config: SubtitlesConfig | None = None
 ) -> tuple[SubtitleCue, ...]:
@@ -28,53 +40,60 @@ def build_subtitle_cues(
     settings = config or SubtitlesConfig()
     labels = {speaker.speaker_id: speaker.speaker_label for speaker in result.speakers}
     multiple_speakers = len(result.speakers) > 1
-    cues: list[SubtitleCue] = []
-    previous_speaker: str | None | object = object()
+    drafts: list[_CueDraft] = []
 
-    for segment in result.transcript.segments:
+    for segment_index, segment in enumerate(result.transcript.segments):
         speaker_id = _effective_speaker(segment)
-        first_show_label = _show_speaker_label(
-            settings.speaker_labels,
-            multiple_speakers=multiple_speakers,
-            speaker_id=speaker_id,
-            previous_speaker=previous_speaker,
-            first_chunk=True,
-        )
         label = labels[speaker_id] if speaker_id is not None else "Unknown"
-        first_prefix = f"{label}: " if first_show_label else ""
-        repeated_prefix = f"{label}: " if settings.speaker_labels == "always" else ""
+        capacity_prefix = (
+            f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+        )
         chunks = _segment_chunks(
             segment,
             settings,
-            first_prefix=first_prefix,
-            repeated_prefix=repeated_prefix,
+            first_prefix=capacity_prefix,
+            repeated_prefix=capacity_prefix,
         )
         for index, (start_ms, end_ms, text) in enumerate(chunks):
-            show_label = _show_speaker_label(
-                settings.speaker_labels,
-                multiple_speakers=multiple_speakers,
-                speaker_id=speaker_id,
-                previous_speaker=previous_speaker,
-                first_chunk=index == 0,
-            )
-            if show_label:
-                label = labels[speaker_id] if speaker_id is not None else "Unknown"
-                text = f"{label}: {text}"
-            lines = wrap_subtitle_text(
-                text,
-                max_lines=settings.max_lines,
-                max_chars_per_line=settings.max_chars_per_line,
-            )
-            cues.append(
-                SubtitleCue(
+            drafts.append(
+                _CueDraft(
                     start_ms=start_ms,
                     end_ms=end_ms,
-                    lines=lines,
+                    text=text,
                     speaker_id=speaker_id,
                     overlap=segment.overlap,
+                    sequence=segment_index * 1_000_000 + index,
                 )
             )
-            previous_speaker = speaker_id
+    drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
+
+    cues: list[SubtitleCue] = []
+    previous_speaker: str | None | object = object()
+    for draft in drafts:
+        text = draft.text
+        if _show_speaker_label(
+            settings.speaker_labels,
+            multiple_speakers=multiple_speakers,
+            speaker_id=draft.speaker_id,
+            previous_speaker=previous_speaker,
+            first_chunk=True,
+        ):
+            label = labels[draft.speaker_id] if draft.speaker_id is not None else "Unknown"
+            text = f"{label}: {text}"
+        cues.append(
+            SubtitleCue(
+                start_ms=draft.start_ms,
+                end_ms=draft.end_ms,
+                lines=wrap_subtitle_text(
+                    text,
+                    max_lines=settings.max_lines,
+                    max_chars_per_line=settings.max_chars_per_line,
+                ),
+                speaker_id=draft.speaker_id,
+                overlap=draft.overlap,
+            )
+        )
+        previous_speaker = draft.speaker_id
     return _extend_short_cues(tuple(cues), settings)
 
 

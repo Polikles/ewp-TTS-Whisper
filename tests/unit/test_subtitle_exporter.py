@@ -152,3 +152,52 @@ def test_serializers_reject_accidental_overlap_but_allow_explicit_overlap() -> N
         SubtitleCue(1900, 2500, ("Second",), "speaker_002", overlap=True),
     )
     assert "Second" in render_vtt(explicit)
+
+
+def test_overlapping_speaker_chunks_are_globally_sorted_before_labelling() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    late_word = first.words[-1].model_copy(
+        update={
+            "word_id": "word_late",
+            "text": "Continuation.",
+            "start_ms": 5000,
+            "end_ms": 6000,
+        }
+    )
+    first = first.model_copy(
+        update={
+            "end_ms": 6000,
+            "text": f"{first.text} Continuation.",
+            "overlap": True,
+            "active_speaker_ids": ("speaker_001", "speaker_002"),
+            "words": (*first.words, late_word),
+        }
+    )
+    second_words = tuple(
+        word.model_copy(update={"start_ms": 4200 + index * 100, "end_ms": 4280 + index * 100})
+        for index, word in enumerate(second.words)
+    )
+    second = second.model_copy(
+        update={
+            "start_ms": 4200,
+            "end_ms": 5000,
+            "overlap": True,
+            "active_speaker_ids": ("speaker_001", "speaker_002"),
+            "words": second_words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+
+    cues = build_subtitle_cues(result, SubtitlesConfig(max_duration_ms=3000))
+
+    assert [cue.start_ms for cue in cues] == sorted(cue.start_ms for cue in cues)
+    speaker_ids = [cue.speaker_id for cue in cues]
+    first_second = speaker_ids.index("speaker_002")
+    return_to_first = speaker_ids.index("speaker_001", first_second)
+    assert cues[0].lines[0].startswith("jan:")
+    assert cues[first_second].lines[0].startswith("anna:")
+    assert cues[return_to_first].lines[0].startswith("jan:")
+    assert "Continuation" in render_srt(cues)
