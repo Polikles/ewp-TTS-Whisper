@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
@@ -28,11 +29,22 @@ from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus
 from ewp_transcripts.domain.errors import UnsupportedPipelineScopeError
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, EngineModelInfo
 from ewp_transcripts.media import prepare_working_audio
-from ewp_transcripts.normalization import normalize_single_speaker
+from ewp_transcripts.normalization import NormalizedTranscript, normalize_single_speaker
+from ewp_transcripts.streams import SpeakerStream
 
 AudioPreparer = Callable[..., Path]
 Clock = Callable[[], float]
 Now = Callable[[], datetime]
+
+
+@dataclass(frozen=True, slots=True)
+class ProcessedSpeakerStream:
+    """Normalized output and provenance from one independent stream pass."""
+
+    normalized: NormalizedTranscript
+    asr_model: EngineModelInfo
+    alignment_model: EngineModelInfo
+    stages: tuple[CanonicalStage, ...]
 
 
 def run_single_speaker_pipeline(
@@ -54,15 +66,95 @@ def run_single_speaker_pipeline(
     state = reservation.state
     outputs = reservation.plan.outputs
     assert state is not None and outputs is not None
-    stages: list[CanonicalStage] = []
-    working_audio = workspace.path / "source_001-working.wav"
+    processed = process_speaker_stream(
+        SpeakerStream(
+            source=source,
+            source_id="source_001",
+            speaker_id="speaker_001",
+            speaker_label=source.speaker_label or "Speaker1",
+            speaker_source="filename" if source.speaker_label else "default",
+            channel_index=source.channel_classification.selected_channel_index or 0,
+        ),
+        workspace,
+        config=config,
+        asr_engine=asr_engine,
+        alignment_engine=alignment_engine,
+        working_filename="source_001-working.wav",
+        audio_preparer=audio_preparer,
+        clock=clock,
+    )
+    normalized = processed.normalized
+    stages = processed.stages
+    speaker_label = source.speaker_label or "Speaker1"
+    first_seen_ms = (
+        normalized.transcript.segments[0].start_ms if normalized.transcript.segments else 0
+    )
+    warnings = (*_inspection_warnings(inspection), *normalized.warnings)
 
+    return CanonicalResult(
+        schema_version="1.0",
+        application_version=__version__,
+        run_id=state.run_id,
+        job_id=inspection.job_id,
+        status="completed",
+        created_at=state.created_at,
+        completed_at=now(),
+        result_version=outputs.result_version,
+        episode=CanonicalEpisode(
+            episode_id=inspection.job_id,
+            episode_signature_sha256=inspection.episode_signature_sha256,
+            source_topology="single_file",
+            language=config.general.language.value,
+            detected_language=normalized.transcript.language,
+        ),
+        sources=(_canonical_source(source, speaker_label),),
+        speakers=(
+            CanonicalSpeaker(
+                speaker_id="speaker_001",
+                speaker_label=speaker_label,
+                speaker_source="filename" if source.speaker_label else "default",
+                first_seen_ms=first_seen_ms,
+                source_ids=("source_001",),
+            ),
+        ),
+        processing=CanonicalProcessing(
+            preset=config.general.preset,
+            effective_config=config.model_dump(mode="json"),
+            environment=environment,
+            models=(
+                _model_reference(processed.asr_model),
+                _model_reference(processed.alignment_model),
+            ),
+            channel_analysis=_channel_analysis(source, config),
+            audio_quality=_audio_quality(source),
+            stages=stages,
+        ),
+        transcript=normalized.transcript,
+        warnings=warnings,
+    )
+
+
+def process_speaker_stream(
+    stream: SpeakerStream,
+    workspace: WorkDirectory,
+    *,
+    config: ApplicationConfig,
+    asr_engine: AsrEngine,
+    alignment_engine: AlignmentEngine,
+    working_filename: str,
+    audio_preparer: AudioPreparer = prepare_working_audio,
+    clock: Clock = time.perf_counter,
+) -> ProcessedSpeakerStream:
+    """Prepare, transcribe, align, and normalize one independent speaker stream."""
+
+    stages: list[CanonicalStage] = []
+    working_audio = workspace.path / working_filename
     start = clock()
     audio_preparer(
-        source.fingerprint.path,
+        stream.source.fingerprint.path,
         working_audio,
-        stream_index=source.stream.index,
-        channel_index=source.channel_classification.selected_channel_index,
+        stream_index=stream.source.stream.index,
+        channel_index=stream.channel_index,
     )
     stages.append(_completed_stage("prepare_audio", start, clock))
 
@@ -93,53 +185,15 @@ def run_single_speaker_pipeline(
     start = clock()
     normalized = normalize_single_speaker(
         aligned,
-        speaker_id="speaker_001",
-        source_id="source_001",
+        speaker_id=stream.speaker_id,
+        source_id=stream.source_id,
     )
     stages.append(_completed_stage("normalize", start, clock))
-    speaker_label = source.speaker_label or "Speaker1"
-    first_seen_ms = (
-        normalized.transcript.segments[0].start_ms if normalized.transcript.segments else 0
-    )
-    warnings = (*_inspection_warnings(inspection), *normalized.warnings)
-
-    return CanonicalResult(
-        schema_version="1.0",
-        application_version=__version__,
-        run_id=state.run_id,
-        job_id=inspection.job_id,
-        status="completed",
-        created_at=state.created_at,
-        completed_at=now(),
-        result_version=outputs.result_version,
-        episode=CanonicalEpisode(
-            episode_id=inspection.job_id,
-            episode_signature_sha256=inspection.episode_signature_sha256,
-            source_topology="single_file",
-            language=config.general.language.value,
-            detected_language=aligned.language,
-        ),
-        sources=(_canonical_source(source, speaker_label),),
-        speakers=(
-            CanonicalSpeaker(
-                speaker_id="speaker_001",
-                speaker_label=speaker_label,
-                speaker_source="filename" if source.speaker_label else "default",
-                first_seen_ms=first_seen_ms,
-                source_ids=("source_001",),
-            ),
-        ),
-        processing=CanonicalProcessing(
-            preset=config.general.preset,
-            effective_config=config.model_dump(mode="json"),
-            environment=environment,
-            models=(_model_reference(asr_info), _model_reference(alignment_info)),
-            channel_analysis=_channel_analysis(source, config),
-            audio_quality=_audio_quality(source),
-            stages=tuple(stages),
-        ),
-        transcript=normalized.transcript,
-        warnings=warnings,
+    return ProcessedSpeakerStream(
+        normalized=normalized,
+        asr_model=asr_info,
+        alignment_model=alignment_info,
+        stages=tuple(stages),
     )
 
 

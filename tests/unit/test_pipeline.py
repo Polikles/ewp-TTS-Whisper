@@ -32,7 +32,8 @@ from ewp_transcripts.engines import (
     TranscriptionDraft,
     TranscriptionSegment,
 )
-from ewp_transcripts.pipeline import run_single_speaker_pipeline
+from ewp_transcripts.pipeline import process_speaker_stream, run_single_speaker_pipeline
+from ewp_transcripts.streams import SpeakerStream
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "schemas/results.schema.json"
@@ -177,6 +178,48 @@ def test_pipeline_rejects_automatic_speaker_count_before_preparation(tmp_path: P
             alignment_engine=FakeAlignment([]),
             audio_preparer=lambda *args, **kwargs: pytest.fail("must not prepare audio"),
         )
+
+
+def test_processes_one_selected_channel_with_stream_specific_identity(tmp_path: Path) -> None:
+    inspection, _, workspace = _job(tmp_path)
+    source = inspection.sources[0]
+    stream = SpeakerStream(
+        source=source,
+        source_id="source_001",
+        speaker_id="speaker_002",
+        speaker_label="Right",
+        speaker_source="default",
+        channel_index=1,
+    )
+    events: list[str] = []
+
+    def prepare(source_path: Path, destination: Path, **kwargs: object) -> Path:
+        events.append(f"prepare:{kwargs['channel_index']}")
+        destination.write_bytes(b"working audio")
+        return destination
+
+    processed = process_speaker_stream(
+        stream,
+        workspace,
+        config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=1)),
+        asr_engine=FakeAsr(events),
+        alignment_engine=FakeAlignment(events),
+        working_filename="stream_002-working.wav",
+        audio_preparer=prepare,
+    )
+
+    segment = processed.normalized.transcript.segments[0]
+    assert segment.speaker_id == "speaker_002"
+    assert segment.source_ids == ("source_001",)
+    assert all(word.speaker_id == "speaker_002" for word in segment.words)
+    assert events[0] == "prepare:1"
+    assert events[-1] == "align:close"
+    assert [stage.name for stage in processed.stages] == [
+        "prepare_audio",
+        "transcribe",
+        "align",
+        "normalize",
+    ]
 
 
 def _job(tmp_path: Path) -> tuple[EpisodeInspection, JobReservation, WorkDirectory]:
