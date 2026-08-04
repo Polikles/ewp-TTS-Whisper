@@ -142,6 +142,53 @@ def test_transcribe_interrupt_publishes_cancelled_state(
     assert len(list(config.runtime.work_root.glob("*/*"))) == 1
 
 
+def test_transcribe_routes_grouped_sources_to_source_speaker_pipeline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path)
+    first = inspection.episodes[0].sources[0].model_copy(update={"speaker_label": "Damian"})
+    second_path = tmp_path / "episode-Szymon.wav"
+    second_path.write_bytes(b"second")
+    second = first.model_copy(
+        update={
+            "fingerprint": first.fingerprint.model_copy(
+                update={
+                    "path": second_path,
+                    "filename": second_path.name,
+                    "sha256": "c" * 64,
+                }
+            ),
+            "speaker_label": "Szymon",
+        }
+    )
+    grouped_episode = inspection.episodes[0].model_copy(update={"sources": (first, second)})
+    inspection = inspection.model_copy(update={"episodes": (grouped_episode,)})
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+    called: list[str] = []
+
+    def grouped_pipeline(episode, reservation, workspace, **kwargs):
+        called.append("grouped")
+        assert callable(kwargs["asr_engine_factory"])
+        assert callable(kwargs["alignment_engine_factory"])
+        return _matching_result(reservation)
+
+    monkeypatch.setattr(application, "run_source_speaker_pipeline", grouped_pipeline)
+    monkeypatch.setattr(
+        application,
+        "run_single_speaker_pipeline",
+        lambda *args, **kwargs: pytest.fail("single-speaker pipeline must not run"),
+    )
+
+    outcome = transcribe_one(
+        inspection.discovery.input_path,
+        config=_config(tmp_path),
+        output_directory=tmp_path / "output",
+    )
+
+    assert outcome.decision is PlanDecision.PROCESS
+    assert called == ["grouped"]
+
+
 def _config(tmp_path: Path) -> ApplicationConfig:
     return ApplicationConfig(
         diarization=DiarizationConfig(speaker_count=1),

@@ -32,13 +32,14 @@ from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAs
 from ewp_transcripts.export_service import ExportFormat, ExportOutcome, export_result
 from ewp_transcripts.inspection import inspect_episode
 from ewp_transcripts.media import measure_file_channels
-from ewp_transcripts.pipeline import run_single_speaker_pipeline
+from ewp_transcripts.pipeline import run_single_speaker_pipeline, run_source_speaker_pipeline
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
 from ewp_transcripts.storage import (
     find_existing_results,
     plan_job_outputs,
     resolve_output_directory,
 )
+from ewp_transcripts.streams import plan_speaker_streams
 from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
 
 __all__ = [
@@ -380,15 +381,28 @@ def _process_reservation(
             run_id=state.run_id,
             job_id=episode.job_id,
         )
-        result = run_single_speaker_pipeline(
-            episode,
-            reservation,
-            workspace,
-            config=config,
-            environment=_runtime_environment(config),
-            asr_engine=asr_factory(config),
-            alignment_engine=alignment_factory(config),
-        )
+        environment = _runtime_environment(config)
+        streams = plan_speaker_streams(episode)
+        if len(streams) == 1:
+            result = run_single_speaker_pipeline(
+                episode,
+                reservation,
+                workspace,
+                config=config,
+                environment=environment,
+                asr_engine=asr_factory(config),
+                alignment_engine=alignment_factory(config),
+            )
+        else:
+            result = run_source_speaker_pipeline(
+                episode,
+                reservation,
+                workspace,
+                config=config,
+                environment=environment,
+                asr_engine_factory=lambda: asr_factory(config),
+                alignment_engine_factory=lambda: alignment_factory(config),
+            )
         result_path = finalize_job_result(
             reservation,
             result,
