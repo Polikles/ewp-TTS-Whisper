@@ -73,6 +73,9 @@ Validate Phase 8 exact-count and automatic mixed-source diarization, offline pin
 execution, overlap representation, labelled exports, and duplicate replay using
 [`RUN_PHASE8_DIARIZATION.md`](RUN_PHASE8_DIARIZATION.md).
 
+Begin Phase 9 by validating privacy-oriented, marker-safe workspace preview, age
+filtering, and confirmed cleanup using [`RUN_PHASE9_CLEAN.md`](RUN_PHASE9_CLEAN.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
