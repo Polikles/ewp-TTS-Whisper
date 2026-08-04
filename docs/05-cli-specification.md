@@ -150,8 +150,6 @@ The command does not open audio or load models. An existing export is skipped wi
 ## 8. `clean`
 
 ```text
-transcriber clean temp
-transcriber clean failed
 transcriber clean all-workdirs
 ```
 
@@ -163,7 +161,17 @@ Safety options:
 --yes
 ```
 
-The command does not remove final results, models, tokens, or configuration. Model-cache deletion must be a separately named operation outside the MVP or require separate confirmation.
+Exactly one of `--dry-run` or `--yes` is required. The command considers only valid
+application-owned workspace markers immediately below the configured work root. Unknown
+directories, symbolic links, invalid markers, final results, exports, models, tokens, and
+configuration are never removed. `--older-than` currently uses the ownership marker's
+modification time; changing diagnostic content therefore cannot make a workspace eligible
+earlier.
+
+Filtering retained workspaces by `failed`, `cancelled`, or deliberately retained after
+success is deferred until a versioned marker records the terminal retention reason and an
+immutable creation timestamp. Model-cache deletion remains a separately named operation
+outside the MVP and requires separate confirmation.
 
 ## 9. Exit codes
 

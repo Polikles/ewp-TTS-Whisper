@@ -292,6 +292,10 @@ At the end of today, documentation link validation and `git diff --check` passed
 
 - Review `LICENSE_SKETCH.TXT`, select and finalize the future repository license, then replace the sketch with the appropriately named final license file in a dedicated change. Do not commit the sketch as the repository license without that review.
 - Build the manifest-driven corpus WER/CER runner and human-readable transcript diff after additional manually verified references are available.
+- Add versioned workdir-marker metadata with an immutable creation timestamp and a
+  terminal retention reason (`failed`, `cancelled`, or `successful-retained`), preserving
+  compatibility with version-1 markers. Only then add filtered cleanup commands for
+  those categories; the MVP exposes marker-verified `all-workdirs` cleanup only.
 
 ## Next user actions
 

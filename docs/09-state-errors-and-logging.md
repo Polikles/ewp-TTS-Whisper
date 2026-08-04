@@ -133,3 +133,22 @@ persisted run ID, job ID, episode signature, version, and current `running` stat
 the in-memory reservation. A complete terminal record is published exclusively before
 the running record is removed. If cleanup is interrupted, both parseable records may
 remain and the version stays occupied; neither record is overwritten.
+
+## 9. Workdir cleanup metadata
+
+The MVP cleanup command treats every valid owner-marked workspace as one category:
+`all-workdirs`. It cannot safely infer why a workspace was retained from filenames or
+contents. Selection by age uses the ownership marker's modification time and is
+conservative when that timestamp has been changed.
+
+A later marker version should add an immutable creation timestamp and a terminal
+retention reason written through a validated atomic transition. Proposed reasons are:
+
+- `failed` for a processing error;
+- `cancelled` for user interruption;
+- `successful-retained` when configuration deliberately preserves temporary files after
+  success.
+
+Only after that metadata exists may cleanup expose corresponding filters. The reader and
+cleanup path must remain compatible with version-1 markers until their retained
+workspaces have expired or been explicitly removed.
