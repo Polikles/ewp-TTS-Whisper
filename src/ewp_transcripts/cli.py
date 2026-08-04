@@ -58,6 +58,16 @@ class RequestedSubtitlePreset(StrEnum):
     YOUTUBE = "youtube"
 
 
+class RequestedPreset(StrEnum):
+    ACCURATE = "accurate"
+
+
+class RequestedTranscribeFormat(StrEnum):
+    TXT = "txt"
+    SRT = "srt"
+    VTT = "vtt"
+
+
 class CleanTarget(StrEnum):
     ALL_WORKDIRS = "all-workdirs"
 
@@ -128,6 +138,41 @@ def _inspection_overrides(
         overrides["channels"] = {"mode": ChannelMode(channel_mode.value)}
     if speaker_count is not None:
         overrides["diarization"] = {"speaker_count": speaker_count}
+    return overrides
+
+
+def _transcribe_overrides(
+    *,
+    recursive: bool,
+    channel_mode: RequestedChannelMode | None,
+    speaker_count: str | int,
+    preset: RequestedPreset,
+    formats: list[RequestedTranscribeFormat] | None,
+    segments: bool,
+    keep_temp: bool,
+    non_interactive: bool,
+) -> dict[str, object]:
+    overrides = _inspection_overrides(
+        recursive=recursive,
+        channel_mode=channel_mode,
+        speaker_count=speaker_count,
+    )
+    general: dict[str, object] = {"preset": preset.value}
+    if non_interactive:
+        general["interactive"] = False
+    overrides["general"] = general
+    if formats is not None:
+        selected = {format_.value for format_ in formats or []}
+        overrides["outputs"] = {
+            "generate_txt": "txt" in selected,
+            "generate_srt": "srt" in selected,
+            "generate_vtt": "vtt" in selected,
+            "generate_segments_json": segments,
+        }
+    elif segments:
+        overrides["outputs"] = {"generate_segments_json": True}
+    if keep_temp:
+        overrides["runtime"] = {"keep_temp_on_success": True}
     return overrides
 
 
@@ -485,6 +530,26 @@ def transcribe_command(
             help="Use one speaker, an exact positive count, or 'auto'.",
         ),
     ] = None,
+    preset: Annotated[
+        RequestedPreset,
+        typer.Option("--preset", help="Select the transcription preset."),
+    ] = RequestedPreset.ACCURATE,
+    formats: Annotated[
+        list[RequestedTranscribeFormat] | None,
+        typer.Option("--format", help="Generated text format; may be repeated."),
+    ] = None,
+    segments: Annotated[
+        bool,
+        typer.Option("--segments", help="Generate the optional segments JSON export."),
+    ] = False,
+    keep_temp: Annotated[
+        bool,
+        typer.Option("--keep-temp", help="Retain the owned workspace after success."),
+    ] = False,
+    non_interactive: Annotated[
+        bool,
+        typer.Option("--non-interactive", help="Disable all interactive behavior."),
+    ] = False,
     force: Annotated[
         bool,
         typer.Option("--force", help="Create a new result version for a duplicate input."),
@@ -503,10 +568,15 @@ def transcribe_command(
         parsed_speaker_count = _speaker_count(speaker_count)
         config = load_config(
             explicit_path=config_path,
-            cli_overrides=_inspection_overrides(
-                recursive=recursive if input_path.is_dir() else False,
+            cli_overrides=_transcribe_overrides(
+                recursive=bool(recursive) if input_path.is_dir() else False,
                 channel_mode=channel_mode,
                 speaker_count=1 if parsed_speaker_count is None else parsed_speaker_count,
+                preset=preset,
+                formats=formats,
+                segments=segments,
+                keep_temp=keep_temp,
+                non_interactive=non_interactive,
             ),
         )
         if input_path.is_dir():
