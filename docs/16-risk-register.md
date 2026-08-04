@@ -14,3 +14,5 @@
 | R-010 | Data loss after failure | low | high | partial/failed state, atomic finalization, fsync/copy-verify |
 | R-011 | Unreadable subtitles during fast speech | medium | medium | CPS/line limits, human review corpus, configurable preset |
 | R-012 | Ambiguous speaker suffix in filename | medium | low | suffix only in groups or count=1, dry-run preview |
+| R-013 | English ASR assumed from multilingual model but English alignment unvalidated | medium | medium | do not claim full English support until a pinned English aligner and smoke sample pass |
+| R-014 | Small untimestamped quality corpus | high | medium | expand with manually corrected archive excerpts; add timestamp/speaker annotations later |

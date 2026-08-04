@@ -55,5 +55,8 @@ The ML dependency versions are frozen by `pyproject.toml` and the promoted `uv.l
 - overlap in mixed material is not handled perfectly;
 - diarization may miscount or misassign speakers;
 - numbers and symbols may lack aligned timestamps;
+- large-v2 is provisionally assumed to provide comparable multilingual English ASR, but
+  the complete English path is not validated because the pinned alignment snapshot is
+  Polish-specific;
 - alignment is language-dependent;
 - multichannel audio passed directly to pyannote is downmixed, so channel classification must occur first.

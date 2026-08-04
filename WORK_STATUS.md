@@ -75,6 +75,16 @@ and lacks speaker-timestamp annotations. Phase 9 must build the larger manifest-
 evaluation and release gates. No owner input is needed for the initial acceptance audit
 and tooling scaffold.
 
+Owner input for the next Phase 9 gates:
+
+- longer Polish recordings are available for the 60-minute and sequential stability
+  tests;
+- no English sample is currently available; large-v2 English ASR accuracy is accepted as
+  a provisional assumption, but English forced alignment remains an open technical risk
+  and must not be reported as validated;
+- timestamp and DER references are lower priority and are deferred until the MVP has
+  produced archive transcripts that can be manually corrected and annotated.
+
 ## End-of-day checkpoint — 2026-08-03
 
 Repository state at handoff:
