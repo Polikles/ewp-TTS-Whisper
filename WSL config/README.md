@@ -84,6 +84,9 @@ Validate realistic 21.5- to 151-minute Polish recordings, long silence, resource
 offline execution, duplicate replay, and endurance stability using
 [`RUN_PHASE9_LONG_DURATION.md`](RUN_PHASE9_LONG_DURATION.md).
 
+Validate ten sequential jobs in one batch process for timing and GPU-memory stability
+using [`RUN_PHASE9_BATCH_STABILITY.md`](RUN_PHASE9_BATCH_STABILITY.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
