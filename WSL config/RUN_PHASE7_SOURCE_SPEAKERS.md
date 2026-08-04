@@ -40,7 +40,7 @@ nvidia-smi --query-gpu=name,memory.used,memory.total,utilization.gpu \
 printf 'sandbox=%s\n' "$EWP_P7_ROOT"
 ```
 
-The log must contain commit `6b9c86b` or later. At that commit, 198 tests should pass.
+The log must contain commit `33060f6` or later. At that commit, 199 tests should pass.
 All fixtures and generated results remain outside the repository.
 
 ## 1. Verify and derive the grouped-source fixture
@@ -135,6 +135,39 @@ SUMMARY completed=1 skipped=0 failed=0 cancelled=0
 ```
 
 The same sequential, local-only, non-diarized requirements apply.
+
+### Recovery from the pre-fix export failure
+
+The first target execution at commit `025e56e` completed both ML streams and published
+each canonical JSON, then rejected derived subtitles because chunks from overlapping
+speaker segments were not globally ordered. Commit `33060f6` fixes cue ordering and
+applies on-change labels after ordering.
+
+If continuing that existing sandbox, do not delete results and do not use `--force`.
+Update the application and repeat sections 3 and 4 exactly:
+
+```bash
+cd "$EWP_REPO"
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+    uv run --locked transcriber transcribe \
+    "$EWP_P7_SPLIT/input/p2-01-split-speakers.wav" \
+    --config "$EWP_P7_SPLIT/transcriber.toml" \
+    --output-dir "$EWP_P7_SPLIT/output"
+
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+    uv run --locked transcriber transcribe "$EWP_P7_GROUP/input" \
+    --config "$EWP_P7_GROUP/transcriber.toml" \
+    --output-dir "$EWP_P7_GROUP/output"
+```
+
+Both jobs must report the canonical `RESULT` as `SKIP`/`SKIPPED` and the three missing
+exports as `WROTE`, without model-loading logs. This demonstrates the canonical-first
+publication boundary and model-free export recovery. Continue with section 5 afterward.
 
 ## 5. Validate canonical results and labelled exports
 
@@ -243,6 +276,7 @@ Send back:
 - source and derived fixture hashes plus ffprobe summaries;
 - inspection and dry-run decisions;
 - both first-run and duplicate terminal summaries;
+- if applicable, the model-free recovery summaries;
 - all PASS lines and actual segment/word counts;
 - every output hash;
 - repository status and any unexpected warning, download, traceback, diarization log,

@@ -23,8 +23,8 @@ evidence in the ADRs before closing the phase.
 
 Repository state at this checkpoint:
 
-- `main` and `origin/main` include commit `6b9c86b`;
-- the complete development-VM gate passes formatting, lint, strict typing, and **198
+- `main` and `origin/main` include commit `33060f6`;
+- the complete development-VM gate passes formatting, lint, strict typing, and **199
   tests**;
 - source/channel work items have stable source IDs, speaker IDs, label provenance, and
   selected channel indices;
@@ -36,6 +36,10 @@ Repository state at this checkpoint:
   physical source referenced by two speakers;
 - the application preserves the established single-speaker path and routes only planned
   multi-stream jobs to the new pipeline;
+- the first target run published both canonical results but exposed non-monotonic derived
+  subtitle chunks across overlapping speaker segments; `33060f6` globally orders cue
+  candidates before applying on-change labels, and the runbook now resumes through
+  model-free export recovery;
 - `LICENSE_SKETCH.TXT` remains intentionally untracked and must not be staged.
 
 The next owner input is execution output from the Phase 7 WSL runbook. No new recording
