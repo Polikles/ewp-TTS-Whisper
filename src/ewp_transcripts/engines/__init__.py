@@ -13,6 +13,7 @@ from ewp_transcripts.engines.protocols import (
     TranscriptionDraft,
     TranscriptionSegment,
 )
+from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
 
 __all__ = [
@@ -25,6 +26,7 @@ __all__ = [
     "DiarizationResult",
     "DiarizationTurn",
     "EngineModelInfo",
+    "PyannoteDiarizationEngine",
     "TranscriptionDraft",
     "TranscriptionSegment",
     "WhisperXAlignmentEngine",
