@@ -184,3 +184,9 @@ Priority:
 4. `Speaker1`, `Speaker2`, and so on.
 
 Standard channel-layout labels such as `FL` and `FR` are not person names.
+
+CLI explicit labels use exact filenames. For example,
+`--speaker-map S01E01-guest.wav=Marta` labels only that physical source. This
+avoids unsafe matching by stem or partial path. A split-speaker stereo source
+cannot receive one source-wide explicit label because its channels represent
+different speakers; it retains channel-derived identities in the MVP.

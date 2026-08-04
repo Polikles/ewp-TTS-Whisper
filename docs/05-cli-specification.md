@@ -108,6 +108,14 @@ Primary options:
 
 Default post-transcription exports are defined in TOML. `results.json` is always created and does not require a flag.
 
+`--speaker NAME` applies only to a single, non-split source and implies the
+single-speaker use case. `--speaker-map SOURCE=NAME` may be repeated; `SOURCE`
+is the exact input filename including its extension, not a path, stem, or
+pattern. Unknown, repeated, ambiguous, and split-source mappings are rejected.
+The two options cannot be combined. Explicit labels are applied before
+duplicate/version planning, recorded with `speaker_source = "explicit"`, and
+participate in the episode signature.
+
 ### Output directory
 
 - single file without `--output-dir`: source directory;
