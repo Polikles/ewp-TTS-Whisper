@@ -87,6 +87,10 @@ offline execution, duplicate replay, and endurance stability using
 Validate ten sequential jobs in one batch process for timing and GPU-memory stability
 using [`RUN_PHASE9_BATCH_STABILITY.md`](RUN_PHASE9_BATCH_STABILITY.md).
 
+Validate real `SIGINT` cancellation, durable cancelled state, queue stop, versioned
+restart, duplicate replay, and retained-workspace cleanup using
+[`RUN_PHASE9_INTERRUPT_RESTART.md`](RUN_PHASE9_INTERRUPT_RESTART.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
