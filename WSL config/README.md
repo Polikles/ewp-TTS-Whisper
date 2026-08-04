@@ -108,6 +108,9 @@ Validate chronological default speakers, JSON Lines isolation, timing/VRAM metri
 missing-model guidance using
 [`RUN_RELEASE_OBSERVABILITY.md`](RUN_RELEASE_OBSERVABILITY.md).
 
+Validate complete FLAC, M4A/AAC, and Opus input processing using
+[`RUN_RELEASE_FORMAT_MATRIX.md`](RUN_RELEASE_FORMAT_MATRIX.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
