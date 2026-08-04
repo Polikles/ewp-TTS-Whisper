@@ -76,6 +76,10 @@ execution, overlap representation, labelled exports, and duplicate replay using
 Begin Phase 9 by validating privacy-oriented, marker-safe workspace preview, age
 filtering, and confirmed cleanup using [`RUN_PHASE9_CLEAN.md`](RUN_PHASE9_CLEAN.md).
 
+Establish the initial three-case production large-v2 WER/CER baseline with strict
+reference provenance using
+[`RUN_PHASE9_LEXICAL_BASELINE.md`](RUN_PHASE9_LEXICAL_BASELINE.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
