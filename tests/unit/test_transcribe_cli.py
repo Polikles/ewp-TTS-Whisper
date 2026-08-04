@@ -62,6 +62,29 @@ def test_root_help_lists_transcribe_command() -> None:
     assert "transcribe" in outcome.stdout
 
 
+def test_transcribe_cli_accepts_automatic_speaker_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+    observed: list[str | int] = []
+
+    def run(input_path, *, config, **kwargs):
+        observed.append(config.diarization.speaker_count)
+        return TranscriptionOutcome(
+            decision=PlanDecision.PROCESS,
+            job_id="episode",
+            result_path=tmp_path / "episode_results.json",
+        )
+
+    monkeypatch.setattr(cli, "transcribe_one", run)
+
+    outcome = CliRunner().invoke(app, ["transcribe", str(source), "--speaker-count", "auto"])
+
+    assert outcome.exit_code == 0
+    assert observed == ["auto"]
+
+
 def test_directory_transcribe_prints_stable_summary_and_partial_failure_exit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

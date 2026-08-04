@@ -255,7 +255,10 @@ def dry_run_command(
     ] = None,
     speaker_count: Annotated[
         str | None,
-        typer.Option("--speaker-count", help="Expected speakers: 'auto' or a positive integer."),
+        typer.Option(
+            "--speaker-count",
+            help="Use one speaker, an exact positive count, or 'auto'.",
+        ),
     ] = None,
     force: Annotated[
         bool,
@@ -420,6 +423,13 @@ def transcribe_command(
         RequestedChannelMode | None,
         typer.Option("--channel-mode", help="Override automatic channel classification."),
     ] = None,
+    speaker_count: Annotated[
+        str | None,
+        typer.Option(
+            "--speaker-count",
+            help="Use one speaker, an exact positive count, or 'auto'.",
+        ),
+    ] = None,
     force: Annotated[
         bool,
         typer.Option("--force", help="Create a new result version for a duplicate input."),
@@ -432,15 +442,16 @@ def transcribe_command(
         ),
     ] = False,
 ) -> None:
-    """Transcribe one single-speaker source with pinned local models."""
+    """Transcribe audio with pinned local models."""
 
     try:
+        parsed_speaker_count = _speaker_count(speaker_count)
         config = load_config(
             explicit_path=config_path,
             cli_overrides=_inspection_overrides(
                 recursive=recursive if input_path.is_dir() else False,
                 channel_mode=channel_mode,
-                speaker_count=1,
+                speaker_count=1 if parsed_speaker_count is None else parsed_speaker_count,
             ),
         )
         if input_path.is_dir():

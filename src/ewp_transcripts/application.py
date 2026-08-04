@@ -23,23 +23,27 @@ from ewp_transcripts.domain import (
     JobReservation,
 )
 from ewp_transcripts.domain.canonical import CanonicalEnvironment
-from ewp_transcripts.domain.enums import JobStateStatus, PlanDecision
+from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import ApplicationError, UnsupportedPipelineScopeError
-from ewp_transcripts.engines import AlignmentEngine, AsrEngine
+from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
+from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
 
 # Re-exported here to keep user interfaces on the application boundary.
 from ewp_transcripts.export_service import ExportFormat, ExportOutcome, export_result
 from ewp_transcripts.inspection import inspect_episode
 from ewp_transcripts.media import measure_file_channels
-from ewp_transcripts.pipeline import run_single_speaker_pipeline, run_source_speaker_pipeline
+from ewp_transcripts.pipeline import (
+    run_diarization_pipeline,
+    run_single_speaker_pipeline,
+    run_source_speaker_pipeline,
+)
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
 from ewp_transcripts.storage import (
     find_existing_results,
     plan_job_outputs,
     resolve_output_directory,
 )
-from ewp_transcripts.streams import plan_speaker_streams
 from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
 
 __all__ = [
@@ -57,6 +61,7 @@ __all__ = [
 
 AsrFactory = Callable[[ApplicationConfig], AsrEngine]
 AlignmentFactory = Callable[[ApplicationConfig], AlignmentEngine]
+DiarizationFactory = Callable[[ApplicationConfig], DiarizationEngine]
 
 
 @dataclass(frozen=True, slots=True)
@@ -212,11 +217,9 @@ def transcribe_one(
     run_id: UUID | None = None,
     asr_factory: AsrFactory | None = None,
     alignment_factory: AlignmentFactory | None = None,
+    diarization_factory: DiarizationFactory | None = None,
 ) -> TranscriptionOutcome:
-    """Run one single-source/single-speaker job through safe publication."""
-
-    if config.diarization.speaker_count != 1:
-        raise UnsupportedPipelineScopeError("Single-file transcribe requires speaker_count = 1")
+    """Run one inspected episode through safe publication."""
     inspected = inspect_input(
         input_path,
         config=config,
@@ -238,6 +241,7 @@ def transcribe_one(
         run_id=run_id or uuid4(),
         asr_factory=asr_factory or _whisperx_asr,
         alignment_factory=alignment_factory or _whisperx_alignment,
+        diarization_factory=diarization_factory or _pyannote_diarization,
     )
 
 
@@ -250,11 +254,10 @@ def transcribe_batch(
     allow_duration_mismatch: bool = False,
     asr_factory: AsrFactory | None = None,
     alignment_factory: AlignmentFactory | None = None,
+    diarization_factory: DiarizationFactory | None = None,
 ) -> BatchTranscriptionOutcome:
     """Process inspected episodes sequentially and isolate per-job failures."""
 
-    if config.diarization.speaker_count != 1:
-        raise UnsupportedPipelineScopeError("Single-speaker batch requires speaker_count = 1")
     inspected = inspect_input(
         input_path,
         config=config,
@@ -277,6 +280,7 @@ def transcribe_batch(
                 run_id=uuid4(),
                 asr_factory=asr_factory or _whisperx_asr,
                 alignment_factory=alignment_factory or _whisperx_alignment,
+                diarization_factory=diarization_factory or _pyannote_diarization,
             )
             jobs.append(
                 BatchJobOutcome(
@@ -324,6 +328,7 @@ def _transcribe_episode(
     run_id: UUID,
     asr_factory: AsrFactory,
     alignment_factory: AlignmentFactory,
+    diarization_factory: DiarizationFactory,
 ) -> TranscriptionOutcome:
     reservation = reserve_job(
         episode,
@@ -359,6 +364,7 @@ def _transcribe_episode(
         config=config,
         asr_factory=asr_factory,
         alignment_factory=alignment_factory,
+        diarization_factory=diarization_factory,
     )
 
 
@@ -369,6 +375,7 @@ def _process_reservation(
     config: ApplicationConfig,
     asr_factory: AsrFactory,
     alignment_factory: AlignmentFactory,
+    diarization_factory: DiarizationFactory,
 ) -> TranscriptionOutcome:
     state = reservation.state
     assert state is not None
@@ -382,8 +389,22 @@ def _process_reservation(
             job_id=episode.job_id,
         )
         environment = _runtime_environment(config)
-        streams = plan_speaker_streams(episode)
-        if len(streams) == 1:
+        source_speakers = len(episode.sources) > 1 or (
+            len(episode.sources) == 1
+            and episode.sources[0].channel_classification.processing_mode
+            is ChannelMode.SPLIT_SPEAKERS
+        )
+        if source_speakers:
+            result = run_source_speaker_pipeline(
+                episode,
+                reservation,
+                workspace,
+                config=config,
+                environment=environment,
+                asr_engine_factory=lambda: asr_factory(config),
+                alignment_engine_factory=lambda: alignment_factory(config),
+            )
+        elif config.diarization.speaker_count == 1:
             result = run_single_speaker_pipeline(
                 episode,
                 reservation,
@@ -394,14 +415,15 @@ def _process_reservation(
                 alignment_engine=alignment_factory(config),
             )
         else:
-            result = run_source_speaker_pipeline(
+            result = run_diarization_pipeline(
                 episode,
                 reservation,
                 workspace,
                 config=config,
                 environment=environment,
-                asr_engine_factory=lambda: asr_factory(config),
-                alignment_engine_factory=lambda: alignment_factory(config),
+                asr_engine=asr_factory(config),
+                alignment_engine=alignment_factory(config),
+                diarization_engine=diarization_factory(config),
             )
         result_path = finalize_job_result(
             reservation,
@@ -481,6 +503,14 @@ def _whisperx_alignment(config: ApplicationConfig) -> AlignmentEngine:
     return WhisperXAlignmentEngine(
         config.models.alignment_snapshot_path,
         revision=config.models.alignment_revision,
+        device=config.models.device,
+    )
+
+
+def _pyannote_diarization(config: ApplicationConfig) -> DiarizationEngine:
+    return PyannoteDiarizationEngine(
+        config.diarization.local_model_path,
+        revision=config.diarization.model_revision,
         device=config.models.device,
     )
 

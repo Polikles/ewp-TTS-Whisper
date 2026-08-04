@@ -189,6 +189,37 @@ def test_transcribe_routes_grouped_sources_to_source_speaker_pipeline(
     assert called == ["grouped"]
 
 
+def test_transcribe_routes_automatic_count_to_diarization_pipeline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path)
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+    called: list[str] = []
+
+    def diarized_pipeline(episode, reservation, workspace, **kwargs):
+        called.append("diarized")
+        assert kwargs["diarization_engine"] is not None
+        return _matching_result(reservation)
+
+    monkeypatch.setattr(application, "run_diarization_pipeline", diarized_pipeline)
+    monkeypatch.setattr(
+        application,
+        "run_single_speaker_pipeline",
+        lambda *args, **kwargs: pytest.fail("single-speaker pipeline must not run"),
+    )
+    config = ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work"))
+
+    outcome = transcribe_one(
+        inspection.discovery.input_path,
+        config=config,
+        output_directory=tmp_path / "output",
+        diarization_factory=lambda config: object(),  # type: ignore[arg-type,return-value]
+    )
+
+    assert outcome.decision is PlanDecision.PROCESS
+    assert called == ["diarized"]
+
+
 def _config(tmp_path: Path) -> ApplicationConfig:
     return ApplicationConfig(
         diarization=DiarizationConfig(speaker_count=1),
