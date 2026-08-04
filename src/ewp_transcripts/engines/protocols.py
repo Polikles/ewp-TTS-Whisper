@@ -15,7 +15,7 @@ class EngineModel(BaseModel):
 
 
 class EngineModelInfo(EngineModel):
-    role: Literal["asr", "alignment"]
+    role: Literal["asr", "alignment", "diarization"]
     name: str = Field(min_length=1)
     revision: str | None = None
     local_path: Path | None = None
@@ -95,6 +95,34 @@ class AlignedTranscript(EngineModel):
         return self
 
 
+class DiarizationTurn(EngineModel):
+    """One backend speaker interval on the original audio timeline."""
+
+    start_ms: int = Field(ge=0)
+    end_ms: int = Field(ge=0)
+    speaker_label: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_timestamps(self) -> Self:
+        if self.end_ms < self.start_ms:
+            raise ValueError("diarization turn end must not precede start")
+        return self
+
+
+class DiarizationResult(EngineModel):
+    """Regular overlap-preserving turns plus optional exclusive assignment turns."""
+
+    turns: tuple[DiarizationTurn, ...]
+    exclusive_turns: tuple[DiarizationTurn, ...] | None = None
+
+    @model_validator(mode="after")
+    def validate_chronology(self) -> Self:
+        _validate_turn_order(self.turns, exclusive=False)
+        if self.exclusive_turns is not None:
+            _validate_turn_order(self.exclusive_turns, exclusive=True)
+        return self
+
+
 class AsrEngine(Protocol):
     """Replaceable ASR stage; implementations must load dependencies lazily."""
 
@@ -131,3 +159,29 @@ class AlignmentEngine(Protocol):
     def close(self) -> None:
         """Release stage resources, including GPU model references."""
         ...
+
+
+class DiarizationEngine(Protocol):
+    """Replaceable speaker-diarization stage with backend-neutral intervals."""
+
+    @property
+    def model_info(self) -> EngineModelInfo: ...
+
+    def diarize(
+        self,
+        audio_path: Path,
+        *,
+        speaker_count: int | None,
+    ) -> DiarizationResult: ...
+
+    def close(self) -> None:
+        """Release stage resources, including GPU model references."""
+        ...
+
+
+def _validate_turn_order(turns: tuple[DiarizationTurn, ...], *, exclusive: bool) -> None:
+    for previous, current in zip(turns, turns[1:], strict=False):
+        if current.start_ms < previous.start_ms:
+            raise ValueError("diarization turns must be sorted chronologically")
+        if exclusive and current.start_ms < previous.end_ms:
+            raise ValueError("exclusive diarization turns must not overlap")
