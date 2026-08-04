@@ -239,3 +239,40 @@ is mandatory, age filtering is based on the ownership marker, and deletion reval
 ownership immediately before removing each workspace. Retention-reason filters remain
 deferred until versioned marker metadata can distinguish failed, cancelled, and
 deliberately retained successful jobs.
+
+## Phase 9 production SIGINT and restart evidence
+
+On 2026-08-04, commit `cf12efa` passed a real cancellation gate on the target WSL2 RTX
+3090 workstation. A two-job batch started the 50-minute P9-03 recording first. After
+pyannote VAD was observed, the recorded transcriber PID received `SIGINT`.
+
+The process:
+
+- exited with the documented cancellation code 6;
+- reported `completed=0 skipped=0 failed=0 cancelled=1`;
+- durably published `episode01-long_results.failed.json` with status `cancelled`, code
+  `USER_CANCELLED`, and result version 1;
+- published no final result and left no partial state;
+- stopped before the queued `episode02-never-started` job began;
+- retained exactly the cancelled job's marker-owned diagnostic workspace;
+- emitted no application traceback.
+
+An ordinary offline restart processed the cancelled long job from the beginning as
+`episode01-long_results_v002.json`, then processed the previously untouched short job as
+version 1. Both canonical results validated, while the cancelled-state hash remained
+unchanged. Duplicate replay skipped both completed jobs without model loading, and
+marker-safe cleanup removed exactly the retained cancelled workspace.
+
+External artifact hashes:
+
+```text
+0dca68a60a1f663b332ec410479f04599b470654efafc209bc4b65705d10bfe6  episode01-long_results.failed.json
+0e0600ddf7e76e550207236bf486ad06487cf7d8274383ee993690070b4e099d  episode01-long_results_v002.json
+71b95ed3f7e27272f7271ca27362b27b32cec0dd22c796496af1fea333ba76ae  episode02-never-started_results.json
+```
+
+The first procedural attempt was stopped by shell job control before application
+workspace allocation because the background command inherited terminal stdin. Commit
+`cf12efa` corrected the runbook by redirecting stdin from `/dev/null` and by avoiding
+interactive-shell `errexit`. The abandoned attempt selected zero owned workspaces during
+cleanup and produced no acceptance evidence.

@@ -59,13 +59,13 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 ### State and failures
 
-- [ ] SIGINT during ASR.
+- [x] SIGINT during ASR.
 - [ ] Exception during alignment.
 - [ ] Exception during diarization.
 - [ ] Disk full.
 - [ ] Output write error.
 - [ ] Corrupt partial result.
-- [ ] Restart processes the file from the beginning.
+- [x] Restart processes the file from the beginning.
 - [ ] One failed job does not stop the batch.
 - [ ] Temporary files are preserved after failure.
 - [ ] Temporary files are removed after success.
