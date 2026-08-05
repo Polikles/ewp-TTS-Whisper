@@ -39,6 +39,10 @@
 - [ADR-0010: Isolated wheel installation procedure](adr/0010-isolated-wheel-installation.md)
 - [ADR-0011: Language-specific offline alignment selection](adr/0011-multilingual-alignment-selection.md)
 - [ADR-0012: Explicit group identity and validation contract](adr/0012-explicit-group-contract.md)
+- [ADR-0013: Release observability and speaker order](adr/0013-release-observability-and-speaker-order.md)
+- [ADR-0014: Dataset-dependent quality gates](adr/0014-dataset-dependent-quality-gates.md)
+- [ADR-0015: MVP input format matrix](adr/0015-input-format-matrix.md)
+- [ADR-0016: Subtitle readability and correction boundary](adr/0016-subtitle-readability-and-correction-boundary.md)
 
 ## Implementation guidance
 

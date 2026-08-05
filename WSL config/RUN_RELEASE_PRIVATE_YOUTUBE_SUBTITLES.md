@@ -30,7 +30,7 @@ test -z "${HF_TOKEN:-}" && echo "HF_TOKEN: absent"
 printf 'sandbox=%s\n' "$EWP_SUB_REVIEW_ROOT"
 ```
 
-Expected commit: `e60e3ef` or later and 257 passing tests.
+Expected commit: `11bd748` or later and 258 passing tests.
 
 ## 1. Generate the two-speaker result and subtitles offline
 
@@ -136,3 +136,44 @@ git status --short
 
 Send the two completed checklists, the three hashes from section 2, and whether the
 Private video was retained or deleted. Do not copy or commit `LICENSE_SKETCH.TXT`.
+
+## 7. Re-review after cue-readability tuning
+
+The first review on 2026-08-05 found isolated one- or two-word cues around rhetorical
+pauses. Commit `11bd748` makes the configured `max_merge_gap_ms` effective and changes
+its default to 1200 ms. If the canonical result and review MP4 from the first attempt
+still exist, do not rerun ASR or rebuild the video. Regenerate only the derived captions:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V2="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v002.srt"
+export EWP_SUB_REVIEW_VTT_V2="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v002.vtt"
+
+test -s "$EWP_SUB_REVIEW_RESULT" && echo "canonical result: present"
+test -s "$EWP_SUB_REVIEW_ROOT/p2-03-private-review.mp4" && echo "review video: present"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V2" && echo "revised SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V2" && echo "revised VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V2" "$EWP_SUB_REVIEW_VTT_V2"
+git status --short
+```
+
+Upload the `_v002` files using sections 3–5. Pay particular attention to the previously
+failing fragments `a co`, `Może i … nikt nie zauważy`, and speech separated by an
+approximately one-second emphatic pause. The test passes only when the complete SRT and
+VTT checklists pass; a YouTube notice about unsupported extra VTT formatting is
+informational if the text, timing, and Polish characters remain correct.
