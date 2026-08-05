@@ -242,7 +242,6 @@ def _rebalance_adjacent_drafts(
             or not previous.words
             or not following.words
             or not 0 <= gap_ms <= settings.max_merge_gap_ms
-            or previous.text.rstrip().endswith((".", "!", "?"))
         ):
             continue
         previous_prefix = _capacity_prefix(
@@ -544,7 +543,7 @@ def _best_word_boundary(
 ) -> tuple[list[CanonicalWord], list[CanonicalWord]]:
     """Select the best valid split across two fragments without greedy transfer."""
 
-    if not previous or not following or _ends_sentence(previous):
+    if not previous or not following:
         return previous, following
     combined = [*previous, *following]
     original_boundary = len(previous)
@@ -586,7 +585,10 @@ def _word_boundary_score(
     previous_prefix: str,
     following_prefix: str,
     movement: int,
-) -> tuple[int, int, int, int]:
+) -> tuple[int, int, int, int, int]:
+    nonfinal_one_line_penalty = int(
+        _display_line_count(previous, settings, prefix=previous_prefix) == 1
+    )
     linguistic_penalty = int(_ends_connective(previous))
     linguistic_penalty += _internal_line_connective_count(
         previous, settings, prefix=previous_prefix
@@ -598,7 +600,19 @@ def _word_boundary_score(
         len(following) < settings.min_words_per_cue
     )
     imbalance = abs(len(previous) - len(following))
-    return linguistic_penalty, orphan_penalty, movement, imbalance
+    return nonfinal_one_line_penalty, linguistic_penalty, orphan_penalty, movement, imbalance
+
+
+def _display_line_count(
+    words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str
+) -> int:
+    return len(
+        wrap_subtitle_text(
+            f"{prefix}{_word_text(words)}",
+            max_lines=settings.max_lines,
+            max_chars_per_line=settings.max_chars_per_line,
+        )
+    )
 
 
 def _internal_line_connective_count(

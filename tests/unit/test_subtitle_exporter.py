@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.config import SubtitlesConfig
-from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.canonical import CanonicalSegment, load_canonical_result
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
     build_subtitle_cues,
@@ -675,6 +675,74 @@ def test_default_flexible_ceiling_keeps_reported_continuation_in_one_balanced_cu
 
     assert len(reported_cues) == 1
     assert tuple(len(line) for line in reported_cues[0].lines) == (50, 49)
+
+
+def test_one_line_cue_is_rebalanced_when_same_speaker_turn_continues() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    speaker_one_template, speaker_two = result.transcript.segments
+
+    def segment_with_words(
+        texts: tuple[str, ...], *, start_ms: int, word_prefix: str
+    ) -> CanonicalSegment:
+        words = tuple(
+            speaker_one_template.words[0].model_copy(
+                update={
+                    "word_id": f"word_{word_prefix}_{index}",
+                    "text": text,
+                    "start_ms": start_ms + index * 420,
+                    "end_ms": start_ms + index * 420 + 340,
+                    "speaker_id": "speaker_001",
+                }
+            )
+            for index, text in enumerate(texts)
+        )
+        return speaker_one_template.model_copy(
+            update={
+                "start_ms": words[0].start_ms,
+                "end_ms": words[-1].end_ms,
+                "text": " ".join(texts),
+                "speaker_id": "speaker_001",
+                "active_speaker_ids": ("speaker_001",),
+                "words": words,
+            }
+        )
+
+    opening = segment_with_words(
+        ("Dodajmy", "tutaj", "doprecyzowanie."),
+        start_ms=52603,
+        word_prefix="turn_opening",
+    )
+    continuation = segment_with_words(
+        (
+            "W",
+            "poprzednich",
+            "odcinkach",
+            "wspomnieliśmy,",
+            "że",
+            "kliknięcie",
+            "Usuń",
+            "tak",
+            "naprawdę",
+            "niczego",
+            "nie",
+            "usuwa.",
+        ),
+        start_ms=54584,
+        word_prefix="turn_continuation",
+    )
+    result = result.model_copy(
+        update={
+            "transcript": result.transcript.model_copy(
+                update={"segments": (speaker_two, opening, continuation)}
+            )
+        }
+    )
+
+    cues = build_subtitle_cues(result)
+    speaker_one_cues = [cue for cue in cues if cue.speaker_id == "speaker_001"]
+
+    assert len(speaker_one_cues) >= 2
+    assert all(len(cue.lines) == 2 for cue in speaker_one_cues[:-1])
 
 
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
