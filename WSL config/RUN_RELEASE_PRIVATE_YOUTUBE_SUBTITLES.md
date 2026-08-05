@@ -181,3 +181,39 @@ failing fragments `a co`, `Może i … nikt nie zauważy`, and speech separated 
 approximately one-second emphatic pause. The test passes only when the complete SRT and
 VTT checklists pass; a YouTube notice about unsupported extra VTT formatting is
 informational if the text, timing, and Polish characters remain correct.
+
+## 8. Re-review after orphan-fragment balancing
+
+The `_v002` review improved pacing but still found one-to-three-word pieces stranded at
+capacity-based sentence splits. Commit `479004a` adds a soft four-word balancing target
+using canonical word timestamps. It does not combine a punctuated short sentence across
+silence, another speaker, or overlap. Reuse the same canonical result and MP4 again:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V3="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v003.srt"
+export EWP_SUB_REVIEW_VTT_V3="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v003.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V3" && echo "balanced SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V3" && echo "balanced VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V3" "$EWP_SUB_REVIEW_VTT_V3"
+git status --short
+```
+
+Repeat sections 3–5 with `_v003`. Confirm specifically that sentence fragments are no
+longer stranded, while genuinely short statements surrounded by silence still appear as
+independent cues.
