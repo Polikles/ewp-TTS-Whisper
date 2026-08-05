@@ -95,6 +95,9 @@ Build and install the wheel into a fresh external Python environment, prove inst
 import provenance, and run a short offline GPU transcription using
 [`RUN_PHASE9_WHEEL_INSTALL.md`](RUN_PHASE9_WHEEL_INSTALL.md).
 
+Close the clean-OS distribution gate in a dedicated new Ubuntu 24.04 WSL instance using
+[`RUN_RELEASE_FRESH_WSL_INSTALL.md`](RUN_RELEASE_FRESH_WSL_INSTALL.md).
+
 Validate the final lightweight CUDA and pinned-model readiness diagnostics using
 [`RUN_RELEASE_DOCTOR.md`](RUN_RELEASE_DOCTOR.md).
 

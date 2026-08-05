@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: feature-complete for the validated Polish workflows; release audit and clean-environment validation remain in progress.
+- MVP implementation: feature-complete for the validated Polish workflows; only fresh-OS installation validation remains in the release audit.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
@@ -14,9 +14,9 @@
 
 - English and automatic language selection are part of the MVP contract because large-v2 is multilingual. The complete English path, especially word alignment, still requires validation with an English sample before its quality can be characterized.
 - The current manually verified quality corpus contains three Polish cases and has no timestamp or diarization annotations. WER/CER are baselined; timestamp accuracy and DER/JER remain to be baselined after the corpus is expanded.
-- Subtitle syntax and export constraints are covered automatically, but playback review in the target player or a private YouTube upload is still pending.
+- Subtitle syntax, readability, and timing passed short and complete-episode YouTube reviews.
 - The wheel has passed an isolated offline installation and transcription test on the reference WSL machine. A fresh Ubuntu 24.04 WSL installation test is still pending.
-- Explicit CLI grouping, complete `doctor` model-readiness checks, and the final CLI/documentation conformance pass remain release-audit items.
+- Three-speaker and full-English quality validation remain deferred until representative archive-derived material exists.
 
 ## Primary outputs
 
