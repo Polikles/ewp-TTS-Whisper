@@ -548,13 +548,20 @@ def _best_word_boundary(
     combined = [*previous, *following]
     original_boundary = len(previous)
     best = (previous, following)
-    best_score = _word_boundary_score(
-        previous,
-        following,
-        settings,
-        previous_prefix=previous_prefix,
-        following_prefix=following_prefix,
-        movement=0,
+    original_fits = _word_chunk_fits(
+        previous, settings, prefix=previous_prefix
+    ) and _word_chunk_fits(following, settings, prefix=following_prefix)
+    best_score = (
+        _word_boundary_score(
+            previous,
+            following,
+            settings,
+            previous_prefix=previous_prefix,
+            following_prefix=following_prefix,
+            movement=0,
+        )
+        if original_fits
+        else (10**9, 10**9, 10**9, 10**9, 10**9)
     )
     for boundary in range(1, len(combined)):
         previous_candidate = combined[:boundary]

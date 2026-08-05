@@ -745,6 +745,94 @@ def test_one_line_cue_is_rebalanced_when_same_speaker_turn_continues() -> None:
     assert all(len(cue.lines) == 2 for cue in speaker_one_cues[:-1])
 
 
+def test_invalid_rapid_micro_cues_do_not_outrank_valid_neighbor_boundaries() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    template = result.transcript.segments[0]
+    texts = (
+        "On",
+        "ma",
+        "być",
+        "wystarczający,",
+        "nie",
+        "musi",
+        "być",
+        "idealny,",
+        "chociaż",
+        "zawsze",
+        "mnie",
+        "ciśnie,",
+        "żeby",
+        "wszystko",
+        "dopięć",
+        "na",
+        "120%,",
+        "bo",
+        "nawet",
+        "110%",
+        "ma",
+        "za",
+        "mały",
+        "margines",
+        "błędu.",
+    )
+    starts = (
+        807125,
+        807305,
+        807485,
+        807745,
+        808545,
+        808765,
+        808985,
+        809245,
+        809965,
+        810405,
+        810725,
+        811045,
+        811311,
+        811711,
+        812111,
+        812371,
+        812711,
+        813193,
+        813253,
+        813414,
+        813714,
+        813894,
+        814074,
+        814315,
+        814655,
+    )
+    ends = tuple((*starts[1:], 815096))
+    words = tuple(
+        template.words[0].model_copy(
+            update={
+                "word_id": f"word_rapid_{index}",
+                "text": text,
+                "start_ms": start,
+                "end_ms": end,
+            }
+        )
+        for index, (text, start, end) in enumerate(zip(texts, starts, ends, strict=True))
+    )
+    segment = template.model_copy(
+        update={
+            "start_ms": words[0].start_ms,
+            "end_ms": words[-1].end_ms,
+            "text": " ".join(texts),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (segment,)})}
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert all(cue.end_ms - cue.start_ms >= 1000 for cue in cues)
+    assert all(len(" ".join(cue.lines).removeprefix("jan: ").split()) >= 4 for cue in cues)
+    assert " ".join(" ".join(cue.lines) for cue in cues).count("błędu.") == 1
+
+
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     original = result.transcript.segments[0]
