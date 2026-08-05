@@ -111,6 +111,9 @@ missing-model guidance using
 Validate complete FLAC, M4A/AAC, and Opus input processing using
 [`RUN_RELEASE_FORMAT_MATRIX.md`](RUN_RELEASE_FORMAT_MATRIX.md).
 
+Perform the explicit external SRT/VTT player review using a Private YouTube upload with
+[`RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md`](RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md).
+
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
 Then prove offline operation with the environment-level block in [`RUN_PHASE0_NETWORK_BLOCK.md`](RUN_PHASE0_NETWORK_BLOCK.md).
