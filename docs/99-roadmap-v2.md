@@ -101,6 +101,8 @@ The following items do not block the MVP.
   readable transcript and a timed caption resource;
 - build an accessible synchronized HTML transcript from canonical/segments JSON, with
   sentence-level seeking, current-sentence highlighting, and keyboard controls;
+- add HTML as an explicit generated export (`transcriber export --format html`), with a
+  standalone document and an embeddable fragment that require no transcription rerun;
 - apply speaker colors in custom HTML/CSS with textual labels as the portable and
   accessible fallback;
 - define export presets for conservative platform interchange and web-native playback.
