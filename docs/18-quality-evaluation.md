@@ -76,5 +76,5 @@ grouping need not equal the WER alignment decomposition.
 
 Macro averages are the primary initial comparison because each selected case contributes
 equally. Micro averages remain visible to show corpus-wide unit counts. The current
-three-case Phase 0 material is only an initial baseline; release thresholds require the
-larger licensed and manually verified Phase 9 corpus.
+three-case material is only an initial baseline; release thresholds require the larger
+licensed and manually verified archive-derived corpus.

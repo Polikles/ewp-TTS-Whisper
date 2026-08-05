@@ -30,7 +30,7 @@ directory, model cache, or siblings.
 6. Validate it against the schema.
 7. Atomically rename it to `_results.json`.
 
-The Phase 3 reservation implementation publishes the initial running state with an
+The reservation implementation publishes the initial running state with an
 exclusive same-filesystem hard link from a fully written and `fsync`ed temporary file.
 This provides no-overwrite semantics unavailable from a normal replacing rename. The
 directory is then `fsync`ed before the temporary link is removed. Reservation is planned

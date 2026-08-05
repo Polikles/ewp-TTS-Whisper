@@ -10,21 +10,24 @@
 | GPU | NVIDIA RTX 3090, 24 GB VRAM |
 | Driver | Current Windows NVIDIA driver with WSL support |
 | Python | 3.12 |
-| Package manager | `uv`; exact version recorded during the spike |
+| Package manager | `uv`; dependencies are reproduced from the committed lockfile |
 | Media tools | FFmpeg and ffprobe from Ubuntu packages |
 | Storage | Linux-filesystem space for source checkout, environments, models, and work files |
 | Network | Required during initial package and model setup; not required for normal offline transcription |
 
 ## Capacity guidance
 
-Exact minimum free-space and RAM requirements must be recorded during the compatibility and long-file tests. Until measured, reserve enough Linux-filesystem space for the Git checkout, Python environment, model snapshots, working audio, retained failure artifacts, and external test data.
+Reserve enough Linux-filesystem space for the Git checkout, Python environment, model
+snapshots, working audio, retained failure artifacts, and archive outputs. The accepted
+151-minute test peaked near 4.14 GiB process RAM and 14.6 GiB sampled total GPU use on the
+24 GiB reference GPU, but these observations are not minimum hardware guarantees.
 
 Do not publish an unsupported numeric minimum before these measurements exist.
 
 ## Expected paths
 
 ```text
-/home/<user>/projects/ewp-transcripts
+/home/<user>/transkrypcje/ewp-transcripts
 /home/<user>/.cache/ewp-transcripts
 /home/<user>/.cache/huggingface
 ```

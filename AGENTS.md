@@ -103,7 +103,8 @@ Mandatory boundaries:
 
 ## 7. Change strategy
 
-Work in vertical slices. Each phase in `docs/MVP_IMPLEMENTATION_PLAN.md` must end with a usable increment and passing tests.
+Work in vertical slices. Use `WORK_STATUS.md` for the current resume point and
+`docs/99-roadmap-v2.md` for post-MVP priorities.
 
 Before implementing a phase:
 

@@ -23,7 +23,7 @@ and doctor command instead of only stating that the snapshot is absent.
 
 Commits `ff5bc13`, `f76410a`, `7b5dcc4`, and `16a07af` passed the complete automated
 suite, ending with 254 tests. The Ubuntu 24.04 WSL2 RTX 3090 workstation then executed
-[`RUN_RELEASE_OBSERVABILITY.md`](../../WSL%20config/RUN_RELEASE_OBSERVABILITY.md) from
+[`RUN_RELEASE_OBSERVABILITY.md`](../../archive/mvp-validation-runbooks/RUN_RELEASE_OBSERVABILITY.md) from
 commit `9de5b3c`.
 
 P2-01 completed offline in 21,482 ms. JSONL stdout contained one parseable

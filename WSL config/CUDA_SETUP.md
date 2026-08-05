@@ -2,13 +2,12 @@
 
 ## Critical rule
 
-Install the NVIDIA GPU driver on Windows. Do not install a Linux NVIDIA display driver inside WSL. NVIDIA states that the Windows driver is exposed inside WSL and that installing a Linux driver there can overwrite the WSL integration.
+Install the NVIDIA display driver on Windows. Do not install a Linux NVIDIA display
+driver inside WSL; the Windows driver exposes the GPU to WSL2.
 
-Source: [NVIDIA — CUDA on WSL user guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html).
+## 1. Verify Windows
 
-## 1. Verify the Windows side
-
-In PowerShell:
+Run in PowerShell:
 
 ```powershell
 nvidia-smi
@@ -16,34 +15,25 @@ wsl --update
 wsl --shutdown
 ```
 
-Then reopen Ubuntu.
+Reopen Ubuntu after WSL shuts down.
 
-## 2. Verify the WSL side
-
-Inside Ubuntu:
+## 2. Verify WSL passthrough
 
 ```bash
 nvidia-smi
 ```
 
-If it is not on `PATH`, check the WSL-provided binary directly:
+If it is not on `PATH`, try `/usr/lib/wsl/lib/nvidia-smi`. The CUDA version displayed by
+`nvidia-smi` describes driver compatibility, not the installed PyTorch runtime.
+
+## 3. Verify the locked PyTorch runtime
+
+After `uv sync --locked`:
 
 ```bash
-/usr/lib/wsl/lib/nvidia-smi
+cd "$HOME/transkrypcje/ewp-transcripts"
+uv run --locked python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'no CUDA device')"
 ```
 
-Record the GPU name, displayed Windows driver version, reported CUDA compatibility version, and whether the explicit WSL path was required.
-
-The CUDA value displayed by `nvidia-smi` is the maximum CUDA compatibility exposed by the driver; it does not prove that CUDA-enabled PyTorch is installed.
-
-## 3. PyTorch verification belongs to the spike
-
-Do not install a guessed global CUDA toolkit or PyTorch wheel. The compatibility spike will select the PyTorch build together with WhisperX and pyannote, using the official [PyTorch installation selector](https://pytorch.org/get-started/locally/).
-
-After the spike environment exists, verify it with:
-
-```bash
-uv run python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'no CUDA device')"
-```
-
-Required outcome: `torch.cuda.is_available()` is `True` and the device name identifies the RTX 3090.
+Required: CUDA is available and the expected NVIDIA GPU is named. Do not install a
+global CUDA toolkit or replace the locked PyTorch packages independently.

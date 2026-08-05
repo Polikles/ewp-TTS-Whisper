@@ -60,7 +60,7 @@ Recommended starting documents:
 4. [`docs/05-cli-specification.md`](docs/05-cli-specification.md) — CLI contract.
 5. [`docs/07-results-data-model.md`](docs/07-results-data-model.md) — canonical data model.
 6. [`docs/12-testing-and-acceptance.md`](docs/12-testing-and-acceptance.md) — tests and acceptance criteria.
-7. [`docs/13-implementation-plan.md`](docs/13-implementation-plan.md) — implementation plan.
+7. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — internal pilot and V2 priorities.
 
 ## Examples and schemas
 

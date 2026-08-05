@@ -1,6 +1,7 @@
 # Install stable base tools
 
-These steps install only the non-ML foundation. ML dependencies are selected and locked during the Phase 0 compatibility spike.
+These steps install only the non-ML foundation. Application and ML dependencies are
+installed later from the committed lockfile.
 
 ## 1. Update Ubuntu packages
 

@@ -26,7 +26,8 @@ Do not fix this by installing a Linux NVIDIA display driver inside WSL.
 
 Check that WSL is version 2, `nvidia-smi` works inside WSL, the PyTorch build includes CUDA support, it is driver-compatible, and the command uses the intended `uv` environment.
 
-Do not install random CUDA or PyTorch versions over the spike environment. Recreate it from the selected dependency set.
+Do not install random CUDA or PyTorch versions over the project environment. Restore it
+with `uv sync --locked`.
 
 ## FFmpeg or ffprobe is missing
 

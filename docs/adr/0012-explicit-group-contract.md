@@ -29,7 +29,7 @@ speaker provenance, CLI conflicts, application routing, and all three planning/e
 entry points.
 
 The reference Ubuntu 24.04 WSL2 workstation then executed
-[`RUN_RELEASE_EXPLICIT_GROUP.md`](../../WSL%20config/RUN_RELEASE_EXPLICIT_GROUP.md)
+[`RUN_RELEASE_EXPLICIT_GROUP.md`](../../archive/mvp-validation-runbooks/RUN_RELEASE_EXPLICIT_GROUP.md)
 using the two isolated channels of P2-01 under unrelated filenames:
 
 ```text

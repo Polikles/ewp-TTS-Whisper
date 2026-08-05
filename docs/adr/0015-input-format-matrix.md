@@ -14,7 +14,7 @@ source into private working audio, while the original input remains unchanged.
 
 Commit `b4e37e5` or later passed all 254 automated tests. The Ubuntu 24.04 WSL2 RTX 3090
 workstation then executed
-[`RUN_RELEASE_FORMAT_MATRIX.md`](../../WSL%20config/RUN_RELEASE_FORMAT_MATRIX.md).
+[`RUN_RELEASE_FORMAT_MATRIX.md`](../../archive/mvp-validation-runbooks/RUN_RELEASE_FORMAT_MATRIX.md).
 Three fixtures were derived from the verified 95.376-second mono P0-01 source:
 
 ```text

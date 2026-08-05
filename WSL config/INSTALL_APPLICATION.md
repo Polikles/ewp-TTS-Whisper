@@ -1,63 +1,50 @@
-# Install EWP-transcripts in WSL
+# Install the internal MVP candidate
 
-Status: **MVP source-checkout installation is executable; release-wheel validation is
-documented separately**.
+The supported installation is a source checkout synchronized from the committed
+`uv.lock`. Installation does not download transcription models.
 
-This guide installs the current EWP-transcripts package from its committed lockfile.
-`doctor`, `inspect`, `dry-run`, `transcribe`, `export`, and `clean` are available.
-
-It is intentionally separate from [`PREPARE_PHASE0_WSL.md`](PREPARE_PHASE0_WSL.md):
-
-- the spike guide tests candidate dependencies and may be discarded;
-- this guide will consume the approved repository `uv.lock`;
-- users will not manually reconstruct the dependency matrix;
-- gated model downloads will remain explicit;
-- normal transcription will run offline without hidden downloads.
-
-## Current installation
-
-Keep the repository in the WSL Linux filesystem, not under `/mnt/c` or `/mnt/d`:
+## 1. Clone into the Linux filesystem
 
 ```bash
-cd ~/transkrypcje
-git clone <REPOSITORY-URL> ewp-transcripts
+mkdir -p "$HOME/transkrypcje"
+cd "$HOME/transkrypcje"
+git clone <AUTHENTICATED-REPOSITORY-URL> ewp-transcripts
 cd ewp-transcripts
-uv sync --locked
 ```
 
-For an existing checkout:
+The repository is public but `0.1.0` is an internal release candidate. No public version
+tag or hosted release exists; use the intended commit on `main`.
+
+## 2. Install the locked environment
 
 ```bash
-cd ~/transkrypcje/ewp-transcripts
+uv sync --locked
+uv pip check
+uv run --locked transcriber --version
+uv run --locked transcriber --help
+```
+
+Expected application version: `0.1.0`. Help must list `doctor`, `inspect`, `dry-run`,
+`transcribe`, `export`, and `clean`.
+
+## 3. Check the machine before model setup
+
+```bash
+test -z "${HF_TOKEN:-}" && echo "HF_TOKEN: absent"
+uv run --locked transcriber doctor
+```
+
+On a fresh machine, `doctor` should pass Python, WSL, Ubuntu, FFmpeg, GPU, and CUDA but
+exit with code 3 because pinned model snapshots are not present. Continue with
+[`MODEL_SETUP.md`](MODEL_SETUP.md); transcription never downloads a missing model.
+
+## 4. Update an existing checkout
+
+```bash
+cd "$HOME/transkrypcje/ewp-transcripts"
 git pull --ff-only
 uv sync --locked
+uv pip check
 ```
 
-Verify the installed scaffold:
-
-```bash
-uv run transcriber --help
-uv run transcriber --version
-uv run transcriber doctor
-make check
-uv build
-```
-
-`doctor` does not load WhisperX, pyannote, or transcription models. It checks CUDA in a short child Python process and verifies the configured pinned model directories. A missing required environment capability or model returns exit code 3. `HF_TOKEN` is reported only as present or missing; its value is never printed.
-
-## Complete application flow
-
-1. Verify WSL, Ubuntu, NVIDIA passthrough, and FFmpeg.
-2. Clone a tagged EWP-transcripts release into the Linux filesystem.
-3. Install the documented `uv` version.
-4. Run `uv sync --locked` using the committed production lockfile.
-5. Run `transcriber doctor` without loading transcription models.
-6. Explicitly download pinned ASR, alignment, and diarization models.
-7. Run the GPU/model checks from the model-setup guide.
-8. Verify offline readiness.
-9. Run `inspect` and `dry-run`, then the first production `transcribe` operation.
-
-For release evidence, build and install the distributable artifact into an isolated
-environment using [`RUN_PHASE9_WHEEL_INSTALL.md`](RUN_PHASE9_WHEEL_INSTALL.md). That
-procedure prevents the source checkout from satisfying imports and installs the exact
-locked CUDA runtime dependency set before the wheel.
+Review `CHANGELOG.md` before using a newer commit on irreplaceable archive material.

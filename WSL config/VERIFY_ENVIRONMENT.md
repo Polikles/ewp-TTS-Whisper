@@ -68,6 +68,5 @@ Free Linux-home space:
 Existing torch/CUDA, if any:
 ```
 
-The first user input needed for Phase 0 is this completed, sanitized template.
-
-The target workstation results from 2026-07-31 are recorded in [`VERIFIED_BASELINE.md`](VERIFIED_BASELINE.md).
+Use this completed, sanitized template when requesting installation help. Historical
+target-workstation baselines are archived with the MVP validation runbooks.

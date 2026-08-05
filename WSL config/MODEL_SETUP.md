@@ -1,69 +1,75 @@
-# Model and Hugging Face setup
+# Prepare the pinned models explicitly
 
-This procedure is completed only after the dependency spike has selected exact model identifiers and revisions.
+Run this from the synchronized repository after `INSTALL_APPLICATION.md`. Model setup is
+an explicit online operation; normal transcription remains offline and never downloads a
+missing resource.
 
-## 1. Account-side preparation
-
-The user must sign in to Hugging Face, accept the terms for every gated model required by the selected pyannote pipeline, and create a read-only user access token.
-
-Never paste the token into project files, issue reports, logs, or chat transcripts.
-
-## 2. Session-only token
-
-Set the token without placing it directly in shell history:
+## 1. Prepare cache locations
 
 ```bash
-read -rsp "Hugging Face token: " HF_TOKEN
-echo
-export HF_TOKEN
-```
-
-Verify presence without printing the value:
-
-```bash
-test -n "$HF_TOKEN" && echo "HF_TOKEN: present" || echo "HF_TOKEN: missing"
-```
-
-## 3. Cache location
-
-```bash
+cd "$HOME/transkrypcje/ewp-transcripts"
 export HF_HOME="$HOME/.cache/huggingface"
-mkdir -p "$HF_HOME"
+export NLTK_DATA="$HOME/nltk_data"
+mkdir -p "$HF_HOME" "$NLTK_DATA"
 chmod 700 "$HF_HOME"
 ```
 
-Hugging Face documents `HF_HOME` as the root for its token and cache data.
-
-## 4. Explicit downloads
-
-Use `hf download` or the selected library's explicit setup operation only after model IDs and revisions are pinned. Never rely on transcription to download a missing gated model.
-
-The final command template will be filled during the Phase 0 spike:
-
-```text
-hf download <pinned-model-id> --revision <pinned-revision>
-```
-
-Source: [Hugging Face — Download files from the Hub](https://huggingface.co/docs/huggingface_hub/en/guides/download).
-
-The accepted MVP model revisions are recorded in `docs/14-dependency-baseline.md`.
-After download, set `models.asr_snapshot_path`, `models.alignment_snapshot_path`, and
-`models.english_alignment_snapshot_path` in configuration to their exact snapshot
-directories.
-Each directory name must be the corresponding revision hash. The packaged defaults
-match the standard cache created under `$HOME/.cache/huggingface`; override the paths
-when `HF_HOME` points elsewhere. Runtime transcription uses these paths directly and
-does not download or discover models.
-
-The English alignment snapshot is public and does not require `HF_TOKEN`:
+## 2. Download public immutable snapshots
 
 ```bash
+uv run --locked hf download Systran/faster-whisper-large-v2 \
+    --revision f0fe81560cb8b68660e564f55dd99207059c092e
+uv run --locked hf download jonatasgrosman/wav2vec2-large-xlsr-53-polish \
+    --revision 6b1cea36bd8bc5f65ec8081667cd9c0207d51970
 uv run --locked hf download facebook/wav2vec2-base-960h \
     --revision 22aad52d435eb6dbaf354bdad9b0da84ce7d6156
+
+(
+    cd /tmp
+    "$HOME/transkrypcje/ewp-transcripts/.venv/bin/python" -P -m nltk.downloader \
+        -d "$NLTK_DATA" punkt_tab
+)
 ```
 
-This is an explicit setup operation, not a transcription-time fallback.
+The English aligner is installed because `en` and `auto` are supported execution modes,
+although English quality is not yet characterized by the reference corpus.
 
-## Input needed later
+## 3. Download the gated diarization snapshot
 
-Before gated-model verification, confirm only that the required terms have been accepted, a read-only token exists, and it is available as `HF_TOKEN` in the spike shell.
+First accept the terms for `pyannote/speaker-diarization-community-1` in the Hugging Face
+account and create a read-only token. Read it without echoing or placing it in history:
+
+```bash
+read -rsp "Hugging Face read token: " HF_TOKEN
+echo
+export HF_TOKEN
+test -n "$HF_TOKEN" && echo "HF_TOKEN: present"
+
+uv run --locked hf download pyannote/speaker-diarization-community-1 \
+    --revision 3533c8cf8e369892e6b79ff1bf80f7b0286a54ee
+
+unset HF_TOKEN
+test -z "${HF_TOKEN:-}" && echo "HF_TOKEN: removed"
+```
+
+Never pass the token as a command argument or include it in shared output.
+
+## 4. Verify exact snapshots and readiness
+
+```bash
+test -d "$HF_HOME/hub/models--Systran--faster-whisper-large-v2/snapshots/f0fe81560cb8b68660e564f55dd99207059c092e" \
+    && echo "ASR model: present"
+test -d "$HF_HOME/hub/models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970" \
+    && echo "Polish alignment: present"
+test -d "$HF_HOME/hub/models--facebook--wav2vec2-base-960h/snapshots/22aad52d435eb6dbaf354bdad9b0da84ce7d6156" \
+    && echo "English alignment: present"
+test -d "$HF_HOME/hub/models--pyannote--speaker-diarization-community-1/snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee" \
+    && echo "Diarization model: present"
+test -d "$NLTK_DATA/tokenizers/punkt_tab" && echo "NLTK punkt_tab: present"
+
+test -z "${HF_TOKEN:-}" && echo "HF_TOKEN: absent"
+uv run --locked transcriber doctor
+```
+
+Every required check should pass. Keep `NLTK_DATA="$HOME/nltk_data"` in the shell used
+for transcription, or configure the same standard location in the user's environment.

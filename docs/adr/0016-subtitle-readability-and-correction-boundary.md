@@ -19,7 +19,7 @@ together.
 
 Commit `47b25af` or later passed 257 automated tests before the first external-player
 review. The Ubuntu 24.04 WSL2 RTX 3090 workstation ran
-[`RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md`](../../WSL%20config/RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md)
+[`RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md`](../../archive/mvp-validation-runbooks/RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md)
 against P2-03. Both SRT and WebVTT uploaded to YouTube successfully and rendered Polish
 characters correctly. The reviewed artifacts were:
 

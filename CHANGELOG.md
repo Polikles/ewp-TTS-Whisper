@@ -28,7 +28,7 @@ Initial functional MVP release candidate.
 
 ### Validated
 
-- 279 automated formatting, linting, typing, unit, integration, schema, documentation,
+- 282 automated formatting, linting, typing, unit, integration, schema, documentation,
   and traceability checks.
 - WAV at 44.1/48 kHz, MP3, FLAC, M4A/AAC, Ogg/Opus, dual mono, split speakers,
   separate mono sources, mixed overlap, clipping, imbalance, long silence, fast speech,
@@ -38,6 +38,14 @@ Initial functional MVP release candidate.
 - Short and complete 34.7-minute YouTube SRT/VTT readability and timing reviews.
 - Offline installed-wheel transcription and locked installation in a fresh Ubuntu
   24.04.4 WSL2 distribution.
+
+### Changed
+
+- Replaced the implementation-era work status with the current internal-candidate
+  status and V2 agenda.
+- Consolidated the live WSL documentation around fresh installation, current MVP
+  operation, and actionable V2 feedback; historical validation runbooks and planning
+  documents now live under `archive/`.
 
 ### Known limitations and deferrals
 

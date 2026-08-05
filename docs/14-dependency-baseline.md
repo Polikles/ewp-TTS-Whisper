@@ -31,7 +31,7 @@ Ubuntu 26.04 LTS has been released, but 24.04 remains the baseline until the com
 | ASR model | `Systran/faster-whisper-large-v2` revision `f0fe81560cb8b68660e564f55dd99207059c092e` for the `accurate` preset |
 | Diarization | local `pyannote/speaker-diarization-community-1` |
 | Polish alignment | `jonatasgrosman/wav2vec2-large-xlsr-53-polish` revision `6b1cea36bd8bc5f65ec8081667cd9c0207d51970` |
-| English alignment | select and pin after validation |
+| English alignment | `facebook/wav2vec2-base-960h` revision `22aad52d435eb6dbaf354bdad9b0da84ce7d6156` |
 
 ADR-0007 records the three-case `large-v2`/`large-v3` comparison and the initial `large-v2` decision. The corpus is small, so the decision must be reevaluated on the larger manually verified Polish dataset. `large-v3` remains configurable.
 

@@ -1,39 +1,43 @@
 # Development
 
-## Starting point
+## Current starting point
 
-1. Read `docs/01-product-scope.md` and `docs/02-requirements.md`.
-2. Review and accept the ADRs.
-3. Create the repository structure described in Milestone 0 of `docs/13-implementation-plan.md`.
-4. Treat `schemas/` as a public contract from the first vertical slice.
-5. Implement `doctor`, `inspect`, and `dry-run` before the transcription pipeline.
-6. Run separate WhisperX and channel-classification spikes before freezing the `accurate` preset.
+1. Read `WORK_STATUS.md` for the active resume point.
+2. Read the relevant product contract under `docs/` and accepted ADRs.
+3. Use `docs/99-roadmap-v2.md` for post-MVP priorities.
+4. Keep canonical schemas backward compatible or explicitly version changes.
+5. Keep private audio, transcripts, model files, tokens, workdirs, and generated evidence
+   outside the repository.
+
+The Phase 0–9 implementation plans and validation procedures are historical and live
+under `archive/`; they no longer define the active workflow.
 
 ## Local setup and quality gate
 
 ```bash
 uv sync --locked
 make check
-uv build
+uv build --offline
 ```
 
-`make check` uses the already synchronized environment and does not update dependencies or
-download models. GPU and ML validation is run separately on the target WSL workstation.
+`make check` uses the synchronized environment and does not download models. Changes to
+FFmpeg, model adapters, CUDA behavior, performance, or real transcription require a
+focused external test against the private dataset in addition to the local gate.
 
-## Technical recommendations
+## Change discipline
 
-- Python 3.12;
-- `uv` with a committed lockfile;
-- strict typing;
-- adapters around external tools;
-- subprocess execution without `shell=True` for FFmpeg;
-- small synthetic audio fixtures for automated tests;
-- long or private audio samples stored outside the repository;
-- deterministic JSON output and natural sorting.
+- Python 3.12 and the committed uv lockfile;
+- strict typing and focused typed domain models;
+- CLI-independent application services;
+- lazy model imports and no hidden network access;
+- subprocess argument lists without `shell=True`;
+- deterministic, non-destructive filesystem behavior;
+- small synthetic fixtures in Git and private/long material outside Git;
+- requirement, ADR, schema, CLI, and changelog updates when their contracts change.
 
-## Branching and versions
+## Versions
 
-- semantic versioning for the application;
-- a separate version for the data schema;
-- prereleases for ML-related changes;
-- release notes must state changes to the quality baseline.
+- use semantic versioning for the application;
+- version canonical schemas separately;
+- treat ML changes as prerelease candidates until quality evidence is rerun;
+- state quality-baseline changes and deferrals in release notes.

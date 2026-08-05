@@ -2,6 +2,25 @@
 
 The following items do not block the MVP.
 
+## Recommended execution agenda
+
+1. Run a bounded internal production pilot on 3–5 representative archive episodes and
+   collect structured correction, timing, subtitle, performance, and workflow feedback.
+2. Design and implement the versioned correction layer from observed edits, keeping
+   canonical ASR results immutable and anchoring corrections to stable words, speakers,
+   and timestamps.
+3. Regenerate TXT, SRT, VTT, segments JSON, and corrected transcript data atomically
+   from one reviewed revision.
+4. Add synchronized standalone and embeddable HTML transcript export for the blog audio
+   player, including seeking, highlighting, keyboard access, and speaker presentation.
+5. Convert licensed manually corrected excerpts into a larger ground-truth corpus, then
+   reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates.
+6. Prioritize the remaining roadmap items using pilot frequency, review time saved,
+   privacy impact, and implementation risk.
+
+The pilot procedure and minimum feedback summary are documented in
+[`../WSL config/FEEDBACK_FOR_V2.md`](../WSL%20config/FEEDBACK_FOR_V2.md).
+
 ## Content-aware directory discovery
 
 - Replace the directory extension allowlist with a bounded ffprobe-based candidate

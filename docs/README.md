@@ -16,7 +16,6 @@
 | [10 - WSL2 installation](10-wsl2-installation.md) | Reference environment, CUDA, models, and offline setup |
 | [11 - Security and privacy](11-security-and-privacy.md) | Privacy, tokens, temporary files, and network use |
 | [12 - Testing and acceptance](12-testing-and-acceptance.md) | Application and audio-material checklists |
-| [13 - Implementation plan](13-implementation-plan.md) | Milestones, epics, sequencing, and Definition of Ready |
 | [14 - Dependency baseline](14-dependency-baseline.md) | Verified environment starting point |
 | [15 - Glossary](15-glossary.md) | Standardized terminology |
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
@@ -51,8 +50,7 @@
 ## Implementation guidance
 
 - [Architecture and coding rules](ARCHITECTURE_AND_CODING_RULES.md)
-- [Repository structure](REPOSITORY_STRUCTURE.md)
-- [Agent MVP implementation plan](MVP_IMPLEMENTATION_PLAN.md)
+- [Archived MVP planning documents](../archive/mvp-planning/README.md)
 - [Testing strategy](TESTING_STRATEGY.md)
 - [WSL setup and verification](../WSL%20config/README.md)
 
