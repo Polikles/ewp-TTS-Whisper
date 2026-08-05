@@ -183,7 +183,7 @@ class SubtitlesConfig(StrictConfigModel):
     preset: Literal["youtube"] = "youtube"
     max_lines: int = Field(default=2, ge=1)
     target_chars_per_line: int = Field(default=42, ge=1)
-    max_chars_per_line: int = Field(default=46, ge=1)
+    max_chars_per_line: int = Field(default=50, ge=1)
     min_duration_ms: int = Field(default=1000, ge=0)
     max_duration_ms: int = Field(default=7000, ge=0)
     target_chars_per_second: int = Field(default=17, ge=1)

@@ -81,7 +81,7 @@ actual publishing account and player before release.
 ```toml
 max_lines = 2
 target_chars_per_line = 42
-max_chars_per_line = 46
+max_chars_per_line = 50
 min_duration_ms = 1000
 max_duration_ms = 7000
 target_chars_per_second = 17
@@ -93,6 +93,11 @@ speaker_labels = "on-change"
 ```
 
 All values are configurable.
+
+The 42-character value is the preferred line-length target; 50 characters is a hard
+ceiling, not the normal goal. The exporter may use the additional width when it produces
+a more coherent cue or avoids an isolated one-line fragment. Neither SRT, WebVTT, nor
+YouTube requires a 46-character limit.
 
 ## 6. Segmentation rules
 

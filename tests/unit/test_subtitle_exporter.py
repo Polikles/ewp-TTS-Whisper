@@ -37,7 +37,7 @@ def test_builds_bounded_cues_with_labels_on_speaker_changes() -> None:
         speaker_id="speaker_002",
     )
     assert all(len(cue.lines) <= 2 for cue in cues)
-    assert all(len(line) <= 46 for cue in cues for line in cue.lines)
+    assert all(len(line) <= 50 for cue in cues for line in cue.lines)
 
 
 def test_srt_and_vtt_have_valid_headers_timestamps_and_spacing() -> None:
@@ -620,6 +620,63 @@ def test_reported_na_line_ending_is_removed_by_neighboring_cue_boundary_search()
     assert " ".join(" ".join(cue.lines) for cue in reported_cues).count("przedsiębiorstwo") == 1
 
 
+def test_default_flexible_ceiling_keeps_reported_continuation_in_one_balanced_cue() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first_template = result.transcript.segments[0]
+    texts = (
+        "danych",
+        "przez",
+        "przedsiębiorstwo,",
+        "to",
+        "faktycznie",
+        "w",
+        "tym",
+        "zbiorze",
+        "może",
+        "nie",
+        "być",
+        "usuniętych",
+        "przez",
+        "nas",
+        "treści.",
+    )
+    words = tuple(
+        first_template.words[0].model_copy(
+            update={
+                "word_id": f"word_flexible_ceiling_{index}",
+                "text": text,
+                "start_ms": 75976 + index * 360,
+                "end_ms": 76256 + index * 360,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index, text in enumerate(texts)
+    )
+    segment = first_template.model_copy(
+        update={
+            "start_ms": words[0].start_ms,
+            "end_ms": words[-1].end_ms,
+            "text": " ".join(texts),
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={
+            "transcript": result.transcript.model_copy(
+                update={"segments": (first_template, segment)}
+            )
+        }
+    )
+
+    cues = build_subtitle_cues(result)
+    reported_cues = [cue for cue in cues if cue.start_ms >= words[0].start_ms]
+
+    assert len(reported_cues) == 1
+    assert tuple(len(line) for line in reported_cues[0].lines) == (50, 49)
+
+
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     original = result.transcript.segments[0]
@@ -656,7 +713,7 @@ def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
         texts[2],
     )
     assert all(len(cue.lines) <= 2 for cue in cues)
-    assert all(len(line) <= 46 for cue in cues for line in cue.lines)
+    assert all(len(line) <= 50 for cue in cues for line in cue.lines)
 
 
 def test_serializers_reject_accidental_overlap_but_allow_explicit_overlap() -> None:
