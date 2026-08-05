@@ -111,6 +111,10 @@ missing-model guidance using
 Validate complete FLAC, M4A/AAC, and Opus input processing using
 [`RUN_RELEASE_FORMAT_MATRIX.md`](RUN_RELEASE_FORMAT_MATRIX.md).
 
+Close the remaining reproducible audio stress rows with derived fast Polish speech and
+light pink recorder noise using
+[`RUN_RELEASE_FAST_NOISY_AUDIO.md`](RUN_RELEASE_FAST_NOISY_AUDIO.md).
+
 Perform the explicit external SRT/VTT player review using a Private YouTube upload with
 [`RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md`](RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md).
 
