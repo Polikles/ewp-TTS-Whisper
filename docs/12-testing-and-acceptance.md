@@ -2,60 +2,64 @@
 
 Tests are divided into two matrices: application behavior and audio-material types.
 
+Checked application items may be satisfied by deterministic automated tests, recorded WSL
+integration gates, or both. Hardware-, player-, and corpus-dependent items remain open until
+their corresponding external evidence is accepted.
+
 ## 1. Application tests
 
 ### Discovery and paths
 
-- [ ] Single Windows path with backslashes.
-- [ ] Windows path with forward slashes.
-- [ ] `/mnt/d` path.
-- [ ] Spaces, Polish characters, and general Unicode.
-- [ ] Directory without recursion.
-- [ ] Explicit recursion.
-- [ ] Symbolic link skipped by default.
-- [ ] File with a misleading extension detected by content.
+- [x] Single Windows path with backslashes.
+- [x] Windows path with forward slashes.
+- [x] `/mnt/d` path.
+- [x] Spaces, Polish characters, and general Unicode.
+- [x] Directory without recursion.
+- [x] Explicit recursion.
+- [x] Symbolic link skipped by default.
+- [x] File with a misleading extension detected by content.
 
 ### Grouping
 
-- [ ] `S01E01-jan` + `S01E01-anna`.
-- [ ] Base identifier containing underscores.
-- [ ] Single hyphenated file with `speaker_count=auto`.
-- [ ] Single hyphenated file with `speaker_count=1`.
-- [ ] Base file plus suffixed file.
-- [ ] Ambiguous names are not grouped.
+- [x] `S01E01-jan` + `S01E01-anna`.
+- [x] Base identifier containing underscores.
+- [x] Single hyphenated file with `speaker_count=auto`.
+- [x] Single hyphenated file with `speaker_count=1`.
+- [x] Base file plus suffixed file.
+- [x] Ambiguous names are not grouped.
 - [x] Explicit group overrides automatic detection.
 
 ### Timeline validation
 
-- [ ] Difference of 0 ms.
-- [ ] Difference of 100 ms.
-- [ ] Difference of 101 ms produces a warning.
-- [ ] Difference of 500 ms produces a warning.
-- [ ] Difference of 501 ms blocks the group.
-- [ ] `--allow-duration-mismatch`.
-- [ ] Different sample rates block the group.
+- [x] Difference of 0 ms.
+- [x] Difference of 100 ms.
+- [x] Difference of 101 ms produces a warning.
+- [x] Difference of 500 ms produces a warning.
+- [x] Difference of 501 ms blocks the group.
+- [x] `--allow-duration-mismatch`.
+- [x] Different sample rates block the group.
 
 ### Channels
 
-- [ ] Mono.
-- [ ] Identical dual mono.
-- [ ] Nearly identical dual mono.
+- [x] Mono.
+- [x] Identical dual mono.
+- [x] Nearly identical dual mono.
 - [x] Split speakers.
-- [ ] Mixed stereo.
-- [ ] Ambiguous input uses one channel and emits a warning.
-- [ ] Forced channel mode.
-- [ ] An implausible forced mode produces a visible warning.
+- [x] Mixed stereo.
+- [x] Ambiguous input uses one channel and emits a warning.
+- [x] Forced channel mode.
+- [x] An implausible forced mode produces a visible warning.
 
 ### Hashing and versioning
 
-- [ ] Same SHA and same name results in SKIP.
-- [ ] Same SHA and different name results in SKIP.
-- [ ] Same SHA with `--force` creates `_v002`.
-- [ ] Existing `_v002` causes `_v003` allocation.
-- [ ] Same name with different SHA creates a new version.
-- [ ] A grouped signature changes when one source changes.
-- [ ] Every export in a run uses the same version.
-- [ ] Concurrent version allocation does not collide.
+- [x] Same SHA and same name results in SKIP.
+- [x] Same SHA and different name results in SKIP.
+- [x] Same SHA with `--force` creates `_v002`.
+- [x] Existing `_v002` causes `_v003` allocation.
+- [x] Same name with different SHA creates a new version.
+- [x] A grouped signature changes when one source changes.
+- [x] Every export in a run uses the same version.
+- [x] Concurrent version allocation does not collide.
 
 ### State and failures
 
@@ -76,7 +80,7 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 - [x] Conformance to JSON Schema.
 - [x] `schema_version` and `application_version` present.
-- [ ] Monotonic timestamps.
+- [x] Monotonic timestamps.
 - [x] No secrets.
 - [x] Complete effective-configuration snapshot.
 - [x] Correct `timestamp_source` values.
@@ -85,10 +89,10 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 ### Exports
 
-- [ ] TXT contains no timestamps.
-- [ ] One sentence per line.
-- [ ] Speaker blocks.
-- [ ] No label for a single speaker.
+- [x] TXT contains no timestamps.
+- [x] One sentence per line.
+- [x] Speaker blocks.
+- [x] No label for a single speaker.
 - [x] SRT is syntactically valid.
 - [x] VTT is syntactically valid.
 - [x] No more than two lines per cue.
@@ -99,7 +103,7 @@ Tests are divided into two matrices: application behavior and audio-material typ
 
 ### Environment
 
-- [ ] `doctor` without a GPU.
+- [x] `doctor` without a GPU.
 - [x] `doctor` with RTX 3090.
 - [ ] Missing FFmpeg.
 - [x] Missing model.
