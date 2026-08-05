@@ -296,6 +296,16 @@ def _rebalance_adjacent_drafts(
             ):
                 previous, following = previous_candidate, following_candidate
 
+        optimized_previous, optimized_following = _best_word_boundary(
+            list(previous.words),
+            list(following.words),
+            settings,
+            previous_prefix=previous_prefix,
+            following_prefix=following_prefix,
+        )
+        previous = _draft_with_words(previous, tuple(optimized_previous))
+        following = _draft_with_words(following, tuple(optimized_following))
+
         balanced[index] = previous
         balanced[index + 1] = following
     return balanced
@@ -513,17 +523,93 @@ def _rebalance_orphan_chunks(
     for index in range(len(chunks) - 1):
         current = chunks[index]
         following = chunks[index + 1]
-        if not _ends_connective(current) or len(current) <= 1:
-            continue
-        current_candidate = current[:-1]
-        following_candidate = [current[-1], *following]
-        if _word_chunk_fits(
-            current_candidate,
+        optimized_current, optimized_following = _best_word_boundary(
+            current,
+            following,
             settings,
-            prefix=first_prefix if index == 0 else repeated_prefix,
-        ) and _word_chunk_fits(following_candidate, settings, prefix=repeated_prefix):
-            current[:] = current_candidate
-            following[:] = following_candidate
+            previous_prefix=first_prefix if index == 0 else repeated_prefix,
+            following_prefix=repeated_prefix,
+        )
+        current[:] = optimized_current
+        following[:] = optimized_following
+
+
+def _best_word_boundary(
+    previous: list[CanonicalWord],
+    following: list[CanonicalWord],
+    settings: SubtitlesConfig,
+    *,
+    previous_prefix: str,
+    following_prefix: str,
+) -> tuple[list[CanonicalWord], list[CanonicalWord]]:
+    """Select the best valid split across two fragments without greedy transfer."""
+
+    if not previous or not following or _ends_sentence(previous):
+        return previous, following
+    combined = [*previous, *following]
+    original_boundary = len(previous)
+    best = (previous, following)
+    best_score = _word_boundary_score(
+        previous,
+        following,
+        settings,
+        previous_prefix=previous_prefix,
+        following_prefix=following_prefix,
+        movement=0,
+    )
+    for boundary in range(1, len(combined)):
+        previous_candidate = combined[:boundary]
+        following_candidate = combined[boundary:]
+        if not _word_chunk_fits(
+            previous_candidate, settings, prefix=previous_prefix
+        ) or not _word_chunk_fits(following_candidate, settings, prefix=following_prefix):
+            continue
+        score = _word_boundary_score(
+            previous_candidate,
+            following_candidate,
+            settings,
+            previous_prefix=previous_prefix,
+            following_prefix=following_prefix,
+            movement=abs(boundary - original_boundary),
+        )
+        if score < best_score:
+            best = previous_candidate, following_candidate
+            best_score = score
+    return best
+
+
+def _word_boundary_score(
+    previous: list[CanonicalWord],
+    following: list[CanonicalWord],
+    settings: SubtitlesConfig,
+    *,
+    previous_prefix: str,
+    following_prefix: str,
+    movement: int,
+) -> tuple[int, int, int, int]:
+    linguistic_penalty = int(_ends_connective(previous))
+    linguistic_penalty += _internal_line_connective_count(
+        previous, settings, prefix=previous_prefix
+    )
+    linguistic_penalty += _internal_line_connective_count(
+        following, settings, prefix=following_prefix
+    )
+    orphan_penalty = int(len(previous) < settings.min_words_per_cue) + int(
+        len(following) < settings.min_words_per_cue
+    )
+    imbalance = abs(len(previous) - len(following))
+    return linguistic_penalty, orphan_penalty, movement, imbalance
+
+
+def _internal_line_connective_count(
+    words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str
+) -> int:
+    lines = wrap_subtitle_text(
+        f"{prefix}{_word_text(words)}",
+        max_lines=settings.max_lines,
+        max_chars_per_line=settings.max_chars_per_line,
+    )
+    return sum(_normalized_word(line.split()[-1]) in _NONFINAL_CONNECTIVES for line in lines[:-1])
 
 
 def _word_chunk_fits(words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str) -> bool:

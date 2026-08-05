@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.config import SubtitlesConfig
-from ewp_transcripts.domain.canonical import CanonicalWord, load_canonical_result
+from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
     build_subtitle_cues,
@@ -362,75 +362,101 @@ def test_on_change_label_reserves_capacity_only_for_first_speaker_chunk() -> Non
     assert not cues[1].lines[0].startswith("anna: ")
 
 
-def test_three_cue_speaker_opening_is_revisited_after_continuation_balances() -> None:
+def test_reported_speaker_opening_micro_cues_are_balanced_from_one_segment() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     first_template, second_template = result.transcript.segments
-
-    def timed_words(
-        texts: tuple[str, ...], starts: tuple[int, ...], *, prefix: str
-    ) -> tuple[CanonicalWord, ...]:
-        return tuple(
-            second_template.words[0].model_copy(
-                update={
-                    "word_id": f"word_{prefix}_{index}",
-                    "text": text,
-                    "start_ms": start,
-                    "end_ms": start + 160,
-                    "speaker_id": "speaker_002",
-                }
-            )
-            for index, (text, start) in enumerate(zip(texts, starts, strict=True))
-        )
-
-    first_speaker = first_template
-    opening_words = timed_words(("Może", "i"), (15444, 15584), prefix="opening")
-    opening = second_template.model_copy(
-        update={
-            "start_ms": 15444,
-            "end_ms": 15744,
-            "text": "Może i",
-            "speaker_id": "speaker_002",
-            "active_speaker_ids": ("speaker_002",),
-            "words": opening_words,
-        }
-    )
-    orphan_words = timed_words(("nikt",), (15784,), prefix="orphan")
-    orphan = second_template.model_copy(
-        update={
-            "start_ms": 15784,
-            "end_ms": 15964,
-            "text": "nikt",
-            "speaker_id": "speaker_002",
-            "active_speaker_ids": ("speaker_002",),
-            "words": orphan_words,
-        }
-    )
-    continuation_texts = (
+    texts = (
+        "Może",
+        "i",
+        "nikt",
         "nie",
         "zauważy,",
         "ale",
         "pamiętajmy,",
         "że",
+        "powiedzenie",
         "internet",
         "nie",
-        "zapomina.",
+        "zapomina,",
+        "bo",
+        "dotyczy",
+        "także,",
+        "a",
+        "może",
+        "przede",
+        "wszystkim",
+        "algorytmów.",
     )
-    continuation_starts = tuple(16004 + index * 450 for index in range(len(continuation_texts)))
-    continuation_words = timed_words(continuation_texts, continuation_starts, prefix="continuation")
-    continuation = second_template.model_copy(
+    starts = (
+        15444,
+        15704,
+        15784,
+        16004,
+        16124,
+        16945,
+        17105,
+        17965,
+        18085,
+        18925,
+        19406,
+        19526,
+        20666,
+        20766,
+        21166,
+        21867,
+        21947,
+        22167,
+        22427,
+        23147,
+    )
+    ends = (
+        15644,
+        15744,
+        15964,
+        16084,
+        16885,
+        17065,
+        17945,
+        18045,
+        18885,
+        19386,
+        19486,
+        20646,
+        20726,
+        21106,
+        21827,
+        21907,
+        22127,
+        22387,
+        23107,
+        24648,
+    )
+    words = tuple(
+        second_template.words[0].model_copy(
+            update={
+                "word_id": f"word_reported_opening_{index}",
+                "text": text,
+                "start_ms": start,
+                "end_ms": end,
+                "speaker_id": "speaker_002",
+            }
+        )
+        for index, (text, start, end) in enumerate(zip(texts, starts, ends, strict=True))
+    )
+    segment = second_template.model_copy(
         update={
-            "start_ms": continuation_words[0].start_ms,
-            "end_ms": continuation_words[-1].end_ms,
-            "text": " ".join(continuation_texts),
+            "start_ms": starts[0],
+            "end_ms": ends[-1],
+            "text": " ".join(texts),
             "speaker_id": "speaker_002",
             "active_speaker_ids": ("speaker_002",),
-            "words": continuation_words,
+            "words": words,
         }
     )
     result = result.model_copy(
         update={
             "transcript": result.transcript.model_copy(
-                update={"segments": (first_speaker, opening, orphan, continuation)}
+                update={"segments": (first_template, segment)}
             )
         }
     )
@@ -438,8 +464,10 @@ def test_three_cue_speaker_opening_is_revisited_after_continuation_balances() ->
     cues = build_subtitle_cues(result)
     speaker_two_cues = [cue for cue in cues if cue.speaker_id == "speaker_002"]
 
-    assert len(speaker_two_cues) == 1
-    assert speaker_two_cues[0].end_ms - speaker_two_cues[0].start_ms >= 1000
+    assert all(cue.end_ms - cue.start_ms >= 1000 for cue in speaker_two_cues)
+    assert all(
+        len(" ".join(cue.lines).removeprefix("anna: ").split()) >= 4 for cue in speaker_two_cues
+    )
     assert " ".join(speaker_two_cues[0].lines).startswith("anna: Może i nikt nie zauważy")
 
 
@@ -480,6 +508,116 @@ def test_connective_moves_from_end_of_cue_to_following_fragment() -> None:
 
     assert " ".join(cues[0].lines).split()[-1] != "i"
     assert " ".join(cues[1].lines).split()[0] == "i"
+
+
+def test_reported_na_line_ending_is_removed_by_neighboring_cue_boundary_search() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first_template = result.transcript.segments[0]
+    texts = (
+        "I",
+        "w",
+        "jaki",
+        "sposób",
+        "jednak",
+        "te",
+        "dane",
+        "pozostają",
+        "na",
+        "profilach",
+        "reklamowych,",
+        "jeśli",
+        "przedsiębiorstwo",
+        "faktycznie",
+        "usunęło",
+        "nasze",
+        "dane",
+        "ze",
+        "swoich",
+        "zbiorów?",
+    )
+    starts = (
+        96772,
+        96952,
+        97032,
+        97252,
+        97813,
+        98233,
+        98393,
+        98713,
+        99314,
+        99514,
+        100075,
+        101015,
+        101256,
+        102337,
+        103037,
+        103538,
+        103818,
+        104098,
+        104198,
+        104518,
+    )
+    ends = (
+        96912,
+        96992,
+        97212,
+        97773,
+        98153,
+        98353,
+        98673,
+        99274,
+        99454,
+        100035,
+        100975,
+        101216,
+        102276,
+        102977,
+        103498,
+        103758,
+        104058,
+        104158,
+        104498,
+        105179,
+    )
+    words = tuple(
+        first_template.words[0].model_copy(
+            update={
+                "word_id": f"word_reported_na_{index}",
+                "text": text,
+                "start_ms": start,
+                "end_ms": end,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index, (text, start, end) in enumerate(zip(texts, starts, ends, strict=True))
+    )
+    segment = first_template.model_copy(
+        update={
+            "start_ms": starts[0],
+            "end_ms": ends[-1],
+            "text": " ".join(texts),
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={
+            "transcript": result.transcript.model_copy(
+                update={"segments": (first_template, segment)}
+            )
+        }
+    )
+
+    cues = build_subtitle_cues(result)
+    reported_cues = [cue for cue in cues if cue.start_ms >= starts[0]]
+
+    assert all(
+        line.split()[-1].casefold() not in {"na", "to"}
+        for cue in reported_cues
+        for line in cue.lines
+    )
+    assert " ".join(" ".join(cue.lines) for cue in reported_cues).count("przedsiębiorstwo") == 1
 
 
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
