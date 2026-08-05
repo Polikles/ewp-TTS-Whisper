@@ -361,3 +361,40 @@ Repeat sections 3–5 with `_v007`. Review the entire file, with special attenti
 75–82 second continuation and to whether occasional 47–50-character lines remain
 comfortable on the target YouTube player. If every checklist item passes, report an
 overall PASS so ADR-0016 and the MVP subtitle gate can be accepted.
+
+## 13. Re-review continuous speaker-turn line balance
+
+The `_v007` review established the final structural rule: a one-line cue may be the last
+cue or the entire speaker turn, but should not interrupt the middle of a continuous
+multi-cue turn. Commit `17f5d86` rebalances such cues across sentence boundaries while
+preserving real silence and hard constraints. Generate version 8:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V8="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v008.srt"
+export EWP_SUB_REVIEW_VTT_V8="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v008.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V8" && echo "turn-balanced SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V8" && echo "turn-balanced VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V8" "$EWP_SUB_REVIEW_VTT_V8"
+git status --short
+```
+
+Repeat sections 3–5 with `_v008`. Review the complete file and confirm that every
+one-line cue is either the final cue of its speaker turn, the entire turn, separated by
+material silence, or unavoidable under the documented hard limits. If the complete SRT
+and VTT checklists pass, report overall PASS.

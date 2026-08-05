@@ -99,6 +99,12 @@ ceiling, not the normal goal. The exporter may use the additional width when it 
 a more coherent cue or avoids an isolated one-line fragment. Neither SRT, WebVTT, nor
 YouTube requires a 46-character limit.
 
+Inside a continuous same-speaker turn that needs multiple cues, a one-line cue should
+appear only as the final cue. Nonfinal cues are rebalanced toward two lines using timed
+words from their continuation. A one-line cue remains valid when it is the entire speaker
+turn, when it ends the turn, when surrounding silence separates it from the continuation,
+or when hard duration, reading-speed, or line limits leave no valid two-line split.
+
 ## 6. Segmentation rules
 
 Preferred split boundaries, in order:

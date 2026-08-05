@@ -129,6 +129,23 @@ ceiling from 46 to 50. This is an application preset choice, not a container or 
 requirement. The exact reported continuation now forms one balanced two-line cue, and
 all 269 automated tests pass. External-player acceptance remains pending.
 
+The `_v007` review confirmed the flexible ceiling but clarified the remaining aesthetic
+rule: in a continuous multi-cue speaker turn, a one-line cue is acceptable only at the
+end. A turn consisting of one short cue is also valid. Several nonfinal one-line cues
+remained, including the labelled Speaker2 opening and short complete sentences within
+Speaker1's longer turn. The v7 evidence is:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+94f89fd6d45fd0ece2818eaa7e5986757ebedf2ae44df5537c0f29ab4652dcda  p2-03-mixed-stereo_subtitles_v007.srt
+adfab9d254c9ae4aae71a558b41aa0641eb3c381113de2f55f9cba6260e761d7  p2-03-mixed-stereo_subtitles_v007.vtt
+```
+
+Commit `17f5d86` adds a turn-level line-count penalty to neighboring boundary search and
+allows a sentence boundary to move when the same speaker continues without material
+silence. It preserves one-line final turns and silence-separated short statements. The
+implementation passes 270 automated tests. External-player acceptance remains pending.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;
