@@ -54,6 +54,20 @@ next implementation therefore treats a minimum word count as a soft balancing ta
 inside a continuous canonical segment while preserving punctuation boundaries, silence,
 speaker changes, and every hard subtitle constraint.
 
+The `_v003` review confirmed another material improvement, and SRT and WebVTT behaved
+functionally the same in YouTube. One speaker-change cue still stranded the label and two
+opening words (`Speaker2: Może i`) from the continuation. Some line and cue boundaries
+also ended with Polish connectives such as `i`, `że`, `z`, `bo`, or `w`. The cause was
+twofold: capacity was conservatively reserved for a label on continuation chunks even in
+`on-change` mode, and wrapping optimized only maximum length rather than linguistic
+boundaries.
+
+Commit `fc0ac29` reserves label capacity only where a label is rendered, balances the
+labelled first cue against its unlabeled continuation, moves connective words to the
+following timed cue when hard constraints permit, and selects balanced line breaks that
+avoid nonfinal connectives. It passes 264 automated tests. A final external-player review
+is still required before this ADR becomes accepted.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

@@ -135,6 +135,12 @@ or ending fragment, words are shifted across that boundary if both resulting cue
 meet all hard limits. A genuinely short punctuated sentence remains independent, as does
 a short utterance separated from surrounding speech by silence or a speaker change.
 
+With `speaker_labels = "on-change"`, label width is reserved only for the first cue after
+the change. Continuation cues may use the full line capacity. Polish connective words
+such as `i`, `że`, `z`, `bo`, and `w` should not end a cue or the first visible line when
+a valid neighboring boundary exists. These are linguistic preferences rather than hard
+constraints: accurate timing, speaker separation, and maximum cue limits take priority.
+
 Fast speech is divided into more cues. The previous cue is not extended at the expense of the next utterance.
 
 ## 8. Speaker labels

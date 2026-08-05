@@ -217,3 +217,38 @@ git status --short
 Repeat sections 3–5 with `_v003`. Confirm specifically that sentence fragments are no
 longer stranded, while genuinely short statements surrounded by silence still appear as
 independent cues.
+
+## 9. Re-review linguistic cue and line boundaries
+
+The `_v003` review found one labelled speaker-change fragment and Polish connective
+words stranded at cue or line endings. Commit `fc0ac29` corrects label-capacity accounting
+and adds linguistic boundary preferences. Generate version 4 from the same result:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V4="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v004.srt"
+export EWP_SUB_REVIEW_VTT_V4="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v004.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V4" && echo "linguistic SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V4" && echo "linguistic VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V4" "$EWP_SUB_REVIEW_VTT_V4"
+git status --short
+```
+
+Repeat sections 3–5 with `_v004`. Verify the complete files and specifically confirm
+that `Speaker2: Może i` is no longer detached and that connective words are not stranded
+at line or cue endings when a readable alternative exists.
