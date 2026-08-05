@@ -45,6 +45,23 @@ The following items do not block the MVP.
 - no timestamp movement without word mapping;
 - optional (with prepared prompts) summaries.
 
+## 4a. Transcript correction and editorial workflow
+
+- keep the original canonical result immutable and store corrections as a versioned
+  layer linked by result hash, schema version, and application version;
+- represent edits against stable word/time/speaker anchors rather than treating TXT as
+  the source of truth;
+- import corrected TXT or LLM output through normalized token alignment, automatically
+  applying unambiguous substitutions and punctuation while reporting ambiguous
+  insertions, deletions, speaker changes, and timestamp mappings for review;
+- support punctuation, quotation marks, proper names, sentence boundaries, speaker
+  attribution, and explicit split/merge operations with an audit trail;
+- record whether each edit was manual, dictionary-driven, or LLM-assisted and preserve
+  privacy-relevant processing provenance;
+- regenerate TXT, SRT, VTT, segments JSON, and web transcript data atomically from one
+  corrected revision; never maintain independent hand-edited exports;
+- provide audio-following word or sentence review and re-export without rerunning ASR.
+
 ## 5. Presets and benchmark
 
 - `balanced`;
@@ -75,6 +92,18 @@ The following items do not block the MVP.
 - burned-in subtitles;
 - platform presets;
 - visual preview.
+
+## 7a. Platform transcript delivery
+
+- qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
+  audio/video players; record account- or host-dependent limitations;
+- publish multiple Podcasting 2.0 transcript links where appropriate, including a
+  readable transcript and a timed caption resource;
+- build an accessible synchronized HTML transcript from canonical/segments JSON, with
+  sentence-level seeking, current-sentence highlighting, and keyboard controls;
+- apply speaker colors in custom HTML/CSS with textual labels as the portable and
+  accessible fallback;
+- define export presets for conservative platform interchange and web-native playback.
 
 ## 8. Distribution
 

@@ -1,6 +1,6 @@
 # Technical Sources
 
-Verification date: 2026-07-29.
+Verification date: 2026-08-05.
 
 ## WhisperX
 
@@ -42,3 +42,21 @@ Verified facts:
 - Repository: https://github.com/SYSTRAN/faster-whisper
 
 Used to confirm availability of the `large-v3` model. The final `accurate` preset model must be selected through project benchmarks rather than upstream descriptions alone.
+
+## Caption and transcript platforms
+
+- YouTube supported subtitle formats: https://support.google.com/youtube/answer/2734698
+- YouTube caption editing: https://support.google.com/youtube/answer/2734705
+- Spotify transcript management: https://support.spotify.com/creators/article/managing-episode-transcripts-on-spotify/
+- Apple Podcasts transcripts: https://podcasters.apple.com/support/5316-transcripts-on-apple-podcasts
+- Podcasting 2.0 transcript tag: https://podcasting2.org/docs/podcast-namespace/tags/transcript
+
+Verified scope:
+
+- YouTube accepts plain SRT and WebVTT, but its WebVTT styling support is limited;
+- Spotify accepts timestamped SRT or VTT uploads where transcript management is
+  available;
+- Apple documents synchronized, tappable transcripts and accepts creator-provided SRT
+  or VTT in supported transcript workflows;
+- the Podcasting 2.0 namespace permits multiple transcript resources and distinguishes
+  timed captions with `rel="captions"`.

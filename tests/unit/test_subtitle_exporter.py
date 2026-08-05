@@ -99,6 +99,69 @@ def test_short_cue_extension_stops_before_next_cue() -> None:
     assert cues[1].start_ms == 1600
 
 
+def test_nearby_same_speaker_fragments_merge_across_rhetorical_pause() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    first_words = tuple(
+        word.model_copy(
+            update={
+                "text": text,
+                "start_ms": 1000 + index * 350,
+                "end_ms": 1300 + index * 350,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index, (word, text) in enumerate(zip(first.words[:2], ("Może", "i"), strict=True))
+    )
+    first = first.model_copy(
+        update={
+            "start_ms": 1000,
+            "end_ms": 1650,
+            "text": "Może i",
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": first_words,
+        }
+    )
+    second_words = tuple(
+        word.model_copy(
+            update={
+                "text": text,
+                "start_ms": 2450 + index * 250,
+                "end_ms": 2650 + index * 250,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index, (word, text) in enumerate(
+            zip(second.words[:3], ("nikt", "nie", "zauważy."), strict=True)
+        )
+    )
+    second = second.model_copy(
+        update={
+            "start_ms": 2450,
+            "end_ms": 3150,
+            "text": "nikt nie zauważy.",
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": second_words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert cues == (
+        SubtitleCue(
+            start_ms=1000,
+            end_ms=3150,
+            lines=("jan: Może i nikt nie zauważy.",),
+            speaker_id="speaker_001",
+        ),
+    )
+
+
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     original = result.transcript.segments[0]

@@ -66,6 +66,12 @@ def build_subtitle_cues(
                 )
             )
     drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
+    drafts = _merge_adjacent_drafts(
+        drafts,
+        settings,
+        labels=labels,
+        multiple_speakers=multiple_speakers,
+    )
 
     cues: list[SubtitleCue] = []
     previous_speaker: str | None | object = object()
@@ -95,6 +101,50 @@ def build_subtitle_cues(
         )
         previous_speaker = draft.speaker_id
     return _extend_short_cues(tuple(cues), settings)
+
+
+def _merge_adjacent_drafts(
+    drafts: list[_CueDraft],
+    settings: SubtitlesConfig,
+    *,
+    labels: dict[str, str],
+    multiple_speakers: bool,
+) -> list[_CueDraft]:
+    """Merge nearby same-speaker fragments into readable bounded cues."""
+
+    merged: list[_CueDraft] = []
+    for draft in drafts:
+        if not merged:
+            merged.append(draft)
+            continue
+        previous = merged[-1]
+        gap_ms = draft.start_ms - previous.end_ms
+        text = f"{previous.text} {draft.text}".strip()
+        label = labels[previous.speaker_id] if previous.speaker_id is not None else "Unknown"
+        prefix = f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+        duration_ms = draft.end_ms - previous.start_ms
+        chars_per_second = len(text) * 1000 / max(duration_ms, 1)
+        can_merge = (
+            previous.speaker_id == draft.speaker_id
+            and not previous.overlap
+            and not draft.overlap
+            and 0 <= gap_ms <= settings.max_merge_gap_ms
+            and duration_ms <= settings.max_duration_ms
+            and chars_per_second <= settings.max_chars_per_second
+            and _fits_line_limits(f"{prefix}{text}", settings)
+        )
+        if can_merge:
+            merged[-1] = _CueDraft(
+                start_ms=previous.start_ms,
+                end_ms=draft.end_ms,
+                text=text,
+                speaker_id=previous.speaker_id,
+                overlap=False,
+                sequence=previous.sequence,
+            )
+        else:
+            merged.append(draft)
+    return merged
 
 
 def render_srt(cues: tuple[SubtitleCue, ...]) -> str:

@@ -53,7 +53,28 @@ Filenames:
 <job_id>_subtitles.vtt
 ```
 
-The MVP produces plain-text subtitles without depending on colors or CSS. TODO: adding optional color settings for separate speakers
+The MVP produces plain-text subtitles without depending on colors or CSS. Speaker
+coloring is not portable between target platforms and remains a Version 2 feature.
+
+Format roles:
+
+- canonical `results.json` is the internal timed source of truth;
+- SRT is the conservative interchange format for YouTube and other platforms where
+  plain captions and broad compatibility matter;
+- WebVTT is the preferred native browser `<track>` format and is also useful where a
+  hosting platform accepts VTT;
+- a custom synchronized web transcript should be rendered as accessible HTML from
+  canonical or derived segments JSON. Its sentence controls can seek the media player
+  using stored start times, and CSS can color speakers without changing the portable
+  caption files;
+- TXT is a reading and editorial export, not a timing authority.
+
+YouTube accepts both SRT and WebVTT, but supports only limited WebVTT formatting. A
+formatting-loss notice is therefore not evidence of broken text or timestamps. Spotify
+accepts timed SRT or VTT transcript uploads where the feature is available. Podcasting
+2.0 permits multiple transcript links, so a publisher can expose a readable transcript
+and timed captions together. Platform behavior must still be qualified against the
+actual publishing account and player before release.
 
 ## 5. Default `youtube` cue preset
 
@@ -66,7 +87,7 @@ max_duration_ms = 7000
 target_chars_per_second = 17
 max_chars_per_second = 20
 min_gap_ms = 80
-max_merge_gap_ms = 300
+max_merge_gap_ms = 1200
 speaker_labels = "on-change"
 ```
 
@@ -101,6 +122,11 @@ end = end of the last word
 ```
 
 A cue shorter than `min_duration_ms` may be extended only into available silence, by at most 300 ms, and without overlapping the next cue.
+
+Adjacent fragments from the same speaker may be merged across up to
+`max_merge_gap_ms` when the combined cue still satisfies duration, reading-speed, and
+line limits. The default 1.2-second window preserves short rhetorical pauses while
+avoiding isolated one- or two-word cues.
 
 Fast speech is divided into more cues. The previous cue is not extended at the expense of the next utterance.
 
@@ -138,3 +164,17 @@ TXT and subtitles use canonical transcript text. The sentence segmenter should:
 - `WEBVTT` header;
 - no empty cues;
 - limits are satisfied, or a warning is recorded when the physical speech rate makes compliance impossible.
+
+## 11. Correction workflow boundary
+
+TXT, SRT, and VTT must not be corrected independently because their text, sentence
+boundaries, speaker labels, and timestamps would drift apart. The original canonical
+result remains immutable evidence. A future correction workflow will create a versioned
+correction layer linked to that result, then regenerate all derived formats together.
+
+Importing a manually or LLM-corrected TXT file cannot safely be a blind replacement:
+the application must align corrected tokens with canonical timed words, apply
+unambiguous spelling and punctuation edits automatically, and require review of
+insertions, deletions, speaker changes, or sentence-boundary changes whose timestamps
+cannot be inferred safely. The detailed editor and import design is tracked in the
+Version 2 roadmap.
