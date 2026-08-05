@@ -162,6 +162,153 @@ def test_nearby_same_speaker_fragments_merge_across_rhetorical_pause() -> None:
     )
 
 
+def test_trailing_fragment_is_rebalanced_without_exceeding_limits() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    original = result.transcript.segments[0]
+    words = tuple(
+        original.words[0].model_copy(
+            update={
+                "word_id": f"word_balance_{index}",
+                "text": "aa",
+                "start_ms": 1000 + index * 500,
+                "end_ms": 1400 + index * 500,
+            }
+        )
+        for index in range(10)
+    )
+    segment = original.model_copy(
+        update={
+            "start_ms": words[0].start_ms,
+            "end_ms": words[-1].end_ms,
+            "text": " ".join(word.text for word in words),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (segment,)})}
+    )
+    config = SubtitlesConfig(
+        max_lines=1,
+        max_chars_per_line=20,
+        max_chars_per_second=100,
+        min_words_per_cue=4,
+        speaker_labels="never",
+    )
+
+    cues = build_subtitle_cues(result, config)
+
+    assert tuple(len(" ".join(cue.lines).split()) for cue in cues) == (6, 4)
+    assert all(len(line) <= 20 for cue in cues for line in cue.lines)
+
+
+def test_short_standalone_sentence_surrounded_by_silence_is_preserved() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    first_words = tuple(
+        word.model_copy(update={"text": text})
+        for word, text in zip(first.words[:2], ("Tak", "jest."), strict=True)
+    )
+    first = first.model_copy(
+        update={"text": "Tak jest.", "words": first_words, "end_ms": first_words[-1].end_ms}
+    )
+    second_words = tuple(
+        word.model_copy(
+            update={
+                "text": text,
+                "start_ms": 7000 + index * 400,
+                "end_ms": 7300 + index * 400,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index, (word, text) in enumerate(
+            zip(second.words[:4], ("Dalsza", "część", "tej", "wypowiedzi."), strict=True)
+        )
+    )
+    second = second.model_copy(
+        update={
+            "start_ms": 7000,
+            "end_ms": second_words[-1].end_ms,
+            "text": "Dalsza część tej wypowiedzi.",
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": second_words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert cues[0].lines == ("jan: Tak jest.",)
+    assert cues[1].lines == ("Dalsza część tej wypowiedzi.",)
+
+
+def test_short_cross_segment_fragment_borrows_timed_words_from_following_cue() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    first_words = tuple(
+        first.words[0].model_copy(
+            update={
+                "word_id": f"word_cross_first_{index}",
+                "text": "aa",
+                "start_ms": 1000 + index * 500,
+                "end_ms": 1400 + index * 500,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index in range(1)
+    )
+    first = first.model_copy(
+        update={
+            "start_ms": first_words[0].start_ms,
+            "end_ms": first_words[-1].end_ms,
+            "text": "aa",
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": first_words,
+        }
+    )
+    second_words = tuple(
+        second.words[0].model_copy(
+            update={
+                "word_id": f"word_cross_second_{index}",
+                "text": "aa",
+                "start_ms": 2300 + index * 500,
+                "end_ms": 2700 + index * 500,
+                "speaker_id": "speaker_001",
+            }
+        )
+        for index in range(8)
+    )
+    second = second.model_copy(
+        update={
+            "start_ms": second_words[0].start_ms,
+            "end_ms": second_words[-1].end_ms,
+            "text": " ".join(word.text for word in second_words),
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "words": second_words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+    config = SubtitlesConfig(
+        max_lines=1,
+        max_chars_per_line=14,
+        max_chars_per_second=100,
+        min_words_per_cue=3,
+        speaker_labels="never",
+    )
+
+    cues = build_subtitle_cues(result, config)
+
+    assert tuple(len(" ".join(cue.lines).split()) for cue in cues) == (3, 3, 3)
+    assert cues[0].end_ms == second_words[1].end_ms
+    assert cues[1].start_ms == second_words[2].start_ms
+
+
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     original = result.transcript.segments[0]

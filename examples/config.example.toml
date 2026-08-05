@@ -74,7 +74,8 @@ max_duration_ms = 7000
 target_chars_per_second = 17
 max_chars_per_second = 20
 min_gap_ms = 80
-max_merge_gap_ms = 300
+max_merge_gap_ms = 1200
+min_words_per_cue = 4
 speaker_labels = "on-change"   # on-change | always | never
 
 [outputs]

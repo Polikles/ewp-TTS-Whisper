@@ -30,6 +30,7 @@ class _CueDraft:
     speaker_id: str | None
     overlap: bool
     sequence: int
+    words: tuple[CanonicalWord, ...] = ()
 
 
 def build_subtitle_cues(
@@ -54,7 +55,7 @@ def build_subtitle_cues(
             first_prefix=capacity_prefix,
             repeated_prefix=capacity_prefix,
         )
-        for index, (start_ms, end_ms, text) in enumerate(chunks):
+        for index, (start_ms, end_ms, text, words) in enumerate(chunks):
             drafts.append(
                 _CueDraft(
                     start_ms=start_ms,
@@ -63,10 +64,17 @@ def build_subtitle_cues(
                     speaker_id=speaker_id,
                     overlap=segment.overlap,
                     sequence=segment_index * 1_000_000 + index,
+                    words=words,
                 )
             )
     drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
     drafts = _merge_adjacent_drafts(
+        drafts,
+        settings,
+        labels=labels,
+        multiple_speakers=multiple_speakers,
+    )
+    drafts = _rebalance_adjacent_drafts(
         drafts,
         settings,
         labels=labels,
@@ -141,10 +149,91 @@ def _merge_adjacent_drafts(
                 speaker_id=previous.speaker_id,
                 overlap=False,
                 sequence=previous.sequence,
+                words=((*previous.words, *draft.words) if previous.words and draft.words else ()),
             )
         else:
             merged.append(draft)
     return merged
+
+
+def _rebalance_adjacent_drafts(
+    drafts: list[_CueDraft],
+    settings: SubtitlesConfig,
+    *,
+    labels: dict[str, str],
+    multiple_speakers: bool,
+) -> list[_CueDraft]:
+    """Move continuous sentence boundaries when a complete merge cannot fit."""
+
+    balanced = list(drafts)
+    for index in range(len(balanced) - 1):
+        previous = balanced[index]
+        following = balanced[index + 1]
+        gap_ms = following.start_ms - previous.end_ms
+        if (
+            previous.speaker_id != following.speaker_id
+            or previous.overlap
+            or following.overlap
+            or not previous.words
+            or not following.words
+            or not 0 <= gap_ms <= settings.max_merge_gap_ms
+            or previous.text.rstrip().endswith((".", "!", "?"))
+        ):
+            continue
+        label = labels[previous.speaker_id] if previous.speaker_id is not None else "Unknown"
+        prefix = f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+
+        while (
+            len(previous.words) < settings.min_words_per_cue
+            and len(following.words) > settings.min_words_per_cue
+        ):
+            previous_candidate = _draft_with_words(previous, (*previous.words, following.words[0]))
+            following_candidate = _draft_with_words(following, following.words[1:])
+            if not _draft_fits(previous_candidate, settings, prefix=prefix) or not _draft_fits(
+                following_candidate, settings, prefix=prefix
+            ):
+                break
+            previous, following = previous_candidate, following_candidate
+
+        while (
+            len(following.words) < settings.min_words_per_cue
+            and len(previous.words) > settings.min_words_per_cue
+        ):
+            previous_candidate = _draft_with_words(previous, previous.words[:-1])
+            following_candidate = _draft_with_words(
+                following, (previous.words[-1], *following.words)
+            )
+            if not _draft_fits(previous_candidate, settings, prefix=prefix) or not _draft_fits(
+                following_candidate, settings, prefix=prefix
+            ):
+                break
+            previous, following = previous_candidate, following_candidate
+
+        balanced[index] = previous
+        balanced[index + 1] = following
+    return balanced
+
+
+def _draft_with_words(draft: _CueDraft, words: tuple[CanonicalWord, ...]) -> _CueDraft:
+    return _CueDraft(
+        start_ms=words[0].start_ms,
+        end_ms=words[-1].end_ms,
+        text=_word_text(list(words)),
+        speaker_id=draft.speaker_id,
+        overlap=draft.overlap,
+        sequence=draft.sequence,
+        words=words,
+    )
+
+
+def _draft_fits(draft: _CueDraft, settings: SubtitlesConfig, *, prefix: str) -> bool:
+    duration_ms = draft.end_ms - draft.start_ms
+    chars_per_second = len(draft.text) * 1000 / max(duration_ms, 1)
+    return (
+        duration_ms <= settings.max_duration_ms
+        and chars_per_second <= settings.max_chars_per_second
+        and _fits_line_limits(f"{prefix}{draft.text}", settings)
+    )
 
 
 def render_srt(cues: tuple[SubtitleCue, ...]) -> str:
@@ -203,15 +292,15 @@ def _segment_chunks(
     *,
     first_prefix: str,
     repeated_prefix: str,
-) -> list[tuple[int, int, str]]:
+) -> list[tuple[int, int, str, tuple[CanonicalWord, ...]]]:
     if not segment.words:
-        return [(segment.start_ms, segment.end_ms, segment.text.strip())]
-    chunks: list[tuple[int, int, str]] = []
+        return [(segment.start_ms, segment.end_ms, segment.text.strip(), ())]
+    word_chunks: list[list[CanonicalWord]] = []
     current: list[CanonicalWord] = []
     for word in segment.words:
         candidate = [*current, word]
         text = _word_text(candidate)
-        prefix = first_prefix if not chunks else repeated_prefix
+        prefix = first_prefix if not word_chunks else repeated_prefix
         displayed_text = f"{prefix}{text}"
         duration_ms = candidate[-1].end_ms - candidate[0].start_ms
         chars_per_second = len(text) * 1000 / max(duration_ms, 1)
@@ -221,7 +310,7 @@ def _segment_chunks(
             or chars_per_second > settings.max_chars_per_second
         )
         if current and exceeds:
-            chunks.append(_word_chunk(current))
+            word_chunks.append(current)
             current = [word]
         else:
             current = candidate
@@ -229,11 +318,90 @@ def _segment_chunks(
             current[-1].text.rstrip().endswith((".", "!", "?"))
             and len(_word_text(current)) >= settings.target_chars_per_line
         ):
-            chunks.append(_word_chunk(current))
+            word_chunks.append(current)
             current = []
     if current:
-        chunks.append(_word_chunk(current))
-    return chunks
+        word_chunks.append(current)
+    _rebalance_orphan_chunks(
+        word_chunks,
+        settings,
+        first_prefix=first_prefix,
+        repeated_prefix=repeated_prefix,
+    )
+    return [(*_word_chunk(words), tuple(words)) for words in word_chunks]
+
+
+def _rebalance_orphan_chunks(
+    chunks: list[list[CanonicalWord]],
+    settings: SubtitlesConfig,
+    *,
+    first_prefix: str,
+    repeated_prefix: str,
+) -> None:
+    """Avoid stranded sentence fragments while preserving hard cue limits."""
+
+    if settings.min_words_per_cue <= 1:
+        return
+
+    # A short trailing fragment belongs to the preceding unfinished sentence. Move
+    # its boundary left when both resulting cues remain valid.
+    for index in range(1, len(chunks)):
+        previous = chunks[index - 1]
+        current = chunks[index]
+        if _ends_sentence(previous):
+            continue
+        while (
+            len(current) < settings.min_words_per_cue and len(previous) > settings.min_words_per_cue
+        ):
+            previous_candidate = previous[:-1]
+            current_candidate = [previous[-1], *current]
+            if not _word_chunk_fits(
+                previous_candidate,
+                settings,
+                prefix=first_prefix if index == 1 else repeated_prefix,
+            ) or not _word_chunk_fits(current_candidate, settings, prefix=repeated_prefix):
+                break
+            previous[:] = previous_candidate
+            current[:] = current_candidate
+
+    # A short leading fragment of an unfinished sentence can borrow from the following
+    # cue. A punctuated short sentence remains independent.
+    for index in range(len(chunks) - 1):
+        current = chunks[index]
+        following = chunks[index + 1]
+        if _ends_sentence(current):
+            continue
+        while (
+            len(current) < settings.min_words_per_cue
+            and len(following) > settings.min_words_per_cue
+        ):
+            current_candidate = [*current, following[0]]
+            following_candidate = following[1:]
+            if not _word_chunk_fits(
+                current_candidate,
+                settings,
+                prefix=first_prefix if index == 0 else repeated_prefix,
+            ) or not _word_chunk_fits(following_candidate, settings, prefix=repeated_prefix):
+                break
+            current[:] = current_candidate
+            following[:] = following_candidate
+
+
+def _word_chunk_fits(words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str) -> bool:
+    if not words:
+        return False
+    text = _word_text(words)
+    duration_ms = words[-1].end_ms - words[0].start_ms
+    chars_per_second = len(text) * 1000 / max(duration_ms, 1)
+    return (
+        duration_ms <= settings.max_duration_ms
+        and chars_per_second <= settings.max_chars_per_second
+        and _fits_line_limits(f"{prefix}{text}", settings)
+    )
+
+
+def _ends_sentence(words: list[CanonicalWord]) -> bool:
+    return bool(words and words[-1].text.rstrip().endswith((".", "!", "?")))
 
 
 def _fits_line_limits(text: str, settings: SubtitlesConfig) -> bool:

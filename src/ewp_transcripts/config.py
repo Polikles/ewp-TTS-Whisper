@@ -190,6 +190,7 @@ class SubtitlesConfig(StrictConfigModel):
     max_chars_per_second: int = Field(default=20, ge=1)
     min_gap_ms: int = Field(default=80, ge=0)
     max_merge_gap_ms: int = Field(default=1200, ge=0)
+    min_words_per_cue: int = Field(default=4, ge=1)
     speaker_labels: Literal["on-change", "always", "never"] = "on-change"
 
 
