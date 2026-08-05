@@ -2,7 +2,7 @@
 
 All notable changes to EWP-transcripts are documented here.
 
-## 0.1.0 — 2026-08-05
+## 0.1.0 — internal release candidate — 2026-08-05
 
 Initial functional MVP release candidate.
 
@@ -57,8 +57,9 @@ Initial functional MVP release candidate.
 
 ### Distribution note
 
-No public license is declared in this release candidate. The private
+This version is for internal use and is not a public release. No public license is
+declared in this release candidate. The private
 `LICENSE_SKETCH.TXT` draft is deliberately excluded from both wheel and source
-distribution artifacts. Do not publish artifacts for third-party use until the owner
-chooses and commits the intended license terms.
-
+distribution artifacts. Do not create or push a public version tag, publish a hosted
+release, or distribute artifacts for third-party use until the owner decides the
+application is ready and chooses and commits the intended license terms.

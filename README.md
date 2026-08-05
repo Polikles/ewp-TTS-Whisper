@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational release gates complete for the validated Polish workflows.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.1.0` is an internal release candidate, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
