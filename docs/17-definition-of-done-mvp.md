@@ -44,6 +44,6 @@ review, iterative cue-readability evidence, and final hashes are recorded in
 
 - [ ] A clean installation on WSL2 Ubuntu 24.04 is documented and tested.
 - [x] The lockfile is approved.
-- [ ] CLI documentation matches `--help`.
+- [x] CLI documentation matches `--help`.
 - [x] Known limitations are listed in README or release notes.
 - [x] Application version and schema version are defined.

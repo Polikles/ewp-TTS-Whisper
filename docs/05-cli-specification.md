@@ -6,9 +6,9 @@ Working command name: `transcriber`.
 
 - Every command supports `--config PATH`.
 - CLI flags override TOML values.
-- `--non-interactive` disables all prompts.
-- `--json-output` writes a machine-readable operation result to stdout; logs go to stderr.
-- `--verbose` and `--debug` increase log detail.
+- `transcribe --non-interactive` disables all prompts.
+- `doctor`, `inspect`, and `dry-run` support `--json-output`; structured transcription
+  logging is selected through configuration.
 - Secrets are never printed.
 
 ## 2. `doctor`
@@ -35,7 +35,7 @@ The CUDA check runs in a short child Python process. No transcription model is l
 ## 3. `inspect`
 
 ```text
-transcriber inspect INPUT [OPTIONS]
+transcriber inspect [INPUT] [OPTIONS]
 ```
 
 Does not run ASR. Returns:
@@ -53,18 +53,27 @@ Options:
 
 ```text
 --recursive
+--language pl|en|auto
+--config PATH
 --channel-mode auto|mono|dual-mono|split-speakers|mixed-stereo
 --speaker-count auto|N
 --allow-duration-mismatch
+--json-output
+--group PATH                    # repeatable; alternative to INPUT
+--group-id ID                   # required with --group
 ```
 
 ## 4. `dry-run`
 
 ```text
-transcriber dry-run INPUT [OPTIONS]
+transcriber dry-run [INPUT] [OPTIONS]
 ```
 
 Performs discovery, probing, grouping, hashing, existing-result lookup, and export planning. It does not load ASR models or create final files.
+
+Options are `--group`, `--group-id`, `--output-dir`, `--recursive`, `--language`,
+`--config`, `--channel-mode`, `--speaker-count`, `--force`,
+`--allow-duration-mismatch`, and `--json-output`.
 
 For every job, output must include:
 
@@ -83,14 +92,17 @@ warnings
 ## 5. `transcribe`
 
 ```text
-transcriber transcribe INPUT [OPTIONS]
+transcriber transcribe [INPUT] [OPTIONS]
 ```
 
 Primary options:
 
 ```text
 --output-dir PATH
+--group PATH                   # repeatable; alternative to INPUT
+--group-id ID                  # required with --group
 --recursive
+--config PATH
 --language pl|en|auto
 --speaker-count auto|N
 --speaker NAME                 # single-speaker input
@@ -157,9 +169,11 @@ Options:
 --format txt
 --format srt
 --format vtt
+--format segments
 --segments
 --output-dir PATH
 --force
+--config PATH
 --subtitle-preset youtube
 --speaker-labels on-change|always|never
 ```
@@ -178,6 +192,7 @@ Safety options:
 --dry-run
 --older-than DAYS
 --yes
+--config PATH
 ```
 
 Exactly one of `--dry-run` or `--yes` is required. The command considers only valid
