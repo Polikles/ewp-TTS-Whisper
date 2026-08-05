@@ -78,6 +78,16 @@ def test_wraps_only_at_word_boundaries_and_rejects_impossible_text() -> None:
         wrap_subtitle_text("one two three", max_lines=1, max_chars_per_line=5)
 
 
+def test_wrap_avoids_polish_connective_at_end_of_visible_line() -> None:
+    lines = wrap_subtitle_text(
+        "To jest pierwsza część i druga część zdania.",
+        max_lines=2,
+        max_chars_per_line=28,
+    )
+
+    assert lines == ("To jest pierwsza część", "i druga część zdania.")
+
+
 def test_short_cue_extension_stops_before_next_cue() -> None:
     result = load_canonical_result(EXAMPLE_PATH)
     first = result.transcript.segments[0]
@@ -307,6 +317,87 @@ def test_short_cross_segment_fragment_borrows_timed_words_from_following_cue() -
     assert tuple(len(" ".join(cue.lines).split()) for cue in cues) == (3, 3, 3)
     assert cues[0].end_ms == second_words[1].end_ms
     assert cues[1].start_ms == second_words[2].start_ms
+
+
+def test_on_change_label_reserves_capacity_only_for_first_speaker_chunk() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    original = result.transcript.segments[1]
+    words = tuple(
+        original.words[0].model_copy(
+            update={
+                "word_id": f"word_label_capacity_{index}",
+                "text": "aa",
+                "start_ms": 1000 + index * 500,
+                "end_ms": 1400 + index * 500,
+                "speaker_id": "speaker_002",
+            }
+        )
+        for index in range(12)
+    )
+    segment = original.model_copy(
+        update={
+            "start_ms": words[0].start_ms,
+            "end_ms": words[-1].end_ms,
+            "text": " ".join(word.text for word in words),
+            "speaker_id": "speaker_002",
+            "active_speaker_ids": ("speaker_002",),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (segment,)})}
+    )
+    config = SubtitlesConfig(
+        max_lines=1,
+        max_chars_per_line=20,
+        max_chars_per_second=100,
+        speaker_labels="on-change",
+    )
+
+    cues = build_subtitle_cues(result, config)
+
+    assert tuple(len(" ".join(cue.lines).removeprefix("anna: ").split()) for cue in cues) == (5, 7)
+    assert cues[0].lines[0].startswith("anna: ")
+    assert not cues[1].lines[0].startswith("anna: ")
+
+
+def test_connective_moves_from_end_of_cue_to_following_fragment() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    original = result.transcript.segments[0]
+    texts = (*("aa" for _ in range(6)), "i", *("aa" for _ in range(4)))
+    words = tuple(
+        original.words[0].model_copy(
+            update={
+                "word_id": f"word_connective_{index}",
+                "text": text,
+                "start_ms": 1000 + index * 500,
+                "end_ms": 1400 + index * 500,
+            }
+        )
+        for index, text in enumerate(texts)
+    )
+    segment = original.model_copy(
+        update={
+            "start_ms": words[0].start_ms,
+            "end_ms": words[-1].end_ms,
+            "text": " ".join(texts),
+            "words": words,
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (segment,)})}
+    )
+    config = SubtitlesConfig(
+        max_lines=1,
+        max_chars_per_line=20,
+        max_chars_per_second=100,
+        speaker_labels="never",
+    )
+
+    cues = build_subtitle_cues(result, config)
+
+    assert " ".join(cues[0].lines).split()[-1] != "i"
+    assert " ".join(cues[1].lines).split()[0] == "i"
 
 
 def test_chunking_uses_real_wrapping_limit_not_only_total_capacity() -> None:

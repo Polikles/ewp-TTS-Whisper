@@ -8,6 +8,29 @@ from typing import Literal
 from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSegment, CanonicalWord
 
+_NONFINAL_CONNECTIVES = frozenset(
+    {
+        "a",
+        "ale",
+        "bo",
+        "czy",
+        "do",
+        "i",
+        "lub",
+        "na",
+        "o",
+        "od",
+        "po",
+        "u",
+        "w",
+        "we",
+        "z",
+        "za",
+        "ze",
+        "że",
+    }
+)
+
 
 @dataclass(frozen=True, slots=True)
 class SubtitleCue:
@@ -42,18 +65,30 @@ def build_subtitle_cues(
     labels = {speaker.speaker_id: speaker.speaker_label for speaker in result.speakers}
     multiple_speakers = len(result.speakers) > 1
     drafts: list[_CueDraft] = []
+    previous_segment_speaker: str | None | object = object()
 
     for segment_index, segment in enumerate(result.transcript.segments):
         speaker_id = _effective_speaker(segment)
         label = labels[speaker_id] if speaker_id is not None else "Unknown"
-        capacity_prefix = (
-            f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+        first_prefix = (
+            f"{label}: "
+            if _show_speaker_label(
+                settings.speaker_labels,
+                multiple_speakers=multiple_speakers,
+                speaker_id=speaker_id,
+                previous_speaker=previous_segment_speaker,
+                first_chunk=True,
+            )
+            else ""
+        )
+        repeated_prefix = (
+            f"{label}: " if multiple_speakers and settings.speaker_labels == "always" else ""
         )
         chunks = _segment_chunks(
             segment,
             settings,
-            first_prefix=capacity_prefix,
-            repeated_prefix=capacity_prefix,
+            first_prefix=first_prefix,
+            repeated_prefix=repeated_prefix,
         )
         for index, (start_ms, end_ms, text, words) in enumerate(chunks):
             drafts.append(
@@ -67,6 +102,7 @@ def build_subtitle_cues(
                     words=words,
                 )
             )
+        previous_segment_speaker = speaker_id
     drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
     drafts = _merge_adjacent_drafts(
         drafts,
@@ -128,8 +164,13 @@ def _merge_adjacent_drafts(
         previous = merged[-1]
         gap_ms = draft.start_ms - previous.end_ms
         text = f"{previous.text} {draft.text}".strip()
-        label = labels[previous.speaker_id] if previous.speaker_id is not None else "Unknown"
-        prefix = f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+        prefix = _capacity_prefix(
+            settings,
+            labels=labels,
+            multiple_speakers=multiple_speakers,
+            speaker_id=previous.speaker_id,
+            previous_speaker=merged[-2].speaker_id if len(merged) > 1 else object(),
+        )
         duration_ms = draft.end_ms - previous.start_ms
         chars_per_second = len(text) * 1000 / max(duration_ms, 1)
         can_merge = (
@@ -180,8 +221,20 @@ def _rebalance_adjacent_drafts(
             or previous.text.rstrip().endswith((".", "!", "?"))
         ):
             continue
-        label = labels[previous.speaker_id] if previous.speaker_id is not None else "Unknown"
-        prefix = f"{label}: " if multiple_speakers and settings.speaker_labels != "never" else ""
+        previous_prefix = _capacity_prefix(
+            settings,
+            labels=labels,
+            multiple_speakers=multiple_speakers,
+            speaker_id=previous.speaker_id,
+            previous_speaker=balanced[index - 1].speaker_id if index > 0 else object(),
+        )
+        following_prefix = _capacity_prefix(
+            settings,
+            labels=labels,
+            multiple_speakers=multiple_speakers,
+            speaker_id=following.speaker_id,
+            previous_speaker=previous.speaker_id,
+        )
 
         while (
             len(previous.words) < settings.min_words_per_cue
@@ -189,9 +242,9 @@ def _rebalance_adjacent_drafts(
         ):
             previous_candidate = _draft_with_words(previous, (*previous.words, following.words[0]))
             following_candidate = _draft_with_words(following, following.words[1:])
-            if not _draft_fits(previous_candidate, settings, prefix=prefix) or not _draft_fits(
-                following_candidate, settings, prefix=prefix
-            ):
+            if not _draft_fits(
+                previous_candidate, settings, prefix=previous_prefix
+            ) or not _draft_fits(following_candidate, settings, prefix=following_prefix):
                 break
             previous, following = previous_candidate, following_candidate
 
@@ -203,11 +256,21 @@ def _rebalance_adjacent_drafts(
             following_candidate = _draft_with_words(
                 following, (previous.words[-1], *following.words)
             )
-            if not _draft_fits(previous_candidate, settings, prefix=prefix) or not _draft_fits(
-                following_candidate, settings, prefix=prefix
-            ):
+            if not _draft_fits(
+                previous_candidate, settings, prefix=previous_prefix
+            ) or not _draft_fits(following_candidate, settings, prefix=following_prefix):
                 break
             previous, following = previous_candidate, following_candidate
+
+        if _ends_connective(previous.words) and len(previous.words) > 1:
+            previous_candidate = _draft_with_words(previous, previous.words[:-1])
+            following_candidate = _draft_with_words(
+                following, (previous.words[-1], *following.words)
+            )
+            if _draft_fits(previous_candidate, settings, prefix=previous_prefix) and _draft_fits(
+                following_candidate, settings, prefix=following_prefix
+            ):
+                previous, following = previous_candidate, following_candidate
 
         balanced[index] = previous
         balanced[index + 1] = following
@@ -234,6 +297,26 @@ def _draft_fits(draft: _CueDraft, settings: SubtitlesConfig, *, prefix: str) -> 
         and chars_per_second <= settings.max_chars_per_second
         and _fits_line_limits(f"{prefix}{draft.text}", settings)
     )
+
+
+def _capacity_prefix(
+    settings: SubtitlesConfig,
+    *,
+    labels: dict[str, str],
+    multiple_speakers: bool,
+    speaker_id: str | None,
+    previous_speaker: str | None | object,
+) -> str:
+    if not _show_speaker_label(
+        settings.speaker_labels,
+        multiple_speakers=multiple_speakers,
+        speaker_id=speaker_id,
+        previous_speaker=previous_speaker,
+        first_chunk=True,
+    ):
+        return ""
+    label = labels[speaker_id] if speaker_id is not None else "Unknown"
+    return f"{label}: "
 
 
 def render_srt(cues: tuple[SubtitleCue, ...]) -> str:
@@ -271,19 +354,36 @@ def wrap_subtitle_text(text: str, *, max_lines: int, max_chars_per_line: int) ->
         raise ValueError("subtitle cue text must not be empty")
     if any(len(word) > max_chars_per_line for word in words):
         raise ValueError("a subtitle word exceeds max_chars_per_line")
-    lines: list[str] = []
-    current = words[0]
-    for word in words[1:]:
-        candidate = f"{current} {word}"
-        if len(candidate) <= max_chars_per_line:
-            current = candidate
-        else:
-            lines.append(current)
-            current = word
-    lines.append(current)
-    if len(lines) > max_lines:
+    if len(text) <= max_chars_per_line:
+        return (text,)
+
+    candidates: list[tuple[str, ...]] = []
+
+    def collect(start: int, lines: tuple[str, ...]) -> None:
+        if len(lines) >= max_lines:
+            return
+        for end in range(start + 1, len(words) + 1):
+            line = " ".join(words[start:end])
+            if len(line) > max_chars_per_line:
+                break
+            if end == len(words):
+                candidates.append((*lines, line))
+            else:
+                collect(end, (*lines, line))
+
+    collect(0, ())
+    if not candidates:
         raise ValueError("subtitle cue exceeds max_lines")
-    return tuple(lines)
+    return min(candidates, key=_line_break_score)
+
+
+def _line_break_score(lines: tuple[str, ...]) -> tuple[int, int, int]:
+    dangling_connectives = sum(
+        _normalized_word(line.split()[-1]) in _NONFINAL_CONNECTIVES for line in lines[:-1]
+    )
+    single_word_lines = sum(len(line.split()) == 1 for line in lines)
+    lengths = [len(line) for line in lines]
+    return dangling_connectives, single_word_lines, max(lengths) - min(lengths)
 
 
 def _segment_chunks(
@@ -386,6 +486,21 @@ def _rebalance_orphan_chunks(
             current[:] = current_candidate
             following[:] = following_candidate
 
+    for index in range(len(chunks) - 1):
+        current = chunks[index]
+        following = chunks[index + 1]
+        if not _ends_connective(current) or len(current) <= 1:
+            continue
+        current_candidate = current[:-1]
+        following_candidate = [current[-1], *following]
+        if _word_chunk_fits(
+            current_candidate,
+            settings,
+            prefix=first_prefix if index == 0 else repeated_prefix,
+        ) and _word_chunk_fits(following_candidate, settings, prefix=repeated_prefix):
+            current[:] = current_candidate
+            following[:] = following_candidate
+
 
 def _word_chunk_fits(words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str) -> bool:
     if not words:
@@ -402,6 +517,14 @@ def _word_chunk_fits(words: list[CanonicalWord], settings: SubtitlesConfig, *, p
 
 def _ends_sentence(words: list[CanonicalWord]) -> bool:
     return bool(words and words[-1].text.rstrip().endswith((".", "!", "?")))
+
+
+def _ends_connective(words: list[CanonicalWord] | tuple[CanonicalWord, ...]) -> bool:
+    return bool(words and _normalized_word(words[-1].text) in _NONFINAL_CONNECTIVES)
+
+
+def _normalized_word(text: str) -> str:
+    return text.casefold().strip(".,!?;:—–-…()[]{}\"'„”’")
 
 
 def _fits_line_limits(text: str, settings: SubtitlesConfig) -> bool:
