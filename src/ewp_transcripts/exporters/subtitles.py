@@ -21,6 +21,7 @@ _NONFINAL_CONNECTIVES = frozenset(
         "o",
         "od",
         "po",
+        "to",
         "u",
         "w",
         "we",
@@ -104,13 +105,7 @@ def build_subtitle_cues(
             )
         previous_segment_speaker = speaker_id
     drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
-    drafts = _merge_adjacent_drafts(
-        drafts,
-        settings,
-        labels=labels,
-        multiple_speakers=multiple_speakers,
-    )
-    drafts = _rebalance_adjacent_drafts(
+    drafts = _stabilize_drafts(
         drafts,
         settings,
         labels=labels,
@@ -145,6 +140,35 @@ def build_subtitle_cues(
         )
         previous_speaker = draft.speaker_id
     return _extend_short_cues(tuple(cues), settings)
+
+
+def _stabilize_drafts(
+    drafts: list[_CueDraft],
+    settings: SubtitlesConfig,
+    *,
+    labels: dict[str, str],
+    multiple_speakers: bool,
+) -> list[_CueDraft]:
+    """Repeat merge and balancing until a multi-cue chain stops changing."""
+
+    stable = drafts
+    for _ in range(len(drafts) + 1):
+        updated = _merge_adjacent_drafts(
+            stable,
+            settings,
+            labels=labels,
+            multiple_speakers=multiple_speakers,
+        )
+        updated = _rebalance_adjacent_drafts(
+            updated,
+            settings,
+            labels=labels,
+            multiple_speakers=multiple_speakers,
+        )
+        if updated == stable:
+            return updated
+        stable = updated
+    return stable
 
 
 def _merge_adjacent_drafts(

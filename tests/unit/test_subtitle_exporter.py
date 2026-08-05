@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.config import SubtitlesConfig
-from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.canonical import CanonicalWord, load_canonical_result
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
     build_subtitle_cues,
@@ -78,14 +78,15 @@ def test_wraps_only_at_word_boundaries_and_rejects_impossible_text() -> None:
         wrap_subtitle_text("one two three", max_lines=1, max_chars_per_line=5)
 
 
-def test_wrap_avoids_polish_connective_at_end_of_visible_line() -> None:
+@pytest.mark.parametrize("connective", ["i", "na", "to"])
+def test_wrap_avoids_polish_connective_at_end_of_visible_line(connective: str) -> None:
     lines = wrap_subtitle_text(
-        "To jest pierwsza część i druga część zdania.",
+        f"To jest pierwsza część {connective} druga część zdania.",
         max_lines=2,
         max_chars_per_line=28,
     )
 
-    assert lines == ("To jest pierwsza część", "i druga część zdania.")
+    assert lines[0].split()[-1] != connective
 
 
 def test_short_cue_extension_stops_before_next_cue() -> None:
@@ -359,6 +360,87 @@ def test_on_change_label_reserves_capacity_only_for_first_speaker_chunk() -> Non
     assert tuple(len(" ".join(cue.lines).removeprefix("anna: ").split()) for cue in cues) == (5, 7)
     assert cues[0].lines[0].startswith("anna: ")
     assert not cues[1].lines[0].startswith("anna: ")
+
+
+def test_three_cue_speaker_opening_is_revisited_after_continuation_balances() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first_template, second_template = result.transcript.segments
+
+    def timed_words(
+        texts: tuple[str, ...], starts: tuple[int, ...], *, prefix: str
+    ) -> tuple[CanonicalWord, ...]:
+        return tuple(
+            second_template.words[0].model_copy(
+                update={
+                    "word_id": f"word_{prefix}_{index}",
+                    "text": text,
+                    "start_ms": start,
+                    "end_ms": start + 160,
+                    "speaker_id": "speaker_002",
+                }
+            )
+            for index, (text, start) in enumerate(zip(texts, starts, strict=True))
+        )
+
+    first_speaker = first_template
+    opening_words = timed_words(("Może", "i"), (15444, 15584), prefix="opening")
+    opening = second_template.model_copy(
+        update={
+            "start_ms": 15444,
+            "end_ms": 15744,
+            "text": "Może i",
+            "speaker_id": "speaker_002",
+            "active_speaker_ids": ("speaker_002",),
+            "words": opening_words,
+        }
+    )
+    orphan_words = timed_words(("nikt",), (15784,), prefix="orphan")
+    orphan = second_template.model_copy(
+        update={
+            "start_ms": 15784,
+            "end_ms": 15964,
+            "text": "nikt",
+            "speaker_id": "speaker_002",
+            "active_speaker_ids": ("speaker_002",),
+            "words": orphan_words,
+        }
+    )
+    continuation_texts = (
+        "nie",
+        "zauważy,",
+        "ale",
+        "pamiętajmy,",
+        "że",
+        "internet",
+        "nie",
+        "zapomina.",
+    )
+    continuation_starts = tuple(16004 + index * 450 for index in range(len(continuation_texts)))
+    continuation_words = timed_words(continuation_texts, continuation_starts, prefix="continuation")
+    continuation = second_template.model_copy(
+        update={
+            "start_ms": continuation_words[0].start_ms,
+            "end_ms": continuation_words[-1].end_ms,
+            "text": " ".join(continuation_texts),
+            "speaker_id": "speaker_002",
+            "active_speaker_ids": ("speaker_002",),
+            "words": continuation_words,
+        }
+    )
+    result = result.model_copy(
+        update={
+            "transcript": result.transcript.model_copy(
+                update={"segments": (first_speaker, opening, orphan, continuation)}
+            )
+        }
+    )
+
+    cues = build_subtitle_cues(result)
+    speaker_two_cues = [cue for cue in cues if cue.speaker_id == "speaker_002"]
+
+    assert len(speaker_two_cues) == 1
+    assert speaker_two_cues[0].end_ms - speaker_two_cues[0].start_ms >= 1000
+    assert " ".join(speaker_two_cues[0].lines).startswith("anna: Może i nikt nie zauważy")
 
 
 def test_connective_moves_from_end_of_cue_to_following_fragment() -> None:
