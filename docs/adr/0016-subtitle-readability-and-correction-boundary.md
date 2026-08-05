@@ -68,6 +68,24 @@ following timed cue when hard constraints permit, and selects balanced line brea
 avoid nonfinal connectives. It passes 264 automated tests. A final external-player review
 is still required before this ADR becomes accepted.
 
+The `_v004` review confirmed that conjunction handling worked well and that subtitles
+were much better overall. It still exposed two single-word micro-cues, again detached
+the opening `Speaker2: Może i`, and found `to` and `na` at two line endings. The accepted
+v4 evidence is:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+1af2655f3f7cf278fdf94beaa60ec86b94e7c50d1f63e11b17d63b56a64e23e4  p2-03-mixed-stereo_subtitles_v004.srt
+144ec38e729cfcabe6bd829a4cb424379a0fd9fce6c4d81a81c9ef42a5ae83ac  p2-03-mixed-stereo_subtitles_v004.vtt
+```
+
+The supplied excerpt showed a three-cue dependency: a two-word labelled opening, a
+one-word middle cue, and a long continuation. A single left-to-right balancing pass could
+repair the middle cue but did not revisit the opening afterward. Commit `6545355` repeats
+merge and balance passes until the chain stabilizes, protects `to` in addition to the
+existing Polish boundary list, and tests the reported timing pattern directly. It passes
+267 automated tests. External-player review remains pending.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

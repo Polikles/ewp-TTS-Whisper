@@ -252,3 +252,39 @@ git status --short
 Repeat sections 3–5 with `_v004`. Verify the complete files and specifically confirm
 that `Speaker2: Może i` is no longer detached and that connective words are not stranded
 at line or cue endings when a readable alternative exists.
+
+## 10. Re-review stabilized multi-cue chains
+
+The `_v004` review supplied a three-cue chain that a single balancing pass could not
+fully repair. Commit `6545355` repeats merge and balance passes until stable and adds the
+reported timing pattern as a regression test. Generate version 5 without ASR:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V5="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v005.srt"
+export EWP_SUB_REVIEW_VTT_V5="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v005.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V5" && echo "stabilized SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V5" && echo "stabilized VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V5" "$EWP_SUB_REVIEW_VTT_V5"
+git status --short
+```
+
+Repeat sections 3–5 with `_v005`. Recheck the complete file, the supplied 15–22 second
+Speaker2 transition, the `Tak się` / `dzieje` chain near 36 seconds, and all remaining
+single-word cues. Report any remaining connective ending with its complete two-line cue
+so hard-capacity constraints can be distinguished from a selectable bad boundary.
