@@ -107,6 +107,28 @@ Regression tests use the operator-provided canonical text and exact timings for 
 failures. The implementation passes 268 automated tests. External-player acceptance is
 still pending.
 
+The `_v006` review passed the previously failing micro-cue and protected-word cases and
+was judged much better overall. SRT and WebVTT remained functionally equivalent. One
+continuous sentence still produced a single-line cue between otherwise two-line cues:
+
+```text
+danych przez przedsiębiorstwo, to faktycznie
+```
+
+Together with its continuation, the text is exactly 100 characters and can wrap cleanly
+as 50 and 49 characters. The v6 evidence is:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+d0ff4847d88135ad5e19fc8390dbdb58a608701d159f76139fa9ff3eec62f787  p2-03-mixed-stereo_subtitles_v006.srt
+ec7ec0ed88605bbdbdf03fb18b22683df7f5826e65c3cc78c3f3318e9597cf6d  p2-03-mixed-stereo_subtitles_v006.vtt
+```
+
+Commit `b0f7374` retains 42 characters as the preferred target but raises the hard line
+ceiling from 46 to 50. This is an application preset choice, not a container or YouTube
+requirement. The exact reported continuation now forms one balanced two-line cue, and
+all 269 automated tests pass. External-player acceptance remains pending.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

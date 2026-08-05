@@ -324,3 +324,40 @@ git status --short
 Repeat sections 3–5 with `_v006`. Recheck the complete file and the exact previously
 failing ranges at 15–22, 35–39, and 96–105 seconds. The gate passes only if there are no
 avoidable micro-cues or protected Polish words stranded at visible line endings.
+
+## 12. Re-review the flexible 42–50 character line policy
+
+The `_v006` review passed the earlier defects but found one aesthetically isolated
+single-line continuation. Commit `b0f7374` keeps 42 characters as the target and raises
+the hard ceiling to 50, allowing that exact 100-character pair to wrap as 50 + 49.
+Generate version 7 without ASR:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V7="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v007.srt"
+export EWP_SUB_REVIEW_VTT_V7="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v007.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V7" && echo "flexible SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V7" && echo "flexible VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V7" "$EWP_SUB_REVIEW_VTT_V7"
+git status --short
+```
+
+Repeat sections 3–5 with `_v007`. Review the entire file, with special attention to the
+75–82 second continuation and to whether occasional 47–50-character lines remain
+comfortable on the target YouTube player. If every checklist item passes, report an
+overall PASS so ADR-0016 and the MVP subtitle gate can be accepted.
