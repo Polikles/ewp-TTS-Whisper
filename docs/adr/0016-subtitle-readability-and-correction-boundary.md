@@ -182,6 +182,18 @@ the retest must establish whether the lead persists after fragmentation is remov
 if so, compare canonical word time with the audible time before any timing correction is
 designed.
 
+The `_v002` long-form retest proved that commit `72b43a3` did not repair the real P9-02
+chain. The same micro-cues remained, along with nonfinal one-line cues, an orphaned final
+word (`metody.`), and an overlapping split (`Nie` followed by `zapomnijcie`) near the end.
+This disproves pairwise boundary repair as a sufficient general solution. The next design
+must partition complete continuous same-speaker word chains while respecting canonical
+segment, overlap, timing, and speaker boundaries. Exact canonical windows are required as
+regression fixtures before that change.
+
+The apparent timing concern is deferred until text partitioning is stable. VLC produced
+inconsistent pacing, while Subtitle Edit 5.1 was materially better. Final pacing will be
+checked with a blank video in YouTube Studio rather than inferred from VLC playback.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

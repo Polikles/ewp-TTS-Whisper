@@ -120,6 +120,8 @@ representative podcast episode using
 If that review exposes fragmentation or timing concerns, regenerate the retained result
 and collect checkpointed evidence with
 [`RUN_RELEASE_LONG_SUBTITLE_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_RETEST.md).
+Extract exact canonical regression evidence for any remaining multi-cue failures with
+[`EXTRACT_LONG_SUBTITLE_FAILURES.md`](EXTRACT_LONG_SUBTITLE_FAILURES.md).
 
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
