@@ -4,7 +4,10 @@ The MVP is complete when the following conditions are met.
 
 ## Functionality
 
-- [ ] All FR requirements are implemented or explicitly deferred through an ADR.
+- [x] All FR requirements are implemented or explicitly deferred through an ADR.
+
+The requirement-by-requirement evidence and the narrow FR-A05 directory-discovery
+deferral are recorded in the [MVP requirements traceability matrix](20-mvp-requirements-traceability.md).
 - [x] `doctor`, `inspect`, `dry-run`, `transcribe`, `export`, and `clean` work.
 - [x] A results JSON is always generated after successful transcription.
 - [x] TXT, SRT, VTT, and optional segments JSON are generated without running ASR again.

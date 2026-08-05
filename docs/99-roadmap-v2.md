@@ -2,6 +2,15 @@
 
 The following items do not block the MVP.
 
+## Content-aware directory discovery
+
+- Replace the directory extension allowlist with a bounded ffprobe-based candidate
+  classifier so any FFmpeg-decodable audio can be included without treating documents,
+  cover art, and other ordinary siblings as failed transcription jobs.
+- Preserve the current rules for symlinks, recursion, natural ordering, and direct-file
+  errors, and emit a structured skip reason for non-audio files.
+- Avoid probing each accepted source twice by carrying trusted probe data into inspection.
+
 ## 1. GUI
 
 - file, directory, and group selection;

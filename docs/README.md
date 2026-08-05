@@ -22,6 +22,7 @@
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
 | [17 - Definition of Done](17-definition-of-done-mvp.md) | MVP completion criteria |
 | [18 - Quality evaluation](18-quality-evaluation.md) | Manifest-driven WER/CER reports and review diffs |
+| [20 - MVP requirements traceability](20-mvp-requirements-traceability.md) | Requirement-by-requirement implementation, test, evidence, and deferral status |
 | [99 - Version 2 roadmap](99-roadmap-v2.md) | GUI, audio repair, LLMs, benchmarks, and Docker |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 
@@ -43,6 +44,7 @@
 - [ADR-0014: Dataset-dependent quality gates](adr/0014-dataset-dependent-quality-gates.md)
 - [ADR-0015: MVP input format matrix](adr/0015-input-format-matrix.md)
 - [ADR-0016: Subtitle readability and correction boundary](adr/0016-subtitle-readability-and-correction-boundary.md)
+- [ADR-0017: Content-aware directory discovery after MVP](adr/0017-content-aware-directory-discovery.md)
 
 ## Implementation guidance
 
