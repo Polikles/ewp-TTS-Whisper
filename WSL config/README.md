@@ -122,6 +122,8 @@ and collect checkpointed evidence with
 [`RUN_RELEASE_LONG_SUBTITLE_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_RETEST.md).
 Extract exact canonical regression evidence for any remaining multi-cue failures with
 [`EXTRACT_LONG_SUBTITLE_FAILURES.md`](EXTRACT_LONG_SUBTITLE_FAILURES.md).
+Retest the resulting continuous-turn partitioner with
+[`RUN_RELEASE_LONG_SUBTITLE_TURN_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_TURN_RETEST.md).
 
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 

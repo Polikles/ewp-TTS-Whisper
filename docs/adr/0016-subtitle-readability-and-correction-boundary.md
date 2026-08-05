@@ -194,6 +194,23 @@ The apparent timing concern is deferred until text partitioning is stable. VLC p
 inconsistent pacing, while Subtitle Edit 5.1 was materially better. Final pacing will be
 checked with a blank video in YouTube Studio rather than inferred from VLC playback.
 
+Canonical-window evidence hash
+`eeb7d4ad8fba567d2f186d5c4e7c075145b27354f46e7d90ca64eeb108100a77`
+confirmed the structural causes. The rapid fragment is one 25-word ordinary segment;
+`metody.` is inside one 19-word overlap-marked segment; and `Nie zapomnijcie…` is one
+six-word overlap-marked segment whose first word spans only 100 ms. Commit `c15ccaa`
+therefore replaces preservation of greedy splits with bounded dynamic programming over
+complete continuous word chains. Speaker changes, overlap-status changes, missing word
+timings, negative gaps, and pauses above 1.2 seconds remain hard boundaries. Line count,
+line length, and maximum cue duration remain hard constraints. Minimum word count,
+minimum readable duration, nonfinal two-line layout, connective placement, sentence
+boundaries, cue count, and line utilization form the ordered optimization criteria.
+
+Some rapid aligned speech has no exact word-boundary partition below 20 characters per
+second. In that case coherence wins over creating unreadable micro-cues, and derived cue
+display duration is extended toward the configured readability rate where the following
+timeline permits. Canonical word timestamps remain unchanged.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;
