@@ -242,6 +242,19 @@ This closes text splitting for the MVP. The remaining long-form activity is a se
 YouTube Studio timing check; it must not reopen layout unless the platform reveals an
 actual serialization defect.
 
+The private YouTube Studio timing review passed on the complete 34.7-minute P9-02 sample,
+both at normal playback speed and at 2×. The generated review MP4 used H.264 video and AAC
+audio and had duration 2083.613 seconds. Timing evidence:
+
+```text
+9cc87af0d7ebb27555be7802580fea08cc7d18d602f2d1bd42005c378272850d  p9-02-youtube-timing.mp4
+d7cec53344de5b60b005ce12f5362bee1e4dc29bba7f07c8877853f3728e0ad1  p9-02-long-two-speakers-polish_subtitles_v004.srt
+```
+
+Minor lexical transcription errors were observed but do not affect subtitle layout,
+serialization, or timing acceptance. They remain input for the planned Version 2
+versioned transcript-correction workflow.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

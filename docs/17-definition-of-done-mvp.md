@@ -27,8 +27,9 @@ references exist; the combined checkbox therefore remains open.
 - [x] A batch of at least ten files shows no accumulating VRAM use.
 - [x] SRT and VTT have been reviewed manually in a private YouTube upload.
 
-The accepted P2-03 review, iterative cue-readability evidence, and final SRT/VTT hashes
-are recorded in [ADR-0016](adr/0016-subtitle-readability-and-correction-boundary.md).
+The accepted P2-03 compatibility review and complete 34.7-minute P9-02 YouTube timing
+review, iterative cue-readability evidence, and final hashes are recorded in
+[ADR-0016](adr/0016-subtitle-readability-and-correction-boundary.md).
 
 ## Security and reliability
 
