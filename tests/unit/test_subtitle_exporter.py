@@ -857,6 +857,7 @@ def test_invalid_rapid_micro_cues_do_not_outrank_valid_neighbor_boundaries() -> 
     durations = [cue.end_ms - cue.start_ms for cue in cues]
     assert all(duration >= 1000 for duration in durations), durations
     assert all(len(" ".join(cue.lines).removeprefix("jan: ").split()) >= 4 for cue in cues)
+    assert all(len(cue.lines) == 2 for cue in cues)
     assert " ".join(" ".join(cue.lines) for cue in cues).count("błędu.") == 1
 
 

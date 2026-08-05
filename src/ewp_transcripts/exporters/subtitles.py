@@ -241,7 +241,10 @@ def _optimal_word_partition(
             orphan = int(
                 len(chunk) < settings.min_words_per_cue or duration_ms < settings.min_duration_ms
             )
-            one_line = int(is_nonfinal and _display_line_count(chunk, settings, prefix=prefix) == 1)
+            one_line = int(
+                _display_line_count(chunk, settings, prefix=prefix) == 1
+                and (is_nonfinal or start > 0)
+            )
             linguistic = int(is_nonfinal and _ends_connective(chunk))
             linguistic += _internal_line_connective_count(chunk, settings, prefix=prefix)
             displayed_chars = len(f"{prefix}{_word_text(chunk)}")
