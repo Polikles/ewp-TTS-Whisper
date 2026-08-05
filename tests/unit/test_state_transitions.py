@@ -77,6 +77,30 @@ def test_tampered_running_identity_is_rejected_without_terminal_write(tmp_path: 
     assert not (tmp_path / "episode_results.failed.json").exists()
 
 
+def test_corrupt_partial_result_is_rejected_without_terminal_write(tmp_path: Path) -> None:
+    reservation = reserve_job(
+        _inspection(),
+        output_directory=tmp_path,
+        run_id=RUN_ID,
+        force=False,
+        config=OutputsConfig(),
+    )
+    assert reservation.state_path
+    reservation.state_path.write_text("{truncated", encoding="utf-8")
+
+    with pytest.raises(InvalidJobStateError, match="Cannot read trusted job state"):
+        transition_job_state(
+            reservation,
+            status=JobStateStatus.FAILED,
+            failure_code="CONTROLLED_TEST",
+            failure_message="Controlled failure.",
+        )
+
+    assert reservation.state_path.read_text(encoding="utf-8") == "{truncated"
+    assert not (tmp_path / "episode_results.failed.json").exists()
+    assert not (tmp_path / "episode_results.json").exists()
+
+
 def test_non_processing_reservation_cannot_transition() -> None:
     from ewp_transcripts.domain import JobOutputPlan, JobReservation
     from ewp_transcripts.domain.enums import PlanDecision

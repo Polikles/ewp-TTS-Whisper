@@ -1,12 +1,17 @@
 """Tests for locked atomic running-state reservation."""
 
+import errno
 import json
 from pathlib import Path
 from uuid import UUID
 
+import pytest
+
+import ewp_transcripts.state as state_module
 from ewp_transcripts.config import OutputsConfig
 from ewp_transcripts.domain import EpisodeInspection
 from ewp_transcripts.domain.enums import JobStateStatus, PlanDecision
+from ewp_transcripts.domain.errors import OutputReservationError
 from ewp_transcripts.state import reserve_job
 
 RUN_ID = UUID("123e4567-e89b-12d3-a456-426614174000")
@@ -100,3 +105,34 @@ def test_repeated_forced_reservations_allocate_distinct_versions(tmp_path: Path)
     assert second.state and second.state.result_version == 3
     assert first.state_path and first.state_path.name.endswith("_v002.partial.json")
     assert second.state_path and second.state_path.name.endswith("_v003.partial.json")
+
+
+@pytest.mark.parametrize(
+    ("error_number", "case_name"),
+    [(errno.ENOSPC, "disk full"), (errno.EIO, "output write error")],
+)
+def test_running_state_write_failure_is_sanitized_and_leaves_no_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    error_number: int,
+    case_name: str,
+) -> None:
+    def fail_write(descriptor: int, payload: bytes) -> None:
+        del descriptor, payload
+        raise OSError(error_number, case_name)
+
+    monkeypatch.setattr(state_module, "_write_all", fail_write)
+    output_directory = tmp_path / "output"
+
+    with pytest.raises(OutputReservationError, match="Cannot reserve output state"):
+        reserve_job(
+            _inspection(),
+            output_directory=output_directory,
+            run_id=RUN_ID,
+            force=False,
+            config=OutputsConfig(),
+        )
+
+    assert not (output_directory / "episode_results.partial.json").exists()
+    assert not (output_directory / "episode_results.json").exists()
+    assert not list(output_directory.glob("*.tmp"))

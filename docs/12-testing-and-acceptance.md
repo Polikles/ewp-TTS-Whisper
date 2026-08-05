@@ -66,9 +66,9 @@ their corresponding external evidence is accepted.
 - [x] SIGINT during ASR.
 - [x] Exception during alignment.
 - [x] Exception during diarization.
-- [ ] Disk full.
-- [ ] Output write error.
-- [ ] Corrupt partial result.
+- [x] Disk full.
+- [x] Output write error.
+- [x] Corrupt partial result.
 - [x] Restart processes the file from the beginning.
 - [x] One failed job does not stop the batch.
 - [x] Temporary files are preserved after failure.
