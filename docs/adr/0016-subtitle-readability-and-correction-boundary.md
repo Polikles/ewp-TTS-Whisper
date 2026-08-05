@@ -161,6 +161,27 @@ two-speaker P2-03 fixture. Because the fixture is short, a separate long-form lo
 review remains useful as additional representativeness evidence, not as a condition for
 this decision.
 
+The first supplementary long-form review used the existing 34.7-minute P9-02 canonical
+result. It found a new fragmentation case around `00:08:13`: rapid aligned words were
+exported as several 40–441 ms cues (`bo`, `nawet`, `110% ma za mały margines`, and
+`błędu.`). It also reported inconsistent apparent lead relative to the audio: accurate at
+the beginning, roughly two cues ahead around minute 24, and still two or three words
+ahead near the end. The SRT and WebVTT evidence hashes were:
+
+```text
+41c4fa5e7368a3ae94b60e8a0071c9e575033a4db54682311cde734136f1e751  p9-02-long-two-speakers-polish_results.json
+44b340a8f123f2daa11cdf23affd8654f1ac600dc41cd15a3fc7000fe862b499  p9-02-long-two-speakers-polish_subtitles.srt
+b22d2d5d39ab0e53d156a27117bde4f57f650ed14f74c135a934935e6fab0d56  p9-02-long-two-speakers-polish_subtitles.vtt
+```
+
+Commit `72b43a3` fixes the fragmentation bug. The neighboring-boundary search had allowed
+an invalid original split to remain its best candidate, so valid redistributions could
+lose to a cue that violated the intended pacing constraints. A regression based on the
+reported passage now rejects those micro-cues. The timing observation remains separate:
+the retest must establish whether the lead persists after fragmentation is removed and,
+if so, compare canonical word time with the audible time before any timing correction is
+designed.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

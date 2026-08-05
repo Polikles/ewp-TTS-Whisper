@@ -117,6 +117,9 @@ Perform the explicit external SRT/VTT player review using a Private YouTube uplo
 Supplement that short compatibility gate with a full local-player review of a
 representative podcast episode using
 [`RUN_RELEASE_LONG_SUBTITLE_REVIEW.md`](RUN_RELEASE_LONG_SUBTITLE_REVIEW.md).
+If that review exposes fragmentation or timing concerns, regenerate the retained result
+and collect checkpointed evidence with
+[`RUN_RELEASE_LONG_SUBTITLE_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_RETEST.md).
 
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 
