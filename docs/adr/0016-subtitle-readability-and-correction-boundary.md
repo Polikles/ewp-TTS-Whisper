@@ -211,6 +211,22 @@ second. In that case coherence wins over creating unreadable micro-cues, and der
 display duration is extended toward the configured readability rate where the following
 timeline permits. Canonical word timestamps remain unchanged.
 
+The P9-02 `_v003` retest was almost perfect and eliminated the reported micro-cues,
+overlap split, and orphan words. Evidence hashes were:
+
+```text
+41c4fa5e7368a3ae94b60e8a0071c9e575033a4db54682311cde734136f1e751  p9-02-long-two-speakers-polish_results.json
+613348a73cbc246151c078027f65008754a229c618f7beacf90f7d033955ea05  p9-02-long-two-speakers-polish_subtitles_v003.srt
+2826d08d5a80ce5e6f442a2d9bf02451303efe4dfc093c24b322e231544fa0a3  p9-02-long-two-speakers-polish_subtitles_v003.vtt
+```
+
+One avoidable final one-line cue remained inside a multi-cue continuous chain (`za mały
+margines błędu.`). Commit `f8aad6a` makes this a soft penalty for both nonfinal and final
+cues whenever the chain contains multiple cues. A truly short chain consisting of one
+cue remains valid. The silence or alignment gap from roughly `00:08:14.8` to `00:08:18.6`
+is not closed by moving canonical words; timing validation remains deferred to YouTube
+Studio after text layout passes.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;
