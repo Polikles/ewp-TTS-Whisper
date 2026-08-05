@@ -288,3 +288,39 @@ Repeat sections 3–5 with `_v005`. Recheck the complete file, the supplied 15�
 Speaker2 transition, the `Tak się` / `dzieje` chain near 36 seconds, and all remaining
 single-word cues. Report any remaining connective ending with its complete two-line cue
 so hard-capacity constraints can be distinguished from a selectable bad boundary.
+
+## 11. Re-review canonical word-boundary search
+
+The `_v005` review and canonical JSON diagnostic demonstrated that valid repairs can
+require moving several words at once; a one-word greedy transfer may pass through an
+invalid intermediate state. Commit `c23dd71` searches all valid neighboring word splits
+and includes the exact reported timings as regressions. Generate version 6:
+
+```bash
+cd ~/transkrypcje/ewp-transcripts
+git pull --ff-only
+git log -1 --oneline
+uv sync --locked
+make check
+
+export EWP_SUB_REVIEW_ROOT="$HOME/transkrypcje/ewp-transcripts-testdata/phase0/release-subtitles-rG9E4ZHD"
+export EWP_SUB_REVIEW_OUTPUT="$EWP_SUB_REVIEW_ROOT/output"
+export EWP_SUB_REVIEW_RESULT="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_results.json"
+export EWP_SUB_REVIEW_CONFIG="$EWP_SUB_REVIEW_ROOT/transcriber.toml"
+export EWP_SUB_REVIEW_SRT_V6="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v006.srt"
+export EWP_SUB_REVIEW_VTT_V6="$EWP_SUB_REVIEW_OUTPUT/p2-03-mixed-stereo_subtitles_v006.vtt"
+
+CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber export "$EWP_SUB_REVIEW_RESULT" \
+    --config "$EWP_SUB_REVIEW_CONFIG" \
+    --format srt --format vtt --force
+
+test -s "$EWP_SUB_REVIEW_SRT_V6" && echo "searched SRT: present"
+test -s "$EWP_SUB_REVIEW_VTT_V6" && echo "searched VTT: present"
+sha256sum "$EWP_SUB_REVIEW_RESULT" "$EWP_SUB_REVIEW_SRT_V6" "$EWP_SUB_REVIEW_VTT_V6"
+git status --short
+```
+
+Repeat sections 3–5 with `_v006`. Recheck the complete file and the exact previously
+failing ranges at 15–22, 35–39, and 96–105 seconds. The gate passes only if there are no
+avoidable micro-cues or protected Polish words stranded at visible line endings.

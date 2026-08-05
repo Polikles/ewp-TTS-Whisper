@@ -86,6 +86,27 @@ merge and balance passes until the chain stabilizes, protects `to` in addition t
 existing Polish boundary list, and tests the reported timing pattern directly. It passes
 267 automated tests. External-player review remains pending.
 
+The `_v005` output remained unchanged at the reported locations. Its evidence is:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+3ab34169aad4aee4fd6ddd1640aa1817b61877668d494e6ca99e7f85245fb31a  p2-03-mixed-stereo_subtitles_v005.srt
+c82b52084efdb533c832bca9cd8ece374da684a20ba43b6d2e03d4d96b49c50c  p2-03-mixed-stereo_subtitles_v005.vtt
+```
+
+Inspection of the canonical words showed why. The sequence was one 20-word canonical
+segment, not three source segments. Moving only `nie` into the `nikt` cue temporarily
+exceeded the 20 CPS limit, but moving several timed words produced a valid cue. The
+greedy balancer stopped on that first invalid intermediate state. The remaining `na`
+was inside a two-line cue; removing it required moving `przedsiębiorstwo` across the next
+cue boundary so both cues could rewrap validly.
+
+Commit `c23dd71` searches all valid word boundaries across neighboring fragments and
+ranks them by protected-word placement, orphan avoidance, boundary movement, and balance.
+Regression tests use the operator-provided canonical text and exact timings for both
+failures. The implementation passes 268 automated tests. External-player acceptance is
+still pending.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;
