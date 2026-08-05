@@ -45,6 +45,7 @@
 - [ADR-0015: MVP input format matrix](adr/0015-input-format-matrix.md)
 - [ADR-0016: Subtitle readability and correction boundary](adr/0016-subtitle-readability-and-correction-boundary.md)
 - [ADR-0017: Content-aware directory discovery after MVP](adr/0017-content-aware-directory-discovery.md)
+- [ADR-0018: Synthetic fast-speech and recorder-noise acceptance](adr/0018-fast-noisy-audio-acceptance.md)
 
 ## Implementation guidance
 

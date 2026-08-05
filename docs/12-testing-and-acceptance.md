@@ -132,10 +132,10 @@ their corresponding external evidence is accepted.
 - [x] Two separate mono files.
 - [x] Overlap on separate tracks.
 - [x] Overlap in mixed mono.
-- [ ] Fast speech.
+- [x] Fast speech.
 - [x] Long pauses.
 - [x] Intro/outro music.
-- [ ] Light recorder noise.
+- [x] Light recorder noise.
 - [x] Clipping.
 - [x] Unequal channel levels.
 - [x] WAV 44.1 kHz.
