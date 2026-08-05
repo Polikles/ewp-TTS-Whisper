@@ -1,6 +1,6 @@
 # ADR-0016: Subtitle readability and correction boundary
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-08-05
 
 ## Decision
@@ -145,6 +145,21 @@ Commit `17f5d86` adds a turn-level line-count penalty to neighboring boundary se
 allows a sentence boundary to move when the same speaker continues without material
 silence. It preserves one-line final turns and silence-separated short statements. The
 implementation passes 270 automated tests. External-player acceptance remains pending.
+
+The `_v008` SRT and WebVTT exports passed the complete manual review and were judged very
+good. The operator confirmed the turn-level one-line rule and all previous readability
+defects were resolved. Accepted evidence:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+b1fb69469a2aae399e221d202c642f44886f7e69f455fa101e3960ea737b89f9  p2-03-mixed-stereo_subtitles_v008.srt
+0bc9b1d5ad30c7b61c42edadf086e28971a3bb6b058972579b849f1fca63e6f4  p2-03-mixed-stereo_subtitles_v008.vtt
+```
+
+This accepts the MVP subtitle algorithm and YouTube compatibility gate on the 105-second
+two-speaker P2-03 fixture. Because the fixture is short, a separate long-form local-player
+review remains useful as additional representativeness evidence, not as a condition for
+this decision.
 
 ## Consequences
 

@@ -25,7 +25,10 @@ DER/JER, English, and statistically representative thresholds are explicitly def
 references exist; the combined checkbox therefore remains open.
 - [x] A 60-minute file completes on RTX 3090 without OOM.
 - [x] A batch of at least ten files shows no accumulating VRAM use.
-- [ ] SRT and VTT have been reviewed manually in a private YouTube upload.
+- [x] SRT and VTT have been reviewed manually in a private YouTube upload.
+
+The accepted P2-03 review, iterative cue-readability evidence, and final SRT/VTT hashes
+are recorded in [ADR-0016](adr/0016-subtitle-readability-and-correction-boundary.md).
 
 ## Security and reliability
 
