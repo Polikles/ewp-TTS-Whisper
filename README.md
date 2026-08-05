@@ -48,6 +48,8 @@ Reprocessing the same source with `--force` creates a consistently versioned res
 
 The complete index is available in [`docs/README.md`](docs/README.md).
 
+Release history is recorded in [`CHANGELOG.md`](CHANGELOG.md).
+
 Operational WSL2 setup and verification instructions are in [`WSL config/`](WSL%20config/README.md).
 
 Recommended starting documents:

@@ -1,0 +1,64 @@
+# Changelog
+
+All notable changes to EWP-transcripts are documented here.
+
+## 0.1.0 — 2026-08-05
+
+Initial functional MVP release candidate.
+
+### Added
+
+- Local-first `doctor`, `inspect`, `dry-run`, `transcribe`, `export`, and `clean`
+  commands with a CLI-independent application boundary.
+- Deterministic single-file, natural-order directory, filename-derived, and explicit
+  collision-safe group discovery.
+- Conservative mono, dual-mono, split-speaker, mixed-stereo, and ambiguous-channel
+  classification with explicit overrides and warning-only audio diagnostics.
+- Offline pinned WhisperX large-v2 ASR, Polish/English alignment selection, pyannote
+  diarization, chronological speaker normalization, and overlap provenance.
+- Schema-versioned canonical JSON with integer-millisecond timestamps, timestamp-source
+  provenance, source hashes, model revisions, effective configuration, stage timing,
+  VRAM metrics, structured warnings, and sanitized failures.
+- Regeneratable TXT, sentence-level segments JSON, and readability-balanced SRT/VTT.
+- Atomic partial/failed/final state transitions, signature-based duplicate skipping,
+  versioned forced reruns, output locking, interruption recovery, sequential batch
+  isolation, and marker-verified privacy cleanup with age filtering.
+- Manifest-driven WER/CER reports and error-only review diffs.
+- Reproducible locked CUDA 12.8 dependency graph and Python 3.12 wheel/sdist packaging.
+
+### Validated
+
+- 279 automated formatting, linting, typing, unit, integration, schema, documentation,
+  and traceability checks.
+- WAV at 44.1/48 kHz, MP3, FLAC, M4A/AAC, Ogg/Opus, dual mono, split speakers,
+  separate mono sources, mixed overlap, clipping, imbalance, long silence, fast speech,
+  light recorder noise, and repeated intro/outro material.
+- Polish recordings from 95 seconds through 151 minutes on an RTX 3090 under Ubuntu
+  24.04 WSL2, including ten-job batch stability and real SIGINT restart.
+- Short and complete 34.7-minute YouTube SRT/VTT readability and timing reviews.
+- Offline installed-wheel transcription and locked installation in a fresh Ubuntu
+  24.04.4 WSL2 distribution.
+
+### Known limitations and deferrals
+
+- Quantitative English, Polish/English code-switch, and three-speaker quality remains
+  deferred until representative archive-derived references exist. The `pl`, `en`, and
+  `auto` execution modes are implemented.
+- Timestamp accuracy and DER/JER lack manually annotated reference data; provenance and
+  structural behavior are covered, but quantitative thresholds are deferred.
+- The lexical corpus contains only three manually verified Polish cases and is not yet
+  statistically representative.
+- Arbitrary FFmpeg-decodable extensions work as direct files; content-aware discovery of
+  arbitrary-extension files inside directories is deferred to V2.
+- Transcription correction, synchronized HTML, speaker-colored web presentation, and
+  source-aware subtitle editing are V2 workflow items.
+- The accurate preset is validated only on the reference RTX 3090; lower-memory GPUs do
+  not yet have supported presets or performance claims.
+
+### Distribution note
+
+No public license is declared in this release candidate. The private
+`LICENSE_SKETCH.TXT` draft is deliberately excluded from both wheel and source
+distribution artifacts. Do not publish artifacts for third-party use until the owner
+chooses and commits the intended license terms.
+
