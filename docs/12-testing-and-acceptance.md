@@ -136,9 +136,9 @@ Tests are divided into two matrices: application behavior and audio-material typ
 - [x] WAV 44.1 kHz.
 - [x] WAV 48 kHz.
 - [x] MP3.
-- [ ] FLAC.
-- [ ] M4A/AAC.
-- [ ] Opus.
+- [x] FLAC.
+- [x] M4A/AAC.
+- [x] Opus.
 
 ## 3. Text-quality evaluation
 
