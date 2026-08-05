@@ -126,6 +126,8 @@ Retest the resulting continuous-turn partitioner with
 [`RUN_RELEASE_LONG_SUBTITLE_TURN_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_TURN_RETEST.md).
 Verify the final multi-cue turn balancing refinement with
 [`RUN_RELEASE_LONG_SUBTITLE_FINAL_CUE_RETEST.md`](RUN_RELEASE_LONG_SUBTITLE_FINAL_CUE_RETEST.md).
+Validate the accepted long-form SRT timing in YouTube Studio with
+[`RUN_RELEASE_LONG_SUBTITLE_YOUTUBE_TIMING.md`](RUN_RELEASE_LONG_SUBTITLE_YOUTUBE_TIMING.md).
 
 After the first integrated job, verify second-run stability with [`RUN_PHASE0_REPEAT.md`](RUN_PHASE0_REPEAT.md).
 

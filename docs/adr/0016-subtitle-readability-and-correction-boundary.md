@@ -227,6 +227,21 @@ cue remains valid. The silence or alignment gap from roughly `00:08:14.8` to `00
 is not closed by moving canonical words; timing validation remains deferred to YouTube
 Studio after text layout passes.
 
+The P9-02 `_v004` retest passed the long-form text-layout gate. The previously short final
+fragment is contained within two lines, no avoidable one-line cues remain, and the only
+one-line cues are legitimate silence-separated utterances. Accepted long-form layout
+evidence:
+
+```text
+41c4fa5e7368a3ae94b60e8a0071c9e575033a4db54682311cde734136f1e751  p9-02-long-two-speakers-polish_results.json
+d7cec53344de5b60b005ce12f5362bee1e4dc29bba7f07c8877853f3728e0ad1  p9-02-long-two-speakers-polish_subtitles_v004.srt
+ef8f0050fe7e1c95e8f13fc9fa8f7d497dd575920e476a021d4c60ae6464467f  p9-02-long-two-speakers-polish_subtitles_v004.vtt
+```
+
+This closes text splitting for the MVP. The remaining long-form activity is a separate
+YouTube Studio timing check; it must not reopen layout unless the platform reveals an
+actual serialization defect.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;
