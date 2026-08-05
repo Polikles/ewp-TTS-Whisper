@@ -64,8 +64,8 @@ their corresponding external evidence is accepted.
 ### State and failures
 
 - [x] SIGINT during ASR.
-- [ ] Exception during alignment.
-- [ ] Exception during diarization.
+- [x] Exception during alignment.
+- [x] Exception during diarization.
 - [ ] Disk full.
 - [ ] Output write error.
 - [ ] Corrupt partial result.
@@ -73,7 +73,7 @@ their corresponding external evidence is accepted.
 - [x] One failed job does not stop the batch.
 - [x] Temporary files are preserved after failure.
 - [x] Temporary files are removed after success.
-- [ ] `--keep-temp`.
+- [x] `--keep-temp`.
 - [x] `clean --dry-run`.
 
 ### JSON
@@ -105,7 +105,7 @@ their corresponding external evidence is accepted.
 
 - [x] `doctor` without a GPU.
 - [x] `doctor` with RTX 3090.
-- [ ] Missing FFmpeg.
+- [x] Missing FFmpeg.
 - [x] Missing model.
 - [ ] Missing `HF_TOKEN` before model download.
 - [x] Complete offline readiness.

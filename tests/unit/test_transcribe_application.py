@@ -95,6 +95,35 @@ def test_transcribe_records_cuda_peak_in_canonical_environment(
     assert result.processing.environment.peak_vram_bytes == 123_456
 
 
+def test_transcribe_keep_temp_retains_successful_owned_workspace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inspection = _inspection(tmp_path)
+    monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
+    monkeypatch.setattr(
+        application,
+        "run_single_speaker_pipeline",
+        lambda episode, reservation, workspace, **kwargs: _matching_result(reservation),
+    )
+    config = ApplicationConfig(
+        diarization=DiarizationConfig(speaker_count=1),
+        runtime=RuntimeConfig(
+            work_root=tmp_path / "work",
+            keep_temp_on_success=True,
+        ),
+    )
+
+    transcribe_one(
+        inspection.discovery.input_path,
+        config=config,
+        output_directory=tmp_path / "output",
+    )
+
+    retained = list(config.runtime.work_root.glob("*/*"))
+    assert len(retained) == 1
+    assert (retained[0] / ".ewp-transcripts-work.json").is_file()
+
+
 def test_transcribe_failure_publishes_failed_state_and_retains_workspace(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -242,3 +242,28 @@ def test_backend_failure_is_sanitized(tmp_path: Path) -> None:
         engine.transcribe(tmp_path / "audio.wav", language="pl", batch_size=4)
 
     assert "secret backend detail" not in str(raised.value)
+
+
+def test_alignment_backend_failure_is_sanitized(tmp_path: Path) -> None:
+    class BrokenAlignment(FakeWhisperX):
+        def align(self, *args: object, **kwargs: object) -> Mapping[str, object]:
+            raise RuntimeError("private alignment detail")
+
+    revision = "alignment-revision"
+    snapshot = tmp_path / revision
+    snapshot.mkdir()
+    engine = WhisperXAlignmentEngine(
+        snapshot,
+        revision=revision,
+        device="cuda",
+        module_loader=lambda: BrokenAlignment([]),
+    )
+    draft = TranscriptionDraft(
+        language="pl",
+        segments=(TranscriptionSegment(text="Tekst.", start_ms=0, end_ms=1000),),
+    )
+
+    with pytest.raises(SpeechEngineError, match="WhisperX alignment execution failed") as raised:
+        engine.align(tmp_path / "audio.wav", draft, language="pl")
+
+    assert "private alignment detail" not in str(raised.value)

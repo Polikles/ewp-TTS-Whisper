@@ -89,6 +89,24 @@ def test_doctor_fails_when_gpu_is_missing(tmp_path) -> None:
     assert gpu_check.status is DiagnosticStatus.FAIL
 
 
+def test_doctor_fails_when_ffmpeg_is_missing(tmp_path) -> None:
+    def finder(name: str) -> str | None:
+        return None if name == "ffmpeg" else f"/usr/bin/{name}"
+
+    result = run_doctor(
+        config=_config_with_models(tmp_path),
+        finder=finder,
+        runner=_successful_runner,
+        python_version=(3, 12, 3),
+        kernel_release="6.18.0-microsoft-standard-WSL2",
+        os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
+    )
+
+    assert result.ready is False
+    check = next(item for item in result.checks if item.code == "ffmpeg")
+    assert check.status is DiagnosticStatus.FAIL
+
+
 def test_doctor_json_returns_environment_exit_code_without_secrets(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
