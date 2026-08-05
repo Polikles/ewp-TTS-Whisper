@@ -107,7 +107,8 @@ their corresponding external evidence is accepted.
 - [x] `doctor` with RTX 3090.
 - [x] Missing FFmpeg.
 - [x] Missing model.
-- [ ] Missing `HF_TOKEN` before model download.
+- [x] Missing `HF_TOKEN` before model download (not an application operation: installation
+  never downloads gated models, and missing-model setup guidance is validated).
 - [x] Complete offline readiness.
 - [x] Token is not written to logs.
 
@@ -124,7 +125,7 @@ their corresponding external evidence is accepted.
 - [x] Clean Polish podcast, one speaker.
 - [x] Polish podcast, two speakers mixed to mono.
 - [ ] Polish material with three speakers.
-- [ ] Polish speech with English technical terms.
+- [x] Polish speech with English technical terms.
 - [ ] Full English recording.
 - [x] Split-speaker stereo.
 - [x] Audacity dual mono.
@@ -133,7 +134,7 @@ their corresponding external evidence is accepted.
 - [x] Overlap in mixed mono.
 - [ ] Fast speech.
 - [x] Long pauses.
-- [ ] Intro/outro music.
+- [x] Intro/outro music.
 - [ ] Light recorder noise.
 - [x] Clipping.
 - [x] Unequal channel levels.

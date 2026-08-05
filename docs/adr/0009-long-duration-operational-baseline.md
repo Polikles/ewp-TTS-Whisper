@@ -82,6 +82,14 @@ The recording owner reviewed the generated transcripts locally:
 - transcripts were near-perfect overall, with small lexical errors and some proper
   names rendered phonetically, for example `Morawek` instead of `Moravec`.
 
+P9-02 also exercises Polish speech containing English technical names and terms,
+including AlphaFold, CASP14, Midjourney, DALL-E, and podcast-platform names. P9-04 is a
+concatenation of six published podcast episodes with their stable intro/outro material;
+the review found neither false speech at those episode boundaries nor instability caused
+by the repeated program material. These cases therefore close the corresponding
+representative-material rows without claiming a quantitative code-switch or music-noise
+accuracy threshold.
+
 The review did not create timestamped ground truth and is not a WER, CER, DER, or timing
 accuracy measurement.
 

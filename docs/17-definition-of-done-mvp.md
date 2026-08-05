@@ -18,7 +18,7 @@ deferral are recorded in the [MVP requirements traceability matrix](20-mvp-requi
 ## Quality
 
 - [x] All examples pass JSON Schema validation.
-- [ ] The complete application-test checklist passes.
+- [x] The complete application-test checklist passes.
 - [ ] The representative audio matrix has been executed.
 - [ ] WER/CER/timestamp/DER baselines have been recorded.
 
