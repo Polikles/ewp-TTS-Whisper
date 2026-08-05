@@ -105,6 +105,12 @@ def build_subtitle_cues(
             )
         previous_segment_speaker = speaker_id
     drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
+    drafts = _repartition_continuous_chains(
+        drafts,
+        settings,
+        labels=labels,
+        multiple_speakers=multiple_speakers,
+    )
     drafts = _stabilize_drafts(
         drafts,
         settings,
@@ -140,6 +146,134 @@ def build_subtitle_cues(
         )
         previous_speaker = draft.speaker_id
     return _extend_short_cues(tuple(cues), settings)
+
+
+def _repartition_continuous_chains(
+    drafts: list[_CueDraft],
+    settings: SubtitlesConfig,
+    *,
+    labels: dict[str, str],
+    multiple_speakers: bool,
+) -> list[_CueDraft]:
+    """Globally partition continuous timed words instead of preserving greedy splits."""
+
+    repartitioned: list[_CueDraft] = []
+    index = 0
+    while index < len(drafts):
+        first = drafts[index]
+        end = index + 1
+        while end < len(drafts) and _same_continuous_chain(drafts[end - 1], drafts[end], settings):
+            end += 1
+        chain = drafts[index:end]
+        if all(draft.words for draft in chain):
+            words = tuple(word for draft in chain for word in draft.words)
+            first_prefix = _capacity_prefix(
+                settings,
+                labels=labels,
+                multiple_speakers=multiple_speakers,
+                speaker_id=first.speaker_id,
+                previous_speaker=(repartitioned[-1].speaker_id if repartitioned else object()),
+            )
+            repeated_prefix = first_prefix if settings.speaker_labels == "always" else ""
+            partition = _optimal_word_partition(
+                words,
+                settings,
+                first_prefix=first_prefix,
+                repeated_prefix=repeated_prefix,
+            )
+            if partition is not None:
+                chain = [
+                    _CueDraft(
+                        start_ms=chunk[0].start_ms,
+                        end_ms=chunk[-1].end_ms,
+                        text=_word_text(list(chunk)),
+                        speaker_id=first.speaker_id,
+                        overlap=first.overlap,
+                        sequence=first.sequence + chunk_index,
+                        words=chunk,
+                    )
+                    for chunk_index, chunk in enumerate(partition)
+                ]
+        repartitioned.extend(chain)
+        index = end
+    return repartitioned
+
+
+def _same_continuous_chain(
+    previous: _CueDraft, following: _CueDraft, settings: SubtitlesConfig
+) -> bool:
+    gap_ms = following.start_ms - previous.end_ms
+    return (
+        previous.speaker_id == following.speaker_id
+        and previous.overlap == following.overlap
+        and bool(previous.words)
+        and bool(following.words)
+        and 0 <= gap_ms <= settings.max_merge_gap_ms
+    )
+
+
+def _optimal_word_partition(
+    words: tuple[CanonicalWord, ...],
+    settings: SubtitlesConfig,
+    *,
+    first_prefix: str,
+    repeated_prefix: str,
+) -> tuple[tuple[CanonicalWord, ...], ...] | None:
+    """Find the best valid partition of a complete continuous word chain."""
+
+    solutions: list[tuple[tuple[int, ...], tuple[tuple[int, int], ...]] | None] = [None] * (
+        len(words) + 1
+    )
+    solutions[len(words)] = (0, 0, 0, 0, 0, 0, 0), ()
+    for start in range(len(words) - 1, -1, -1):
+        best: tuple[tuple[int, ...], tuple[tuple[int, int], ...]] | None = None
+        prefix = first_prefix if start == 0 else repeated_prefix
+        for end in range(start + 1, len(words) + 1):
+            chunk = list(words[start:end])
+            if not _word_chunk_hard_fits(chunk, settings, prefix=prefix):
+                continue
+            remainder = solutions[end]
+            if remainder is None:
+                continue
+            remainder_score, boundaries = remainder
+            duration_ms = chunk[-1].end_ms - chunk[0].start_ms
+            is_nonfinal = end < len(words)
+            orphan = int(
+                len(chunk) < settings.min_words_per_cue or duration_ms < settings.min_duration_ms
+            )
+            one_line = int(is_nonfinal and _display_line_count(chunk, settings, prefix=prefix) == 1)
+            linguistic = int(is_nonfinal and _ends_connective(chunk))
+            linguistic += _internal_line_connective_count(chunk, settings, prefix=prefix)
+            displayed_chars = len(f"{prefix}{_word_text(chunk)}")
+            readable_duration_ms = (
+                displayed_chars * 1000 + settings.max_chars_per_second - 1
+            ) // settings.max_chars_per_second
+            speed_deficit = max(0, readable_duration_ms - duration_ms)
+            unfinished = int(is_nonfinal and not _ends_sentence(chunk))
+            target = settings.target_chars_per_line * settings.max_lines
+            deviation = abs(displayed_chars - target)
+            local_score = (
+                orphan,
+                one_line,
+                linguistic,
+                speed_deficit,
+                unfinished,
+                1,
+                deviation,
+            )
+            score = tuple(
+                local + remaining
+                for local, remaining in zip(local_score, remainder_score, strict=True)
+            )
+            candidate = score, ((start, end), *boundaries)
+            if best is None or candidate[0] < best[0]:
+                best = candidate
+        solutions[start] = best
+
+    solution = solutions[0]
+    if solution is None:
+        return None
+    return tuple(tuple(words[start:end]) for start, end in solution[1])
 
 
 def _stabilize_drafts(
@@ -646,6 +780,17 @@ def _word_chunk_fits(words: list[CanonicalWord], settings: SubtitlesConfig, *, p
     )
 
 
+def _word_chunk_hard_fits(
+    words: list[CanonicalWord], settings: SubtitlesConfig, *, prefix: str
+) -> bool:
+    if not words:
+        return False
+    duration_ms = words[-1].end_ms - words[0].start_ms
+    return duration_ms <= settings.max_duration_ms and _fits_line_limits(
+        f"{prefix}{_word_text(words)}", settings
+    )
+
+
 def _ends_sentence(words: list[CanonicalWord]) -> bool:
     return bool(words and words[-1].text.rstrip().endswith((".", "!", "?")))
 
@@ -707,11 +852,19 @@ def _extend_short_cues(
     extended: list[SubtitleCue] = []
     for index, cue in enumerate(cues):
         duration = cue.end_ms - cue.start_ms
-        if duration >= settings.min_duration_ms:
+        displayed_chars = len(" ".join(cue.lines))
+        readable_duration = (
+            displayed_chars * 1000 + settings.max_chars_per_second - 1
+        ) // settings.max_chars_per_second
+        target_duration = min(
+            settings.max_duration_ms,
+            max(settings.min_duration_ms, readable_duration),
+        )
+        if duration >= target_duration:
             extended.append(cue)
             continue
-        desired_end = cue.start_ms + settings.min_duration_ms
-        maximum_end = cue.end_ms + 300
+        desired_end = cue.start_ms + target_duration
+        maximum_end = desired_end
         if index + 1 < len(cues) and not (cue.overlap or cues[index + 1].overlap):
             maximum_end = min(maximum_end, cues[index + 1].start_ms - settings.min_gap_ms)
         end_ms = max(cue.end_ms, min(desired_end, maximum_end))
