@@ -27,8 +27,12 @@ from ewp_transcripts.inspection import (
 )
 
 
-def _episode(tmp_path: Path) -> EpisodeCandidate:
-    for name in ("episode-anna.wav", "episode-jan.wav"):
+def _episode(
+    tmp_path: Path,
+    *,
+    names: tuple[str, ...] = ("episode-anna.wav", "episode-jan.wav"),
+) -> EpisodeCandidate:
+    for name in names:
         (tmp_path / name).write_bytes(name.encode())
     files = discover_input(tmp_path, supported_extensions=("wav",)).files
     return group_discovered_files(files)[0]
@@ -182,6 +186,37 @@ def test_explicit_speaker_map_changes_label_provenance_and_signature(tmp_path: P
     assert updated.episodes[0].sources[0].speaker_source == "explicit"
     assert updated.episodes[0].sources[1].speaker_source == "filename"
     assert updated.episodes[0].episode_signature_sha256 != inspected.episode_signature_sha256
+
+
+def test_stream_title_labels_source_only_when_filename_has_no_label(tmp_path: Path) -> None:
+    unlabeled = _episode(tmp_path, names=("episode.wav",))
+
+    def probe(path: Path) -> MediaProbeResult:
+        return MediaProbeResult(
+            path=path,
+            format_names=("wav",),
+            duration_ms=1000,
+            audio_streams=(
+                AudioStream(
+                    index=0,
+                    codec="pcm_s16le",
+                    sample_rate_hz=48000,
+                    channels=1,
+                    duration_ms=1000,
+                    title="Studio Guest",
+                ),
+            ),
+        )
+
+    metadata_labeled = inspect_episode(unlabeled, probe=probe)
+    assert metadata_labeled.sources[0].speaker_label == "Studio Guest"
+    assert metadata_labeled.sources[0].speaker_source == "channel_metadata"
+
+    labeled_root = tmp_path / "labeled"
+    labeled_root.mkdir()
+    filename_labeled = inspect_episode(_episode(labeled_root), probe=probe)
+    assert [source.speaker_label for source in filename_labeled.sources] == ["anna", "jan"]
+    assert all(source.speaker_source == "filename" for source in filename_labeled.sources)
 
 
 def test_stereo_metrics_are_classified_and_enter_the_signature(tmp_path: Path) -> None:

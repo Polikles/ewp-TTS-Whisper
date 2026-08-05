@@ -193,8 +193,14 @@ def inspect_episode(
                 channel_metrics=metrics,
                 channel_classification=classification,
                 speaker_id=f"speaker_{position:03d}",
-                speaker_label=grouped_source.speaker_label,
-                speaker_source=grouped_source.speaker_source,
+                speaker_label=grouped_source.speaker_label or stream.title,
+                speaker_source=(
+                    grouped_source.speaker_source
+                    if grouped_source.speaker_label is not None
+                    else "channel_metadata"
+                    if stream.title is not None
+                    else grouped_source.speaker_source
+                ),
             )
         )
 
