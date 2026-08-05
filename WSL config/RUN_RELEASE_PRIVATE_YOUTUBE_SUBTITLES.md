@@ -67,7 +67,8 @@ ffmpeg -v error -y \
     -i "$EWP_SUB_REVIEW_INPUT" \
     -map 0:v:0 -map 1:a:0 \
     -c:v libx264 -preset veryfast -tune stillimage -pix_fmt yuv420p \
-    -c:a aac -b:a 192k -shortest "$EWP_SUB_REVIEW_VIDEO"
+    -c:a aac -b:a 192k -metadata:s:a:0 language=pol \
+    -shortest "$EWP_SUB_REVIEW_VIDEO"
 
 ffprobe -v error -show_entries format=duration \
     -show_entries stream=codec_name,codec_type \
@@ -79,11 +80,14 @@ sha256sum "$EWP_SUB_REVIEW_VIDEO" "$EWP_SUB_REVIEW_SRT" "$EWP_SUB_REVIEW_VTT"
 
 1. Upload `p2-03-private-review.mp4` through YouTube Studio.
 2. Set visibility to **Private** before completing the upload.
-3. Disable automatic publication and do not share the private invitation.
-4. In **Subtitles**, select Polish and upload `p2-03-mixed-stereo_subtitles.srt` with
+3. In **Details → Show more → Language and captions certification**, set the original
+   video language to **Polish**. YouTube may otherwise infer or apply a channel-default
+   language even when the MP4 audio stream is tagged `pol`.
+4. Disable automatic publication and do not share the private invitation.
+5. In **Subtitles**, select Polish and upload `p2-03-mixed-stereo_subtitles.srt` with
    timing.
-5. Watch the complete 105-second video with subtitles enabled at normal speed.
-6. Record PASS/FAIL for every criterion below.
+6. Watch the complete 105-second video with subtitles enabled at normal speed.
+7. Record PASS/FAIL for every criterion below.
 
 ## 4. Review VTT separately
 

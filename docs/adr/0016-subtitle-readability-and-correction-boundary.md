@@ -39,6 +39,21 @@ merge gap from 300 to 1200 ms, documents platform format roles and the correctio
 boundary, and passes 258 automated tests. External-player re-review remains required
 before this ADR becomes accepted.
 
+The second review regenerated exports from the unchanged canonical result:
+
+```text
+2086aa699bc489c02718077f8ebc72aa61087ac1598cb3d626defee38074962a  p2-03-mixed-stereo_results.json
+93d132e785b87a1b6cbe2dd5299bd68ba7347ab58225b7ef14b8019674e65545  p2-03-mixed-stereo_subtitles_v002.srt
+0c514003a913386ea978d70cc0b1ea7a84febcc86a4e9a77e4675d2aa9a0e31a  p2-03-mixed-stereo_subtitles_v002.vtt
+```
+
+Pacing improved, but the gate still failed: capacity-based cue splitting left some
+one-to-three-word beginnings or endings of longer sentences isolated. These differ from
+legitimate short utterances surrounded by silence, which must remain independent. The
+next implementation therefore treats a minimum word count as a soft balancing target
+inside a continuous canonical segment while preserving punctuation boundaries, silence,
+speaker changes, and every hard subtitle constraint.
+
 ## Consequences
 
 - short rhetorical pauses can remain inside a readable subtitle cue;

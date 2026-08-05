@@ -47,6 +47,7 @@ Used to confirm availability of the `large-v3` model. The final `accurate` prese
 
 - YouTube supported subtitle formats: https://support.google.com/youtube/answer/2734698
 - YouTube caption editing: https://support.google.com/youtube/answer/2734705
+- YouTube original video language: https://support.google.com/youtube/answer/6304325
 - Spotify transcript management: https://support.spotify.com/creators/article/managing-episode-transcripts-on-spotify/
 - Apple Podcasts transcripts: https://podcasters.apple.com/support/5316-transcripts-on-apple-podcasts
 - Podcasting 2.0 transcript tag: https://podcasting2.org/docs/podcast-namespace/tags/transcript
@@ -54,6 +55,8 @@ Used to confirm availability of the `large-v3` model. The final `accurate` prese
 Verified scope:
 
 - YouTube accepts plain SRT and WebVTT, but its WebVTT styling support is limited;
+- YouTube stores original video language as an editable Studio setting used for caption
+  and discovery behavior; container metadata alone is not authoritative;
 - Spotify accepts timestamped SRT or VTT uploads where transcript management is
   available;
 - Apple documents synchronized, tappable transcripts and accepts creator-provided SRT

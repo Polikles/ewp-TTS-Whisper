@@ -88,6 +88,7 @@ target_chars_per_second = 17
 max_chars_per_second = 20
 min_gap_ms = 80
 max_merge_gap_ms = 1200
+min_words_per_cue = 4
 speaker_labels = "on-change"
 ```
 
@@ -127,6 +128,12 @@ Adjacent fragments from the same speaker may be merged across up to
 `max_merge_gap_ms` when the combined cue still satisfies duration, reading-speed, and
 line limits. The default 1.2-second window preserves short rhetorical pauses while
 avoiding isolated one- or two-word cues.
+
+`min_words_per_cue` is a soft balancing target for fragments created while splitting one
+continuous canonical segment. When a capacity boundary would strand a shorter beginning
+or ending fragment, words are shifted across that boundary if both resulting cues still
+meet all hard limits. A genuinely short punctuated sentence remains independent, as does
+a short utterance separated from surrounding speech by silence or a speaker change.
 
 Fast speech is divided into more cues. The previous cue is not extended at the expense of the next utterance.
 
