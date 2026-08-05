@@ -19,7 +19,11 @@ deferral are recorded in the [MVP requirements traceability matrix](20-mvp-requi
 
 - [x] All examples pass JSON Schema validation.
 - [x] The complete application-test checklist passes.
-- [ ] The representative audio matrix has been executed.
+- [x] The representative audio matrix has been executed for available MVP material.
+
+Fast/noisy derived fixtures and the long-form archive cases close the available material
+rows. Full-English and three-speaker quality remain explicitly deferred by ADR-0014
+until representative archive-derived inputs exist.
 - [ ] WER/CER/timestamp/DER baselines have been recorded.
 
 The lexical WER/CER portion has an accepted three-case Polish baseline. Timestamp,
@@ -45,7 +49,7 @@ review, iterative cue-readability evidence, and final hashes are recorded in
 
 ## Distribution
 
-- [ ] A clean installation on WSL2 Ubuntu 24.04 is documented and tested.
+- [x] A clean installation on WSL2 Ubuntu 24.04 is documented and tested.
 - [x] The lockfile is approved.
 - [x] CLI documentation matches `--help`.
 - [x] Known limitations are listed in README or release notes.

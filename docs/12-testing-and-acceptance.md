@@ -124,9 +124,9 @@ their corresponding external evidence is accepted.
 
 - [x] Clean Polish podcast, one speaker.
 - [x] Polish podcast, two speakers mixed to mono.
-- [ ] Polish material with three speakers.
+- [ ] Polish material with three speakers — quality validation deferred by ADR-0014.
 - [x] Polish speech with English technical terms.
-- [ ] Full English recording.
+- [ ] Full English recording — quality validation deferred by ADR-0014.
 - [x] Split-speaker stereo.
 - [x] Audacity dual mono.
 - [x] Two separate mono files.

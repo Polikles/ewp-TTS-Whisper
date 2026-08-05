@@ -31,6 +31,7 @@ test ! -e "$HOME/transkrypcje/ewp-transcripts" \
     && echo "project checkout initially absent: PASS"
 
 sudo apt update
+sudo apt upgrade
 sudo apt install build-essential ca-certificates curl ffmpeg git
 
 git --version
@@ -44,8 +45,15 @@ GPU passed through from Windows. Do not install a Linux NVIDIA display driver.
 
 ## 2. Install uv and clone the release candidate
 
-Inspect and run the official uv installer as described in `INSTALL_TOOLS.md`, then open
-a new shell and run:
+Download and inspect the official uv installer before running it:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh -o /tmp/ewp-uv-install.sh
+less /tmp/ewp-uv-install.sh
+sh /tmp/ewp-uv-install.sh
+```
+
+Open a new shell (or apply the PATH instruction printed by the installer), then run:
 
 ```bash
 uv --version

@@ -68,9 +68,5 @@ Status meanings:
 
 ## Open release work resulting from this audit
 
-1. Execute the remaining representative audio cases listed in
-   `docs/12-testing-and-acceptance.md`.
-2. Run the documented installation flow in a genuinely fresh Ubuntu 24.04 WSL
-   distribution; ADR-0010 intentionally records only an isolated environment test.
-3. Keep dataset-dependent English, timestamp, and DER/JER accuracy gates deferred under
+1. Keep dataset-dependent English, three-speaker, timestamp, and DER/JER accuracy gates deferred under
    ADR-0014 until annotated archive-derived references exist.

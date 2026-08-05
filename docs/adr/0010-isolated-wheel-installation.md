@@ -104,6 +104,5 @@ recreated the venv, and passed the complete gate.
 This proves that the wheel contains and exposes the application correctly and works with
 the locked runtime graph on the already-qualified workstation. It is not a fresh-OS
 test: the system packages, uv cache, model cache, WSL distribution, FFmpeg, and NVIDIA
-driver were already prepared. The MVP release gate still requires executing the
-documented installation flow in a fresh Ubuntu 24.04 WSL distribution or equivalent
-clean validation VM.
+driver were already prepared. The separate fresh-OS limitation recorded here was
+subsequently closed by ADR-0019 on a dedicated Ubuntu 24.04.4 WSL2 distribution.
