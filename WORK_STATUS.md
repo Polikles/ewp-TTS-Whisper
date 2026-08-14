@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 363 automated checks pass;
+- all 366 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -24,18 +24,14 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 ## Authoritative next step
 
-Continue implementing the accepted v0.2.0 transcript-revision contract. Strict immutable
-revision models, exact base-result compatibility checks, and anchored alignment are
-implemented; the next slice is the concise operator workflow and final consolidated
-validation. Revision
-configuration, filename allocation, atomic storage, strict `EWP-REVIEW 1`
-parsing/rendering, safe model-free single/batch `revise prepare`, and single-file
-single/directory `revise preview`/`revise apply`, safe external-editor review, and
-revision-aware effective transcript/export, reconstructable detailed audit, and
-parent/sibling full-snapshot lineage are implemented.
+Validate the implemented v0.2.0 transcript-revision workflow on one real podcast episode
+using `WSL config/REVISE_TRANSCRIPTS.md`. Immutable revision models, exact base-result
+compatibility, anchored alignment, configuration, safe model-free single/batch review,
+external-editor operation, preview/apply, effective transcript export, detailed audit,
+and parent/sibling full-snapshot lineage are implemented and covered by automated tests.
 
-Do not hand-edit canonical JSON. Until the revision pipeline is implemented and tested,
-preserve each original result and keep corrections as separate review material.
+Do not hand-edit canonical JSON. Preserve each original result and store accepted
+corrections as immutable revision snapshots.
 
 ## V2 priority order
 

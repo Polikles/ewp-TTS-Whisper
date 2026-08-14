@@ -9,6 +9,8 @@
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
 - Reference backend: WhisperX with pyannote speaker diarization.
+- The v0.2.0 transcript-revision workflow is implemented on `main`; real-episode
+  operator validation is the next acceptance step before release.
 
 ## Known limitations before the first MVP release
 
@@ -51,6 +53,8 @@ The complete index is available in [`docs/README.md`](docs/README.md).
 Release history is recorded in [`CHANGELOG.md`](CHANGELOG.md).
 
 Operational WSL2 setup and verification instructions are in [`WSL config/`](WSL%20config/README.md).
+The current manual correction workflow is in
+[`WSL config/REVISE_TRANSCRIPTS.md`](WSL%20config/REVISE_TRANSCRIPTS.md).
 
 Recommended starting documents:
 
@@ -60,7 +64,7 @@ Recommended starting documents:
 4. [`docs/05-cli-specification.md`](docs/05-cli-specification.md) — CLI contract.
 5. [`docs/07-results-data-model.md`](docs/07-results-data-model.md) — canonical data model.
 6. [`docs/12-testing-and-acceptance.md`](docs/12-testing-and-acceptance.md) — tests and acceptance criteria.
-7. [`docs/13-transcript-revisions.md`](docs/13-transcript-revisions.md) — accepted planned v0.2.0 revision contract.
+7. [`docs/13-transcript-revisions.md`](docs/13-transcript-revisions.md) — implemented v0.2.0 revision contract.
 8. [`docs/21-v0.2.0-transcript-revision-plan.md`](docs/21-v0.2.0-transcript-revision-plan.md) — implementation and acceptance plan.
 9. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — post-0.1 priorities.
 

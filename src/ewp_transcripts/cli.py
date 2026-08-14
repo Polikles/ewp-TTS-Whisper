@@ -502,6 +502,10 @@ def revise_edit_command(
             help="Keep editor changes without automatically creating a revision.",
         ),
     ] = False,
+    audit: Annotated[
+        bool,
+        typer.Option("--audit", help="Publish detailed diagnostics after automatic apply."),
+    ] = False,
     editor: Annotated[
         str | None,
         typer.Option("--editor", help="External editor command; overrides config and environment."),
@@ -539,10 +543,20 @@ def revise_edit_command(
             results_directory=normalized_result.parent,
             output_directory=_optional_user_path(output_directory),
         )
+        audit_path = None
+        if audit or config.revision.generate_audit:
+            audit_path = audit_revision_file(
+                applied.revision_path,
+                config=config,
+                results_directory=normalized_result.parent,
+                output_directory=_optional_user_path(output_directory),
+            ).audit_path
     except ApplicationError as error:
         _expected_error(error)
     typer.echo(f"EDITED {prepared.path}")
     typer.echo(f"APPLIED {applied.revision_path}")
+    if audit_path is not None:
+        typer.echo(f"AUDIT {audit_path}")
     typer.echo(f"SUMMARY applied=1 revision_number={applied.revision.revision_number}")
 
 

@@ -40,6 +40,9 @@ All notable changes to EWP-transcripts are documented here.
   optional `revise apply --audit` publication without making audit data authoritative.
 - Added exact parent-revision identity verification, standalone child snapshots, and
   sibling revision behavior that shares a base without implying false lineage.
+- Added a concise WSL operator runbook for preparing, editing, previewing, applying,
+  auditing, exporting, retaining, and recovering transcript revisions.
+- Added optional audit publication to the automatic `revise edit` apply path.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

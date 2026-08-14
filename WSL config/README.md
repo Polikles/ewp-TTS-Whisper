@@ -25,6 +25,9 @@ clean-distribution acceptance procedure is retained as
 
 - [`USE_CURRENT_MVP.md`](USE_CURRENT_MVP.md) — inspect, plan, transcribe, export,
   version, and clean jobs safely.
+- [`REVISE_TRANSCRIPTS.md`](REVISE_TRANSCRIPTS.md) — prepare, edit, preview, apply,
+  audit, and export immutable corrected transcript revisions on the v0.2.0 development
+  branch.
 - [`FEEDBACK_FOR_V2.md`](FEEDBACK_FOR_V2.md) — run the first archive pilot and retain
   correction, performance, subtitle, and workflow evidence without modifying canonical
   results.

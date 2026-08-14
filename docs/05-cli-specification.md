@@ -269,9 +269,9 @@ revision.
 
 The editor is executed as an argument vector, never through `shell=True`.
 
-Options include `--review-output-dir`, `--output-dir`, `--editor`, `--config`, and
-`--no-apply`. `--editor` overrides `[revision].editor`; an empty configuration falls back
-to `VISUAL` and then `EDITOR`.
+Options include `--review-output-dir`, `--output-dir`, `--editor`, `--config`, `--audit`,
+and `--no-apply`. `--editor` overrides `[revision].editor`; an empty configuration falls
+back to `VISUAL` and then `EDITOR`.
 
 ### `revise audit`
 

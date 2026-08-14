@@ -16,7 +16,7 @@
 | [10 - WSL2 installation](10-wsl2-installation.md) | Reference environment, CUDA, models, and offline setup |
 | [11 - Security and privacy](11-security-and-privacy.md) | Privacy, tokens, temporary files, and network use |
 | [12 - Testing and acceptance](12-testing-and-acceptance.md) | Application and audio-material checklists |
-| [13 - Transcript revisions](13-transcript-revisions.md) | Planned v0.2.0 manual correction, review format, revision snapshots, and effective transcript |
+| [13 - Transcript revisions](13-transcript-revisions.md) | v0.2.0 manual correction, review format, revision snapshots, and effective transcript |
 | [14 - Dependency baseline](14-dependency-baseline.md) | Verified environment starting point |
 | [15 - Glossary](15-glossary.md) | Standardized terminology |
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
@@ -61,10 +61,10 @@
 
 - `schemas/results.schema.json` - JSON Schema for canonical results.
 - `schemas/segments.schema.json` - JSON Schema for the derived segment export.
-- `schemas/revision.schema.json` - planned v0.2.0 JSON Schema for immutable transcript revisions.
-- `schemas/ewp-review.schema.md` - planned `EWP-REVIEW 1` text-format grammar and validation contract.
+- `schemas/revision.schema.json` - v0.2.0 JSON Schema for immutable transcript revisions.
+- `schemas/ewp-review.schema.md` - `EWP-REVIEW 1` text-format grammar and validation contract.
 - `examples/config.example.toml` - complete example configuration.
 - `examples/results.example.json` - minimal valid result.
 - `examples/segments.example.json` - example sentence-level export.
-- `examples/revision.example.json` - planned revision snapshot example.
-- `examples/review.example.txt` - planned human-editable review example.
+- `examples/revision.example.json` - revision snapshot example.
+- `examples/review.example.txt` - human-editable review example.
