@@ -25,94 +25,32 @@ provenance remain anchored in `results.json`. Corrected sentence and speaker seg
 derived from `results.json + revision.json` during export. This avoids two independently
 editable segment structures that could disagree.
 
-## 2. Recommended one-file workflow
+## 2. Recommended workflow: Windows Notepad
 
-For the first correction, use the terminal editor included with Ubuntu. Add this option
-to the command:
+The current recommended workflow is:
 
 ```text
---editor "nano"
+prepare -> edit the review manually in Windows -> apply -> export
 ```
 
-The complete command is:
+It works for long transcripts and does not require the transcriber to launch an editor.
+In the examples below, replace the paths with the directory containing your result.
+
+### 2.1. Prepare the editable review
 
 ```bash
-uv run --locked transcriber revise edit ./output/episode_results.json \
-  --output-dir ./output \
-  --audit \
-  --editor "nano"
+uv run --locked transcriber revise prepare \
+  "C:\Users\YOUR_NAME\Documents\EWP\episode_results.json" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\reviews"
 ```
 
-In nano, save with `Ctrl+O`, confirm with Enter, and exit with `Ctrl+X`. A successful
-exit applies the correction. `--editor "code --wait"` is also supported when the
-`code` command is installed and available inside WSL.
+Use the exact `REVIEW` path printed by the command in the following steps.
 
-To make the choice persistent, put the setting under the `[revision]` section in one of
-these exact locations:
+### 2.2. Edit and save it in Windows Notepad
 
-- project configuration: `./transcriber.toml` in the directory from which you run the
-  command; in the documented checkout this is
-  `/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml`;
-- user configuration: `/home/linuch/.config/ewp-transcripts/config.toml`, which applies
-  regardless of the current directory;
-- another file selected explicitly with `--config /exact/path/to/config.toml`.
-
-For example, the file can contain only:
-
-```toml
-[revision]
-editor = "nano"
-```
-
-`VISUAL` and `EDITOR` are environment-variable names, not editor commands. Do not set
-`editor = "VISUAL"` or `editor = "EDITOR"`. As an alternative to TOML, set one of the
-variables to a real installed command, for example `export EDITOR=nano`.
-
-`revise edit` creates a revision only when the editor actually changes the review file.
-If a GUI launcher exits without opening or changing the file, the command reports an
-error, retains the review, and creates no revision. This protects against launchers that
-return success before editing is complete.
-
-Once an editor is configured, the shorter command is:
-
-```bash
-uv run --locked transcriber revise edit ./output/episode_results.json \
-  --output-dir ./output \
-  --audit
-```
-
-`revise edit` creates a review, waits for the editor, and treats a successful editor
-close as approval to apply it. Use `--no-apply` when you want to save the review without
-creating a revision:
-
-```bash
-uv run --locked transcriber revise edit ./output/episode_results.json --no-apply
-```
-
-The `--editor "COMMAND ..."` option overrides configuration and environment variables
-for one invocation. The command is parsed into arguments and is never executed through
-a shell.
-
-## 3. Staged workflow and batch review
-
-This is the recommended workflow for long transcripts and Windows GUI editors. It does
-not require `--editor`, `VISUAL`, or `EDITOR`.
-
-Prepare one result or every result in a directory:
-
-```bash
-uv run --locked transcriber revise prepare ./output/episode_results.json \
-  --output-dir "C:\\Users\\DS\\Desktop\\transcript reviews"
-
-uv run --locked transcriber revise prepare ./output \
-  --output-dir ./reviews
-```
-
-Directories are non-recursive by default. Add `--recursive` only intentionally.
-
-Open the reported `.review.txt` path directly in the Windows editor of your choice,
-save it, and close it. When the review directory is on `/mnt/c`, its Windows path can be
-opened normally from Explorer; the transcriber does not need to launch the editor.
+Open the reported `.review.txt` directly from Windows Explorer with Notepad. The file is
+already on the Windows filesystem, so do not invoke `notepad.exe`, VS Code, or another
+GUI launcher through `transcriber revise edit`. Save the file normally when finished.
 
 Edit ordinary transcript text and `@@ speaker speaker_NNN` directives. Do not edit:
 
@@ -125,26 +63,63 @@ Line breaks inside ordinary review text are presentation only. Correct sentence
 boundaries with punctuation. Keep genuine repetitions and fillers unless the recording
 shows they are transcription errors.
 
-Preview without writing a revision:
+An optional validation-only preview can be run before applying:
 
 ```bash
-uv run --locked transcriber revise preview ./reviews/episode.review.txt \
-  --results-dir ./output
-
-uv run --locked transcriber revise apply ./reviews/episode.review.txt \
-  --results-dir ./output --no-apply
+uv run --locked transcriber revise preview \
+  "C:\Users\YOUR_NAME\Documents\EWP\reviews\episode.review.txt" \
+  --results-dir "C:\Users\YOUR_NAME\Documents\EWP"
 ```
 
-These commands execute the same validation and alignment path. Apply after preview:
+### 2.3. Apply the saved review
 
 ```bash
-uv run --locked transcriber revise apply ./reviews/episode.review.txt \
-  --results-dir ./output --output-dir ./output --audit
+uv run --locked transcriber revise apply \
+  "C:\Users\YOUR_NAME\Documents\EWP\reviews\episode.review.txt" \
+  --results-dir "C:\Users\YOUR_NAME\Documents\EWP" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\output" \
+  --audit
 ```
 
-Directories can be supplied to `preview` and `apply`. A failed item is isolated; the
-configured runtime batch policy decides whether later reviews continue. Any mixed batch
-returns exit code 5.
+Retain the reported `*_revision_NNN.json`; it is the accepted correction artifact.
+
+### 2.4. Export the corrected transcript
+
+Use the explicit revision path printed by apply:
+
+```bash
+uv run --locked transcriber export \
+  "C:\Users\YOUR_NAME\Documents\EWP\episode_results.json" \
+  --revision "C:\Users\YOUR_NAME\Documents\EWP\output\episode_revision_001.json" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\output" \
+  --format txt --format srt --format vtt --format segments
+```
+
+## 3. Optional nano shortcut and batch operation
+
+`revise edit` is an optional shortcut only for users who want to edit inside the WSL
+terminal with nano. It is not the recommended Windows GUI workflow:
+
+```bash
+uv run --locked transcriber revise edit ./output/episode_results.json \
+  --output-dir ./output --audit --editor "nano"
+```
+
+In nano, save with `Ctrl+O`, confirm with Enter, and exit with `Ctrl+X`. The command
+applies only if the review file changed. GUI launchers are environment-dependent and
+must not be assumed to wait or open the requested WSL path correctly.
+
+For repeated nano use, configure `editor = "nano"` under `[revision]` in either:
+
+- `/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml` for the documented
+  checkout; or
+- `/home/linuch/.config/ewp-transcripts/config.toml` for the current user.
+
+`VISUAL` and `EDITOR` are environment-variable names, not editor commands.
+
+For batches, `revise prepare` and `revise apply` accept directories. Directories are
+non-recursive by default; add `--recursive` only intentionally. A failed item is
+isolated, and any mixed batch returns exit code 5.
 
 ## 4. Generate corrected exports
 

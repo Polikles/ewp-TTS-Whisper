@@ -29,8 +29,9 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml",
         '--editor "nano"',
         "environment-variable names, not editor commands",
-        "recommended workflow for long transcripts",
-        "creates a revision only when the editor actually changes",
+        "prepare -> edit the review manually in Windows -> apply -> export",
+        "Recommended workflow: Windows Notepad",
+        "applies only if the review file changed",
         "intentionally stores corrected tokens rather than a second copy",
         "*_segments_revision_NNN.json",
         "--revision latest",
@@ -39,6 +40,14 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "model-free and audio-free",
     ):
         assert invariant in document
+
+    workflow_positions = [
+        document.index("### 2.1. Prepare"),
+        document.index("### 2.2. Edit"),
+        document.index("### 2.3. Apply"),
+        document.index("### 2.4. Export"),
+    ]
+    assert workflow_positions == sorted(workflow_positions)
 
 
 def test_operator_index_links_existing_revision_runbook() -> None:
