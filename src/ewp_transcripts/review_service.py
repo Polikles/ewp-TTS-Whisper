@@ -104,7 +104,13 @@ def prepare_review(
 ) -> TranscriptReview:
     """Create a complete human-editable review model from one canonical result file."""
 
-    base = load_canonical_result(result_path)
+    try:
+        base = load_canonical_result(result_path)
+    except Exception as error:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            f"Cannot read a valid completed canonical result: {result_path}",
+        ) from error
     if base.status != "completed":
         raise InvalidReviewError(
             "REVISION_BASE_HASH_MISMATCH",

@@ -20,6 +20,8 @@ All notable changes to EWP-transcripts are documented here.
   segment-boundary anchors and speaker-turn preservation.
 - Added locked, non-destructive review-file publication and an application-facing
   single-file review preparation operation.
+- Added deterministic non-recursive result discovery and isolated batch review
+  preparation with the configured continue/stop policy.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

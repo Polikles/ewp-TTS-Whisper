@@ -19,6 +19,7 @@ from ewp_transcripts.discovery import (
     discover_input,
     group_discovered_files,
     group_explicit_files,
+    normalize_input_path,
 )
 from ewp_transcripts.doctor import run_doctor
 from ewp_transcripts.domain import (
@@ -33,7 +34,11 @@ from ewp_transcripts.domain import (
 )
 from ewp_transcripts.domain.canonical import CanonicalEnvironment, CanonicalResult
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
-from ewp_transcripts.domain.errors import ApplicationError, UnsupportedPipelineScopeError
+from ewp_transcripts.domain.errors import (
+    ApplicationError,
+    InvalidReviewError,
+    UnsupportedPipelineScopeError,
+)
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
 from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
@@ -47,6 +52,7 @@ from ewp_transcripts.pipeline import (
     run_single_speaker_pipeline,
     run_source_speaker_pipeline,
 )
+from ewp_transcripts.review_discovery import discover_review_results
 from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.review_storage import publish_review
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
@@ -72,6 +78,7 @@ __all__ = [
     "export_result",
     "inspect_input",
     "prepare_review_file",
+    "prepare_review_batch",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -147,6 +154,34 @@ class ReviewPreparationOutcome:
     path: Path
 
 
+@dataclass(frozen=True, slots=True)
+class BatchReviewJobOutcome:
+    """One deterministic review-preparation batch item."""
+
+    result_path: Path
+    status: Literal["prepared", "failed"]
+    review_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchReviewPreparationOutcome:
+    """Summary of isolated sequential review preparation."""
+
+    output_directory: Path
+    jobs: tuple[BatchReviewJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def prepared(self) -> int:
+        return sum(job.status == "prepared" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
+
+
 def prepare_review_file(
     result_path: Path,
     *,
@@ -163,6 +198,59 @@ def prepare_review_file(
         lock_timeout_seconds=lock_timeout_seconds,
     )
     return ReviewPreparationOutcome(review=review, path=path)
+
+
+def prepare_review_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    anchor_target_words: int = 200,
+) -> BatchReviewPreparationOutcome:
+    """Prepare discovered canonical results sequentially with per-file failure isolation."""
+
+    results = discover_review_results(input_path, recursive=recursive)
+    normalized_input = normalize_input_path(input_path)
+    destination = output_directory or (
+        normalized_input.parent
+        if normalized_input.is_file()
+        else normalized_input / "review-ewp-transcripts"
+    )
+    jobs: list[BatchReviewJobOutcome] = []
+    stopped_early = False
+    for result_path in results:
+        try:
+            prepared = prepare_review_file(
+                result_path,
+                output_directory=destination,
+                anchor_target_words=anchor_target_words,
+                lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+            )
+            jobs.append(
+                BatchReviewJobOutcome(
+                    result_path=result_path,
+                    status="prepared",
+                    review_path=prepared.path,
+                )
+            )
+        except Exception as error:
+            jobs.append(
+                BatchReviewJobOutcome(
+                    result_path=result_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchReviewPreparationOutcome(
+        output_directory=destination,
+        jobs=tuple(jobs),
+        stopped_early=stopped_early,
+    )
 
 
 def clean_all_workdirs(
@@ -681,6 +769,8 @@ def _distribution_version(name: str) -> str | None:
 
 
 def _failure_code(error: Exception) -> str:
+    if isinstance(error, InvalidReviewError):
+        return error.code
     if isinstance(error, ApplicationError):
         name = type(error).__name__
         code = "".join(
