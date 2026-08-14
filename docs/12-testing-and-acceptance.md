@@ -232,7 +232,7 @@ Perform a manual review in the target player or a private YouTube upload:
 - [x] Single-file `revise prepare`.
 - [x] Directory `revise prepare` in deterministic natural order.
 - [x] Single-file `revise apply`.
-- [ ] Directory `revise apply` with per-item failure isolation.
+- [x] Directory `revise apply` with per-item failure isolation.
 - [x] `revise preview` writes no revision.
 - [x] `revise apply --no-apply` writes no revision and matches preview outcome.
 - [ ] `revise edit --no-apply` retains review edits without creating a revision.

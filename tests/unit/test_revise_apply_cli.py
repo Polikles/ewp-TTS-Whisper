@@ -73,3 +73,32 @@ def test_apply_publishes_revision_and_json_reports_path(tmp_path: Path) -> None:
     assert payload["revision_number"] == 1
     assert Path(payload["revision_path"]).name == "S01E01_revision_001.json"
     assert Path(payload["revision_path"]).is_file()
+
+
+def test_directory_apply_reports_mixed_batch_and_exit_five(tmp_path: Path) -> None:
+    results, review = _case(tmp_path)
+    batch = tmp_path / "batch"
+    revisions = tmp_path / "revisions"
+    batch.mkdir()
+    (batch / "episode2.review.txt").write_bytes(review.read_bytes())
+    (batch / "episode3.review.txt").write_text("invalid", encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        [
+            "revise",
+            "apply",
+            str(batch),
+            "--results-dir",
+            str(results),
+            "--output-dir",
+            str(revisions),
+            "--json-output",
+        ],
+    )
+
+    assert result.exit_code == 5
+    payload = json.loads(result.stdout)
+    assert payload["applied"] == 1
+    assert payload["failed"] == 1
+    assert [job["status"] for job in payload["jobs"]] == ["applied", "failed"]

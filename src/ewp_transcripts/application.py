@@ -58,7 +58,7 @@ from ewp_transcripts.pipeline import (
     run_single_speaker_pipeline,
     run_source_speaker_pipeline,
 )
-from ewp_transcripts.review_discovery import discover_review_results
+from ewp_transcripts.review_discovery import discover_review_files, discover_review_results
 from ewp_transcripts.review_format import load_review
 from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.review_storage import publish_review
@@ -90,6 +90,7 @@ __all__ = [
     "prepare_review_batch",
     "preview_review_file",
     "apply_review_file",
+    "process_review_batch",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -212,6 +213,38 @@ class RevisionApplyOutcome:
     revision_path: Path
 
 
+@dataclass(frozen=True, slots=True)
+class BatchRevisionJobOutcome:
+    """One isolated review preview/apply outcome."""
+
+    review_path: Path
+    status: Literal["previewed", "applied", "failed"]
+    revision: TranscriptRevision | None = None
+    revision_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchRevisionOutcome:
+    """Deterministically ordered batch revision summary."""
+
+    jobs: tuple[BatchRevisionJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def previewed(self) -> int:
+        return sum(job.status == "previewed" for job in self.jobs)
+
+    @property
+    def applied(self) -> int:
+        return sum(job.status == "applied" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
+
+
 def _review_base_path(review_path: Path, *, results_directory: Path | None) -> Path:
     review = load_review(review_path)
     filename = review.header.base_result_file
@@ -285,6 +318,65 @@ def apply_review_file(
         revision,
         path,
     )
+
+
+def process_review_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    results_directory: Path | None = None,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    apply: bool = True,
+) -> BatchRevisionOutcome:
+    """Preview or apply discovered reviews sequentially with per-item isolation."""
+
+    review_paths = discover_review_files(input_path, recursive=recursive)
+    jobs: list[BatchRevisionJobOutcome] = []
+    stopped_early = False
+    for review_path in review_paths:
+        try:
+            if apply:
+                applied = apply_review_file(
+                    review_path,
+                    config=config,
+                    results_directory=results_directory,
+                    output_directory=output_directory,
+                )
+                jobs.append(
+                    BatchRevisionJobOutcome(
+                        review_path=review_path,
+                        status="applied",
+                        revision=applied.revision,
+                        revision_path=applied.revision_path,
+                    )
+                )
+            else:
+                previewed = preview_review_file(
+                    review_path,
+                    results_directory=results_directory,
+                    long_gap_warning_ms=config.revision.long_gap_warning_ms,
+                )
+                jobs.append(
+                    BatchRevisionJobOutcome(
+                        review_path=review_path,
+                        status="previewed",
+                        revision=previewed.revision,
+                    )
+                )
+        except Exception as error:
+            jobs.append(
+                BatchRevisionJobOutcome(
+                    review_path=review_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchRevisionOutcome(tuple(jobs), stopped_early=stopped_early)
 
 
 def prepare_review_file(

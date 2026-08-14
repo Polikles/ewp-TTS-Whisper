@@ -12,6 +12,7 @@ import typer
 
 from ewp_transcripts.application import (
     BatchReviewPreparationOutcome,
+    BatchRevisionOutcome,
     BatchTranscriptionOutcome,
     ExportFormat,
     TranscriptionOutcome,
@@ -24,6 +25,7 @@ from ewp_transcripts.application import (
     inspect_input,
     prepare_review_batch,
     preview_review_file,
+    process_review_batch,
     transcribe_batch,
     transcribe_one,
 )
@@ -217,6 +219,42 @@ def _print_revision_preview(revision: TranscriptRevision) -> None:
     )
 
 
+def _revision_batch_json(outcome: BatchRevisionOutcome) -> str:
+    return json.dumps(
+        {
+            "previewed": outcome.previewed,
+            "applied": outcome.applied,
+            "failed": outcome.failed,
+            "stopped_early": outcome.stopped_early,
+            "jobs": [
+                {
+                    "review_path": str(job.review_path),
+                    "status": job.status,
+                    "revision_path": str(job.revision_path) if job.revision_path else None,
+                    "failure_code": job.failure_code,
+                    "failure_message": job.failure_message,
+                }
+                for job in outcome.jobs
+            ],
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+def _print_revision_batch(outcome: BatchRevisionOutcome) -> None:
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.review_path}")
+        if job.revision_path is not None:
+            typer.echo(f"  REVISION {job.revision_path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY previewed={outcome.previewed} applied={outcome.applied} "
+        f"failed={outcome.failed} stopped_early={str(outcome.stopped_early).lower()}"
+    )
+
+
 @revise_app.command("preview")
 def revise_preview_command(
     review_path: Annotated[
@@ -227,6 +265,10 @@ def revise_preview_command(
         Path | None,
         typer.Option("--results-dir", help="Directory containing the exact base result."),
     ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include review files in subdirectories."),
+    ] = False,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -240,14 +282,31 @@ def revise_preview_command(
 
     try:
         config = load_config(explicit_path=config_path)
-        outcome = preview_review_file(
-            review_path,
-            results_directory=_optional_user_path(results_directory),
-            long_gap_warning_ms=config.revision.long_gap_warning_ms,
-        )
+        normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir():
+            batch = process_review_batch(
+                normalized_review,
+                config=config,
+                results_directory=_optional_user_path(results_directory),
+                recursive=recursive,
+                apply=False,
+            )
+        else:
+            outcome = preview_review_file(
+                normalized_review,
+                results_directory=_optional_user_path(results_directory),
+                long_gap_warning_ms=config.revision.long_gap_warning_ms,
+            )
     except ApplicationError as error:
         _expected_error(error)
-    if json_output:
+    if normalized_review.is_dir():
+        if json_output:
+            typer.echo(_revision_batch_json(batch))
+        else:
+            _print_revision_batch(batch)
+        if batch.failed:
+            raise typer.Exit(code=5)
+    elif json_output:
         typer.echo(_revision_json(outcome.revision))
     else:
         _print_revision_preview(outcome.revision)
@@ -267,6 +326,10 @@ def revise_apply_command(
         Path | None,
         typer.Option("--output-dir", help="Write the immutable revision to this directory."),
     ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include review files in subdirectories."),
+    ] = False,
     no_apply: Annotated[
         bool,
         typer.Option("--no-apply", help="Run the complete preview path without writing."),
@@ -284,9 +347,19 @@ def revise_apply_command(
 
     try:
         config = load_config(explicit_path=config_path)
-        if no_apply:
+        normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir():
+            batch = process_review_batch(
+                normalized_review,
+                config=config,
+                results_directory=_optional_user_path(results_directory),
+                output_directory=_optional_user_path(output_directory),
+                recursive=recursive,
+                apply=not no_apply,
+            )
+        elif no_apply:
             preview = preview_review_file(
-                review_path,
+                normalized_review,
                 results_directory=_optional_user_path(results_directory),
                 long_gap_warning_ms=config.revision.long_gap_warning_ms,
             )
@@ -294,7 +367,7 @@ def revise_apply_command(
             revision_path = None
         else:
             applied = apply_review_file(
-                review_path,
+                normalized_review,
                 config=config,
                 results_directory=_optional_user_path(results_directory),
                 output_directory=_optional_user_path(output_directory),
@@ -303,7 +376,14 @@ def revise_apply_command(
             revision_path = applied.revision_path
     except ApplicationError as error:
         _expected_error(error)
-    if json_output:
+    if normalized_review.is_dir():
+        if json_output:
+            typer.echo(_revision_batch_json(batch))
+        else:
+            _print_revision_batch(batch)
+        if batch.failed:
+            raise typer.Exit(code=5)
+    elif json_output:
         typer.echo(_revision_json(revision, revision_path=revision_path))
     elif revision_path is None:
         _print_revision_preview(revision)

@@ -28,6 +28,8 @@ All notable changes to EWP-transcripts are documented here.
   punctuation, speaker-reassignment, ambiguity, statistics, and provenance handling.
 - Added non-mutating `revise preview` and atomic single-file `revise apply`, with
   `apply --no-apply` using the same validation and alignment path as preview.
+- Added deterministic directory preview/apply, recursive opt-in, per-review failure
+  isolation, and runtime-configured continue/stop behavior.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.
