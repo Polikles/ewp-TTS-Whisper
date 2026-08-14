@@ -48,3 +48,8 @@ Use `<type>(<scope>): <summary>` for every commit and pull-request title. Suppor
 types are `docs`, `func`, `fix`, `test`, `refactor`, and `chore`. Keep the summary short
 and imperative. Functional requirements should use their requirement ID as the scope,
 for example `func(FR-XXX): add corrected transcript import`.
+
+Every user-visible change must include a `CHANGELOG.md` entry. Accumulate work under
+`Unreleased`, then move those entries into a dated release section and bump the semantic
+version for each identifiable internal or public build. Do not append later fixes to an
+older version section.

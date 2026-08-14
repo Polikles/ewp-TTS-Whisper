@@ -1,4 +1,4 @@
-"""Narrow suppression for accepted third-party model-loading notices."""
+"""Narrow suppression for accepted third-party backend notices."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ _LIGHTNING_MIGRATION_LOGGERS = (
 
 
 @contextmanager
-def suppress_accepted_model_loading_notices() -> Iterator[None]:
+def suppress_accepted_backend_notices() -> Iterator[None]:
     """Hide only dependency notices whose behavior is already intentional."""
 
     loggers = tuple(logging.getLogger(name) for name in _LIGHTNING_MIGRATION_LOGGERS)
@@ -28,6 +28,12 @@ def suppress_accepted_model_loading_notices() -> Iterator[None]:
                 message=r"TensorFloat-32 \(TF32\) has been disabled.*",
                 category=UserWarning,
                 module=r"pyannote\.audio\.utils\.reproducibility",
+            )
+            warnings.filterwarnings(
+                "ignore",
+                message=r"std\(\): degrees of freedom is <= 0\..*",
+                category=UserWarning,
+                module=r"pyannote\.audio\.models\.blocks\.pooling",
             )
             yield
     finally:

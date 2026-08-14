@@ -2,6 +2,44 @@
 
 All notable changes to EWP-transcripts are documented here.
 
+## Unreleased
+
+No changes yet.
+
+## 0.1.1 — internal release candidate — 2026-08-14
+
+Backward-compatible operator and transcription fixes found during the fresh-WSL archive
+pilot.
+
+### Changed
+
+- Replaced the implementation-era work status with the current internal-candidate
+  status and V2 agenda.
+- Consolidated live WSL documentation around fresh installation, current MVP operation,
+  and actionable V2 feedback; historical validation material now lives under
+  `archive/`.
+- Top-level CLI help now points users to `transcriber COMMAND --help` for
+  command-specific options.
+- Standardized commit and pull-request titles as `<type>(<scope>): <summary>`.
+
+### Fixed
+
+- Missing-model diagnostics now point directly to `WSL config/MODEL_SETUP.md`.
+- Windows drive paths are normalized before CLI file/directory dispatch and output-path
+  planning, so directory transcription correctly uses the batch workflow.
+- An omitted `--speaker-count` now preserves the configured `auto` default instead of
+  silently forcing one speaker; `--speaker-count 1` remains the explicit fast path.
+- Accepted Lightning checkpoint-migration, pyannote TF32-reproducibility, and pyannote
+  short-window pooling notices are narrowly suppressed across the operations that emit
+  them; unrelated backend warnings remain visible.
+
+### Validated
+
+- 289 automated formatting, linting, typing, unit, integration, schema, documentation,
+  and traceability checks.
+- Windows-path directory batch dispatch and output placement.
+- Automatic and exact-count speaker selection, including a real two-speaker mono rerun.
+
 ## 0.1.0 — internal release candidate — 2026-08-05
 
 Initial functional MVP release candidate.
@@ -28,7 +66,7 @@ Initial functional MVP release candidate.
 
 ### Validated
 
-- 285 automated formatting, linting, typing, unit, integration, schema, documentation,
+- 279 automated formatting, linting, typing, unit, integration, schema, documentation,
   and traceability checks.
 - WAV at 44.1/48 kHz, MP3, FLAC, M4A/AAC, Ogg/Opus, dual mono, split speakers,
   separate mono sources, mixed overlap, clipping, imbalance, long silence, fast speech,
@@ -38,26 +76,6 @@ Initial functional MVP release candidate.
 - Short and complete 34.7-minute YouTube SRT/VTT readability and timing reviews.
 - Offline installed-wheel transcription and locked installation in a fresh Ubuntu
   24.04.4 WSL2 distribution.
-
-### Changed
-
-- Replaced the implementation-era work status with the current internal-candidate
-  status and V2 agenda.
-- Consolidated the live WSL documentation around fresh installation, current MVP
-  operation, and actionable V2 feedback; historical validation runbooks and planning
-  documents now live under `archive/`.
-- Top-level CLI help now points users to `transcriber COMMAND --help` for
-  command-specific options.
-
-### Fixed
-
-- Missing-model diagnostics now point directly to `WSL config/MODEL_SETUP.md`.
-- Windows drive paths are normalized before CLI file/directory dispatch and output-path
-  planning, so directory transcription correctly uses the batch workflow.
-- An omitted `--speaker-count` now preserves the configured `auto` default instead of
-  silently forcing one speaker; `--speaker-count 1` remains the explicit fast path.
-- Accepted Lightning in-memory checkpoint-migration and pyannote TF32-reproducibility
-  notices are narrowly suppressed while their safe behavior remains unchanged.
 
 ### Known limitations and deferrals
 

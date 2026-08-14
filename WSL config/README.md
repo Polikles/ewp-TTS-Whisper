@@ -1,7 +1,7 @@
 # EWP-transcripts operator guide
 
 This directory contains only current instructions for installing and using the internal
-`0.1.0` release candidate and for collecting feedback needed for V2.
+`0.1.1` release candidate and for collecting feedback needed for V2.
 
 ## Fresh WSL installation
 

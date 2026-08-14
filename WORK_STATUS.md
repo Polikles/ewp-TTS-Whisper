@@ -4,14 +4,14 @@ Last updated: **2026-08-05**.
 
 ## Current state
 
-Version `0.1.0` is an **internal release candidate** on `main`. It is usable for the
+Version `0.1.1` is an **internal release candidate** on `main`. It is usable for the
 owner's archive, but it is not tagged or published as a public release. The repository
 is public; no public license has been selected. `LICENSE_SKETCH.TXT` remains private,
 untracked, and excluded from build artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 287 automated checks pass;
+- all 289 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,

@@ -12,7 +12,7 @@ git clone <AUTHENTICATED-REPOSITORY-URL> ewp-transcripts
 cd ewp-transcripts
 ```
 
-The repository is public but `0.1.0` is an internal release candidate. No public version
+The repository is public but `0.1.1` is an internal release candidate. No public version
 tag or hosted release exists; use the intended commit on `main`.
 
 ## 2. Install the locked environment
@@ -24,7 +24,7 @@ uv run --locked transcriber --version
 uv run --locked transcriber --help
 ```
 
-Expected application version: `0.1.0`. Help must list `doctor`, `inspect`, `dry-run`,
+Expected application version: `0.1.1`. Help must list `doctor`, `inspect`, `dry-run`,
 `transcribe`, `export`, and `clean`.
 
 ## 3. Check the machine before model setup

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from ewp_transcripts.domain.errors import SpeechEngineError
-from ewp_transcripts.engines.notices import suppress_accepted_model_loading_notices
+from ewp_transcripts.engines.notices import suppress_accepted_backend_notices
 from ewp_transcripts.engines.protocols import (
     AlignedSegment,
     AlignedTranscript,
@@ -120,7 +120,7 @@ class WhisperXAsrEngine:
                 }
                 if backend_language is not None:
                     load_options["language"] = backend_language
-                with suppress_accepted_model_loading_notices():
+                with suppress_accepted_backend_notices():
                     self._model = module.load_model(
                         str(self._snapshot),
                         self._device,
@@ -133,7 +133,8 @@ class WhisperXAsrEngine:
             }
             if backend_language is not None:
                 transcribe_options["language"] = backend_language
-            result = self._model.transcribe(audio, **transcribe_options)
+            with suppress_accepted_backend_notices():
+                result = self._model.transcribe(audio, **transcribe_options)
             return _transcription_draft(result, requested_language=language)
         except SpeechEngineError:
             raise

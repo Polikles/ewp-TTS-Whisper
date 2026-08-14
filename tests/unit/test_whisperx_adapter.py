@@ -1,6 +1,8 @@
 """Tests for lazy WhisperX adapters without importing or loading real ML models."""
 
+import logging
 import sys
+import warnings
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -75,6 +77,27 @@ class FakeWhisperX:
         }
 
 
+class NoisyAsrModel(FakeAsrModel):
+    def transcribe(self, audio: object, **kwargs: object) -> Mapping[str, object]:
+        logging.getLogger("lightning.pytorch.utilities.migration.utils").info(
+            "Lightning automatically upgraded your loaded checkpoint"
+        )
+        warnings.warn_explicit(
+            "TensorFloat-32 (TF32) has been disabled for reproducibility.",
+            UserWarning,
+            filename="reproducibility.py",
+            lineno=74,
+            module="pyannote.audio.utils.reproducibility",
+        )
+        return super().transcribe(audio, **kwargs)
+
+
+class NoisyWhisperX(FakeWhisperX):
+    def load_model(self, model: str, device: str, **kwargs: object) -> FakeAsrModel:
+        self.calls.append(("load_model", (model, device, kwargs)))
+        return NoisyAsrModel(self.calls)
+
+
 def test_asr_loads_pinned_snapshot_locally_and_normalizes_milliseconds(
     tmp_path: Path,
 ) -> None:
@@ -126,6 +149,28 @@ def test_automatic_language_omits_backend_language_override(tmp_path: Path) -> N
     assert "language" not in load_call[2]
     assert "language" not in transcribe_call[1]
     assert result.language == "pl"
+
+
+def test_asr_suppresses_accepted_notices_emitted_during_vad(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    revision = "asr-revision"
+    snapshot = tmp_path / revision
+    snapshot.mkdir()
+    engine = WhisperXAsrEngine(
+        snapshot,
+        revision=revision,
+        device="cuda",
+        compute_type="float16",
+        module_loader=lambda: NoisyWhisperX([]),
+    )
+
+    with caplog.at_level(logging.INFO), warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always")
+        engine.transcribe(tmp_path / "working.wav", language="pl", batch_size=4)
+
+    assert "automatically upgraded" not in caplog.text
+    assert captured == []
 
 
 def test_alignment_uses_local_snapshot_and_preserves_missing_word_times(

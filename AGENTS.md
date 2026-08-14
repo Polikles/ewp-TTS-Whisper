@@ -134,6 +134,12 @@ Examples: `docs(readme): add archive-pilot instructions`,
 `func(FR-XXX): add corrected transcript import`, and
 `fix(cli): normalize Windows paths before dispatch`.
 
+Every user-visible behavior, CLI, installation, or workflow change must update
+`CHANGELOG.md` in the same commit. Record ongoing work under `Unreleased`; move it into
+a dated version section and apply the corresponding semantic-version bump when creating
+an identifiable internal or public build. Historical version sections must not be
+rewritten to include later changes.
+
 ## 8. Testing expectations
 
 Follow `docs/TESTING_STRATEGY.md`.
