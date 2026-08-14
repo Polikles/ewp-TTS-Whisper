@@ -392,3 +392,40 @@ def test_directory_transcribe_prints_stable_summary_and_partial_failure_exit(
     assert "FAILED second" in outcome.stdout
     assert "ERROR SPEECH_ENGINE_ERROR: controlled failure" in outcome.stdout
     assert "SUMMARY completed=1 skipped=0 failed=1 cancelled=0" in outcome.stdout
+
+
+def test_windows_directory_and_output_paths_use_batch_transcription(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "input"
+    source.mkdir()
+    destination = tmp_path / "output"
+    observed: dict[str, object] = {}
+
+    def normalize(path: str | Path) -> Path:
+        raw = str(path)
+        if raw.endswith(r"test inspect"):
+            return source
+        if raw.endswith(r"test inspect\output"):
+            return destination
+        return Path(path)
+
+    def run(input_path, *, output_directory, **kwargs):
+        observed.update(input_path=input_path, output_directory=output_directory)
+        return BatchTranscriptionOutcome(output_directory=destination, jobs=())
+
+    monkeypatch.setattr(cli, "normalize_input_path", normalize)
+    monkeypatch.setattr(cli, "transcribe_batch", run)
+
+    outcome = CliRunner().invoke(
+        app,
+        [
+            "transcribe",
+            r"C:\Users\DS\test inspect",
+            "--output-dir",
+            r"C:\Users\DS\test inspect\output",
+        ],
+    )
+
+    assert outcome.exit_code == 0
+    assert observed == {"input_path": source, "output_directory": destination}

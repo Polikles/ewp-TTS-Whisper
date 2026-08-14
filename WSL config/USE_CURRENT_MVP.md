@@ -8,6 +8,13 @@ export NLTK_DATA="$HOME/nltk_data"
 ```
 
 Use `uv run --locked transcriber ...` so the committed dependency graph is always used.
+Run the top-level or command-specific help whenever an option is unclear:
+
+```bash
+uv run --locked transcriber --help
+uv run --locked transcriber inspect --help
+uv run --locked transcriber transcribe --help
+```
 
 ## 1. Check readiness
 
@@ -30,6 +37,12 @@ Directory, non-recursive by default:
 ```bash
 uv run --locked transcriber inspect "/path/to/season"
 ```
+
+Windows drive paths such as `C:\Users\name\recordings` and their WSL equivalents such
+as `/mnt/c/Users/name/recordings` are both accepted. The same applies to `--output-dir`.
+Keep quotes around paths containing spaces. For performance, Linux-side output and work
+directories are preferred for large runs, even when source recordings remain on a
+Windows drive.
 
 Inspect reports source grouping, channel classification, duration, warnings, and the
 processing mode without loading ASR models. Add `--json-output` when retaining a

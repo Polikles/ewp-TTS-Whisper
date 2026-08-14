@@ -28,7 +28,7 @@ Initial functional MVP release candidate.
 
 ### Validated
 
-- 282 automated formatting, linting, typing, unit, integration, schema, documentation,
+- 285 automated formatting, linting, typing, unit, integration, schema, documentation,
   and traceability checks.
 - WAV at 44.1/48 kHz, MP3, FLAC, M4A/AAC, Ogg/Opus, dual mono, split speakers,
   separate mono sources, mixed overlap, clipping, imbalance, long silence, fast speech,
@@ -46,6 +46,14 @@ Initial functional MVP release candidate.
 - Consolidated the live WSL documentation around fresh installation, current MVP
   operation, and actionable V2 feedback; historical validation runbooks and planning
   documents now live under `archive/`.
+- Top-level CLI help now points users to `transcriber COMMAND --help` for
+  command-specific options.
+
+### Fixed
+
+- Missing-model diagnostics now point directly to `WSL config/MODEL_SETUP.md`.
+- Windows drive paths are normalized before CLI file/directory dispatch and output-path
+  planning, so directory transcription correctly uses the batch workflow.
 
 ### Known limitations and deferrals
 

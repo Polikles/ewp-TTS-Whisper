@@ -145,7 +145,7 @@ class PyannoteDiarizationEngine:
         ):
             raise SpeechEngineError(
                 "Pinned local diarization model snapshot is unavailable; "
-                "accept the model terms and prepare it using docs/10-wsl2-installation.md, "
+                "accept the model terms and prepare it using WSL config/MODEL_SETUP.md, "
                 "then run `transcriber doctor --config <path>`"
             )
 

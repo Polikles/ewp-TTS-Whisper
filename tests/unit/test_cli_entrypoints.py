@@ -16,9 +16,18 @@ def test_help_succeeds_without_importing_ml_backends() -> None:
 
     assert result.exit_code == 0
     assert "Local-first transcription" in result.stdout
+    assert "transcriber COMMAND --help" in result.stdout
     assert "torch" not in sys.modules
     assert "whisperx" not in sys.modules
     assert "pyannote.audio" not in sys.modules
+
+
+def test_command_help_exposes_command_specific_options() -> None:
+    result = runner.invoke(app, ["inspect", "--help"])
+
+    assert result.exit_code == 0
+    assert "--speaker-count" in result.stdout
+    assert "--channel-mode" in result.stdout
 
 
 def test_version_reports_installed_package_version() -> None:

@@ -41,3 +41,10 @@ focused external test against the private dataset in addition to the local gate.
 - version canonical schemas separately;
 - treat ML changes as prerelease candidates until quality evidence is rerun;
 - state quality-baseline changes and deferrals in release notes.
+
+## Commit and pull-request titles
+
+Use `<type>(<scope>): <summary>` for every commit and pull-request title. Supported
+types are `docs`, `func`, `fix`, `test`, `refactor`, and `chore`. Keep the summary short
+and imperative. Functional requirements should use their requirement ID as the scope,
+for example `func(FR-XXX): add corrected transcript import`.

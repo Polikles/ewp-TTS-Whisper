@@ -117,6 +117,23 @@ Before implementing a phase:
 
 Do not create empty modules for future phases unless required by imports or packaging.
 
+### Commit and pull-request naming
+
+Use the standardized form `<type>(<scope>): <summary>` for every new commit and pull
+request title. Use a short imperative summary and one of these types unless a later
+repository rule expands the list:
+
+- `docs` for documentation-only changes;
+- `func` for a new functional requirement, normally scoped to its requirement ID;
+- `fix` for defect corrections;
+- `test` for test-only changes;
+- `refactor` for behavior-preserving restructuring;
+- `chore` for repository or dependency maintenance.
+
+Examples: `docs(readme): add archive-pilot instructions`,
+`func(FR-XXX): add corrected transcript import`, and
+`fix(cli): normalize Windows paths before dispatch`.
+
 ## 8. Testing expectations
 
 Follow `docs/TESTING_STRATEGY.md`.

@@ -113,7 +113,7 @@ for code in ('asr_model', 'alignment_model', 'diarization_model'):
     assert checks[code]['status'] == 'fail', (code, checks[code])
 assert checks['hf_token']['context'] == {'present': False}
 serialized = json.dumps(report)
-assert 'follow the model preparation steps' in serialized
+assert 'WSL config/MODEL_SETUP.md' in serialized
 print('fresh WSL diagnostics and missing-model guidance: PASS')
 PY
 ```

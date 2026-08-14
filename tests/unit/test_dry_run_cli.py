@@ -101,3 +101,26 @@ def test_dry_run_json_passes_storage_options(tmp_path: Path, monkeypatch) -> Non
     assert '"decision": "process"' in result.stdout
     assert captured["output_directory"] == destination
     assert captured["force"] is True
+
+
+def test_dry_run_normalizes_windows_output_path(tmp_path: Path, monkeypatch) -> None:
+    captured = {}
+
+    def dry_run_stub(*args, **kwargs):
+        captured.update(kwargs)
+        return _result(tmp_path)
+
+    monkeypatch.setattr("ewp_transcripts.cli.dry_run", dry_run_stub)
+
+    result = runner.invoke(
+        app,
+        [
+            "dry-run",
+            str(tmp_path / "episode.wav"),
+            "--output-dir",
+            r"C:\Users\DS\transcripts",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert captured["output_directory"] == Path("/mnt/c/Users/DS/transcripts")

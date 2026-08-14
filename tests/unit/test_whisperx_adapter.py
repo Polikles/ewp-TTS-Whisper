@@ -220,7 +220,7 @@ def test_missing_snapshot_fails_before_module_loading(tmp_path: Path) -> None:
         module_loader=loader,
     )
 
-    with pytest.raises(SpeechEngineError, match="docs/10-wsl2-installation.md"):
+    with pytest.raises(SpeechEngineError, match="WSL config/MODEL_SETUP.md"):
         engine.transcribe(tmp_path / "audio.wav", language="pl", batch_size=4)
 
     assert loaded is False

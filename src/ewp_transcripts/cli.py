@@ -24,6 +24,7 @@ from ewp_transcripts.application import (
     transcribe_one,
 )
 from ewp_transcripts.config import load_config
+from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain import JobOutputPlan
 from ewp_transcripts.domain.enums import ChannelMode, LanguageMode, PlanDecision
 from ewp_transcripts.domain.errors import (
@@ -37,7 +38,10 @@ from ewp_transcripts.domain.errors import (
 
 app = typer.Typer(
     name="transcriber",
-    help="Local-first transcription for edited podcast and training recordings.",
+    help=(
+        "Local-first transcription for edited podcast and training recordings. "
+        "Run 'transcriber COMMAND --help' for command-specific options."
+    ),
     no_args_is_help=True,
 )
 
@@ -233,7 +237,7 @@ def _input_selection(
     group_paths: list[Path] | None,
     group_id: str | None,
 ) -> tuple[Path, tuple[Path, ...] | None, str | None]:
-    explicit = tuple(group_paths or ())
+    explicit = tuple(normalize_input_path(path) for path in group_paths or ())
     if explicit:
         if input_path is not None:
             raise typer.BadParameter("INPUT cannot be combined with --group")
@@ -246,7 +250,13 @@ def _input_selection(
         raise typer.BadParameter("--group-id requires --group")
     if input_path is None:
         raise typer.BadParameter("provide INPUT or an explicit --group")
-    return input_path, None, None
+    return normalize_input_path(input_path), None, None
+
+
+def _optional_user_path(path: Path | None) -> Path | None:
+    """Normalize an optional Windows, WSL, POSIX, or relative CLI path."""
+
+    return normalize_input_path(path) if path is not None else None
 
 
 @app.command("clean")
@@ -485,7 +495,7 @@ def dry_run_command(
         result = dry_run(
             selected_input,
             config=config,
-            output_directory=output_directory,
+            output_directory=_optional_user_path(output_directory),
             force=force,
             allow_duration_mismatch=allow_duration_mismatch,
             explicit_group_paths=explicit_group_paths,
@@ -581,9 +591,9 @@ def export_command(
                 if enabled
             ]
         outcome = export_result(
-            results_json,
+            normalize_input_path(results_json),
             formats=tuple(requested),
-            output_directory=output_directory,
+            output_directory=_optional_user_path(output_directory),
             force=force,
             subtitles_config=subtitles_config,
         )
@@ -718,7 +728,7 @@ def transcribe_command(
                 batch = transcribe_batch(
                     selected_input,
                     config=config,
-                    output_directory=output_directory,
+                    output_directory=_optional_user_path(output_directory),
                     force=force,
                     allow_duration_mismatch=allow_duration_mismatch,
                     speaker_map=parsed_speaker_map,
@@ -727,7 +737,7 @@ def transcribe_command(
                 outcome = transcribe_one(
                     selected_input,
                     config=config,
-                    output_directory=output_directory,
+                    output_directory=_optional_user_path(output_directory),
                     force=force,
                     allow_duration_mismatch=allow_duration_mismatch,
                     speaker_label=speaker.strip() if speaker is not None else None,

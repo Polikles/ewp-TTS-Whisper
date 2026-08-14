@@ -148,4 +148,4 @@ def test_doctor_fails_with_setup_guidance_when_a_model_is_missing(tmp_path) -> N
     assert result.ready is False
     check = next(item for item in result.checks if item.code == "asr_model")
     assert check.status is DiagnosticStatus.FAIL
-    assert "docs/10-wsl2-installation.md" in check.message
+    assert "WSL config/MODEL_SETUP.md" in check.message

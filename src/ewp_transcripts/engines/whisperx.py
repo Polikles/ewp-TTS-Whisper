@@ -148,7 +148,7 @@ class WhisperXAsrEngine:
         if not self._snapshot.is_dir() or self._snapshot.name != self._model_info.revision:
             raise SpeechEngineError(
                 f"Pinned local {role} model snapshot is unavailable; "
-                "prepare it using docs/10-wsl2-installation.md, then run "
+                "prepare it using WSL config/MODEL_SETUP.md, then run "
                 "`transcriber doctor --config <path>`"
             )
 
@@ -255,7 +255,7 @@ class WhisperXAlignmentEngine:
         if not snapshot.is_dir() or snapshot.name != revision:
             raise SpeechEngineError(
                 "Pinned local alignment model snapshot is unavailable; "
-                "prepare it using docs/10-wsl2-installation.md, then run "
+                "prepare it using WSL config/MODEL_SETUP.md, then run "
                 "`transcriber doctor --config <path>`"
             )
 
