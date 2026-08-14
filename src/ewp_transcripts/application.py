@@ -64,7 +64,7 @@ from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.review_storage import publish_review
 from ewp_transcripts.revision_audit import build_revision_audit, publish_revision_audit
 from ewp_transcripts.revision_service import build_revision
-from ewp_transcripts.revision_storage import publish_next_revision
+from ewp_transcripts.revision_storage import publish_next_revision, revision_filename
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
 from ewp_transcripts.storage import (
     find_existing_results,
@@ -296,11 +296,28 @@ def preview_review_file(
     review = load_review(normalized_review)
     base_path = _review_base_path(normalized_review, results_directory=results_directory)
     base = load_canonical_result(base_path)
+    parent_revision = None
+    parent_path = None
+    if review.header.source_revision_number is not None:
+        parent_name = revision_filename(
+            job_id=base.job_id,
+            result_version=base.result_version,
+            revision_number=review.header.source_revision_number,
+        )
+        parent_path = (results_directory or base_path.parent) / parent_name
+        if not parent_path.is_file():
+            raise InvalidReviewError(
+                "REVISION_BASE_HASH_MISMATCH",
+                "Cannot locate the review parent revision",
+            )
+        parent_revision = load_transcript_revision(parent_path)
     revision = build_revision(
         review,
         base,
         base_path=base_path,
         long_gap_warning_ms=long_gap_warning_ms,
+        parent_revision=parent_revision,
+        parent_path=parent_path,
     )
     return RevisionPreviewOutcome(normalized_review, base_path, revision)
 

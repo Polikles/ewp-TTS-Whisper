@@ -16,6 +16,7 @@ from ewp_transcripts.domain.revision import (
     RevisionAlignment,
     RevisionBaseResult,
     RevisionInsertionAnchor,
+    RevisionParent,
     RevisionProvenance,
     RevisionStatistics,
     RevisionToken,
@@ -23,6 +24,7 @@ from ewp_transcripts.domain.revision import (
     RevisionWarning,
     TranscriptRevision,
     sha256_file,
+    validate_revision_base,
 )
 
 
@@ -109,11 +111,43 @@ def build_revision(
     base_path: Path,
     long_gap_warning_ms: int = 2000,
     created_at: datetime | None = None,
+    parent_revision: TranscriptRevision | None = None,
+    parent_path: Path | None = None,
 ) -> TranscriptRevision:
     """Validate and align one review into a complete unpublished revision snapshot."""
 
     base_hash = sha256_file(base_path)
     validate_review_base(review, base, base_sha256=base_hash)
+    parent = None
+    source_id = review.header.source_revision_id
+    if source_id is not None:
+        if parent_revision is None or parent_path is None:
+            raise InvalidReviewError(
+                "REVISION_BASE_HASH_MISMATCH",
+                "Review parent revision cannot be located",
+            )
+        validate_revision_base(parent_revision, base, base_sha256=base_hash)
+        parent_hash = sha256_file(parent_path)
+        if (
+            source_id != parent_revision.revision_id
+            or review.header.source_revision_number != parent_revision.revision_number
+            or review.header.source_revision_sha256 != parent_hash
+        ):
+            raise InvalidReviewError(
+                "REVISION_BASE_HASH_MISMATCH",
+                "Review parent revision identity does not match",
+            )
+        parent = RevisionParent(
+            revision_id=parent_revision.revision_id,
+            revision_number=parent_revision.revision_number,
+            sha256=parent_hash,
+            filename=parent_path.name,
+        )
+    elif parent_revision is not None or parent_path is not None:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "A parent revision was supplied for a base-relative review",
+        )
     words = tuple(word for segment in base.transcript.segments for word in segment.words)
     positions = {word.word_id: index for index, word in enumerate(words)}
     tokens: list[RevisionToken] = []
@@ -228,7 +262,7 @@ def build_revision(
             sha256=base_hash,
             filename=base_path.name,
         ),
-        parent_revision=None,
+        parent_revision=parent,
         provenance=RevisionProvenance(method="manual", interface="cli"),
         transcript=RevisionTranscript(language=review.header.language, tokens=tuple(tokens)),
         alignment=RevisionAlignment(

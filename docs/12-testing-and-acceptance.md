@@ -242,9 +242,9 @@ Perform a manual review in the target player or a private YouTube upload:
 ### Persistence and provenance
 
 - [ ] Base `results.json` bytes remain unchanged.
-- [ ] Every revision is a full standalone snapshot.
-- [ ] Sibling revisions can reference the same base result.
-- [ ] Parent revision metadata does not make child export depend on parent replay.
+- [x] Every revision is a full standalone snapshot.
+- [x] Sibling revisions can reference the same base result.
+- [x] Parent revision metadata does not make child export depend on parent replay.
 - [ ] Provenance, alignment metadata, statistics, and warnings are always present.
 - [x] `--audit` produces detailed diagnostics without becoming reconstruction state.
 - [x] Base-relative detailed audit can be regenerated later from base + revision.
