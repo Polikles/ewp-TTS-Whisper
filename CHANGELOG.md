@@ -14,6 +14,8 @@ All notable changes to EWP-transcripts are documented here.
   base-result-version-aware filenames.
 - Added strict `EWP-REVIEW 1` parsing and deterministic rendering with directive escaping,
   extension-header preservation, and stable base/anchor/speaker validation errors.
+- Added model-free review preparation from completed canonical results, with complete
+  segment-boundary anchors and speaker-turn preservation.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.
