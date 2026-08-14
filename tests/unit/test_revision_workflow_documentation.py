@@ -29,6 +29,8 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml",
         '--editor "nano"',
         "environment-variable names, not editor commands",
+        "recommended workflow for long transcripts",
+        "creates a revision only when the editor actually changes",
         "--revision latest",
         "--revision none",
         "exit code 5",

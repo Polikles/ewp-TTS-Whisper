@@ -6,7 +6,11 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.domain.errors import RevisionEditorError
-from ewp_transcripts.revision_editor import editor_command, open_review_in_editor
+from ewp_transcripts.revision_editor import (
+    editor_command,
+    open_review_in_editor,
+    require_review_change,
+)
 
 
 def test_editor_resolution_prefers_config_then_visual_then_editor() -> None:
@@ -45,3 +49,14 @@ def test_missing_or_failed_editor_is_controlled(monkeypatch, tmp_path: Path) -> 
     )
     with pytest.raises(RevisionEditorError, match="status 9"):
         open_review_in_editor(tmp_path / "review.txt", configured="false")
+
+
+def test_unchanged_review_cannot_be_automatically_applied(tmp_path: Path) -> None:
+    review = tmp_path / "episode.review.txt"
+    review.write_text("unchanged", encoding="utf-8")
+
+    with pytest.raises(RevisionEditorError, match="without changing.*no revision"):
+        require_review_change(review, original_content=b"unchanged")
+
+    review.write_text("corrected", encoding="utf-8")
+    require_review_change(review, original_content=b"unchanged")

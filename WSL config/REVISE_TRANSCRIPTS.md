@@ -62,6 +62,11 @@ editor = "nano"
 `editor = "VISUAL"` or `editor = "EDITOR"`. As an alternative to TOML, set one of the
 variables to a real installed command, for example `export EDITOR=nano`.
 
+`revise edit` creates a revision only when the editor actually changes the review file.
+If a GUI launcher exits without opening or changing the file, the command reports an
+error, retains the review, and creates no revision. This protects against launchers that
+return success before editing is complete.
+
 Once an editor is configured, the shorter command is:
 
 ```bash
@@ -84,17 +89,24 @@ a shell.
 
 ## 3. Staged workflow and batch review
 
+This is the recommended workflow for long transcripts and Windows GUI editors. It does
+not require `--editor`, `VISUAL`, or `EDITOR`.
+
 Prepare one result or every result in a directory:
 
 ```bash
 uv run --locked transcriber revise prepare ./output/episode_results.json \
-  --output-dir ./reviews
+  --output-dir "C:\\Users\\DS\\Desktop\\transcript reviews"
 
 uv run --locked transcriber revise prepare ./output \
   --output-dir ./reviews
 ```
 
 Directories are non-recursive by default. Add `--recursive` only intentionally.
+
+Open the reported `.review.txt` path directly in the Windows editor of your choice,
+save it, and close it. When the review directory is on `/mnt/c`, its Windows path can be
+opened normally from Explorer; the transcriber does not need to launch the editor.
 
 Edit ordinary transcript text and `@@ speaker speaker_NNN` directives. Do not edit:
 

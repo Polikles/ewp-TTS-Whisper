@@ -43,7 +43,7 @@ from ewp_transcripts.domain.errors import (
     OutputLockUnavailableError,
     OutputReservationError,
 )
-from ewp_transcripts.revision_editor import open_review_in_editor
+from ewp_transcripts.revision_editor import open_review_in_editor, require_review_change
 
 app = typer.Typer(
     name="transcriber",
@@ -535,7 +535,9 @@ def revise_edit_command(
             anchor_target_words=config.revision.anchor_target_words,
             lock_timeout_seconds=config.runtime.lock_timeout_seconds,
         )
+        original_review = prepared.path.read_bytes()
         open_review_in_editor(prepared.path, configured=config.revision.editor)
+        require_review_change(prepared.path, original_content=original_review)
         if no_apply:
             typer.echo(f"EDITED {prepared.path}")
             typer.echo("SUMMARY applied=0")

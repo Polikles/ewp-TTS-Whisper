@@ -268,6 +268,9 @@ review file but suppresses automatic apply. A non-zero editor exit does not crea
 revision.
 
 The editor is executed as an argument vector, never through `shell=True`.
+Automatic apply also requires the review file contents to change while the editor is
+open. A zero-status launcher that makes no change retains the review and creates no
+revision.
 
 Options include `--review-output-dir`, `--output-dir`, `--editor`, `--config`, `--audit`,
 and `--no-apply`. `--editor` overrides `[revision].editor`; an empty configuration falls

@@ -45,6 +45,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added optional audit publication to the automatic `revise edit` apply path.
 - Clarified editor setup with exact project/user configuration paths, a copy-pasteable
   nano workflow, and errors that distinguish editor commands from environment variables.
+- Prevented automatic revision creation when an external editor exits without changing
+  the review, and documented staged Windows-editor review for long transcripts.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

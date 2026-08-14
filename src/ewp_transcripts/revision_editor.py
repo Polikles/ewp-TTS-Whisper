@@ -54,3 +54,17 @@ def open_review_in_editor(
         raise RevisionEditorError(
             f"Revision editor exited unsuccessfully with status {completed.returncode}"
         )
+
+
+def require_review_change(review_path: Path, *, original_content: bytes) -> None:
+    """Reject a successful editor exit that did not change the prepared review."""
+
+    try:
+        current_content = review_path.read_bytes()
+    except OSError as error:
+        raise RevisionEditorError(f"Cannot read edited review: {review_path}") from error
+    if current_content == original_content:
+        raise RevisionEditorError(
+            "Revision editor closed without changing the review; no revision was created. "
+            f"Review retained at: {review_path}"
+        )
