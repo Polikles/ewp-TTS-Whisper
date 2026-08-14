@@ -106,10 +106,10 @@ config_version = "1.0"
 Changing the meaning of an existing key requires a major configuration-version update or a migration layer.
 
 
-## 7. Transcript revision configuration (planned v0.2.0)
+## 7. Transcript revision configuration
 
 Manual revision uses the normal precedence rules and adds a strict `[revision]` section.
-Initial defaults are expected to be:
+The v0.2.0 defaults are:
 
 ```toml
 [revision]

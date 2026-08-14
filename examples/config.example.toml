@@ -86,6 +86,12 @@ generate_segments_json = false
 batch_output_directory_name = "output-ewp-transcripts"
 encoding = "utf-8"
 
+[revision]
+anchor_target_words = 200
+long_gap_warning_ms = 2000
+generate_audit = false
+editor = ""                       # VISUAL, then EDITOR fallback for revise edit
+
 [runtime]
 work_root = "/home/user/.cache/ewp-transcripts/work"
 keep_temp_on_success = false

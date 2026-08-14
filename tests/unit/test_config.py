@@ -28,6 +28,10 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.models.compute_type == "float16"
     assert config.models.batch_size == 4
     assert config.outputs.batch_output_directory_name == "output-ewp-transcripts"
+    assert config.revision.anchor_target_words == 200
+    assert config.revision.long_gap_warning_ms == 2000
+    assert config.revision.generate_audit is False
+    assert config.revision.editor == ""
     assert config.quality.warn_only is True
 
 
@@ -61,6 +65,13 @@ def test_invalid_threshold_order_is_rejected(tmp_path: Path) -> None:
         tmp_path / "selected.toml",
         "[grouping]\nduration_warning_ms = 501\nduration_error_ms = 500\n",
     )
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+def test_invalid_revision_anchor_size_is_rejected(tmp_path: Path) -> None:
+    selected = _write(tmp_path / "selected.toml", "[revision]\nanchor_target_words = 0\n")
 
     with pytest.raises(InvalidConfigurationError, match="validation failed"):
         load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)

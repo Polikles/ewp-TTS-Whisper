@@ -193,7 +193,7 @@ canonical export path. `latest` means the highest allocated revision number whos
 base-result SHA-256 matches `RESULTS_JSON`. Explicit paths are recommended for benchmark
 branches. Revision-aware export remains audio-free and model-free.
 
-## 7a. `revise` (planned v0.2.0)
+## 7a. `revise`
 
 ```text
 transcriber revise prepare INPUT [OPTIONS]
@@ -208,7 +208,7 @@ transcriber revise audit REVISION [OPTIONS]
 Directory operations use deterministic natural ordering and do not recurse unless
 `--recursive` is supplied.
 
-Common planned options:
+Common options:
 
 ```text
 --output-dir PATH

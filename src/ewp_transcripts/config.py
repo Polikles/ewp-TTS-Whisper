@@ -203,6 +203,13 @@ class OutputsConfig(StrictConfigModel):
     encoding: Literal["utf-8"] = "utf-8"
 
 
+class RevisionConfig(StrictConfigModel):
+    anchor_target_words: int = Field(default=200, ge=1)
+    long_gap_warning_ms: int = Field(default=2000, ge=0)
+    generate_audit: bool = False
+    editor: str = ""
+
+
 class RuntimeConfig(StrictConfigModel):
     work_root: Path = Path("~/.cache/ewp-transcripts/work")
     keep_temp_on_success: bool = False
@@ -232,6 +239,7 @@ class ApplicationConfig(StrictConfigModel):
     quality: QualityConfig = QualityConfig()
     subtitles: SubtitlesConfig = SubtitlesConfig()
     outputs: OutputsConfig = OutputsConfig()
+    revision: RevisionConfig = RevisionConfig()
     runtime: RuntimeConfig = RuntimeConfig()
 
 

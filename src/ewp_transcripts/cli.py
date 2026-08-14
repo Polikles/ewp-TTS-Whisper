@@ -11,6 +11,7 @@ from typing import Annotated
 import typer
 
 from ewp_transcripts.application import (
+    BatchReviewPreparationOutcome,
     BatchTranscriptionOutcome,
     ExportFormat,
     TranscriptionOutcome,
@@ -20,6 +21,7 @@ from ewp_transcripts.application import (
     dry_run,
     export_result,
     inspect_input,
+    prepare_review_batch,
     transcribe_batch,
     transcribe_one,
 )
@@ -44,6 +46,12 @@ app = typer.Typer(
     ),
     no_args_is_help=True,
 )
+revise_app = typer.Typer(
+    name="revise",
+    help="Prepare, validate, and publish transcript corrections without source audio.",
+    no_args_is_help=True,
+)
+app.add_typer(revise_app, name="revise")
 
 
 class RequestedChannelMode(StrEnum):
@@ -105,6 +113,87 @@ def root(
     ] = None,
 ) -> None:
     """Run EWP-transcripts commands."""
+
+
+def _review_batch_json(outcome: BatchReviewPreparationOutcome) -> str:
+    return json.dumps(
+        {
+            "output_directory": str(outcome.output_directory),
+            "prepared": outcome.prepared,
+            "failed": outcome.failed,
+            "stopped_early": outcome.stopped_early,
+            "jobs": [
+                {
+                    "result_path": str(job.result_path),
+                    "status": job.status,
+                    "review_path": str(job.review_path) if job.review_path else None,
+                    "failure_code": job.failure_code,
+                    "failure_message": job.failure_message,
+                }
+                for job in outcome.jobs
+            ],
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+@revise_app.command("prepare")
+def revise_prepare_command(
+    input_path: Annotated[
+        Path,
+        typer.Argument(
+            help="Completed canonical result or directory containing results.",
+            metavar="INPUT",
+        ),
+    ],
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write EWP-REVIEW files to this directory."),
+    ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include completed results in subdirectories."),
+    ] = False,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the batch outcome as JSON."),
+    ] = False,
+) -> None:
+    """Create editable EWP-REVIEW files without loading audio or ML models."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = prepare_review_batch(
+            input_path,
+            config=config,
+            output_directory=_optional_user_path(output_directory),
+            recursive=recursive,
+            anchor_target_words=config.revision.anchor_target_words,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+
+    if json_output:
+        typer.echo(_review_batch_json(outcome))
+    else:
+        typer.echo(f"Output directory: {outcome.output_directory}")
+        for job in outcome.jobs:
+            typer.echo(f"{job.status.upper()} {job.result_path}")
+            if job.review_path is not None:
+                typer.echo(f"  REVIEW {job.review_path}")
+            if job.failure_code is not None:
+                typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+        typer.echo(
+            f"SUMMARY prepared={outcome.prepared} failed={outcome.failed} "
+            f"stopped_early={str(outcome.stopped_early).lower()}"
+        )
+    if outcome.failed:
+        raise typer.Exit(code=5)
 
 
 @app.command("doctor")

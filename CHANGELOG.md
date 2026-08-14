@@ -22,6 +22,8 @@ All notable changes to EWP-transcripts are documented here.
   single-file review preparation operation.
 - Added deterministic non-recursive result discovery and isolated batch review
   preparation with the configured continue/stop policy.
+- Added strict transcript-revision configuration and the model-free `revise prepare`
+  CLI for single canonical results and deterministic directory batches.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

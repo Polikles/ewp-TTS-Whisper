@@ -229,8 +229,8 @@ Perform a manual review in the target player or a private YouTube upload:
 
 ### CLI and batch
 
-- [ ] Single-file `revise prepare`.
-- [ ] Directory `revise prepare` in deterministic natural order.
+- [x] Single-file `revise prepare`.
+- [x] Directory `revise prepare` in deterministic natural order.
 - [ ] Single-file `revise apply`.
 - [ ] Directory `revise apply` with per-item failure isolation.
 - [ ] `revise preview` writes no revision.
