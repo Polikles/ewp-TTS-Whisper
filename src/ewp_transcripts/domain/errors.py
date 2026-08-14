@@ -81,6 +81,10 @@ class InvalidCanonicalResultError(ApplicationError):
     """Raised when a canonical result cannot be safely read or exported."""
 
 
+class InvalidRevisionError(ApplicationError):
+    """Raised when a transcript revision is invalid or incompatible with its base."""
+
+
 class OutputLockUnavailableError(ApplicationError):
     """Raised when an output directory cannot be locked within the configured timeout."""
 

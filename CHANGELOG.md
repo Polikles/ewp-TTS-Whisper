@@ -6,6 +6,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added the first v0.2.0 implementation slice: strict immutable transcript-revision
+  domain models, artifact loading, and exact canonical-base compatibility validation.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

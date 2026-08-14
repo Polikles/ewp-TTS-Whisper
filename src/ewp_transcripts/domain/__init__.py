@@ -34,6 +34,11 @@ from ewp_transcripts.domain.models import (
     SourceFingerprint,
     WorkDirectory,
 )
+from ewp_transcripts.domain.revision import (
+    TranscriptRevision,
+    load_transcript_revision,
+    validate_revision_base,
+)
 
 __all__ = [
     "ApplicationWarning",
@@ -64,6 +69,9 @@ __all__ = [
     "PlanDecision",
     "SkippedPath",
     "SourceFingerprint",
+    "TranscriptRevision",
+    "load_transcript_revision",
+    "validate_revision_base",
     "WarningCode",
     "WarningSeverity",
     "WorkDirectory",
