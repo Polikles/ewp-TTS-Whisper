@@ -6,6 +6,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Expanded the future GUI backlog with explicit About, License, and Source Code sections,
+  including a direct link to the public repository.
 - Licensed the project under GNU AGPL v3.0 or later, included the full license in source
   and distribution artifacts, and documented contribution and warranty terms.
 - Added the first v0.2.0 implementation slice: strict immutable transcript-revision

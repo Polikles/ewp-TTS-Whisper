@@ -252,7 +252,11 @@ Planned capabilities:
 - re-export raw or selected revision without ASR;
 - translation and translated-text revision after those pipelines exist;
 - secure handling of optional API credentials;
-- audio-following review where useful.
+- audio-following review where useful;
+- an About section with application/version information;
+- a License section presenting the applicable license and warranty notice;
+- a Source Code section with a direct link to the public project repository:
+  <https://github.com/Polikles/ewp-transcripts>.
 
 The GUI calls application services directly and MUST NOT execute CLI commands as a
 subprocess or maintain a second revision/translation model.
