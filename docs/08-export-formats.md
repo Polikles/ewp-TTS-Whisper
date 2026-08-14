@@ -2,7 +2,10 @@
 
 ## 1. Principle
 
-An export is a deterministic transformation of `results.json`. Exporting must not run WhisperX, pyannote, or open source audio.
+An export is a deterministic transformation of a selected transcript source. In v0.1
+the source is raw `results.json`; planned v0.2.0 revision-aware export first resolves raw
+canonical text or a compatible revision into `EffectiveTranscript`. Exporting must not
+run WhisperX, pyannote, or open source audio.
 
 ## 2. TXT
 
@@ -193,13 +196,16 @@ TXT and subtitles use canonical transcript text. The sentence segmenter should:
 ## 11. Correction workflow boundary
 
 TXT, SRT, and VTT must not be corrected independently because their text, sentence
-boundaries, speaker labels, and timestamps would drift apart. The original canonical
-result remains immutable evidence. A future correction workflow will create a versioned
-correction layer linked to that result, then regenerate all derived formats together.
+boundaries, speaker labels, and timestamps would drift apart. The canonical result remains
+immutable evidence. Planned v0.2.0 stores correction as a separate full-snapshot revision
+linked to the exact canonical result hash and regenerates all derived formats from one
+`EffectiveTranscript`.
 
-Importing a manually or LLM-corrected TXT file cannot safely be a blind replacement:
-the application must align corrected tokens with canonical timed words, apply
-unambiguous spelling and punctuation edits automatically, and require review of
-insertions, deletions, speaker changes, or sentence-boundary changes whose timestamps
-cannot be inferred safely. The detailed editor and import design is tracked in the
-Version 2 roadmap.
+Manual correction uses `EWP-REVIEW 1` plus anchored token alignment. Reviewers edit normal
+text and speaker attribution; they do not maintain timestamps or a separate sentence
+model. Corrected punctuation drives the existing sentence splitter. Merge/split/insert/
+delete mappings inherit timing from canonical words at runtime, with warnings for
+ambiguous cases. See [13 - Transcript revisions](13-transcript-revisions.md).
+
+Revision-aware export adds `--revision none|latest|PATH`. Omitting the selector remains
+raw/canonical behavior for backward compatibility.

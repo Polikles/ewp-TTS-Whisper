@@ -39,7 +39,7 @@ Responsibilities:
 
 - accept typed requests;
 - resolve the effective configuration;
-- invoke inspection, planning, transcription, export, or cleanup;
+- invoke inspection, planning, transcription, revision, export, or cleanup;
 - return typed outcomes;
 - enforce use-case-level policy.
 
@@ -270,3 +270,40 @@ Do not hardcode WSL-specific paths in core logic. WSL is the development/runtime
 ## 16. Simplicity rule
 
 Prefer the smallest module structure that preserves the boundaries above. Add a new package or abstraction only when it removes real duplication, isolates an optional dependency, creates a stable contract, or improves independent testability.
+
+
+## 17. Transcript revision boundary (planned v0.2.0)
+
+Transcript revision follows the same interface-independent rules as transcription. CLI,
+future GUI, and future LLM adapters call application services; none may implement their
+own correction model or token alignment.
+
+Persisted data flow becomes:
+
+```text
+canonical Result -> results.json (immutable)
+                         |
+                         +--> raw TranscriptResolver --------+
+                         |                                   |
+                         +--> revision prepare/apply          v
+                                  |                    EffectiveTranscript
+                                  v                           |
+                         revision_NNN.json -------------------+
+                                                              |
+                                                  TXT/SRT/VTT/segments
+```
+
+Rules:
+
+- `results.schema.json` is not changed merely to support editorial correction;
+- a revision is a complete immutable snapshot linked to the exact base-result SHA-256;
+- `EffectiveTranscript` is runtime-only and must not become a third authoritative file;
+- exporters consume one effective transcript interface instead of independently choosing
+  canonical segment text versus word text;
+- review parsing/alignment and revision persistence belong below the interface layer;
+- normal revision does not load WhisperX, pyannote, alignment models, or source audio;
+- revision and review schemas/formats are public compatibility contracts and require
+  explicit versioning for breaking changes;
+- external editors are executed without a shell;
+- future cloud LLM correction is an explicit opt-in adapter and does not weaken the
+  local-only v0.2.0 contract.

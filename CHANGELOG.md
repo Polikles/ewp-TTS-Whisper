@@ -4,7 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
+  full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
+  the implementation acceptance plan, with automated contract-artifact validation.
+- Prioritized the 24-episode corrected corpus, later local/cloud LLM correction, separate
+  manual/automated translation pipeline, synchronized HTML export, and optional
+  project-scoped dictionaries in the post-0.1 roadmap.
 
 ## 0.1.1 — internal release candidate — 2026-08-14
 

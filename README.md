@@ -60,15 +60,21 @@ Recommended starting documents:
 4. [`docs/05-cli-specification.md`](docs/05-cli-specification.md) — CLI contract.
 5. [`docs/07-results-data-model.md`](docs/07-results-data-model.md) — canonical data model.
 6. [`docs/12-testing-and-acceptance.md`](docs/12-testing-and-acceptance.md) — tests and acceptance criteria.
-7. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — internal pilot and V2 priorities.
+7. [`docs/13-transcript-revisions.md`](docs/13-transcript-revisions.md) — accepted planned v0.2.0 revision contract.
+8. [`docs/21-v0.2.0-transcript-revision-plan.md`](docs/21-v0.2.0-transcript-revision-plan.md) — implementation and acceptance plan.
+9. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — post-0.1 priorities.
 
 ## Examples and schemas
 
 - [`examples/config.example.toml`](examples/config.example.toml)
 - [`examples/results.example.json`](examples/results.example.json)
 - [`examples/segments.example.json`](examples/segments.example.json)
+- [`examples/review.example.txt`](examples/review.example.txt)
+- [`examples/revision.example.json`](examples/revision.example.json)
 - [`schemas/results.schema.json`](schemas/results.schema.json)
 - [`schemas/segments.schema.json`](schemas/segments.schema.json)
+- [`schemas/ewp-review.schema.md`](schemas/ewp-review.schema.md)
+- [`schemas/revision.schema.json`](schemas/revision.schema.json)
 
 ## Core project rules
 

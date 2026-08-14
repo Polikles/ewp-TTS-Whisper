@@ -143,3 +143,19 @@ After finalization, `results.json` is not modified by later `export` operations.
 - field removal or semantic change: increment the major version;
 - readers should reject unsupported major versions;
 - CI validates the schema against examples and integration-test outputs.
+
+
+## 9. Relationship to transcript revisions (planned v0.2.0)
+
+Transcript correction does not change this schema or the meaning of canonical words and
+segments. `results.json` continues to record what the ASR/alignment/diarization pipeline
+produced.
+
+A corrected transcript is stored in a separate full-snapshot revision described in
+[`13-transcript-revisions.md`](13-transcript-revisions.md) and validated against
+`schemas/revision.schema.json`. Revisions refer back to canonical `word_id` values and the
+exact SHA-256 of this file.
+
+Export code resolves either raw canonical text or a selected revision into an in-memory
+`EffectiveTranscript`. This prevents editorial mutation of both `segment.text` and
+`word.text` while preserving compatibility with existing v0.1 results.

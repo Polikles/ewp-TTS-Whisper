@@ -23,3 +23,8 @@
 - **VAD** — voice activity detection.
 - **WER/CER** — word/character error measures against ground truth.
 - **Workdir** — temporary working directory stored in WSL.
+- **Effective transcript** — runtime transcript view resolved from raw canonical data or a compatible revision and consumed by exporters; not a persisted source-of-truth artifact.
+- **Review anchor** — machine-owned `EWP-REVIEW 1` directive delimiting a bounded canonical word range for correction alignment.
+- **Review file** — human-editable `EWP-REVIEW 1` work artifact used to create or preview a revision; not a source of truth.
+- **Revision** — immutable full-snapshot corrected transcript linked to an exact canonical result SHA-256 and optionally to a parent revision.
+- **Revision token** — corrected lexical token carrying exact editorial text, corrected speaker attribution, and mapping to canonical word IDs or an insertion anchor.

@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "application_version": "0.2.0",
+  "revision_id": "0e7c3128-5f2f-4b52-95e8-64566c09854d",
+  "revision_number": 1,
+  "job_id": "revision-example",
+  "created_at": "2026-08-14T14:05:00Z",
+  "base_result": {
+    "job_id": "revision-example",
+    "result_version": 1,
+    "schema_version": "1.0",
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "filename": "revision-example_results.json"
+  },
+  "parent_revision": null,
+  "provenance": {
+    "method": "manual",
+    "interface": "cli"
+  },
+  "transcript": {
+    "language": "pl",
+    "tokens": [
+      {
+        "token_id": "rt_000001",
+        "text": "Rozmawiamy",
+        "speaker_id": "speaker_001",
+        "source_word_ids": ["word_000001"]
+      },
+      {
+        "token_id": "rt_000002",
+        "text": "o",
+        "speaker_id": "speaker_001",
+        "source_word_ids": ["word_000002"]
+      },
+      {
+        "token_id": "rt_000003",
+        "text": "OpenAI.",
+        "speaker_id": "speaker_001",
+        "source_word_ids": ["word_000003", "word_000004"]
+      },
+      {
+        "token_id": "rt_000004",
+        "text": "Tak.",
+        "speaker_id": "speaker_002",
+        "source_word_ids": ["word_000005"]
+      },
+      {
+        "token_id": "rt_000005",
+        "text": "Właśnie.",
+        "speaker_id": "speaker_002",
+        "source_word_ids": [],
+        "insertion_anchor": {
+          "after_word_id": "word_000005",
+          "before_word_id": "word_000006"
+        }
+      }
+    ]
+  },
+  "alignment": {
+    "strategy": "anchored-token-v1",
+    "review_format_version": 1,
+    "anchor_count": 1,
+    "ambiguous_regions": 0
+  },
+  "statistics": {
+    "source_tokens": 6,
+    "revision_tokens": 5,
+    "unchanged": 3,
+    "substitutions": 0,
+    "merges": 1,
+    "splits": 0,
+    "insertions": 1,
+    "deletions": 1,
+    "punctuation_only_changes": 1,
+    "speaker_changes": 1,
+    "alignment_warnings": 0
+  },
+  "warnings": []
+}

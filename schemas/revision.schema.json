@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Polikles/ewp-transcripts/schemas/revision.schema.json",
+  "title": "EWP Transcript Revision",
+  "description": "Planned v0.2.0 immutable full-snapshot transcript revision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "application_version",
+    "revision_id",
+    "revision_number",
+    "job_id",
+    "created_at",
+    "base_result",
+    "parent_revision",
+    "provenance",
+    "transcript",
+    "alignment",
+    "statistics",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "application_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "revision_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "base_result": {
+      "$ref": "#/$defs/baseResultRef"
+    },
+    "parent_revision": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/parentRevisionRef" }
+      ]
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "transcript": {
+      "$ref": "#/$defs/revisionTranscript"
+    },
+    "alignment": {
+      "$ref": "#/$defs/alignmentMetadata"
+    },
+    "statistics": {
+      "$ref": "#/$defs/revisionStatistics"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/revisionWarning"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "wordId": {
+      "type": "string",
+      "pattern": "^word_[0-9]{6,}$"
+    },
+    "speakerId": {
+      "type": "string",
+      "pattern": "^speaker_[0-9]{3,}$"
+    },
+    "baseResultRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "job_id",
+        "result_version",
+        "schema_version",
+        "sha256"
+      ],
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "parentRevisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision_id",
+        "revision_number",
+        "sha256"
+      ],
+      "properties": {
+        "revision_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "revision_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "interface"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "manual",
+            "llm"
+          ]
+        },
+        "interface": {
+          "enum": [
+            "cli",
+            "gui",
+            "api"
+          ]
+        },
+        "llm": {
+          "$ref": "#/$defs/llmProvenance"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": { "const": "llm" }
+            },
+            "required": ["method"]
+          },
+          "then": {
+            "required": ["llm"]
+          },
+          "else": {
+            "not": {
+              "required": ["llm"]
+            }
+          }
+        }
+      ]
+    },
+    "llmProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model",
+        "endpoint_kind",
+        "prompt_sha256"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "endpoint_kind": {
+          "enum": [
+            "local",
+            "cloud"
+          ]
+        },
+        "prompt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "integer",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "revisionTranscript": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "tokens"
+      ],
+      "properties": {
+        "language": {
+          "enum": [
+            "pl",
+            "en"
+          ]
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/revisionToken"
+          }
+        }
+      }
+    },
+    "revisionToken": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token_id",
+        "text",
+        "speaker_id",
+        "source_word_ids"
+      ],
+      "properties": {
+        "token_id": {
+          "type": "string",
+          "pattern": "^rt_[0-9]{6,}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\S.*"
+        },
+        "speaker_id": {
+          "$ref": "#/$defs/speakerId"
+        },
+        "source_word_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/wordId"
+          }
+        },
+        "insertion_anchor": {
+          "$ref": "#/$defs/insertionAnchor"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "source_word_ids": {
+              "minItems": 1
+            }
+          },
+          "not": {
+            "required": ["insertion_anchor"]
+          }
+        },
+        {
+          "properties": {
+            "source_word_ids": {
+              "maxItems": 0
+            }
+          },
+          "required": ["insertion_anchor"]
+        }
+      ]
+    },
+    "insertionAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "after_word_id": {
+          "$ref": "#/$defs/wordId"
+        },
+        "before_word_id": {
+          "$ref": "#/$defs/wordId"
+        }
+      },
+      "anyOf": [
+        { "required": ["after_word_id"] },
+        { "required": ["before_word_id"] }
+      ]
+    },
+    "alignmentMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy",
+        "review_format_version",
+        "anchor_count",
+        "ambiguous_regions"
+      ],
+      "properties": {
+        "strategy": {
+          "const": "anchored-token-v1"
+        },
+        "review_format_version": {
+          "const": 1
+        },
+        "anchor_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ambiguous_regions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "revisionStatistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_tokens",
+        "revision_tokens",
+        "unchanged",
+        "substitutions",
+        "merges",
+        "splits",
+        "insertions",
+        "deletions",
+        "punctuation_only_changes",
+        "speaker_changes",
+        "alignment_warnings"
+      ],
+      "properties": {
+        "source_tokens": { "type": "integer", "minimum": 0 },
+        "revision_tokens": { "type": "integer", "minimum": 0 },
+        "unchanged": { "type": "integer", "minimum": 0 },
+        "substitutions": { "type": "integer", "minimum": 0 },
+        "merges": { "type": "integer", "minimum": 0 },
+        "splits": { "type": "integer", "minimum": 0 },
+        "insertions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "punctuation_only_changes": { "type": "integer", "minimum": 0 },
+        "speaker_changes": { "type": "integer", "minimum": 0 },
+        "alignment_warnings": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "revisionWarning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]+$"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

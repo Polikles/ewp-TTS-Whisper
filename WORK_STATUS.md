@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-05**.
+Last updated: **2026-08-14**.
 
 ## Current state
 
@@ -11,7 +11,7 @@ untracked, and excluded from build artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 289 automated checks pass;
+- all 292 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -24,23 +24,26 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 ## Authoritative next step
 
-Begin an internal production pilot on 3–5 representative archive episodes. Follow
-`WSL config/USE_CURRENT_MVP.md` and collect structured observations with
-`WSL config/FEEDBACK_FOR_V2.md`.
+Implement the accepted v0.2.0 transcript-revision contract in
+`docs/13-transcript-revisions.md`, ADR-0020, and
+`docs/21-v0.2.0-transcript-revision-plan.md`.
 
-Do not hand-edit canonical JSON. Preserve each original result and keep corrections as
-separate review material until the V2 correction-layer contract exists.
+Do not hand-edit canonical JSON. Until the revision pipeline is implemented and tested,
+preserve each original result and keep corrections as separate review material.
 
 ## V2 priority order
 
-1. Run the archive pilot and classify recurring correction/review needs.
-2. Implement a versioned correction layer anchored to canonical words, speakers, and
-   timestamps; regenerate every export from one corrected revision.
-3. Add synchronized standalone/embeddable HTML transcript export for the blog player.
-4. Convert licensed, manually corrected excerpts into a larger ground-truth corpus.
-5. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
+1. Implement and test v0.2.0 manual full-snapshot transcript revisions and revision-aware
+   exports.
+2. Manually revise all 24 podcast episodes to create the first ground-truth corpus and
+   record revision-workflow defects.
+3. Benchmark and add local/cloud API correction through the same revision engine.
+4. Add manual then automated translation using a separate immutable translation artifact.
+5. Add synchronized standalone/embeddable HTML export, including later bilingual output.
+6. Consider small project-scoped dictionaries only if benchmarks justify them; do not
+   add a global dictionary.
+7. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
    suitable references become available.
-6. Continue with lower-priority V2 items in `docs/99-roadmap-v2.md`.
 
 ## Repository hygiene
 

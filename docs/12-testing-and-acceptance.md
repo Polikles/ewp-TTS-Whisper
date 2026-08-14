@@ -198,3 +198,66 @@ Perform a manual review in the target player or a private YouTube upload:
 - fast speech;
 - speaker transitions;
 - Polish characters.
+
+
+## 7. Transcript revision acceptance (planned v0.2.0)
+
+### Review and alignment
+
+- [ ] `EWP-REVIEW 1` round-trip with no text edits.
+- [ ] Punctuation-only edit.
+- [ ] Proper-name/spelling substitution.
+- [ ] Sentence-boundary change through punctuation only.
+- [ ] One-to-one substitution.
+- [ ] N-to-1 merge.
+- [ ] 1-to-N split.
+- [ ] Insertion with adjacent canonical anchors.
+- [ ] Deletion.
+- [ ] Legitimate repeated words remain duplicated when not edited.
+- [ ] Short span reassigned to another existing speaker.
+- [ ] Ambiguous alignment is reported rather than silently selected.
+
+### Review integrity
+
+- [ ] Modified anchor is rejected.
+- [ ] Missing anchor is rejected.
+- [ ] Duplicate/overlapping/out-of-order anchors are rejected.
+- [ ] Nonexistent canonical word ID is rejected.
+- [ ] Base-result SHA mismatch is rejected.
+- [ ] Unknown speaker ID is rejected.
+- [ ] Insert across configured long gap emits a structured warning.
+
+### CLI and batch
+
+- [ ] Single-file `revise prepare`.
+- [ ] Directory `revise prepare` in deterministic natural order.
+- [ ] Single-file `revise apply`.
+- [ ] Directory `revise apply` with per-item failure isolation.
+- [ ] `revise preview` writes no revision.
+- [ ] `revise apply --no-apply` writes no revision and matches preview outcome.
+- [ ] `revise edit --no-apply` retains review edits without creating a revision.
+- [ ] Successful editor close without `--no-apply` automatically applies the saved review.
+- [ ] Non-zero editor exit creates no revision.
+
+### Persistence and provenance
+
+- [ ] Base `results.json` bytes remain unchanged.
+- [ ] Every revision is a full standalone snapshot.
+- [ ] Sibling revisions can reference the same base result.
+- [ ] Parent revision metadata does not make child export depend on parent replay.
+- [ ] Provenance, alignment metadata, statistics, and warnings are always present.
+- [ ] `--audit` produces detailed diagnostics without becoming reconstruction state.
+- [ ] Base-relative detailed audit can be regenerated later from base + revision.
+- [ ] Concurrent revision allocation cannot collide.
+
+### Revision-aware exports
+
+- [ ] Omitted `--revision` is behaviorally equivalent to raw v0.1 export.
+- [ ] `--revision none` selects raw canonical text.
+- [ ] `--revision latest` selects only a revision matching the exact base-result hash.
+- [ ] Explicit revision path is validated against the selected base result.
+- [ ] Revised TXT uses corrected punctuation and one-sentence-per-line output.
+- [ ] Revised SRT and VTT use corrected text with inherited canonical timing.
+- [ ] Revised segments JSON is generated from the same effective transcript.
+- [ ] Revision prepare/apply/export do not require source audio, GPU, ASR, alignment, or
+  diarization models.

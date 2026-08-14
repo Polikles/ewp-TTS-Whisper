@@ -1,27 +1,161 @@
-# Version 2 Roadmap
+# Post-0.1 Roadmap
 
-The following items do not block the MVP.
+The filename is retained for compatibility with existing links. The roadmap now tracks
+planned work after the `0.1.x` internal release candidates rather than implying that all
+items belong to one monolithic "Version 2" release.
 
-## Recommended execution agenda
+## Current execution order
 
-1. Run a bounded internal production pilot on 3–5 representative archive episodes and
-   collect structured correction, timing, subtitle, performance, and workflow feedback.
-2. Design and implement the versioned correction layer from observed edits, keeping
-   canonical ASR results immutable and anchoring corrections to stable words, speakers,
-   and timestamps.
-3. Regenerate TXT, SRT, VTT, segments JSON, and corrected transcript data atomically
-   from one reviewed revision.
-4. Add synchronized standalone and embeddable HTML transcript export for the blog audio
-   player, including seeking, highlighting, keyboard access, and speaker presentation.
-5. Convert licensed manually corrected excerpts into a larger ground-truth corpus, then
-   reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates.
-6. Prioritize the remaining roadmap items using pilot frequency, review time saved,
-   privacy impact, and implementation risk.
+1. **v0.2.0 manual transcript revisions** — promoted from backlog into the next MVP
+   increment and specified normatively in
+   [`13-transcript-revisions.md`](13-transcript-revisions.md), ADR-0020, and
+   [`21-v0.2.0-transcript-revision-plan.md`](21-v0.2.0-transcript-revision-plan.md).
+2. Expand the manually corrected corpus (initial target: 24 podcast episodes) and record
+   correction/alignment workflow defects.
+3. Automated transcript correction using local/cloud API models, configurable chunking,
+   read-only overlap, the same revision engine, and manual revision of model output.
+4. Manual translation pipeline and structured translation artifact, using corrected
+   transcript by default while retaining an explicit raw/dirty source option.
+5. Automated translation using the same source/translation artifact contracts, followed
+   by optional manual revision.
+6. Synchronized HTML transcript/export and remaining publishing features.
+7. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
+   based on observed value and risk.
+8. GUI after the planned core functions are stable; GUI reuses application services and
+   does not implement a parallel pipeline.
 
-The pilot procedure and minimum feedback summary are documented in
-[`../WSL config/FEEDBACK_FOR_V2.md`](../WSL%20config/FEEDBACK_FOR_V2.md).
+The earlier small production pilot requirement is superseded operationally by the larger
+manual-review corpus used to build correction ground truth. Existing accepted v0.1
+validation evidence remains valid.
 
-## Content-aware directory discovery
+## 1. Manual transcript correction — promoted to v0.2.0
+
+The following is no longer an unscheduled roadmap idea. It is the planned v0.2.0 contract:
+
+- immutable canonical `results.json`;
+- versioned full-snapshot revision artifacts linked by base-result SHA-256;
+- `EWP-REVIEW 1` human-readable manual correction format;
+- stable canonical word anchors and corrected speaker attribution;
+- batch `revise prepare` and batch `revise apply`;
+- `revise preview` and `apply --no-apply` equivalence;
+- external-editor `revise edit`, with successful editor close applying automatically
+  unless `--no-apply` is used;
+- deterministic anchored token alignment for substitutions, punctuation, sentence
+  boundaries, merge/split, insertion, deletion, repetition preservation, and speaker
+  reassignment;
+- no normal manual timestamp editing;
+- runtime `EffectiveTranscript` shared by raw and revised export;
+- revision-aware TXT/SRT/VTT/segments regeneration without source audio or ML models;
+- mandatory provenance/statistics and optional/reconstructable detailed audit.
+
+Detailed design belongs in docs 13/21 rather than this roadmap.
+
+## 2. Automated transcript correction
+
+Automated correction follows manual correction so model performance can be measured
+against manually verified ground truth.
+
+Requirements:
+
+- local API endpoints and explicit cloud API endpoints;
+- cloud use is explicit opt-in and requires privacy warnings/documentation;
+- no audio is sent to the correction model;
+- the LLM receives relevant transcript blocks plus word/speaker/timing metadata needed as
+  context, not the complete canonical processing/configuration payload;
+- corrected LLM output is passed through the same alignment and `RevisionEngine` used by
+  manual review;
+- preserve repetitions and self-corrections unless the model output explicitly changes
+  them, and prompt the model not to stylistically rewrite faithful speech;
+- punctuation, sentence boundaries, proper names, obvious ASR lexical errors, and
+  grammatical endings are primary correction targets;
+- model/prompt/config provenance is persisted without secrets;
+- LLM revisions may be direct siblings of manual gold for benchmark comparison;
+- a model revision may later have a manual child revision, with parent provenance but a
+  complete standalone child snapshot.
+
+### Configurable chunking
+
+Chunking is required for flexibility across local and cloud models and must not assume a
+large context window.
+
+Future configuration must expose at least:
+
+- target chunk size;
+- maximum chunk size;
+- read-only context overlap;
+- CLI/request overrides through the normal configuration precedence system.
+
+Exact defaults are deferred until automated-correction benchmarks. Overlap is context
+only: every editable source range belongs to exactly one chunk, preventing conflicting
+corrections in adjacent requests.
+
+## 3. Optional project-scoped dictionaries
+
+Dictionary support remains conditional on benchmark evidence and is not part of v0.2.0.
+
+If implemented:
+
+- there is no global dictionary;
+- users may create/select multiple small named dictionaries scoped to a project, for
+  example `podcast`,
+  `training`, or `history_lectures`;
+- selected terminology may be provided to correction/translation LLMs as context only
+  after explicit project/job selection;
+- no dictionary is inherited automatically across projects;
+- dictionary use is optional, and its identity and content hash must be included in
+  provenance where it affects automated output;
+- ASR vocabulary biasing is not enabled by default because an irrelevant dictionary may
+  reduce recognition quality.
+
+## 4. Manual translation pipeline
+
+Translation is a separate pipeline, not a branch inside transcript correction, although
+it reuses common versioning, batch, editor, provenance, audit, and future GUI
+infrastructure.
+
+The future translation source can be:
+
+```text
+--source raw
+```
+
+for an intentionally dirty/raw canonical translation, or a selected corrected revision.
+Corrected text is the normal intended production source.
+
+Translation requirements:
+
+- source units are sentence-level after sentenceization of the selected transcript;
+- translation mapping is sentence-to-sentence, not word-to-word;
+- source sentence timing is retained for target subtitle planning;
+- translated word count/order is free to differ from the source language;
+- manual translation is implemented first and becomes benchmark ground truth;
+- target-language text can itself be manually revised;
+- one structured immutable translation artifact becomes the source for target TXT, SRT,
+  VTT, and future HTML exports;
+- the artifact records exactly which raw result or transcript revision was translated;
+- exact translation JSON Schema is deferred until this pipeline is designed.
+
+## 5. Automated translation
+
+After manual translation establishes ground truth:
+
+- add local/cloud API translation providers;
+- retain provider/model/prompt/config provenance;
+- use configurable chunks/context appropriate to the model;
+- preserve sentence-level source mapping and source time spans;
+- allow manual revision of automated translations;
+- benchmark automated output against manual translations separately from transcript
+  correction quality.
+
+Useful benchmark paths include:
+
+```text
+raw PL -> automated translation -> compare with EN gold
+manual corrected PL -> automated translation -> compare with EN gold
+raw PL -> automated correction -> automated translation -> compare with EN gold
+```
+
+## 6. Content-aware directory discovery
 
 - Replace the directory extension allowlist with a bounded ffprobe-based candidate
   classifier so any FFmpeg-decodable audio can be included without treating documents,
@@ -30,19 +164,7 @@ The pilot procedure and minimum feedback summary are documented in
   errors, and emit a structured skip reason for non-audio files.
 - Avoid probing each accepted source twice by carrying trusted probe data into inspection.
 
-## 1. GUI
-
-- file, directory, and group selection;
-- dry-run preview;
-- audio-stream selection;
-- speaker-label editing;
-- warning display;
-- job queue;
-- popup or secure token storage;
-- transcript, speaker, and timestamp editor;
-- re-export without ASR.
-
-## 2. Audio repair
+## 7. Audio repair
 
 - problem-type classification;
 - denoising;
@@ -54,7 +176,7 @@ The pilot procedure and minimum feedback summary are documented in
 - `off`, `ask`, and `auto` modes;
 - comparison of original and repaired audio.
 
-## 3. Transcript comparison
+## 8. Transcript comparison
 
 - transcribe original and repaired audio;
 - compare confidence and agreement automatically;
@@ -62,35 +184,7 @@ The pilot procedure and minimum feedback summary are documented in
 - select the better result or a controlled hybrid;
 - preserve both canonical results.
 
-## 4. LLM post-processing
-
-- local LM Studio endpoint;
-- cloud API as an explicit option with proper privacy warning;
-- punctuation and proper-name correction;
-- terminology dictionary;
-- filler removal as an export, not a canonical-text mutation;
-- strict change tracking;
-- no timestamp movement without word mapping;
-- optional (with prepared prompts) summaries.
-
-## 4a. Transcript correction and editorial workflow
-
-- keep the original canonical result immutable and store corrections as a versioned
-  layer linked by result hash, schema version, and application version;
-- represent edits against stable word/time/speaker anchors rather than treating TXT as
-  the source of truth;
-- import corrected TXT or LLM output through normalized token alignment, automatically
-  applying unambiguous substitutions and punctuation while reporting ambiguous
-  insertions, deletions, speaker changes, and timestamp mappings for review;
-- support punctuation, quotation marks, proper names, sentence boundaries, speaker
-  attribution, and explicit split/merge operations with an audit trail;
-- record whether each edit was manual, dictionary-driven, or LLM-assisted and preserve
-  privacy-relevant processing provenance;
-- regenerate TXT, SRT, VTT, segments JSON, and web transcript data atomically from one
-  corrected revision; never maintain independent hand-edited exports;
-- provide audio-following word or sentence review and re-export without rerunning ASR.
-
-## 5. Presets and benchmark
+## 9. Presets and benchmark
 
 - `balanced`;
 - `low-vram`;
@@ -105,14 +199,18 @@ The pilot procedure and minimum feedback summary are documented in
 - HTML/JSON report;
 - hardware comparison.
 
-## 6. Advanced channel handling
+The expanded manual correction corpus should also become the reference source for lexical
+correction benchmarks. Separate timestamp and diarization ground truth is still required
+for timestamp/DER/JER evaluation.
+
+## 10. Advanced channel handling
 
 - detect and remove duplicates caused by crosstalk;
 - compare channel transcripts with timestamps;
 - preserve legitimate single-word and rhetorical repetitions;
 - support for more than two channels in one file.
 
-## 7. Subtitles
+## 11. Subtitles
 
 - speaker colors;
 - styled WebVTT;
@@ -121,21 +219,45 @@ The pilot procedure and minimum feedback summary are documented in
 - platform presets;
 - visual preview.
 
-## 7a. Platform transcript delivery
+## 12. Platform transcript delivery and HTML
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;
 - publish multiple Podcasting 2.0 transcript links where appropriate, including a
   readable transcript and a timed caption resource;
-- build an accessible synchronized HTML transcript from canonical/segments JSON, with
-  sentence-level seeking, current-sentence highlighting, and keyboard controls;
+- build an accessible synchronized HTML transcript from the selected effective transcript
+  or suitable derived timed data, with sentence-level seeking, current-sentence
+  highlighting, and keyboard controls;
 - add HTML as an explicit generated export (`transcriber export --format html`), with a
   standalone document and an embeddable fragment that require no transcription rerun;
 - apply speaker colors in custom HTML/CSS with textual labels as the portable and
   accessible fallback;
-- define export presets for conservative platform interchange and web-native playback.
+- define export presets for conservative platform interchange and web-native playback;
+- design translated/bilingual HTML after the translation artifact contract exists.
 
-## 8. Distribution
+## 13. GUI
+
+GUI remains deliberately late in the roadmap so the application/domain contracts are
+stable first.
+
+Planned capabilities:
+
+- file, directory, and group selection;
+- dry-run preview;
+- audio-stream selection;
+- warning display and job queue;
+- transcript correction and speaker-attribution editing;
+- hide review anchors while retaining the same internal revision mapping;
+- preview revision changes without applying them;
+- re-export raw or selected revision without ASR;
+- translation and translated-text revision after those pipelines exist;
+- secure handling of optional API credentials;
+- audio-following review where useful.
+
+The GUI calls application services directly and MUST NOT execute CLI commands as a
+subprocess or maintain a second revision/translation model.
+
+## 14. Distribution
 
 - GPU-enabled Docker image;
 - pinned image versions;
@@ -144,7 +266,7 @@ The pilot procedure and minimum feedback summary are documented in
 - Ubuntu 26.04 LTS qualification;
 - optional native Windows support as Tier 2.
 
-## 9. Operations
+## 15. Operations
 
 - `fail-fast`;
 - queue scheduling;

@@ -100,6 +100,28 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-I01** Diagnostics MUST be warning-only and MUST NOT modify or repair source audio.
 - **FR-I02** MVP diagnostics MUST cover clipping, low level, channel-level imbalance, and high silence ratio.
 
+### J. Transcript revisions (planned v0.2.0)
+
+- **FR-J00** Final canonical `results.json` MUST remain immutable during all transcript-revision operations.
+- **FR-J01** `revise prepare` MUST accept one completed canonical result or a directory of completed results and create `EWP-REVIEW 1` work files without loading source audio or ML models.
+- **FR-J02** Directory-based revision preparation and apply MUST use deterministic natural ordering, ignore subdirectories unless recursion is explicit, isolate per-item failures, and follow the existing batch continuation policy.
+- **FR-J03** `revise apply` MUST create a separate schema-valid immutable full-snapshot revision linked to the exact base-result SHA-256. It MUST NOT store a delta as the only representation of corrected state.
+- **FR-J04** A revision MUST preserve a mapping from corrected text tokens to canonical `word_id` anchors or an explicit insertion anchor.
+- **FR-J05** Normal revision MUST support spelling/proper-name corrections, capitalization, punctuation, sentence-boundary changes, merge/split, insertion, deletion, and reassignment to an existing `speaker_id`.
+- **FR-J06** Meaningful repetitions and self-corrections MUST NOT be removed implicitly by the revision engine.
+- **FR-J07** Corrected punctuation MUST remain ordinary text; reviewers MUST NOT be required to maintain a separate punctuation-token or sentence-boundary structure.
+- **FR-J08** Canonical word timestamps MUST remain unchanged by normal revision. Revised exports MUST inherit timing from mapped canonical words; inserted text MUST NOT receive fabricated canonical timestamps.
+- **FR-J09** `revise preview REVIEW` and `revise apply REVIEW --no-apply` MUST execute the same parse/alignment/validation path and MUST NOT persist a revision or derived export.
+- **FR-J10** `revise edit` MUST open an external editor and, after a successful editor exit, apply the saved review automatically unless `--no-apply` is supplied. This behavior MUST be documented in CLI help.
+- **FR-J11** Review anchors MUST be validated against canonical word order and the exact base-result hash. Missing, modified, duplicate, overlapping, or out-of-order anchors MUST NOT be silently repaired.
+- **FR-J12** Ambiguous text-to-word mappings MUST be reported rather than resolved arbitrarily when the choice can affect timing or speaker attribution.
+- **FR-J13** Every revision MUST store provenance, alignment metadata, summary change statistics, and structured warnings.
+- **FR-J14** Detailed audit output MAY be generated with `--audit`; a base-relative detailed audit MUST be reconstructable later from the immutable base result and full revision snapshot.
+- **FR-J15** A revision MAY reference a parent revision for lineage, but the revision MUST remain exportable without replaying or loading the parent.
+- **FR-J16** `transcriber export` MUST support selecting raw canonical text or a compatible revision. Omitting a revision selector MUST preserve raw v0.1 behavior.
+- **FR-J17** TXT, SRT, VTT, and `segments.json` generated from a revision MUST be derived from one resolved `EffectiveTranscript` and MUST NOT require source audio or ML models.
+- **FR-J18** Revision artifacts and revision-aware exports MUST use non-destructive allocation and atomic publication.
+
 ## 2. Non-functional requirements
 
 - **NFR-001 Privacy:** the pipeline performs no upload of audio or transcript text - everything is processed locally.
@@ -114,3 +136,6 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **NFR-010 Path compatibility:** Unicode, spaces, and Windows/WSL path forms must be supported.
 - **NFR-011 Non-destructive behavior:** source files and existing results must not be deleted or overwritten.
 - **NFR-012 Documentation and compatibility:** a JSON schema change requires a `schema_version` update and either migration support or a compatible reader.
+
+- **NFR-013 Revision determinism:** for the same base result, review content, configuration, and alignment-strategy version, revision mapping and preview classification must be deterministic.
+- **NFR-014 Revision extensibility:** the manual revision core must be reusable by future LLM and GUI adapters without introducing another corrected transcript model.

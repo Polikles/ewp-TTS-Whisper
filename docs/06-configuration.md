@@ -104,3 +104,35 @@ config_version = "1.0"
 ```
 
 Changing the meaning of an existing key requires a major configuration-version update or a migration layer.
+
+
+## 7. Transcript revision configuration (planned v0.2.0)
+
+Manual revision uses the normal precedence rules and adds a strict `[revision]` section.
+Initial defaults are expected to be:
+
+```toml
+[revision]
+anchor_target_words = 200
+long_gap_warning_ms = 2000
+generate_audit = false
+editor = ""
+```
+
+- `anchor_target_words` is an approximate review/alignment window size. Writers should
+  prefer a nearby canonical segment, pause, or speaker boundary when practical.
+- `long_gap_warning_ms` controls the warning for inserted text positioned between
+  canonical source words separated by a large pause. It does not move canonical timing.
+- `generate_audit` controls optional detailed audit persistence; compact provenance and
+  statistics remain mandatory.
+- an empty `editor` uses environment fallback (`VISUAL`, then `EDITOR`) for `revise edit`.
+
+Revision batch failure behavior reuses the existing runtime batch policy rather than
+introducing a duplicate correction-only setting.
+
+## 8. Future automated-correction configuration
+
+LLM correction is not part of v0.2.0. When implemented, chunk target size, maximum size,
+and read-only overlap MUST be configurable in TOML and overrideable by CLI/application
+request. Exact default values are deferred until automated-correction benchmarks. No
+backend model's maximum context window may be hard-coded into the revision engine.

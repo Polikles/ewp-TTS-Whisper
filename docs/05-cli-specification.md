@@ -180,6 +180,100 @@ Options:
 
 The command does not open audio or load models. An existing export is skipped without `--force`; with `--force`, the next version number is created.
 
+### Revision selection (planned v0.2.0)
+
+`export` additionally accepts:
+
+```text
+--revision none|latest|PATH
+```
+
+Omitting `--revision` is equivalent to `--revision none` and preserves the v0.1 raw
+canonical export path. `latest` means the highest allocated revision number whose exact
+base-result SHA-256 matches `RESULTS_JSON`. Explicit paths are recommended for benchmark
+branches. Revision-aware export remains audio-free and model-free.
+
+## 7a. `revise` (planned v0.2.0)
+
+```text
+transcriber revise prepare INPUT [OPTIONS]
+transcriber revise apply INPUT [OPTIONS]
+transcriber revise preview INPUT [OPTIONS]
+transcriber revise edit INPUT [OPTIONS]
+transcriber revise audit REVISION [OPTIONS]
+```
+
+`prepare` accepts a completed `results.json` or a directory containing completed results.
+`apply` and `preview` accept an `EWP-REVIEW 1` file or a directory of review files.
+Directory operations use deterministic natural ordering and do not recurse unless
+`--recursive` is supplied.
+
+Common planned options:
+
+```text
+--output-dir PATH
+--recursive
+--config PATH
+--results-dir PATH             # resolve base results for review files
+--json-output                  # preview/batch structured outcome where supported
+```
+
+### `revise prepare`
+
+Creates human-readable `.review.txt` work files with immutable base metadata, stable word
+anchors, speaker directives, and editable transcript text. It never modifies the base
+result. Batch prepare is part of v0.2.0, not a later convenience feature.
+
+### `revise apply`
+
+```text
+transcriber revise apply REVIEW [--no-apply] [--audit] [OPTIONS]
+```
+
+Normal apply parses the review, verifies the exact base-result SHA-256, runs deterministic
+anchored alignment, validates the complete revision snapshot, and publishes a new
+`*_revision_NNN.json` atomically. `--audit` additionally writes detailed diagnostic change
+data.
+
+`--no-apply` performs the complete parse/alignment/validation and preview computation but
+does not publish a revision or derived exports.
+
+### `revise preview`
+
+```text
+transcriber revise preview REVIEW [OPTIONS]
+```
+
+This is the user-facing alias for the non-mutating apply path. It is semantically
+equivalent to:
+
+```text
+transcriber revise apply REVIEW --no-apply
+```
+
+The equivalence MUST appear in `--help`. Both CLI forms call the same application
+operation.
+
+### `revise edit`
+
+```text
+transcriber revise edit RESULTS_JSON [--no-apply] [OPTIONS]
+```
+
+The command prepares a review file, starts the configured external editor, and waits for
+it to close. **Saving the file and closing the editor with exit status zero is treated as
+approval to create a revision automatically.** Supplying `--no-apply` keeps the edited
+review file but suppresses automatic apply. A non-zero editor exit does not create a
+revision.
+
+The editor is executed as an argument vector, never through `shell=True`.
+
+### `revise audit`
+
+Reconstructs a detailed base-relative audit from a full revision and its immutable base
+result. Parent-relative reconstruction additionally requires the parent revision artifact.
+Audit data is diagnostic and is not needed to export the revision.
+
 ## 8. `clean`
 
 ```text

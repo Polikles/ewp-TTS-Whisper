@@ -158,3 +158,31 @@ retention reason written through a validated atomic transition. Proposed reasons
 Only after that metadata exists may cleanup expose corresponding filters. The reader and
 cleanup path must remain compatible with version-1 markers until their retained
 workspaces have expired or been explicitly removed.
+
+
+## 10. Revision state and publication (planned v0.2.0)
+
+Transcript revisions are final immutable artifacts and use the same non-destructive
+persistence principles as canonical outputs. Revision number allocation occurs under the
+output-directory lock. A final revision is schema-validated before atomic publication and
+never overwrites an existing revision.
+
+Preview and `apply --no-apply` do not reserve a permanent revision number. Review work
+files are user-editable and are not treated as final application state.
+
+A revision verifies the exact SHA-256 of its canonical base before application or export.
+A parent revision hash is provenance; the parent is not needed to materialize the child.
+
+Additional planned warning/error codes:
+
+```text
+REVISION_ALIGNMENT_AMBIGUOUS
+REVISION_BASE_HASH_MISMATCH
+REVISION_ANCHOR_INVALID
+REVISION_INSERT_ACROSS_LONG_GAP
+REVISION_SOURCE_WORD_MISSING
+REVISION_SPEAKER_INVALID
+```
+
+Batch prepare/apply follows the existing failure-isolation policy and returns the existing
+batch-failure exit code when one or more items fail.

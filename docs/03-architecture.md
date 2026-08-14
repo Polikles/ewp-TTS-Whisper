@@ -136,3 +136,51 @@ The JSON result records:
 - pyannote handles diarization of mixed material.
 - The normalizer translates backend output into the project's stable schema.
 - Exporters do not depend on ML backends.
+
+
+## 8. Transcript revision architecture (planned v0.2.0)
+
+Transcript correction is a post-ASR application pipeline. It does not reopen source audio.
+
+```mermaid
+flowchart TD
+    A[Immutable results.json] --> B[revise prepare]
+    B --> C[EWP-REVIEW 1]
+    C --> D[manual editor]
+    D --> E[parse + anchored token alignment]
+    E --> F[validate full revision snapshot]
+    F --> G[atomic revision_NNN.json]
+    A --> H[TranscriptResolver]
+    G --> H
+    H --> I[EffectiveTranscript]
+    I --> J[TXT]
+    I --> K[SRT]
+    I --> L[VTT]
+    I --> M[segments JSON]
+```
+
+`EffectiveTranscript` is an in-memory boundary between transcript source selection and
+export. Raw canonical content and a corrected revision are resolved into the same runtime
+shape. It is not another persisted source-of-truth artifact.
+
+Recommended new internal responsibilities are revision/review models, review parsing and
+rendering, deterministic anchored alignment, revision persistence, and transcript
+resolution. Exact module names are not public API.
+
+The v0.1 canonical models and `results.schema.json` remain unchanged. In particular, the
+revision layer removes the need to mutate `CanonicalSegment.text` or `CanonicalWord.text`
+when editorial text changes.
+
+## 9. Revision responsibility boundaries
+
+- the canonical reader verifies the completed base result and its hash;
+- the review formatter converts an effective transcript into human-editable text plus
+  machine-owned anchors;
+- the revision aligner maps edited text back to canonical word anchors and reports
+  ambiguity;
+- revision storage validates and atomically publishes a full immutable snapshot;
+- `TranscriptResolver` verifies revision/base compatibility and produces
+  `EffectiveTranscript`;
+- exporters consume effective text/timing and never call ASR/diarization backends;
+- CLI and future GUI/LLM adapters invoke application services rather than implementing
+  correction or alignment logic themselves.

@@ -16,13 +16,15 @@
 | [10 - WSL2 installation](10-wsl2-installation.md) | Reference environment, CUDA, models, and offline setup |
 | [11 - Security and privacy](11-security-and-privacy.md) | Privacy, tokens, temporary files, and network use |
 | [12 - Testing and acceptance](12-testing-and-acceptance.md) | Application and audio-material checklists |
+| [13 - Transcript revisions](13-transcript-revisions.md) | Planned v0.2.0 manual correction, review format, revision snapshots, and effective transcript |
 | [14 - Dependency baseline](14-dependency-baseline.md) | Verified environment starting point |
 | [15 - Glossary](15-glossary.md) | Standardized terminology |
 | [16 - Risk register](16-risk-register.md) | Technical risks and mitigations |
 | [17 - Definition of Done](17-definition-of-done-mvp.md) | MVP completion criteria |
 | [18 - Quality evaluation](18-quality-evaluation.md) | Manifest-driven WER/CER reports and review diffs |
 | [20 - MVP requirements traceability](20-mvp-requirements-traceability.md) | Requirement-by-requirement implementation, test, evidence, and deferral status |
-| [99 - Version 2 roadmap](99-roadmap-v2.md) | GUI, audio repair, LLMs, benchmarks, and Docker |
+| [21 - v0.2.0 transcript revision plan](21-v0.2.0-transcript-revision-plan.md) | Consolidated implementation plan and future-compatibility decisions |
+| [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 
 ## Architecture Decision Records
@@ -46,6 +48,7 @@
 - [ADR-0017: Content-aware directory discovery after MVP](adr/0017-content-aware-directory-discovery.md)
 - [ADR-0018: Synthetic fast-speech and recorder-noise acceptance](adr/0018-fast-noisy-audio-acceptance.md)
 - [ADR-0019: Fresh Ubuntu 24.04 WSL installation](adr/0019-fresh-wsl-installation.md)
+- [ADR-0020: Versioned full-snapshot transcript revisions](adr/0020-versioned-transcript-revisions.md) — accepted for v0.2.0
 
 ## Implementation guidance
 
@@ -58,6 +61,10 @@
 
 - `schemas/results.schema.json` - JSON Schema for canonical results.
 - `schemas/segments.schema.json` - JSON Schema for the derived segment export.
+- `schemas/revision.schema.json` - planned v0.2.0 JSON Schema for immutable transcript revisions.
+- `schemas/ewp-review.schema.md` - planned `EWP-REVIEW 1` text-format grammar and validation contract.
 - `examples/config.example.toml` - complete example configuration.
 - `examples/results.example.json` - minimal valid result.
 - `examples/segments.example.json` - example sentence-level export.
+- `examples/revision.example.json` - planned revision snapshot example.
+- `examples/review.example.txt` - planned human-editable review example.

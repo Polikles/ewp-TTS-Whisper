@@ -9,7 +9,8 @@ Status meanings:
 - **verified** — implemented and covered by automated tests or accepted external evidence;
 - **implemented** — implemented, but an explicitly listed external validation remains;
 - **deferred** — intentionally moved beyond MVP by an accepted ADR;
-- **gap** — the current implementation does not yet satisfy the literal requirement.
+- **gap** — the current implementation does not yet satisfy the literal requirement;
+- **planned** — accepted target for the next MVP increment and intentionally not yet implemented.
 
 ## Functional requirements
 
@@ -70,3 +71,20 @@ Status meanings:
 
 1. Keep dataset-dependent English, three-speaker, timestamp, and DER/JER accuracy gates deferred under
    ADR-0014 until annotated archive-derived references exist.
+
+
+## v0.2.0 planned transcript-revision requirements
+
+These requirements are intentionally **planned**, not implementation claims. Their
+normative definitions are in `02-requirements.md` and `13-transcript-revisions.md`.
+
+| Requirement | Status | Planned implementation/evidence |
+| --- | --- | --- |
+| FR-J00, FR-J03, FR-J15, FR-J18 | planned | Revision domain/storage, ADR-0020, immutable full snapshots, atomic allocator tests. |
+| FR-J01, FR-J02 | planned | `EWP-REVIEW 1`, prepare/apply application services, directory discovery and batch tests. |
+| FR-J04, FR-J05, FR-J06, FR-J07, FR-J11, FR-J12 | planned | Anchored token aligner and correction case matrix. |
+| FR-J08 | planned | `EffectiveTranscript` timing inheritance; no canonical timestamp mutation. |
+| FR-J09, FR-J10 | planned | CLI/application preview path and external-editor lifecycle tests. |
+| FR-J13, FR-J14 | planned | Revision provenance/statistics and optional/reconstructable audit. |
+| FR-J16, FR-J17 | planned | Revision resolver and exporter refactor to `EffectiveTranscript`. |
+| NFR-013, NFR-014 | planned | Determinism fixtures and shared CLI/future-LLM/GUI application boundary. |

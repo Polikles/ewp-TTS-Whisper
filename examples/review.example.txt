@@ -1,0 +1,17 @@
+# EWP-REVIEW 1
+# job_id: revision-example
+# base_result_file: revision-example_results.json
+# base_result_sha256: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+# base_result_schema_version: 1.0
+# base_result_version: 1
+# language: pl
+# generated_at: 2026-08-14T14:00:00Z
+# application_version: 0.2.0
+
+@@ anchor word_000001..word_000006
+@@ speaker speaker_001
+
+Rozmawiamy o OpenAI.
+
+@@ speaker speaker_002
+Tak. Właśnie.

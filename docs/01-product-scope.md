@@ -82,3 +82,20 @@ In descending order:
 7. performance.
 
 The application may run more slowly when this improves quality, provided the reference "quality" preset remains within 24 GB of VRAM on the reference hardware.
+
+
+## 7. Planned v0.2.0 MVP increment
+
+The next MVP increment adds manual transcript revision while preserving the v0.1
+transcription contract. Planned additions are:
+
+- immutable full-snapshot transcript revisions linked to canonical results;
+- human-readable `EWP-REVIEW 1` manual correction;
+- single-file and batch prepare/apply workflows;
+- preview and external-editor workflows;
+- correction of text, punctuation/sentence boundaries, and existing-speaker attribution;
+- revision-aware TXT/SRT/VTT/segments regeneration without ASR;
+- provenance, summary statistics, and optional detailed audit.
+
+LLM-based correction, translation, automated translation, and GUI remain outside v0.2.0.
+They are sequenced in `99-roadmap-v2.md`.
