@@ -925,6 +925,13 @@ def export_command(
         RequestedSpeakerLabels | None,
         typer.Option("--speaker-labels", help="Subtitle speaker-label behavior."),
     ] = None,
+    revision: Annotated[
+        str,
+        typer.Option(
+            "--revision",
+            help="Corrected transcript selection: none, latest, or a revision JSON path.",
+        ),
+    ] = "none",
 ) -> None:
     """Regenerate exports from canonical JSON without opening source audio."""
 
@@ -950,17 +957,23 @@ def export_command(
                 )
                 if enabled
             ]
+        selected_revision: str | Path = revision
+        if revision not in {"none", "latest"}:
+            selected_revision = normalize_input_path(revision)
         outcome = export_result(
             normalize_input_path(results_json),
             formats=tuple(requested),
             output_directory=_optional_user_path(output_directory),
             force=force,
             subtitles_config=subtitles_config,
+            revision=selected_revision,
         )
     except ApplicationError as error:
         _expected_error(error)
 
     typer.echo(f"Export version: {outcome.result_version}")
+    if outcome.revision_number is not None:
+        typer.echo(f"Revision number: {outcome.revision_number}")
     for path in outcome.written:
         typer.echo(f"WROTE {path}")
     for path in outcome.skipped:

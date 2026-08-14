@@ -29,6 +29,8 @@ def render_segments_json(
     results_sha256: str,
     generated_at: datetime,
     include_words: bool = True,
+    revision_file: str | Path | None = None,
+    revision_number: int | None = None,
 ) -> str:
     """Render deterministic speaker-turn JSON without reading source media."""
 
@@ -37,15 +39,19 @@ def render_segments_json(
     if generated_at.tzinfo is None or generated_at.utcoffset() is None:
         raise ValueError("generated_at must be timezone-aware")
     turns = _speaker_turns(result.transcript.segments, include_words=include_words)
+    derived_from: dict[str, object] = {
+        "results_file": Path(results_file).name,
+        "results_sha256": results_sha256,
+        "results_schema_version": result.schema_version,
+    }
+    if revision_file is not None:
+        derived_from["revision_file"] = Path(revision_file).name
+        derived_from["revision_number"] = revision_number
     document = {
         "schema_version": "1.0",
         "generated_at": generated_at.isoformat().replace("+00:00", "Z"),
         "job_id": result.job_id,
-        "derived_from": {
-            "results_file": Path(results_file).name,
-            "results_sha256": results_sha256,
-            "results_schema_version": result.schema_version,
-        },
+        "derived_from": derived_from,
         "segmentation": {
             "mode": "speaker_turn",
             "include_words": include_words,

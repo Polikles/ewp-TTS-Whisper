@@ -236,8 +236,8 @@ Perform a manual review in the target player or a private YouTube upload:
 - [x] `revise preview` writes no revision.
 - [x] `revise apply --no-apply` writes no revision and matches preview outcome.
 - [x] `revise edit --no-apply` retains review edits without creating a revision.
-- [ ] Successful editor close without `--no-apply` automatically applies the saved review.
-- [ ] Non-zero editor exit creates no revision.
+- [x] Successful editor close without `--no-apply` automatically applies the saved review.
+- [x] Non-zero editor exit creates no revision.
 
 ### Persistence and provenance
 
@@ -252,12 +252,12 @@ Perform a manual review in the target player or a private YouTube upload:
 
 ### Revision-aware exports
 
-- [ ] Omitted `--revision` is behaviorally equivalent to raw v0.1 export.
-- [ ] `--revision none` selects raw canonical text.
-- [ ] `--revision latest` selects only a revision matching the exact base-result hash.
-- [ ] Explicit revision path is validated against the selected base result.
-- [ ] Revised TXT uses corrected punctuation and one-sentence-per-line output.
-- [ ] Revised SRT and VTT use corrected text with inherited canonical timing.
-- [ ] Revised segments JSON is generated from the same effective transcript.
-- [ ] Revision prepare/apply/export do not require source audio, GPU, ASR, alignment, or
+- [x] Omitted `--revision` is behaviorally equivalent to raw v0.1 export.
+- [x] `--revision none` selects raw canonical text.
+- [x] `--revision latest` selects only a revision matching the exact base-result hash.
+- [x] Explicit revision path is validated against the selected base result.
+- [x] Revised TXT uses corrected punctuation and one-sentence-per-line output.
+- [x] Revised SRT and VTT use corrected text with inherited canonical timing.
+- [x] Revised segments JSON is generated from the same effective transcript.
+- [x] Revision prepare/apply/export do not require source audio, GPU, ASR, alignment, or
   diarization models.

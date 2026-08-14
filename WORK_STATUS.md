@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 353 automated checks pass;
+- all 358 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -26,11 +26,11 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 Continue implementing the accepted v0.2.0 transcript-revision contract. Strict immutable
 revision models, exact base-result compatibility checks, and anchored alignment are
-implemented; the next slice is revision-aware effective transcript/export. Revision
+implemented; the next slice is detailed revision audit and lineage. Revision
 configuration, filename allocation, atomic storage, strict `EWP-REVIEW 1`
 parsing/rendering, safe model-free single/batch `revise prepare`, and single-file
-single/directory `revise preview`/`revise apply`, and safe external-editor review are
-implemented.
+single/directory `revise preview`/`revise apply`, safe external-editor review, and
+revision-aware effective transcript/export are implemented.
 
 Do not hand-edit canonical JSON. Until the revision pipeline is implemented and tested,
 preserve each original result and keep corrections as separate review material.

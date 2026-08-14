@@ -33,6 +33,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added safe external-editor review workflow with config/`VISUAL`/`EDITOR` resolution,
   automatic apply after a successful close, and a revision-free `--no-apply` path that
   retains the edited review.
+- Added the shared effective-transcript resolver and revision-aware TXT/SRT/VTT/segments
+  export through `--revision none|latest|PATH`, with inherited timing, corrected speakers,
+  distinct filenames, and revision provenance in segments JSON.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

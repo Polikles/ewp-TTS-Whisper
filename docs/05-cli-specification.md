@@ -176,11 +176,12 @@ Options:
 --config PATH
 --subtitle-preset youtube
 --speaker-labels on-change|always|never
+--revision none|latest|PATH
 ```
 
 The command does not open audio or load models. An existing export is skipped without `--force`; with `--force`, the next version number is created.
 
-### Revision selection (planned v0.2.0)
+### Revision selection
 
 `export` additionally accepts:
 

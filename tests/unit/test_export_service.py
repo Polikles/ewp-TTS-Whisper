@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts import export_service
+from ewp_transcripts.application import apply_review_file, prepare_review_file
+from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.errors import InvalidCanonicalResultError
 from ewp_transcripts.export_service import ExportFormat, export_result
 
@@ -113,3 +115,61 @@ def test_export_sanitizes_rendering_value_errors(
 
     with pytest.raises(InvalidCanonicalResultError, match="Cannot render configured exports"):
         export_result(result_path, formats=(ExportFormat.SRT,))
+
+
+def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
+    tmp_path: Path,
+) -> None:
+    result_path = tmp_path / "S01E01_results.json"
+    result_path.write_bytes(EXAMPLE_PATH.read_bytes())
+    review = prepare_review_file(
+        result_path,
+        output_directory=tmp_path / "reviews",
+    ).path
+    review.write_text(
+        review.read_text(encoding="utf-8").replace(
+            "Today we discuss transcription.",
+            "Today we carefully discuss corrected transcription.",
+        ),
+        encoding="utf-8",
+    )
+    applied = apply_review_file(review, config=ApplicationConfig())
+
+    outcome = export_result(
+        result_path,
+        formats=(ExportFormat.TXT, ExportFormat.SRT, ExportFormat.SEGMENTS),
+        revision=applied.revision_path,
+        generated_at=FIXED_TIME,
+    )
+
+    assert outcome.revision_number == 1
+    assert {path.name for path in outcome.written} == {
+        "S01E01_transcript_revision_001.txt",
+        "S01E01_subtitles_revision_001.srt",
+        "S01E01_segments_revision_001.json",
+    }
+    transcript = (tmp_path / "S01E01_transcript_revision_001.txt").read_text(encoding="utf-8")
+    assert "carefully discuss corrected transcription" in transcript
+    segments = json.loads(
+        (tmp_path / "S01E01_segments_revision_001.json").read_text(encoding="utf-8")
+    )
+    assert segments["derived_from"]["revision_number"] == 1
+    assert segments["derived_from"]["revision_file"] == applied.revision_path.name
+
+
+def test_latest_revision_selection_does_not_change_raw_export(tmp_path: Path) -> None:
+    result_path = tmp_path / "S01E01_results.json"
+    result_path.write_bytes(EXAMPLE_PATH.read_bytes())
+    review = prepare_review_file(result_path, output_directory=tmp_path / "reviews").path
+    apply_review_file(review, config=ApplicationConfig())
+
+    revised = export_result(
+        result_path,
+        formats=(ExportFormat.TXT,),
+        revision="latest",
+    )
+    raw = export_result(result_path, formats=(ExportFormat.TXT,), revision="none")
+
+    assert revised.revision_number == 1
+    assert raw.revision_number is None
+    assert (tmp_path / "S01E01_transcript.txt").is_file()
