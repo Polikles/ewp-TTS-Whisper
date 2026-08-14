@@ -24,20 +24,45 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 ## Authoritative next step
 
-Continue validating the implemented v0.2.0 transcript-revision workflow on one real
-podcast episode using `WSL config/REVISE_TRANSCRIPTS.md`; the pilot is in progress.
-Immutable revision models, exact base-result
-compatibility, anchored alignment, configuration, safe model-free single/batch review,
-external-editor operation, preview/apply, effective transcript export, detailed audit,
-and parent/sibling full-snapshot lineage are implemented and covered by automated tests.
+The single-episode v0.2.0 revision pilot passed with the staged workflow documented in
+`WSL config/REVISE_TRANSCRIPTS.md`: prepare, manual Windows Notepad edit, preview/apply,
+audit, and revision-aware export all worked. The minimal workflow is accepted for the
+MVP, although manual editing remains intentionally labor-intensive.
+
+Resume with this bulk-workflow plan:
+
+1. Transcribe the selected episode batch and verify that every expected canonical
+   `*_results.json` completed successfully.
+2. Run non-recursive `revise prepare` on the result directory and verify one distinct
+   review per canonical result, with no failed items or naming collisions.
+3. Manually correct the prepared `.review.txt` files in Windows Notepad. This is the
+   user-input interval; no immutable revisions are created yet.
+4. Run directory `revise preview` if desired, then directory `revise apply --audit` with
+   explicit results and revision output directories. Verify per-item summaries and
+   revision/audit pairing.
+5. Add and test deterministic directory/batch support for revision-aware `export` before
+   the operator bulk-export test; the current `transcriber export` command accepts one
+   canonical result at a time.
+6. Export corrected TXT/SRT/VTT/segments for the complete batch and verify counts,
+   provenance, collision-safe names, and failure isolation.
+7. Record usability defects before beginning correction of all 24 podcast episodes.
+
+Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive environment.
+Step 3 requires the owner's manual transcript corrections. Step 5 is repository work and
+does not require user input unless a new product decision appears.
+
+Immutable revision models, exact base-result compatibility, anchored alignment,
+configuration, safe model-free single/batch review, effective transcript export,
+detailed audit, and parent/sibling full-snapshot lineage are implemented and covered by
+automated tests.
 
 Do not hand-edit canonical JSON. Preserve each original result and store accepted
 corrections as immutable revision snapshots.
 
 ## V2 priority order
 
-1. Implement and test v0.2.0 manual full-snapshot transcript revisions and revision-aware
-   exports.
+1. Complete bulk revision-aware export and validate the full v0.2.0 batch correction
+   workflow.
 2. Manually revise all 24 podcast episodes to create the first ground-truth corpus and
    record revision-workflow defects.
 3. Benchmark and add local/cloud API correction through the same revision engine.

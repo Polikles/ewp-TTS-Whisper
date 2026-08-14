@@ -58,6 +58,12 @@ All notable changes to EWP-transcripts are documented here.
   manual/automated translation pipeline, synchronized HTML export, and optional
   project-scoped dictionaries in the post-0.1 roadmap.
 
+### Validated
+
+- Passed the first real-episode staged revision pilot using Windows Notepad: review
+  preparation, validation, immutable apply, audit, and corrected export completed
+  without modifying the canonical result.
+
 ## 0.1.1 — internal release candidate — 2026-08-14
 
 Backward-compatible operator and transcription fixes found during the fresh-WSL archive
