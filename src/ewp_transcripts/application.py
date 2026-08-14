@@ -31,14 +31,20 @@ from ewp_transcripts.domain import (
     InspectionResult,
     JobReservation,
     TranscriptReview,
+    TranscriptRevision,
 )
-from ewp_transcripts.domain.canonical import CanonicalEnvironment, CanonicalResult
+from ewp_transcripts.domain.canonical import (
+    CanonicalEnvironment,
+    CanonicalResult,
+    load_canonical_result,
+)
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import (
     ApplicationError,
     InvalidReviewError,
     UnsupportedPipelineScopeError,
 )
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
 from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
@@ -53,8 +59,11 @@ from ewp_transcripts.pipeline import (
     run_source_speaker_pipeline,
 )
 from ewp_transcripts.review_discovery import discover_review_results
+from ewp_transcripts.review_format import load_review
 from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.review_storage import publish_review
+from ewp_transcripts.revision_service import build_revision
+from ewp_transcripts.revision_storage import publish_next_revision
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
 from ewp_transcripts.storage import (
     find_existing_results,
@@ -79,6 +88,8 @@ __all__ = [
     "inspect_input",
     "prepare_review_file",
     "prepare_review_batch",
+    "preview_review_file",
+    "apply_review_file",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -180,6 +191,100 @@ class BatchReviewPreparationOutcome:
     @property
     def failed(self) -> int:
         return sum(job.status == "failed" for job in self.jobs)
+
+
+@dataclass(frozen=True, slots=True)
+class RevisionPreviewOutcome:
+    """Validated unpublished revision and its exact base result."""
+
+    review_path: Path
+    base_result_path: Path
+    revision: TranscriptRevision
+
+
+@dataclass(frozen=True, slots=True)
+class RevisionApplyOutcome:
+    """Atomically published immutable revision."""
+
+    review_path: Path
+    base_result_path: Path
+    revision: TranscriptRevision
+    revision_path: Path
+
+
+def _review_base_path(review_path: Path, *, results_directory: Path | None) -> Path:
+    review = load_review(review_path)
+    filename = review.header.base_result_file
+    candidates = (
+        (results_directory / filename,)
+        if results_directory is not None
+        else (review_path.parent / filename, review_path.parent.parent / filename)
+    )
+    existing = [candidate for candidate in candidates if candidate.is_file()]
+    if not existing:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "Cannot locate the review's canonical base result; use --results-dir",
+        )
+    matching = [
+        candidate
+        for candidate in existing
+        if sha256_file(candidate) == review.header.base_result_sha256
+    ]
+    if not matching:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "Located canonical result does not match the review SHA-256",
+        )
+    return matching[0]
+
+
+def preview_review_file(
+    review_path: str | Path,
+    *,
+    results_directory: Path | None = None,
+    long_gap_warning_ms: int = 2000,
+) -> RevisionPreviewOutcome:
+    """Run the complete review parse, base verification, and alignment path without writes."""
+
+    normalized_review = normalize_input_path(review_path)
+    review = load_review(normalized_review)
+    base_path = _review_base_path(normalized_review, results_directory=results_directory)
+    base = load_canonical_result(base_path)
+    revision = build_revision(
+        review,
+        base,
+        base_path=base_path,
+        long_gap_warning_ms=long_gap_warning_ms,
+    )
+    return RevisionPreviewOutcome(normalized_review, base_path, revision)
+
+
+def apply_review_file(
+    review_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    results_directory: Path | None = None,
+    output_directory: Path | None = None,
+) -> RevisionApplyOutcome:
+    """Validate one review through preview and atomically publish its full snapshot."""
+
+    preview = preview_review_file(
+        review_path,
+        results_directory=results_directory,
+        long_gap_warning_ms=config.revision.long_gap_warning_ms,
+    )
+    revision, path = publish_next_revision(
+        preview.revision,
+        output_directory=output_directory or preview.base_result_path.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return RevisionApplyOutcome(
+        preview.review_path,
+        preview.base_result_path,
+        revision,
+        path,
+    )
 
 
 def prepare_review_file(

@@ -16,18 +16,20 @@ from ewp_transcripts.application import (
     ExportFormat,
     TranscriptionOutcome,
     application_version,
+    apply_review_file,
     clean_all_workdirs,
     doctor,
     dry_run,
     export_result,
     inspect_input,
     prepare_review_batch,
+    preview_review_file,
     transcribe_batch,
     transcribe_one,
 )
 from ewp_transcripts.config import load_config
 from ewp_transcripts.discovery import normalize_input_path
-from ewp_transcripts.domain import JobOutputPlan
+from ewp_transcripts.domain import JobOutputPlan, TranscriptRevision
 from ewp_transcripts.domain.enums import ChannelMode, LanguageMode, PlanDecision
 from ewp_transcripts.domain.errors import (
     ApplicationError,
@@ -194,6 +196,125 @@ def revise_prepare_command(
         )
     if outcome.failed:
         raise typer.Exit(code=5)
+
+
+def _revision_json(
+    revision: TranscriptRevision,
+    *,
+    revision_path: Path | None = None,
+) -> str:
+    payload = revision.model_dump(mode="json")
+    payload["revision_path"] = str(revision_path) if revision_path else None
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+def _print_revision_preview(revision: TranscriptRevision) -> None:
+    typer.echo(f"PREVIEW {revision.job_id}")
+    typer.echo(
+        f"SUMMARY source_tokens={revision.statistics.source_tokens} "
+        f"revision_tokens={revision.statistics.revision_tokens} "
+        f"warnings={len(revision.warnings)}"
+    )
+
+
+@revise_app.command("preview")
+def revise_preview_command(
+    review_path: Annotated[
+        Path,
+        typer.Argument(help="EWP-REVIEW file to validate and align.", metavar="REVIEW"),
+    ],
+    results_directory: Annotated[
+        Path | None,
+        typer.Option("--results-dir", help="Directory containing the exact base result."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the unpublished revision as JSON."),
+    ] = False,
+) -> None:
+    """Validate and align a review without writing a revision."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = preview_review_file(
+            review_path,
+            results_directory=_optional_user_path(results_directory),
+            long_gap_warning_ms=config.revision.long_gap_warning_ms,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(_revision_json(outcome.revision))
+    else:
+        _print_revision_preview(outcome.revision)
+
+
+@revise_app.command("apply")
+def revise_apply_command(
+    review_path: Annotated[
+        Path,
+        typer.Argument(help="EWP-REVIEW file to validate and apply.", metavar="REVIEW"),
+    ],
+    results_directory: Annotated[
+        Path | None,
+        typer.Option("--results-dir", help="Directory containing the exact base result."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the immutable revision to this directory."),
+    ] = None,
+    no_apply: Annotated[
+        bool,
+        typer.Option("--no-apply", help="Run the complete preview path without writing."),
+    ] = False,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the revision outcome as JSON."),
+    ] = False,
+) -> None:
+    """Validate a review and publish an immutable full-snapshot revision."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        if no_apply:
+            preview = preview_review_file(
+                review_path,
+                results_directory=_optional_user_path(results_directory),
+                long_gap_warning_ms=config.revision.long_gap_warning_ms,
+            )
+            revision = preview.revision
+            revision_path = None
+        else:
+            applied = apply_review_file(
+                review_path,
+                config=config,
+                results_directory=_optional_user_path(results_directory),
+                output_directory=_optional_user_path(output_directory),
+            )
+            revision = applied.revision
+            revision_path = applied.revision_path
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(_revision_json(revision, revision_path=revision_path))
+    elif revision_path is None:
+        _print_revision_preview(revision)
+    else:
+        typer.echo(f"APPLIED {revision.job_id}")
+        typer.echo(f"  REVISION {revision_path}")
+        typer.echo(
+            f"SUMMARY revision_number={revision.revision_number} "
+            f"revision_tokens={revision.statistics.revision_tokens} "
+            f"warnings={len(revision.warnings)}"
+        )
 
 
 @app.command("doctor")

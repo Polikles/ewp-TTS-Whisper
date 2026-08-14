@@ -26,6 +26,8 @@ All notable changes to EWP-transcripts are documented here.
   CLI for single canonical results and deterministic directory batches.
 - Added deterministic per-anchor review alignment with merge, split, insertion, deletion,
   punctuation, speaker-reassignment, ambiguity, statistics, and provenance handling.
+- Added non-mutating `revise preview` and atomic single-file `revise apply`, with
+  `apply --no-apply` using the same validation and alignment path as preview.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.
