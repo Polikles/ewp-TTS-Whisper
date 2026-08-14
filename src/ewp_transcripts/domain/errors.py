@@ -85,6 +85,14 @@ class InvalidRevisionError(ApplicationError):
     """Raised when a transcript revision is invalid or incompatible with its base."""
 
 
+class InvalidReviewError(InvalidRevisionError):
+    """Raised with a stable code when an ``EWP-REVIEW`` file cannot be trusted."""
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+
+
 class OutputLockUnavailableError(ApplicationError):
     """Raised when an output directory cannot be locked within the configured timeout."""
 

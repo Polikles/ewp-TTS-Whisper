@@ -34,6 +34,7 @@ from ewp_transcripts.domain.models import (
     SourceFingerprint,
     WorkDirectory,
 )
+from ewp_transcripts.domain.review import TranscriptReview, validate_review_base
 from ewp_transcripts.domain.revision import (
     TranscriptRevision,
     load_transcript_revision,
@@ -70,8 +71,10 @@ __all__ = [
     "SkippedPath",
     "SourceFingerprint",
     "TranscriptRevision",
+    "TranscriptReview",
     "load_transcript_revision",
     "validate_revision_base",
+    "validate_review_base",
     "WarningCode",
     "WarningSeverity",
     "WorkDirectory",
