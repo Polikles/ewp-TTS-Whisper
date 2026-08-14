@@ -29,6 +29,7 @@ from ewp_transcripts.domain import (
     EpisodeInspection,
     InspectionResult,
     JobReservation,
+    TranscriptReview,
 )
 from ewp_transcripts.domain.canonical import CanonicalEnvironment, CanonicalResult
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
@@ -46,6 +47,8 @@ from ewp_transcripts.pipeline import (
     run_single_speaker_pipeline,
     run_source_speaker_pipeline,
 )
+from ewp_transcripts.review_service import prepare_review
+from ewp_transcripts.review_storage import publish_review
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
 from ewp_transcripts.storage import (
     find_existing_results,
@@ -68,6 +71,7 @@ __all__ = [
     "dry_run",
     "export_result",
     "inspect_input",
+    "prepare_review_file",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -133,6 +137,32 @@ class CleanupOutcome:
 
     paths: tuple[Path, ...]
     dry_run: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewPreparationOutcome:
+    """One prepared and safely published human-editable review."""
+
+    review: TranscriptReview
+    path: Path
+
+
+def prepare_review_file(
+    result_path: Path,
+    *,
+    output_directory: Path | None = None,
+    anchor_target_words: int = 200,
+    lock_timeout_seconds: float = 0,
+) -> ReviewPreparationOutcome:
+    """Prepare and non-destructively publish one review without loading models or audio."""
+
+    review = prepare_review(result_path, anchor_target_words=anchor_target_words)
+    path = publish_review(
+        review,
+        output_directory=result_path.parent if output_directory is None else output_directory,
+        lock_timeout_seconds=lock_timeout_seconds,
+    )
+    return ReviewPreparationOutcome(review=review, path=path)
 
 
 def clean_all_workdirs(
