@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Polikles/ewp-transcripts/schemas/revision.schema.json",
   "title": "EWP Transcript Revision",
-  "description": "Planned v0.2.0 immutable full-snapshot transcript revision.",
+  "description": "v0.2.0 immutable full-snapshot transcript revision.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -19,6 +19,12 @@ Keep these files:
 The ground-truth corpus consists of the exact base `results.json` plus the accepted
 revision JSON. A corrected TXT file alone is not sufficient ground truth.
 
+The revision JSON intentionally stores corrected tokens rather than a second copy of
+canonical segments. Each corrected token maps back to canonical word IDs, so timing and
+provenance remain anchored in `results.json`. Corrected sentence and speaker segments are
+derived from `results.json + revision.json` during export. This avoids two independently
+editable segment structures that could disagree.
+
 ## 2. Recommended one-file workflow
 
 For the first correction, use the terminal editor included with Ubuntu. Add this option
@@ -142,6 +148,10 @@ returns exit code 5.
 
 ## 4. Generate corrected exports
 
+Applying a revision writes the immutable revision and optional audit; it does not
+automatically write corrected TXT, subtitle, or segments files. Generate those derived
+files explicitly after accepting the revision.
+
 Using `latest` is convenient when revisions are stored beside their base result:
 
 ```bash
@@ -158,6 +168,11 @@ uv run --locked transcriber export ./output/episode_results.json \
   --revision ./revisions/episode_revision_001.json \
   --format txt --format srt --format vtt --format segments
 ```
+
+The resulting `*_segments_revision_NNN.json` contains corrected phrase/speaker segments
+and word-level timing. It is convenient for inspection and downstream applications, but
+it remains replaceable derived output. The authoritative corrected state is still the
+exact base result plus its accepted revision.
 
 `--revision none`, or omitting `--revision`, regenerates raw canonical exports. Revised
 exports have `_revision_NNN` in their names and never overwrite raw exports.

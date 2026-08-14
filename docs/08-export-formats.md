@@ -47,6 +47,10 @@ Filename:
 
 This is a lightweight derived format containing phrase-level and word-level timestamps, and speaker-change segments. It is not the source of truth and can be rebuilt from `results.json`. The purpose of this file is to be used as reference for future project of building a database for voice-recognition and voice-cloning.
 
+For corrected transcripts it is rebuilt from the exact canonical result plus the
+selected revision. Revision JSON intentionally stores corrected tokens and canonical
+word mappings rather than duplicating this derived segment structure.
+
 ## 4. SRT and VTT
 
 Filenames:

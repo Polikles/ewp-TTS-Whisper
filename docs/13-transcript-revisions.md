@@ -86,6 +86,11 @@ N -> 0    represented by absence of corrected tokens for deleted source words
 The full revision stores the final corrected state. It does not store a patch stream as
 the reconstruction mechanism.
 
+It also does not duplicate canonical segment objects. Segment text and boundaries are a
+derived projection of the corrected tokens, speaker assignments, punctuation, and
+canonical timing. Persisting both corrected tokens and corrected canonical-style
+segments in one revision would create two editable representations that could disagree.
+
 ## 6. Speaker attribution
 
 Every corrected token MUST reference a speaker that exists in the base canonical result.
@@ -393,6 +398,10 @@ audio and ML models.
 
 All existing TXT/SRT/VTT/segments rules continue to apply to the selected effective
 transcript.
+
+Consequently, applying a revision writes revision state, while `transcriber export
+--revision ... --format segments` materializes corrected segments as replaceable derived
+output.
 
 ## 23. Batch behavior
 

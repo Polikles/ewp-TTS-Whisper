@@ -31,6 +31,8 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "environment-variable names, not editor commands",
         "recommended workflow for long transcripts",
         "creates a revision only when the editor actually changes",
+        "intentionally stores corrected tokens rather than a second copy",
+        "*_segments_revision_NNN.json",
         "--revision latest",
         "--revision none",
         "exit code 5",
