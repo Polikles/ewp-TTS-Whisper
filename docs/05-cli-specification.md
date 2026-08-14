@@ -271,7 +271,8 @@ The editor is executed as an argument vector, never through `shell=True`.
 
 Options include `--review-output-dir`, `--output-dir`, `--editor`, `--config`, `--audit`,
 and `--no-apply`. `--editor` overrides `[revision].editor`; an empty configuration falls
-back to `VISUAL` and then `EDITOR`.
+back to the `VISUAL` and then `EDITOR` environment-variable value. Each value is an
+editor command, not the literal environment-variable name.
 
 ### `revise audit`
 

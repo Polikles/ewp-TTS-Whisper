@@ -21,14 +21,48 @@ revision JSON. A corrected TXT file alone is not sufficient ground truth.
 
 ## 2. Recommended one-file workflow
 
-Configure an editor in `transcriber.toml`:
+For the first correction, use the terminal editor included with Ubuntu. Add this option
+to the command:
+
+```text
+--editor "nano"
+```
+
+The complete command is:
+
+```bash
+uv run --locked transcriber revise edit ./output/episode_results.json \
+  --output-dir ./output \
+  --audit \
+  --editor "nano"
+```
+
+In nano, save with `Ctrl+O`, confirm with Enter, and exit with `Ctrl+X`. A successful
+exit applies the correction. `--editor "code --wait"` is also supported when the
+`code` command is installed and available inside WSL.
+
+To make the choice persistent, put the setting under the `[revision]` section in one of
+these exact locations:
+
+- project configuration: `./transcriber.toml` in the directory from which you run the
+  command; in the documented checkout this is
+  `/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml`;
+- user configuration: `/home/linuch/.config/ewp-transcripts/config.toml`, which applies
+  regardless of the current directory;
+- another file selected explicitly with `--config /exact/path/to/config.toml`.
+
+For example, the file can contain only:
 
 ```toml
 [revision]
-editor = "code --wait"
+editor = "nano"
 ```
 
-An empty value falls back to `VISUAL`, then `EDITOR`. Run:
+`VISUAL` and `EDITOR` are environment-variable names, not editor commands. Do not set
+`editor = "VISUAL"` or `editor = "EDITOR"`. As an alternative to TOML, set one of the
+variables to a real installed command, for example `export EDITOR=nano`.
+
+Once an editor is configured, the shorter command is:
 
 ```bash
 uv run --locked transcriber revise edit ./output/episode_results.json \
@@ -44,8 +78,9 @@ creating a revision:
 uv run --locked transcriber revise edit ./output/episode_results.json --no-apply
 ```
 
-The `--editor "COMMAND ..."` option overrides configuration for one invocation. The
-command is parsed into arguments and is never executed through a shell.
+The `--editor "COMMAND ..."` option overrides configuration and environment variables
+for one invocation. The command is parsed into arguments and is never executed through
+a shell.
 
 ## 3. Staged workflow and batch review
 

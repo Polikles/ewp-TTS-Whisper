@@ -24,7 +24,9 @@ def editor_command(
     )
     if not selected:
         raise RevisionEditorError(
-            "No revision editor is configured; set revision.editor, VISUAL, or EDITOR"
+            "No revision editor is configured; use --editor 'nano', set editor under "
+            "the [revision] section of transcriber.toml, or set the VISUAL/EDITOR "
+            "environment variable to an installed editor command"
         )
     try:
         command = tuple(shlex.split(selected))

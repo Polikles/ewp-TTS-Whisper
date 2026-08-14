@@ -508,7 +508,10 @@ def revise_edit_command(
     ] = False,
     editor: Annotated[
         str | None,
-        typer.Option("--editor", help="External editor command; overrides config and environment."),
+        typer.Option(
+            "--editor",
+            help="Installed editor command, for example 'nano' or 'code --wait'.",
+        ),
     ] = None,
     config_path: Annotated[
         Path | None,

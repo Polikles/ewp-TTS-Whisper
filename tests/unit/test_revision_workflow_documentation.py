@@ -26,6 +26,9 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
     for invariant in (
         "never edit or overwrite",
         "plus the accepted\nrevision JSON",
+        "/home/linuch/transkrypcje/ewp-transcripts/transcriber.toml",
+        '--editor "nano"',
+        "environment-variable names, not editor commands",
         "--revision latest",
         "--revision none",
         "exit code 5",
@@ -46,5 +49,6 @@ def test_edit_help_states_automatic_apply_and_exposes_documented_options() -> No
 
     assert result.exit_code == 0
     assert "successful editor close applies it unless --no-apply" in result.stdout
+    assert "Installed editor command" in result.stdout
     for option in ("--review-output-dir", "--output-dir", "--editor", "--audit", "--no-apply"):
         assert option in result.stdout

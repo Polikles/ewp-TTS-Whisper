@@ -35,7 +35,7 @@ def test_editor_launch_uses_argument_vector_without_shell(monkeypatch, tmp_path:
 
 
 def test_missing_or_failed_editor_is_controlled(monkeypatch, tmp_path: Path) -> None:
-    with pytest.raises(RevisionEditorError, match="VISUAL"):
+    with pytest.raises(RevisionEditorError, match="--editor 'nano'.*environment variable"):
         editor_command("", environment={})
 
     monkeypatch.setattr(

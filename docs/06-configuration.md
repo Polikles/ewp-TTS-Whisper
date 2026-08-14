@@ -20,9 +20,13 @@ The effective configuration must be stored in `results.json`, excluding secrets.
 Recommended locations:
 
 ```text
-project: ./transcriber.toml
-user: ~/.config/ewp-transcripts/config.toml
+project: ./transcriber.toml (resolved from the command's current working directory)
+user: ~/.config/ewp-transcripts/config.toml (applies from every working directory)
 ```
+
+An arbitrary file may instead be selected with `--config /exact/path/to/file.toml`.
+Configuration keys must be placed below their TOML section header; for example,
+`editor` belongs below `[revision]`.
 
 The application should not modify project configuration automatically.
 
@@ -125,7 +129,9 @@ editor = ""
   canonical source words separated by a large pause. It does not move canonical timing.
 - `generate_audit` controls optional detailed audit persistence; compact provenance and
   statistics remain mandatory.
-- an empty `editor` uses environment fallback (`VISUAL`, then `EDITOR`) for `revise edit`.
+- an empty `editor` uses the `VISUAL` environment variable and then the `EDITOR`
+  environment variable for `revise edit`. Their values must be installed commands such
+  as `nano` or `code --wait`; the words `VISUAL` and `EDITOR` are not commands.
 
 Revision batch failure behavior reuses the existing runtime batch policy rather than
 introducing a duplicate correction-only setting.
