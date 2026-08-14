@@ -102,3 +102,44 @@ def test_directory_apply_reports_mixed_batch_and_exit_five(tmp_path: Path) -> No
     assert payload["applied"] == 1
     assert payload["failed"] == 1
     assert [job["status"] for job in payload["jobs"]] == ["applied", "failed"]
+
+
+def test_apply_audit_and_standalone_no_write_audit(tmp_path: Path) -> None:
+    results, review = _case(tmp_path)
+    revisions = tmp_path / "revisions"
+
+    applied = runner.invoke(
+        app,
+        [
+            "revise",
+            "apply",
+            str(review),
+            "--results-dir",
+            str(results),
+            "--output-dir",
+            str(revisions),
+            "--audit",
+        ],
+    )
+
+    assert applied.exit_code == 0
+    revision = revisions / "S01E01_revision_001.json"
+    audit = revisions / "S01E01_revision_001_audit.json"
+    assert revision.is_file() and audit.is_file()
+
+    audit.unlink()
+    preview = runner.invoke(
+        app,
+        [
+            "revise",
+            "audit",
+            str(revision),
+            "--results-dir",
+            str(results),
+            "--no-write",
+            "--json-output",
+        ],
+    )
+    assert preview.exit_code == 0
+    assert json.loads(preview.stdout)["revision"]["revision_number"] == 1
+    assert not audit.exists()

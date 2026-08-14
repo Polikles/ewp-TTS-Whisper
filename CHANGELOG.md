@@ -36,6 +36,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added the shared effective-transcript resolver and revision-aware TXT/SRT/VTT/segments
   export through `--revision none|latest|PATH`, with inherited timing, corrected speakers,
   distinct filenames, and revision provenance in segments JSON.
+- Added reconstructable base-relative revision audits, standalone `revise audit`, and
+  optional `revise apply --audit` publication without making audit data authoritative.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

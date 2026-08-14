@@ -44,7 +44,7 @@ from ewp_transcripts.domain.errors import (
     InvalidReviewError,
     UnsupportedPipelineScopeError,
 )
-from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
 from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
@@ -62,6 +62,7 @@ from ewp_transcripts.review_discovery import discover_review_files, discover_rev
 from ewp_transcripts.review_format import load_review
 from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.review_storage import publish_review
+from ewp_transcripts.revision_audit import build_revision_audit, publish_revision_audit
 from ewp_transcripts.revision_service import build_revision
 from ewp_transcripts.revision_storage import publish_next_revision
 from ewp_transcripts.state import finalize_job_result, reserve_job, transition_job_state
@@ -91,6 +92,7 @@ __all__ = [
     "preview_review_file",
     "apply_review_file",
     "process_review_batch",
+    "audit_revision_file",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -214,6 +216,16 @@ class RevisionApplyOutcome:
 
 
 @dataclass(frozen=True, slots=True)
+class RevisionAuditOutcome:
+    """Reconstructed audit and optional published diagnostic path."""
+
+    revision_path: Path
+    base_result_path: Path
+    audit: dict[str, object]
+    audit_path: Path | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class BatchRevisionJobOutcome:
     """One isolated review preview/apply outcome."""
 
@@ -318,6 +330,59 @@ def apply_review_file(
         revision,
         path,
     )
+
+
+def audit_revision_file(
+    revision_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    results_directory: Path | None = None,
+    output_directory: Path | None = None,
+    publish: bool = True,
+) -> RevisionAuditOutcome:
+    """Reconstruct and optionally publish a detailed base-relative revision audit."""
+
+    normalized_revision = normalize_input_path(revision_path)
+    revision = load_transcript_revision(normalized_revision)
+    filename = revision.base_result.filename
+    if filename is None:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "Revision does not contain a canonical base filename",
+        )
+    candidates = (
+        (results_directory / filename,)
+        if results_directory is not None
+        else (normalized_revision.parent / filename,)
+    )
+    matching = [
+        candidate
+        for candidate in candidates
+        if candidate.is_file() and sha256_file(candidate) == revision.base_result.sha256
+    ]
+    if not matching:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "Cannot locate the exact revision base result; use --results-dir",
+        )
+    base_path = matching[0]
+    base = load_canonical_result(base_path)
+    audit = build_revision_audit(
+        base,
+        revision,
+        base_path=base_path,
+        revision_path=normalized_revision,
+    )
+    audit_path = None
+    if publish:
+        audit_path = publish_revision_audit(
+            audit,
+            output_directory=output_directory or normalized_revision.parent,
+            job_id=revision.job_id,
+            revision_number=revision.revision_number,
+            lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+        )
+    return RevisionAuditOutcome(normalized_revision, base_path, audit, audit_path)
 
 
 def process_review_batch(

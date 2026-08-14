@@ -279,6 +279,9 @@ Reconstructs a detailed base-relative audit from a full revision and its immutab
 result. Parent-relative reconstruction additionally requires the parent revision artifact.
 Audit data is diagnostic and is not needed to export the revision.
 
+`--results-dir` locates the exact base, `--output-dir` selects publication, `--no-write`
+keeps the operation non-mutating, and `--json-output` prints the reconstructed document.
+
 ## 8. `clean`
 
 ```text

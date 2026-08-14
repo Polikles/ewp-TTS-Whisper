@@ -246,8 +246,8 @@ Perform a manual review in the target player or a private YouTube upload:
 - [ ] Sibling revisions can reference the same base result.
 - [ ] Parent revision metadata does not make child export depend on parent replay.
 - [ ] Provenance, alignment metadata, statistics, and warnings are always present.
-- [ ] `--audit` produces detailed diagnostics without becoming reconstruction state.
-- [ ] Base-relative detailed audit can be regenerated later from base + revision.
+- [x] `--audit` produces detailed diagnostics without becoming reconstruction state.
+- [x] Base-relative detailed audit can be regenerated later from base + revision.
 - [ ] Concurrent revision allocation cannot collide.
 
 ### Revision-aware exports

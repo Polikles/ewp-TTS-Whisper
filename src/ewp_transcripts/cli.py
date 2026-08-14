@@ -18,6 +18,7 @@ from ewp_transcripts.application import (
     TranscriptionOutcome,
     application_version,
     apply_review_file,
+    audit_revision_file,
     clean_all_workdirs,
     doctor,
     dry_run,
@@ -336,6 +337,10 @@ def revise_apply_command(
         bool,
         typer.Option("--no-apply", help="Run the complete preview path without writing."),
     ] = False,
+    audit: Annotated[
+        bool,
+        typer.Option("--audit", help="Publish detailed diagnostics after a successful apply."),
+    ] = False,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -378,7 +383,28 @@ def revise_apply_command(
             revision_path = applied.revision_path
     except ApplicationError as error:
         _expected_error(error)
+    audit_path = None
+    if (
+        not normalized_review.is_dir()
+        and (audit or config.revision.generate_audit)
+        and revision_path is not None
+    ):
+        audit_path = audit_revision_file(
+            revision_path,
+            config=config,
+            results_directory=_optional_user_path(results_directory),
+            output_directory=_optional_user_path(output_directory),
+        ).audit_path
     if normalized_review.is_dir():
+        if (audit or config.revision.generate_audit) and not no_apply:
+            for job in batch.jobs:
+                if job.revision_path is not None:
+                    audit_revision_file(
+                        job.revision_path,
+                        config=config,
+                        results_directory=_optional_user_path(results_directory),
+                        output_directory=_optional_user_path(output_directory),
+                    )
         if json_output:
             typer.echo(_revision_batch_json(batch))
         else:
@@ -392,11 +418,64 @@ def revise_apply_command(
     else:
         typer.echo(f"APPLIED {revision.job_id}")
         typer.echo(f"  REVISION {revision_path}")
+        if audit_path is not None:
+            typer.echo(f"  AUDIT {audit_path}")
         typer.echo(
             f"SUMMARY revision_number={revision.revision_number} "
             f"revision_tokens={revision.statistics.revision_tokens} "
             f"warnings={len(revision.warnings)}"
         )
+
+
+@revise_app.command("audit")
+def revise_audit_command(
+    revision_path: Annotated[
+        Path,
+        typer.Argument(help="Immutable transcript revision JSON.", metavar="REVISION"),
+    ],
+    results_directory: Annotated[
+        Path | None,
+        typer.Option("--results-dir", help="Directory containing the exact base result."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the audit JSON to this directory."),
+    ] = None,
+    no_write: Annotated[
+        bool,
+        typer.Option("--no-write", help="Reconstruct and display without publishing an audit."),
+    ] = False,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the reconstructed audit to stdout as JSON."),
+    ] = False,
+) -> None:
+    """Reconstruct detailed diagnostics from a base result and full revision."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = audit_revision_file(
+            revision_path,
+            config=config,
+            results_directory=_optional_user_path(results_directory),
+            output_directory=_optional_user_path(output_directory),
+            publish=not no_write,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(json.dumps(outcome.audit, ensure_ascii=False, indent=2))
+    else:
+        typer.echo(f"AUDIT {outcome.revision_path}")
+        if outcome.audit_path is not None:
+            typer.echo(f"  WROTE {outcome.audit_path}")
+        changes = outcome.audit.get("changes")
+        change_count = len(changes) if isinstance(changes, list) else 0
+        typer.echo(f"SUMMARY changes={change_count} written={int(outcome.audit_path is not None)}")
 
 
 @revise_app.command("edit")
