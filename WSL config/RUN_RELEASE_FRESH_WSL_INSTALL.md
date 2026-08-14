@@ -155,7 +155,7 @@ git status --short
 
 Inspect and dry-run must identify one mono source and plan canonical JSON plus TXT/SRT/VTT
 without loading or downloading models. Cleanup preview must select nothing. Git status
-must be empty; do not copy or commit `LICENSE_SKETCH.TXT` into the clean distribution.
+must be empty. `LICENSE` must be present in the clean checkout and built distributions.
 
 ## 6. Preserve evidence and dispose only by explicit choice
 

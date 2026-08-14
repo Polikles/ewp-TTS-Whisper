@@ -95,3 +95,19 @@ If documents conflict, use the following order:
 2. `docs/02-requirements.md`.
 3. Detailed specifications in `docs/`.
 4. Examples in `examples/`.
+
+## License
+
+Copyright © 2025–2026 Polikles.
+
+EWP Transcriber is free software licensed under the
+[GNU Affero General Public License v3.0 or later](LICENSE)
+(`AGPL-3.0-or-later`).
+
+You may use, modify, and redistribute the software, including commercially, subject to
+the GNU AGPL. Modified versions remain subject to its copyleft requirements, including
+the source-code requirements applicable to modified versions used for remote network
+interaction.
+
+The software is provided without warranty, as described in Sections 15 and 16 of the GNU
+AGPL. Alternative licensing terms may be available directly from the copyright holder.

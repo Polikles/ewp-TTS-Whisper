@@ -8,6 +8,13 @@
 4. An ML backend update requires a quality regression benchmark.
 5. Secrets and private audio samples must never be committed to the repository.
 
+## Contribution license
+
+The project is licensed under `AGPL-3.0-or-later`. By submitting a contribution, you
+agree that it may be distributed under the same license and confirm that you have the
+right to submit it. Do not add third-party material unless its provenance and compatible
+license are documented and its notices are preserved.
+
 ## Pull request checklist
 
 - [ ] Linting and type checking pass.
@@ -16,3 +23,4 @@
 - [ ] The offline path needs no network access.
 - [ ] Generated results conform to the schema.
 - [ ] WER, timestamp, or DER impact has been evaluated when the change affects ML behavior.
+- [ ] New third-party material has compatible licensing and preserved attribution.

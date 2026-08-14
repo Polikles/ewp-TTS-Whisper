@@ -6,6 +6,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Licensed the project under GNU AGPL v3.0 or later, included the full license in source
+  and distribution artifacts, and documented contribution and warranty terms.
 - Added the first v0.2.0 implementation slice: strict immutable transcript-revision
   domain models, artifact loading, and exact canonical-base compatibility validation.
 - Added locked revision-number allocation and atomic, no-overwrite publication with
