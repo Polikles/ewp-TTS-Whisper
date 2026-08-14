@@ -54,6 +54,10 @@ Initial functional MVP release candidate.
 - Missing-model diagnostics now point directly to `WSL config/MODEL_SETUP.md`.
 - Windows drive paths are normalized before CLI file/directory dispatch and output-path
   planning, so directory transcription correctly uses the batch workflow.
+- An omitted `--speaker-count` now preserves the configured `auto` default instead of
+  silently forcing one speaker; `--speaker-count 1` remains the explicit fast path.
+- Accepted Lightning in-memory checkpoint-migration and pyannote TF32-reproducibility
+  notices are narrowly suppressed while their safe behavior remains unchanged.
 
 ### Known limitations and deferrals
 

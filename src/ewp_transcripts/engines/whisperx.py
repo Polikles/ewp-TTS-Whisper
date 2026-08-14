@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from ewp_transcripts.domain.errors import SpeechEngineError
+from ewp_transcripts.engines.notices import suppress_accepted_model_loading_notices
 from ewp_transcripts.engines.protocols import (
     AlignedSegment,
     AlignedTranscript,
@@ -119,11 +120,12 @@ class WhisperXAsrEngine:
                 }
                 if backend_language is not None:
                     load_options["language"] = backend_language
-                self._model = module.load_model(
-                    str(self._snapshot),
-                    self._device,
-                    **load_options,
-                )
+                with suppress_accepted_model_loading_notices():
+                    self._model = module.load_model(
+                        str(self._snapshot),
+                        self._device,
+                        **load_options,
+                    )
             audio = module.load_audio(str(audio_path))
             transcribe_options: dict[str, object] = {
                 "batch_size": batch_size,

@@ -18,7 +18,7 @@ from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
 from ewp_transcripts.domain.enums import LanguageMode, PlanDecision
 
 
-def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
+def test_transcribe_cli_preserves_automatic_speaker_scope_and_prints_outputs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     source = tmp_path / "episode.wav"
@@ -66,7 +66,7 @@ def test_transcribe_cli_applies_single_speaker_scope_and_prints_outputs(
     assert f"RESULT {result_path}" in outcome.stdout
     assert observed == {
         "input_path": source,
-        "speaker_count": 1,
+        "speaker_count": "auto",
         "output_directory": tmp_path / "output",
         "force": False,
         "allow_duration_mismatch": False,

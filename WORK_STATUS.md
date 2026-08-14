@@ -11,7 +11,7 @@ untracked, and excluded from build artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 285 automated checks pass;
+- all 287 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,

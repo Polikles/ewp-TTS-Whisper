@@ -58,6 +58,9 @@ uv run --locked transcriber dry-run "/path/to/season" \
 
 Review every `PROCESS`, `SKIP`, warning, source assignment, and output path. Use an exact
 positive speaker count when known; use `1` for a genuine single-speaker recording.
+If `--speaker-count` is omitted, the configured default is `auto`. This is the safe
+choice for a directory containing a mixture of one-speaker and multi-speaker recordings,
+although it performs diarization even for mono files that happen to contain one speaker.
 
 ## 4. Transcribe offline
 

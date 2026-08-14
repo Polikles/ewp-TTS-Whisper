@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from ewp_transcripts.domain.errors import SpeechEngineError
+from ewp_transcripts.engines.notices import suppress_accepted_model_loading_notices
 from ewp_transcripts.engines.protocols import (
     DiarizationResult,
     DiarizationTurn,
@@ -111,10 +112,12 @@ class PyannoteDiarizationEngine:
             torch = self._torch or self._torch_loader()
             self._torch = torch
             if self._pipeline is None:
-                self._pipeline = module.Pipeline.from_pretrained(self._snapshot, token=False)
+                with suppress_accepted_model_loading_notices():
+                    self._pipeline = module.Pipeline.from_pretrained(self._snapshot, token=False)
                 if self._pipeline is None:
                     raise SpeechEngineError("Pinned local diarization pipeline could not load")
-                self._pipeline.to(torch.device(self._device))
+                with suppress_accepted_model_loading_notices():
+                    self._pipeline.to(torch.device(self._device))
             kwargs = {} if speaker_count is None else {"num_speakers": speaker_count}
             output = self._pipeline(audio_path, **kwargs)
             turns = _turns(output.speaker_diarization)
