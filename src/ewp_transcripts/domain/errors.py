@@ -93,6 +93,10 @@ class InvalidReviewError(InvalidRevisionError):
         self.code = code
 
 
+class RevisionEditorError(ApplicationError):
+    """Raised when the external transcript-review editor cannot complete successfully."""
+
+
 class OutputLockUnavailableError(ApplicationError):
     """Raised when an output directory cannot be locked within the configured timeout."""
 

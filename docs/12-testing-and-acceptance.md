@@ -235,7 +235,7 @@ Perform a manual review in the target player or a private YouTube upload:
 - [x] Directory `revise apply` with per-item failure isolation.
 - [x] `revise preview` writes no revision.
 - [x] `revise apply --no-apply` writes no revision and matches preview outcome.
-- [ ] `revise edit --no-apply` retains review edits without creating a revision.
+- [x] `revise edit --no-apply` retains review edits without creating a revision.
 - [ ] Successful editor close without `--no-apply` automatically applies the saved review.
 - [ ] Non-zero editor exit creates no revision.
 

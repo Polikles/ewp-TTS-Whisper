@@ -30,6 +30,9 @@ All notable changes to EWP-transcripts are documented here.
   `apply --no-apply` using the same validation and alignment path as preview.
 - Added deterministic directory preview/apply, recursive opt-in, per-review failure
   isolation, and runtime-configured continue/stop behavior.
+- Added safe external-editor review workflow with config/`VISUAL`/`EDITOR` resolution,
+  automatic apply after a successful close, and a revision-free `--no-apply` path that
+  retains the edited review.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

@@ -24,6 +24,7 @@ from ewp_transcripts.application import (
     export_result,
     inspect_input,
     prepare_review_batch,
+    prepare_review_file,
     preview_review_file,
     process_review_batch,
     transcribe_batch,
@@ -41,6 +42,7 @@ from ewp_transcripts.domain.errors import (
     OutputLockUnavailableError,
     OutputReservationError,
 )
+from ewp_transcripts.revision_editor import open_review_in_editor
 
 app = typer.Typer(
     name="transcriber",
@@ -395,6 +397,74 @@ def revise_apply_command(
             f"revision_tokens={revision.statistics.revision_tokens} "
             f"warnings={len(revision.warnings)}"
         )
+
+
+@revise_app.command("edit")
+def revise_edit_command(
+    results_json: Annotated[
+        Path,
+        typer.Argument(help="Completed canonical result to review.", metavar="RESULTS_JSON"),
+    ],
+    review_output_directory: Annotated[
+        Path | None,
+        typer.Option(
+            "--review-output-dir",
+            help="Write the editable EWP-REVIEW file to this directory.",
+        ),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the immutable revision to this directory."),
+    ] = None,
+    no_apply: Annotated[
+        bool,
+        typer.Option(
+            "--no-apply",
+            help="Keep editor changes without automatically creating a revision.",
+        ),
+    ] = False,
+    editor: Annotated[
+        str | None,
+        typer.Option("--editor", help="External editor command; overrides config and environment."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+) -> None:
+    """Edit a prepared review; successful editor close applies it unless --no-apply."""
+
+    try:
+        normalized_result = normalize_input_path(results_json)
+        config = load_config(
+            explicit_path=config_path,
+            cli_overrides=({"revision": {"editor": editor}} if editor is not None else None),
+        )
+        review_directory = _optional_user_path(review_output_directory) or (
+            normalized_result.parent / "review-ewp-transcripts"
+        )
+        prepared = prepare_review_file(
+            normalized_result,
+            output_directory=review_directory,
+            anchor_target_words=config.revision.anchor_target_words,
+            lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+        )
+        open_review_in_editor(prepared.path, configured=config.revision.editor)
+        if no_apply:
+            typer.echo(f"EDITED {prepared.path}")
+            typer.echo("SUMMARY applied=0")
+            return
+        applied = apply_review_file(
+            prepared.path,
+            config=config,
+            results_directory=normalized_result.parent,
+            output_directory=_optional_user_path(output_directory),
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    typer.echo(f"EDITED {prepared.path}")
+    typer.echo(f"APPLIED {applied.revision_path}")
+    typer.echo(f"SUMMARY applied=1 revision_number={applied.revision.revision_number}")
 
 
 @app.command("doctor")
