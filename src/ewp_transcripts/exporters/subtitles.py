@@ -117,6 +117,10 @@ def build_subtitle_cues(
         labels=labels,
         multiple_speakers=multiple_speakers,
     )
+    # Repartitioning may move a word boundary across another speaker's explicitly
+    # overlapping cue. Restore timeline order after every timing-changing pass while
+    # retaining both cues and their overlap metadata.
+    drafts.sort(key=lambda cue: (cue.start_ms, cue.end_ms, cue.sequence))
 
     cues: list[SubtitleCue] = []
     previous_speaker: str | None | object = object()

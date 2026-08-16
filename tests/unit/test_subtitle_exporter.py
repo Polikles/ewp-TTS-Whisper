@@ -6,6 +6,7 @@ import pytest
 
 from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.domain.canonical import CanonicalSegment, load_canonical_result
+from ewp_transcripts.exporters import subtitles as subtitle_exporter
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
     build_subtitle_cues,
@@ -1002,3 +1003,42 @@ def test_overlapping_speaker_chunks_are_globally_sorted_before_labelling() -> No
     assert cues[first_second].lines[0].startswith("anna:")
     assert cues[return_to_first].lines[0].startswith("jan:")
     assert "Continuation" in render_srt(cues)
+
+
+def test_final_repartition_pass_cannot_leave_overlap_cues_out_of_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    first = first.model_copy(
+        update={
+            "overlap": True,
+            "active_speaker_ids": ("speaker_001", "speaker_002"),
+        }
+    )
+    second = second.model_copy(
+        update={
+            "overlap": True,
+            "active_speaker_ids": ("speaker_001", "speaker_002"),
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+    stabilize = subtitle_exporter._stabilize_drafts
+
+    def return_postprocessed_out_of_order(*args, **kwargs):
+        return list(reversed(stabilize(*args, **kwargs)))
+
+    monkeypatch.setattr(
+        subtitle_exporter,
+        "_stabilize_drafts",
+        return_postprocessed_out_of_order,
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert [cue.start_ms for cue in cues] == sorted(cue.start_ms for cue in cues)
+    assert all(cue.overlap for cue in cues)
+    assert "Welcome" in render_srt(cues)
+    assert "Today" in render_vtt(cues)

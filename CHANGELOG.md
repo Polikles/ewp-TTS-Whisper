@@ -69,6 +69,12 @@ All notable changes to EWP-transcripts are documented here.
 - Export failures now identify the failing format and a fixed allowlist of safe renderer
   invariants while continuing to suppress arbitrary internal or transcript details.
 
+### Fixed
+
+- Restored chronological ordering after final subtitle repartitioning so explicitly
+  overlapping speaker cues cannot make SRT/VTT export fail after long silent intervals
+  or fallback alignment.
+
 ## 0.1.1 — internal release candidate — 2026-08-14
 
 Backward-compatible operator and transcription fixes found during the fresh-WSL archive
