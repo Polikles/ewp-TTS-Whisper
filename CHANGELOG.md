@@ -64,6 +64,11 @@ All notable changes to EWP-transcripts are documented here.
   preparation, validation, immutable apply, audit, and corrected export completed
   without modifying the canonical result.
 
+### Changed
+
+- Export failures now identify the failing format and a fixed allowlist of safe renderer
+  invariants while continuing to suppress arbitrary internal or transcript details.
+
 ## 0.1.1 — internal release candidate — 2026-08-14
 
 Backward-compatible operator and transcription fixes found during the fresh-WSL archive

@@ -47,6 +47,12 @@ Resume with this bulk-workflow plan:
    provenance, collision-safe names, and failure isolation.
 7. Record usability defects before beginning correction of all 24 podcast episodes.
 
+The first complete archive transcription batch produced 19 completed jobs, 4 valid
+duplicate skips, and one post-transcription subtitle-export failure (`S2E8p2`). Its
+canonical result and TXT/segments exports are valid; SRT and VTT fail in cue construction.
+Long silence in inactive per-speaker tracks is valid input. The exact safe subtitle
+invariant is being isolated before changing cue planning.
+
 Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive environment.
 Step 3 requires the owner's manual transcript corrections. Step 5 is repository work and
 does not require user input unless a new product decision appears.

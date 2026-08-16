@@ -113,8 +113,30 @@ def test_export_sanitizes_rendering_value_errors(
 
     monkeypatch.setattr(export_service, "build_subtitle_cues", fail)
 
-    with pytest.raises(InvalidCanonicalResultError, match="Cannot render configured exports"):
+    with pytest.raises(
+        InvalidCanonicalResultError,
+        match="Cannot render srt export: invalid renderer input",
+    ) as captured:
         export_result(result_path, formats=(ExportFormat.SRT,))
+    assert "internal rendering detail" not in str(captured.value)
+
+
+def test_export_reports_safe_subtitle_invariant(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result_path = tmp_path / "S01E01_results.json"
+    result_path.write_bytes(EXAMPLE_PATH.read_bytes())
+
+    def fail(*args, **kwargs):
+        raise ValueError("ordinary subtitle cues must not overlap")
+
+    monkeypatch.setattr(export_service, "build_subtitle_cues", fail)
+
+    with pytest.raises(
+        InvalidCanonicalResultError,
+        match="Cannot render vtt export: ordinary subtitle cues must not overlap",
+    ):
+        export_result(result_path, formats=(ExportFormat.VTT,))
 
 
 def test_revision_exports_corrected_text_with_distinct_names_and_provenance(

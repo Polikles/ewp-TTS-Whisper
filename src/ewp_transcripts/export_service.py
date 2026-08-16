@@ -47,6 +47,22 @@ class ExportFormat(StrEnum):
     SEGMENTS = "segments"
 
 
+_SAFE_RENDER_FAILURES = frozenset(
+    {
+        "subtitle line limits must be positive",
+        "subtitle cue text must not be empty",
+        "a subtitle word exceeds max_chars_per_line",
+        "subtitle cue exceeds max_lines",
+        "subtitle cue timestamps are invalid",
+        "subtitle cues must contain non-empty lines",
+        "subtitle cues must be sorted chronologically",
+        "ordinary subtitle cues must not overlap",
+        "results_sha256 must be a lowercase hexadecimal SHA-256",
+        "generated_at must be timezone-aware",
+    }
+)
+
+
 @dataclass(frozen=True, slots=True)
 class ExportOutcome:
     result_version: int
@@ -125,19 +141,16 @@ def export_result(
             }
         skipped = tuple(path for path in paths.values() if path.exists()) if not force else ()
         pending = tuple((format_, path) for format_, path in paths.items() if path not in skipped)
-        try:
-            rendered = _render_exports(
-                rendered_result,
-                pending,
-                results_path=results_path,
-                results_sha256=hashlib.sha256(payload).hexdigest(),
-                subtitles_config=subtitles_config or SubtitlesConfig(),
-                generated_at=generated_at or datetime.now(UTC),
-                revision=selected_revision,
-                revision_path=revision_path,
-            )
-        except ValueError as error:
-            raise InvalidCanonicalResultError("Cannot render configured exports") from error
+        rendered = _render_exports(
+            rendered_result,
+            pending,
+            results_path=results_path,
+            results_sha256=hashlib.sha256(payload).hexdigest(),
+            subtitles_config=subtitles_config or SubtitlesConfig(),
+            generated_at=generated_at or datetime.now(UTC),
+            revision=selected_revision,
+            revision_path=revision_path,
+        )
         for path, content in rendered:
             _publish_exclusive(path, content)
         return ExportOutcome(
@@ -291,21 +304,28 @@ def _render_exports(
     cues = None
     rendered: list[tuple[Path, str]] = []
     for format_, path in pending:
-        if format_ is ExportFormat.TXT:
-            content = render_transcript(result)
-        elif format_ is ExportFormat.SEGMENTS:
-            content = render_segments_json(
-                result,
-                results_file=results_path,
-                results_sha256=results_sha256,
-                generated_at=generated_at,
-                revision_file=revision_path,
-                revision_number=revision.revision_number if revision else None,
-            )
-        else:
-            if cues is None:
-                cues = build_subtitle_cues(result, subtitles_config)
-            content = render_srt(cues) if format_ is ExportFormat.SRT else render_vtt(cues)
+        try:
+            if format_ is ExportFormat.TXT:
+                content = render_transcript(result)
+            elif format_ is ExportFormat.SEGMENTS:
+                content = render_segments_json(
+                    result,
+                    results_file=results_path,
+                    results_sha256=results_sha256,
+                    generated_at=generated_at,
+                    revision_file=revision_path,
+                    revision_number=revision.revision_number if revision else None,
+                )
+            else:
+                if cues is None:
+                    cues = build_subtitle_cues(result, subtitles_config)
+                content = render_srt(cues) if format_ is ExportFormat.SRT else render_vtt(cues)
+        except ValueError as error:
+            detail = str(error)
+            safe_detail = detail if detail in _SAFE_RENDER_FAILURES else "invalid renderer input"
+            raise InvalidCanonicalResultError(
+                f"Cannot render {format_.value} export: {safe_detail}"
+            ) from error
         rendered.append((path, content))
     return tuple(rendered)
 
