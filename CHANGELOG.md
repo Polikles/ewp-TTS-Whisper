@@ -51,6 +51,9 @@ All notable changes to EWP-transcripts are documented here.
   phrase/speaker segments are materialized as revision-aware derived exports.
 - Made staged prepare, manual Windows Notepad editing, apply, and export the primary
   correction runbook; retained `revise edit --editor nano` as an optional shortcut.
+- Documented the complete bulk correction workflow: directory preparation, manual
+  editing, batch preview/apply with audits, partial-failure handling, safe targeted
+  retries, and the current one-result-at-a-time export limitation.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

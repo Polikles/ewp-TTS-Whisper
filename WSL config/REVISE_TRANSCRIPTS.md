@@ -95,7 +95,102 @@ uv run --locked transcriber export \
   --format txt --format srt --format vtt --format segments
 ```
 
-## 3. Optional nano shortcut and batch operation
+## 3. Bulk revision workflow
+
+Use three separate directories for a batch:
+
+- `results` — the canonical `*_results*.json` files selected for correction;
+- `reviews` — editable `*.review.txt` files;
+- `revisions` — accepted immutable revisions and optional audits.
+
+Keep only the intended canonical version of each episode in `results`. Directory
+commands process every matching file they discover; old result versions are separate
+inputs rather than automatically superseded files.
+
+### 3.1. Prepare all reviews
+
+```bash
+uv run --locked transcriber revise prepare \
+  "C:\Users\YOUR_NAME\Documents\EWP\results" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\reviews"
+```
+
+A successful batch ends with output similar to:
+
+```text
+SUMMARY prepared=24 failed=0 stopped_early=false
+```
+
+Confirm that `reviews` contains one review for every intended result before editing.
+Directory discovery is non-recursive by default. Add `--recursive` only when the input
+directory deliberately contains results in subdirectories.
+
+### 3.2. Edit the reviews in Windows
+
+Open each generated review from Windows Explorer and edit it in Notepad or another
+plain-text editor. Follow the editing rules in section 2.2, keep the filenames and
+metadata headers unchanged, and save all files as UTF-8. Review files may be corrected
+over several sessions; no model or source audio is needed for the later commands.
+
+### 3.3. Preview the complete batch
+
+Previewing is optional but recommended before accepting a large corpus:
+
+```bash
+uv run --locked transcriber revise preview \
+  "C:\Users\YOUR_NAME\Documents\EWP\reviews" \
+  --results-dir "C:\Users\YOUR_NAME\Documents\EWP\results"
+```
+
+The command validates each review against its exact canonical result without writing a
+revision. Resolve every reported failure before bulk apply. A clean 24-file preview ends
+with:
+
+```text
+SUMMARY previewed=24 applied=0 failed=0 stopped_early=false
+```
+
+### 3.4. Apply all accepted reviews
+
+```bash
+uv run --locked transcriber revise apply \
+  "C:\Users\YOUR_NAME\Documents\EWP\reviews" \
+  --results-dir "C:\Users\YOUR_NAME\Documents\EWP\results" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\revisions" \
+  --audit
+```
+
+Success writes one immutable `*_revision_NNN.json` and one `*_audit.json` per review and
+ends with:
+
+```text
+SUMMARY previewed=0 applied=24 failed=0 stopped_early=false
+```
+
+Retain the canonical results and accepted revision files together as the corrected
+corpus. Audits are useful diagnostics but are not authoritative correction state.
+
+### 3.5. Handle a partial failure safely
+
+A failed item is isolated; previously successful items remain published. A mixed batch
+returns exit code 5. Whether later items continue is controlled by
+`runtime.continue_batch_after_error` in the active configuration.
+
+Do not rerun the entire review directory after a partial apply: reviews that already
+succeeded would create additional revision numbers. Fix and retry only each failed
+review, for example:
+
+```bash
+uv run --locked transcriber revise apply \
+  "C:\Users\YOUR_NAME\Documents\EWP\reviews\failed-episode.review.txt" \
+  --results-dir "C:\Users\YOUR_NAME\Documents\EWP\results" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\revisions" \
+  --audit
+```
+
+Use `--json-output` when a script needs a machine-readable batch summary.
+
+## 4. Optional nano shortcut
 
 `revise edit` is an optional shortcut only for users who want to edit inside the WSL
 terminal with nano. It is not the recommended Windows GUI workflow:
@@ -117,11 +212,7 @@ For repeated nano use, configure `editor = "nano"` under `[revision]` in either:
 
 `VISUAL` and `EDITOR` are environment-variable names, not editor commands.
 
-For batches, `revise prepare` and `revise apply` accept directories. Directories are
-non-recursive by default; add `--recursive` only intentionally. A failed item is
-isolated, and any mixed batch returns exit code 5.
-
-## 4. Generate corrected exports
+## 5. Generate corrected exports
 
 Applying a revision writes the immutable revision and optional audit; it does not
 automatically write corrected TXT, subtitle, or segments files. Generate those derived
@@ -152,7 +243,11 @@ exact base result plus its accepted revision.
 `--revision none`, or omitting `--revision`, regenerates raw canonical exports. Revised
 exports have `_revision_NNN` in their names and never overwrite raw exports.
 
-## 5. Audit an existing revision
+The current `transcriber export` command accepts one canonical result at a time; it does
+not yet accept a results directory. After bulk apply, export each accepted
+result/revision pair individually. Native bulk export remains planned work.
+
+## 6. Audit an existing revision
 
 Reconstruct and publish detailed diagnostics:
 
@@ -165,7 +260,7 @@ Use `--no-write --json-output` to inspect the audit without creating a file. Aud
 substitutions, punctuation changes, merges, splits, insertions, deletions, and speaker
 changes. They are diagnostic output, not correction state.
 
-## 6. Errors and recovery
+## 7. Errors and recovery
 
 - Base hash mismatch: select the exact `results.json` used to prepare the review. Do not
   update the hash manually.

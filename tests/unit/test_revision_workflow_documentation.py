@@ -37,6 +37,13 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "--revision latest",
         "--revision none",
         "exit code 5",
+        "Bulk revision workflow",
+        "SUMMARY prepared=24 failed=0 stopped_early=false",
+        "SUMMARY previewed=24 applied=0 failed=0 stopped_early=false",
+        "SUMMARY previewed=0 applied=24 failed=0 stopped_early=false",
+        "Do not rerun the entire review directory",
+        "runtime.continue_batch_after_error",
+        "Native bulk export remains planned work",
         "model-free and audio-free",
     ):
         assert invariant in document
@@ -48,6 +55,15 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         document.index("### 2.4. Export"),
     ]
     assert workflow_positions == sorted(workflow_positions)
+
+    batch_positions = [
+        document.index("### 3.1. Prepare all reviews"),
+        document.index("### 3.2. Edit the reviews"),
+        document.index("### 3.3. Preview the complete batch"),
+        document.index("### 3.4. Apply all accepted reviews"),
+        document.index("### 3.5. Handle a partial failure safely"),
+    ]
+    assert batch_positions == sorted(batch_positions)
 
 
 def test_operator_index_links_existing_revision_runbook() -> None:
