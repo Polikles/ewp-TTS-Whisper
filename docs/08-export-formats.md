@@ -26,6 +26,9 @@ Rules:
 - with one speaker, the label is omitted;
 - no stylistic or LLM correction.
 
+Common abbreviations such as `m.in.`, `np.`, `tzw.`, and `vs.` do not create a sentence
+boundary merely because they end with a period.
+
 Example:
 
 ```text

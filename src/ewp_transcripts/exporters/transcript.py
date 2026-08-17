@@ -14,6 +14,7 @@ _NON_BREAKING_ABBREVIATIONS = frozenset(
         "inż.",
         "itd.",
         "itp.",
+        "m.in.",
         "mgr.",
         "mr.",
         "mrs.",
@@ -22,6 +23,8 @@ _NON_BREAKING_ABBREVIATIONS = frozenset(
         "st.",
         "tj.",
         "tzn.",
+        "tzw.",
+        "vs.",
     }
 )
 

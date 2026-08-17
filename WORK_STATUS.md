@@ -55,6 +55,12 @@ invariant was an explicitly overlapping cue shifted 201 ms before its predecesso
 final repartitioning. Final chronological ordering is now restored without removing or
 flattening the overlap; archive re-export remains to be verified.
 
+Manual archive review also identified recurring sentence-export breaks after `m.in.`,
+`np.`, `tzw.`, and `vs.`; these abbreviations are now handled deterministically.
+Silence-associated ASR hallucinations remain an evidence-driven tuning item: do not add
+phrase-specific deletion rules, and do not replace isolated-speaker sources with a mixed
+recording solely to hide silence. Preserve affected windows for VAD/ASR comparison.
+
 Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive environment.
 Step 3 requires the owner's manual transcript corrections. Step 5 is repository work and
 does not require user input unless a new product decision appears.

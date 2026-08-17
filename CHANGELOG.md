@@ -74,6 +74,8 @@ All notable changes to EWP-transcripts are documented here.
 - Restored chronological ordering after final subtitle repartitioning so explicitly
   overlapping speaker cues cannot make SRT/VTT export fail after long silent intervals
   or fallback alignment.
+- Prevented plain-text sentence splitting after common abbreviations including `m.in.`,
+  `np.`, `tzw.`, and `vs.`.
 
 ## 0.1.1 — internal release candidate — 2026-08-14
 

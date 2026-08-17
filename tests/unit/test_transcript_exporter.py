@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.exporters.transcript import render_transcript, split_sentences
 
@@ -51,6 +53,14 @@ def test_sentence_split_preserves_abbreviations_and_repetitions() -> None:
         "Rozmawiam z dr. Kowalskim.",
         "Tak, tak.",
         "Naprawdę?",
+    )
+
+
+@pytest.mark.parametrize("abbreviation", ["m.in.", "np.", "tzw.", "vs."])
+def test_sentence_split_does_not_break_after_common_abbreviation(abbreviation: str) -> None:
+    assert split_sentences(f"Obejmuje to {abbreviation} ten przykład. Następne zdanie.") == (
+        f"Obejmuje to {abbreviation} ten przykład.",
+        "Następne zdanie.",
     )
 
 
