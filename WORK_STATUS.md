@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-14**.
+Last updated: **2026-08-19**.
 
 ## Current state
 
@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 368 automated checks pass;
+- all 374 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -25,7 +25,7 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 ## Authoritative next step
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in
-`WSL config/REVISE_TRANSCRIPTS.md`: prepare, manual Windows Notepad edit, preview/apply,
+`WSL config/REVISE_TRANSCRIPTS.md`: prepare, manual Windows VS Code edit, preview/apply,
 audit, and revision-aware export all worked. The minimal workflow is accepted for the
 MVP, although manual editing remains intentionally labor-intensive.
 
@@ -35,7 +35,7 @@ Resume with this bulk-workflow plan:
    `*_results.json` completed successfully.
 2. Run non-recursive `revise prepare` on the result directory and verify one distinct
    review per canonical result, with no failed items or naming collisions.
-3. Manually correct the prepared `.review.txt` files in Windows Notepad. This is the
+3. Manually correct the prepared `.review.txt` files in Windows VS Code. This is the
    user-input interval; no immutable revisions are created yet.
 4. Run directory `revise preview` if desired, then directory `revise apply --audit` with
    explicit results and revision output directories. Verify per-item summaries and
@@ -60,6 +60,13 @@ Manual archive review also identified recurring sentence-export breaks after `m.
 Silence-associated ASR hallucinations remain an evidence-driven tuning item: do not add
 phrase-specific deletion rules, and do not replace isolated-speaker sources with a mixed
 recording solely to hide silence. Preserve affected windows for VAD/ASR comparison.
+
+The complete archive review found two revision-preparation defects to reproduce before
+v0.2.0 acceptance: some review boundaries moved a few correctly attributed words to the
+adjacent speaker, and one sentence was absent from the middle of a speaker block even
+though the canonical transcript contained it. The logged Amara.org-style alignment
+hallucination did not appear in the canonical transcripts. Treat these as separate
+review-rendering evidence; do not add phrase-specific filtering based on the log line.
 
 Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive environment.
 Step 3 requires the owner's manual transcript corrections. Step 5 is repository work and

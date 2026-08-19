@@ -54,6 +54,13 @@ All notable changes to EWP-transcripts are documented here.
 - Documented the complete bulk correction workflow: directory preparation, manual
   editing, batch preview/apply with audits, partial-failure handling, safe targeted
   retries, and the current one-result-at-a-time export limitation.
+- Made Windows VS Code the preferred manual review editor because its search and
+  change-all-occurrences tools accelerate repeated corrections; retained Notepad as a
+  small-edit fallback and documented why GUI editors must be opened outside `revise
+  edit`.
+- Recorded archive-review evidence for incorrect generated-review speaker boundaries
+  and a missing review sentence, while distinguishing a log-only alignment hallucination
+  from canonical transcript content.
 - Accepted the planned v0.2.0 manual transcript-revision contract, including immutable
   full snapshots, `EWP-REVIEW 1`, revision-aware export, schema/example artifacts, and
   the implementation acceptance plan, with automated contract-artifact validation.

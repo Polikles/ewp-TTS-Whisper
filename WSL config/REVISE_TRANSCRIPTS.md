@@ -25,7 +25,7 @@ provenance remain anchored in `results.json`. Corrected sentence and speaker seg
 derived from `results.json + revision.json` during export. This avoids two independently
 editable segment structures that could disagree.
 
-## 2. Recommended workflow: Windows Notepad
+## 2. Recommended workflow: Windows VS Code
 
 The current recommended workflow is:
 
@@ -46,11 +46,18 @@ uv run --locked transcriber revise prepare \
 
 Use the exact `REVIEW` path printed by the command in the following steps.
 
-### 2.2. Edit and save it in Windows Notepad
+### 2.2. Edit and save it in Windows VS Code
 
-Open the reported `.review.txt` directly from Windows Explorer with Notepad. The file is
-already on the Windows filesystem, so do not invoke `notepad.exe`, VS Code, or another
-GUI launcher through `transcriber revise edit`. Save the file normally when finished.
+Open the reported `.review.txt` directly from Windows Explorer with Windows VS Code. It
+is preferred over Notepad because **Change All Occurrences** and search/replace can fix a
+repeated mistranscription consistently across a long episode. Review every replacement
+before saving: a spelling may be correct in one context and wrong in another.
+
+The review file is already on the Windows filesystem. Open it from Windows Explorer or
+from an existing Windows VS Code window; do not launch `code`, `notepad.exe`, or another
+GUI through `transcriber revise edit`. WSL launchers may return before editing finishes
+or fail to open the requested path, causing an unchanged or prematurely applied review.
+Windows Notepad remains an acceptable fallback for small corrections.
 
 Edit ordinary transcript text and `@@ speaker speaker_NNN` directives. Do not edit:
 
@@ -127,10 +134,12 @@ directory deliberately contains results in subdirectories.
 
 ### 3.2. Edit the reviews in Windows
 
-Open each generated review from Windows Explorer and edit it in Notepad or another
-plain-text editor. Follow the editing rules in section 2.2, keep the filenames and
-metadata headers unchanged, and save all files as UTF-8. Review files may be corrected
-over several sessions; no model or source audio is needed for the later commands.
+Open each generated review from Windows Explorer and edit it in Windows VS Code. Its
+search and **Change All Occurrences** features are especially useful for recurring names
+and terminology across long transcripts. Follow the editing rules in section 2.2, keep
+the filenames and metadata headers unchanged, and save all files as UTF-8. Review files
+may be corrected over several sessions; no model or source audio is needed for the later
+commands.
 
 ### 3.3. Preview the complete batch
 

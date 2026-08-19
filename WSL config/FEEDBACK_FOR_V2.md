@@ -60,6 +60,9 @@ Note the human work, not only model accuracy:
 - tools used for listening and correction;
 - whether review is easiest by word, sentence, speaker turn, or subtitle cue;
 - operations that require split/merge, speaker reassignment, or timestamp adjustment;
+- words whose speaker was correct in canonical JSON but changed at a generated review
+  boundary;
+- canonical sentences missing from a generated review file;
 - mistakes caused by editing TXT, SRT, and VTT independently;
 - terminology that should become a reusable dictionary;
 - information needed to resume an interrupted review;
@@ -88,7 +91,7 @@ review time:
 corrections by category:
 speaker/timing/subtitle problems:
 repeated terminology or names:
-preferred correction tool/workflow:
+preferred correction tool/workflow (including useful bulk-replace features):
 HTML/player requirements:
 material eligible for future ground truth:
 three most expensive manual operations:
