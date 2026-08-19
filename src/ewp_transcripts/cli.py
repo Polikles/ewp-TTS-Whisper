@@ -18,6 +18,7 @@ from ewp_transcripts.application import (
     ExportFormat,
     TranscriptionOutcome,
     application_version,
+    apply_correction,
     apply_review_file,
     audit_revision_file,
     clean_all_workdirs,
@@ -28,14 +29,23 @@ from ewp_transcripts.application import (
     inspect_input,
     prepare_review_batch,
     prepare_review_file,
+    preview_correction,
     preview_review_file,
     process_review_batch,
     transcribe_batch,
     transcribe_one,
 )
-from ewp_transcripts.config import load_config
+from ewp_transcripts.config import ApplicationConfig, load_config
+from ewp_transcripts.correction_consent import (
+    ConsentChoice,
+    CorrectionConsentScope,
+    correction_api_warning,
+    load_correction_consents,
+)
+from ewp_transcripts.correction_providers import create_correction_provider
 from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain import JobOutputPlan, TranscriptRevision
+from ewp_transcripts.domain.correction import CorrectionProvider
 from ewp_transcripts.domain.enums import ChannelMode, LanguageMode, PlanDecision
 from ewp_transcripts.domain.errors import (
     ApplicationError,
@@ -104,6 +114,12 @@ class RequestedTranscribeFormat(StrEnum):
 
 class CleanTarget(StrEnum):
     ALL_WORKDIRS = "all-workdirs"
+
+
+class RequestedCorrectionConsent(StrEnum):
+    REJECT = "reject"
+    ONCE = "once"
+    PERSIST = "persist"
 
 
 def _version_callback(value: bool) -> None:
@@ -485,6 +501,135 @@ def revise_apply_command(
             f"revision_tokens={revision.statistics.revision_tokens} "
             f"warnings={len(revision.warnings)}"
         )
+
+
+@revise_app.command("correct")
+def revise_correct_command(
+    results_json: Annotated[
+        Path,
+        typer.Argument(help="Completed canonical result to correct.", metavar="RESULTS_JSON"),
+    ],
+    model: Annotated[
+        str | None,
+        typer.Option("--model", help="Exact model identifier exposed by LM Studio."),
+    ] = None,
+    endpoint: Annotated[
+        str | None,
+        typer.Option("--endpoint", help="LM Studio loopback /v1 endpoint."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the immutable revision to this directory."),
+    ] = None,
+    resume_directory: Annotated[
+        Path | None,
+        typer.Option("--resume-dir", help="Store private validated per-chunk resume state."),
+    ] = None,
+    preview: Annotated[
+        bool,
+        typer.Option("--preview", help="Validate the complete correction without publishing."),
+    ] = False,
+    consent: Annotated[
+        RequestedCorrectionConsent | None,
+        typer.Option(
+            "--consent",
+            help="API consent: reject, once, or persist for this exact local scope.",
+        ),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+) -> None:
+    """Correct faithfully through an explicitly configured local LM Studio API."""
+
+    try:
+        overrides: dict[str, object] = {"provider": "lm-studio"}
+        if model is not None:
+            overrides["model"] = model
+        if endpoint is not None:
+            overrides["endpoint"] = endpoint
+        config = load_config(
+            explicit_path=config_path,
+            cli_overrides={"correction": overrides},
+        )
+        provider = create_correction_provider(config)
+        choice = _correction_consent_choice(config, provider, consent)
+        normalized_result = normalize_input_path(results_json)
+        state_directory = _optional_user_path(resume_directory) or (
+            normalized_result.parent / "correction-state-ewp-transcripts"
+        )
+        if preview:
+            outcome = preview_correction(
+                normalized_result,
+                config=config,
+                provider=provider,
+                consent_choice=choice,
+                resume_directory=state_directory,
+            )
+            typer.echo(f"PREVIEW {outcome.base_result_path}")
+            typer.echo(
+                "SUMMARY published=0 "
+                f"revision_tokens={outcome.revision.statistics.revision_tokens} "
+                f"warnings={len(outcome.revision.warnings)}"
+            )
+            return
+        applied = apply_correction(
+            normalized_result,
+            config=config,
+            provider=provider,
+            consent_choice=choice,
+            output_directory=_optional_user_path(output_directory),
+            resume_directory=state_directory,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    typer.echo(f"APPLIED {applied.base_result_path}")
+    typer.echo(f"  REVISION {applied.revision_path}")
+    typer.echo(
+        f"SUMMARY revision_number={applied.revision.revision_number} "
+        f"revision_tokens={applied.revision.statistics.revision_tokens} "
+        f"warnings={len(applied.revision.warnings)}"
+    )
+
+
+def _correction_consent_choice(
+    config: ApplicationConfig,
+    provider: CorrectionProvider,
+    requested: RequestedCorrectionConsent | None,
+) -> ConsentChoice | None:
+    """Display the API warning and obtain consent only when exact stored scope is absent."""
+
+    # Kept behind the CLI adapter; application services independently enforce the scope.
+    scope = CorrectionConsentScope(
+        provider_id=provider.provider_id,
+        endpoint_kind=provider.endpoint_kind,
+        endpoint_identity=provider.endpoint_identity,
+    )
+    warning = correction_api_warning(scope.endpoint_kind)
+    if warning is not None:
+        typer.echo(f"WARNING: {warning}", err=True)
+    records = load_correction_consents(config.correction.consent_store)
+    if any(record.scope == scope for record in records):
+        return None
+    if requested is not None:
+        return _consent_value(requested)
+    if not config.general.interactive:
+        return None
+    answer = typer.prompt("Consent [reject/once/persist]", default="reject").strip().casefold()
+    try:
+        selected = RequestedCorrectionConsent(answer)
+    except ValueError as error:
+        raise typer.BadParameter("consent must be reject, once, or persist") from error
+    return _consent_value(selected)
+
+
+def _consent_value(requested: RequestedCorrectionConsent) -> ConsentChoice:
+    if requested is RequestedCorrectionConsent.REJECT:
+        return "reject"
+    if requested is RequestedCorrectionConsent.ONCE:
+        return "accept_once"
+    return "accept_persistently"
 
 
 @revise_app.command("audit")

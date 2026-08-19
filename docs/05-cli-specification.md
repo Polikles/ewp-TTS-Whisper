@@ -214,10 +214,29 @@ transcriber revise apply INPUT [OPTIONS]
 transcriber revise preview INPUT [OPTIONS]
 transcriber revise edit INPUT [OPTIONS]
 transcriber revise audit REVISION [OPTIONS]
+transcriber revise correct RESULTS_JSON [OPTIONS]
 ```
 
 `prepare` accepts a completed `results.json` or a directory containing completed results.
 `apply` and `preview` accept an `EWP-REVIEW 1` file or a directory of review files.
+
+`correct` currently accepts one completed canonical result and an explicitly configured
+LM Studio loopback provider. Its options are:
+
+```text
+--model EXACT_MODEL_ID
+--endpoint LOOPBACK_V1_URL
+--output-dir PATH
+--resume-dir PATH
+--preview
+--consent reject|once|persist
+--config PATH
+```
+
+`--preview` performs provider calls and may write private validated resume state, but
+does not publish a revision. Consent is enforced before request serialization. Stored
+consent is exact-scope only; otherwise interactive execution prompts and non-interactive
+execution fails unless `--consent once|persist` is explicit. `reject` makes zero calls.
 Directory operations use deterministic natural ordering and do not recurse unless
 `--recursive` is supplied.
 

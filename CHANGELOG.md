@@ -58,11 +58,16 @@ All notable changes to EWP-transcripts are documented here.
 - Added the production correction application boundary: exact-scope consent is resolved
   and optionally persisted before request construction, configured timeout/retry policy
   is applied, and local/mock provenance records the provider's actual endpoint kind.
+- Added `transcriber revise correct` for single-result LM Studio correction with exact
+  model/endpoint selection, warning and reject/once/persist consent, preview/apply modes,
+  private resumable chunk state, and zero-call rejection behavior.
 
 ### Documentation
 
 - Updated v0.3 traceability and acceptance status to distinguish implemented neutral
   infrastructure from provider-dependent prompt, CLI, benchmark, and review work.
+- Documented exact LM Studio model discovery, explicit local consent, safe preview/apply
+  and resume paths, initial local benchmark candidates, and the deferred OpenRouter stage.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

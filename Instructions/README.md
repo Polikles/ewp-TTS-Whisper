@@ -244,6 +244,49 @@ Use `--no-write --json-output` to inspect reconstructed diagnostics without publ
 The detailed revision guide is
 [`../WSL config/REVISE_TRANSCRIPTS.md`](../WSL%20config/REVISE_TRANSCRIPTS.md).
 
+### Automated local correction with LM Studio (v0.3 development)
+
+This command is implemented for controlled local benchmarking but has not yet completed
+the three-model acceptance run. In LM Studio, load exactly the intended model and start
+its local OpenAI-compatible server. Confirm the exact identifier without sending a
+transcript:
+
+```bash
+curl -fsS http://127.0.0.1:1234/v1/models | \
+  uv run --locked python -c \
+  'import json,sys; print("\n".join(item["id"] for item in json.load(sys.stdin)["data"]))'
+```
+
+Preview still calls the API and stores validated private resume responses; it only
+avoids publishing a revision. The first call requires explicit consent:
+
+```bash
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --model "EXACT_MODEL_ID_FROM_LM_STUDIO" \
+  --endpoint "http://127.0.0.1:1234/v1" \
+  --consent once \
+  --preview \
+  --resume-dir "/private/path/lm-studio-model-name/resume"
+```
+
+After inspecting the preview, publish an immutable revision. Reusing the same resume
+directory avoids repeating already validated chunks:
+
+```bash
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --model "EXACT_MODEL_ID_FROM_LM_STUDIO" \
+  --consent once \
+  --output-dir "/private/path/lm-studio-model-name/revisions" \
+  --resume-dir "/private/path/lm-studio-model-name/resume"
+```
+
+Use `--consent persist` only to remember the exact LM Studio provider and endpoint scope;
+model and prompt identity still participate in operation/resume hashes. `--consent reject`
+guarantees no API request. Even a loopback server is a separate process that may log or
+forward text, so EWP Transcriber displays its local-API warning. The endpoint must be an
+uncredentialed `http://localhost.../v1`, `127.0.0.1`, or `::1` URL. Remote addresses are
+rejected by this adapter.
+
 ## 10. Export corrected transcripts
 
 Latest compatible revision per result:
@@ -292,9 +335,11 @@ caches, configuration, or tokens.
 
 ## 13. Privacy and evidence
 
-Normal transcription and revision are local-first. Keep `HF_TOKEN`, source recordings,
-canonical paths, transcripts, revisions, audits, and private benchmark material out of
-Git and shared logs. Cloud/API correction is not implemented in this release.
+Normal transcription and manual revision are local-first. Keep `HF_TOKEN`, source
+recordings, canonical paths, transcripts, revisions, audits, correction resume state,
+and private benchmark material out of Git and shared logs. LM Studio correction is an
+explicit local API boundary and is not equivalent to in-process offline execution.
+Cloud/API correction is not implemented; cloud correction remains blocked from inference.
 
 For later benchmark feedback, use
 [`../WSL config/FEEDBACK_FOR_V2.md`](../WSL%20config/FEEDBACK_FOR_V2.md).
