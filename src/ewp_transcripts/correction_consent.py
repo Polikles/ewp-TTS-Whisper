@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -37,6 +40,11 @@ class CorrectionConsentScope(ConsentModel):
 
 class CorrectionConsentRecord(ConsentModel):
     scope: CorrectionConsentScope
+
+
+class CorrectionConsentDocument(ConsentModel):
+    schema_version: Literal["1.0"] = "1.0"
+    records: tuple[CorrectionConsentRecord, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,3 +90,44 @@ def authorize_correction_api(
     if choice == "accept_once":
         return ConsentDecision(True, None, warning)
     return ConsentDecision(True, scope, warning)
+
+
+def load_correction_consents(path: Path) -> tuple[CorrectionConsentRecord, ...]:
+    """Load a strict consent file; a missing file means no persisted consent."""
+
+    if not path.exists():
+        return ()
+    try:
+        document = CorrectionConsentDocument.model_validate_json(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError) as error:
+        raise CorrectionConsentError(
+            f"Cannot read valid correction consent store: {path}"
+        ) from error
+    scopes = [record.scope.model_dump_json() for record in document.records]
+    if len(scopes) != len(set(scopes)):
+        raise CorrectionConsentError("Correction consent store contains duplicate scopes")
+    return document.records
+
+
+def persist_correction_consent(path: Path, scope: CorrectionConsentScope) -> None:
+    """Atomically add one exact non-secret scope with private filesystem permissions."""
+
+    records = load_correction_consents(path)
+    if any(record.scope == scope for record in records):
+        return
+    document = CorrectionConsentDocument(records=(*records, CorrectionConsentRecord(scope=scope)))
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    payload = (document.model_dump_json(indent=2) + "\n").encode()
+    descriptor, temporary_name = tempfile.mkstemp(prefix=".consent-", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        os.chmod(path, 0o600)
+    finally:
+        temporary.unlink(missing_ok=True)

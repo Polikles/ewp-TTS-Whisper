@@ -42,6 +42,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added a provider-independent correction API consent policy with distinct local/cloud
   warnings, strict-offline cloud blocking, reject/accept-once/persist choices, exact-scope
   reuse, mock bypass, and non-interactive denial by default.
+- Added an atomic private consent store containing only exact non-secret scopes, with
+  missing-store denial semantics, strict corruption handling, and duplicate suppression.
 
 ### Documentation
 

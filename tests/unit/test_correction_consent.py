@@ -1,5 +1,7 @@
 """Tests for correction API privacy consent policy."""
 
+from pathlib import Path
+
 import pytest
 
 from ewp_transcripts.correction_consent import (
@@ -10,6 +12,8 @@ from ewp_transcripts.correction_consent import (
     EndpointKind,
     authorize_correction_api,
     correction_api_warning,
+    load_correction_consents,
+    persist_correction_consent,
 )
 from ewp_transcripts.domain.errors import CorrectionConsentError
 
@@ -105,3 +109,27 @@ def test_local_and_cloud_warnings_are_distinct() -> None:
     assert correction_api_warning("local") == LOCAL_API_WARNING
     assert correction_api_warning("cloud") == CLOUD_API_WARNING
     assert LOCAL_API_WARNING != CLOUD_API_WARNING
+
+
+def test_persistent_store_is_private_atomic_and_deduplicated(tmp_path: Path) -> None:
+    path = tmp_path / "config" / "correction-consent.json"
+    scope = _scope("local", endpoint="http://127.0.0.1:11434")
+
+    persist_correction_consent(path, scope)
+    persist_correction_consent(path, scope)
+
+    records = load_correction_consents(path)
+    assert [record.scope for record in records] == [scope]
+    assert path.stat().st_mode & 0o777 == 0o600
+    assert path.parent.stat().st_mode & 0o777 == 0o700
+    assert not tuple(path.parent.glob(".consent-*"))
+
+
+def test_invalid_persistent_store_is_not_silently_replaced(tmp_path: Path) -> None:
+    path = tmp_path / "correction-consent.json"
+    path.write_text("invalid", encoding="utf-8")
+
+    with pytest.raises(CorrectionConsentError, match="consent store"):
+        persist_correction_consent(path, _scope())
+
+    assert path.read_text(encoding="utf-8") == "invalid"
