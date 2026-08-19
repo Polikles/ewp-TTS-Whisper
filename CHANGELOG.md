@@ -53,6 +53,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Documentation
 
+- Updated v0.3 traceability and acceptance status to distinguish implemented neutral
+  infrastructure from provider-dependent prompt, CLI, benchmark, and review work.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

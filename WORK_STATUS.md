@@ -50,6 +50,8 @@ benchmark reports and completing broader artifact payload scans are next. The ne
 response now supports optional input/output token and micro-USD cost accounting. Real
 local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
+The traceability matrix now marks each v0.3 requirement as implemented or partial rather
+than leaving completed neutral infrastructure labelled merely planned.
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in
 `WSL config/REVISE_TRANSCRIPTS.md`: prepare, manual Windows VS Code edit, preview/apply,
