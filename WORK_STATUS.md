@@ -37,13 +37,12 @@ The v0.3 automated-correction contract is now defined in
 `docs/22-v0.3-automated-correction.md`. Provider-neutral request/response/change models,
 the deterministic single-owner chunk planner, network-free mock provider, strict response
 reconstruction validator, and mock-to-review-to-revision vertical slice are implemented.
-Strict correction chunk configuration is also implemented. Next, add application and
-batch boundaries. Single-file and deterministic failure-isolated directory mock
-preview/apply now exist at the application boundary. Resumable chunk response state is
-implemented as private immutable validated entries with exact operation identity. Next,
-wire resume directories into correction application/batches. Exact-hash benchmark
-manifests now validate canonical/intermediate/candidate/gold lineage and report the
-initial lexical baseline; provider-level metrics remain to be added. Real local/cloud provider selection,
+Strict correction chunk configuration, single-file and failure-isolated directory
+preview/apply, and private immutable validated resume entries are implemented. Explicit
+resume directories are wired through single and batch application paths. Exact-hash
+benchmark manifests validate canonical/intermediate/candidate/gold lineage and report
+the initial lexical baseline. Provider-level metrics and consent policy are next. Real
+local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in

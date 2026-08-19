@@ -36,6 +36,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added strict hash-bound automated-correction benchmark manifests and lexical reports
   for canonical-to-gold and earlier-revision-to-gold tasks, with exact base-lineage
   validation and no transcript text in reports.
+- Wired an explicit resume directory into single and batch correction operations so
+  validated chunk responses can be reused without repeating provider calls; preview
+  remains write-free when no resume directory is supplied.
 
 ### Documentation
 

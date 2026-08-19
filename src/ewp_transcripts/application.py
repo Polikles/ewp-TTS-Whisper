@@ -16,7 +16,6 @@ from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
-    DeterministicMockCorrectionProvider,
     build_mock_correction_revision,
 )
 from ewp_transcripts.discovery import (
@@ -43,6 +42,7 @@ from ewp_transcripts.domain.canonical import (
     CanonicalResult,
     load_canonical_result,
 )
+from ewp_transcripts.domain.correction import CorrectionProvider
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import (
     ApplicationError,
@@ -418,8 +418,9 @@ def preview_mock_correction(
     result_path: str | Path,
     *,
     config: ApplicationConfig,
-    provider: DeterministicMockCorrectionProvider,
+    provider: CorrectionProvider,
     prompt_id: str = "faithful-correction-v1",
+    resume_directory: Path | None = None,
 ) -> CorrectionPreviewOutcome:
     """Run the complete network-free correction path without publishing a revision."""
 
@@ -433,6 +434,7 @@ def preview_mock_correction(
             context_tokens=config.correction.context_tokens,
         ),
         prompt_id=prompt_id,
+        resume_directory=resume_directory,
     )
     return CorrectionPreviewOutcome(normalized, revision)
 
@@ -441,9 +443,10 @@ def apply_mock_correction(
     result_path: str | Path,
     *,
     config: ApplicationConfig,
-    provider: DeterministicMockCorrectionProvider,
+    provider: CorrectionProvider,
     output_directory: Path | None = None,
     prompt_id: str = "faithful-correction-v1",
+    resume_directory: Path | None = None,
 ) -> CorrectionApplyOutcome:
     """Validate and atomically publish one network-free mock correction revision."""
 
@@ -452,6 +455,7 @@ def apply_mock_correction(
         config=config,
         provider=provider,
         prompt_id=prompt_id,
+        resume_directory=resume_directory,
     )
     revision, path = publish_next_revision(
         preview.revision,
@@ -465,11 +469,12 @@ def process_mock_correction_batch(
     input_path: str | Path,
     *,
     config: ApplicationConfig,
-    provider: DeterministicMockCorrectionProvider,
+    provider: CorrectionProvider,
     output_directory: Path | None = None,
     recursive: bool = False,
     apply: bool = True,
     prompt_id: str = "faithful-correction-v1",
+    resume_directory: Path | None = None,
 ) -> BatchCorrectionOutcome:
     """Preview or publish mock corrections with deterministic per-result isolation."""
 
@@ -485,6 +490,7 @@ def process_mock_correction_batch(
                     provider=provider,
                     output_directory=output_directory,
                     prompt_id=prompt_id,
+                    resume_directory=resume_directory,
                 )
                 jobs.append(
                     BatchCorrectionJobOutcome(
@@ -500,6 +506,7 @@ def process_mock_correction_batch(
                     config=config,
                     provider=provider,
                     prompt_id=prompt_id,
+                    resume_directory=resume_directory,
                 )
                 jobs.append(
                     BatchCorrectionJobOutcome(

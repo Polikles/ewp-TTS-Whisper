@@ -10,6 +10,7 @@ from typing import Literal
 from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.domain.correction import (
     CorrectionChange,
+    CorrectionProvider,
     CorrectionRequest,
     CorrectionResponse,
     CorrectionToken,
@@ -224,10 +225,11 @@ def validate_correction_response(
 
 def build_mock_correction_revision(
     result_path: Path,
-    provider: DeterministicMockCorrectionProvider,
+    provider: CorrectionProvider,
     *,
     config: CorrectionChunkConfig | None = None,
     prompt_id: str = "faithful-correction-v1",
+    resume_directory: Path | None = None,
 ) -> TranscriptRevision:
     """Exercise provider-to-review-to-revision flow without network or persistence."""
 
@@ -243,7 +245,18 @@ def build_mock_correction_revision(
             provider_id=provider.provider_id,
             model_id=provider.model_id,
         )
-        response = provider.correct(request)
+        if resume_directory is None:
+            response = provider.correct(request)
+        else:
+            # Local import keeps persistence dependent on the correction contract while
+            # allowing the pure planner/validator module to remain independently usable.
+            from ewp_transcripts.correction_state import call_correction_resumable
+
+            response = call_correction_resumable(
+                provider,
+                request,
+                state_directory=resume_directory,
+            ).response
         corrected = validate_correction_response(request, response)
         speakers = _corrected_speakers(request, response)
         anchors.append(

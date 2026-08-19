@@ -1,7 +1,9 @@
 """Application-boundary tests for network-free automated correction."""
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from ewp_transcripts.application import (
     apply_mock_correction,
@@ -10,6 +12,7 @@ from ewp_transcripts.application import (
 )
 from ewp_transcripts.config import ApplicationConfig, CorrectionConfig, RuntimeConfig
 from ewp_transcripts.correction import DeterministicMockCorrectionProvider
+from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
@@ -112,3 +115,50 @@ def test_mock_batch_preview_obeys_stop_policy_and_writes_nothing(tmp_path: Path)
     assert [job.status for job in outcome.jobs] == ["failed"]
     assert outcome.stopped_early is True
     assert not (tmp_path / "revisions").exists()
+
+
+@dataclass
+class _CountingProvider:
+    calls: int = 0
+
+    @property
+    def provider_id(self) -> str:
+        return "application-counting-mock"
+
+    @property
+    def model_id(self) -> str:
+        return "v1"
+
+    @property
+    def endpoint_kind(self) -> Literal["mock"]:
+        return "mock"
+
+    def correct(self, request: CorrectionRequest) -> CorrectionResponse:
+        self.calls += 1
+        return DeterministicMockCorrectionProvider().correct(request)
+
+
+def test_application_resume_directory_avoids_repeating_chunk_calls(tmp_path: Path) -> None:
+    base = tmp_path / EXAMPLE.name
+    base.write_bytes(EXAMPLE.read_bytes())
+    provider = _CountingProvider()
+    resume = tmp_path / "resume"
+
+    first = preview_mock_correction(
+        base,
+        config=_config(tmp_path),
+        provider=provider,
+        resume_directory=resume,
+    )
+    calls_after_first = provider.calls
+    second = preview_mock_correction(
+        base,
+        config=_config(tmp_path),
+        provider=provider,
+        resume_directory=resume,
+    )
+
+    assert calls_after_first == 2
+    assert provider.calls == calls_after_first
+    assert first.revision.transcript == second.revision.transcript
+    assert len(tuple(resume.glob("*.json"))) == 2
