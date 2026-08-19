@@ -52,8 +52,12 @@ provider selection is now recorded: LM Studio is the first local OpenAI-compatib
 backend, with Ollama deferred; OpenRouter follows only after local benchmarks. The LM
 Studio adapter and network-free contract tests are implemented, but no real transcript
 has yet been sent to it. The generic application path now gates the provider before
-request construction and applies configured retries/timeouts. CLI exposure and local
-benchmark execution are next. Cloud credentials, API calls, and cost remain separately gated.
+request construction and applies configured retries/timeouts. `revise correct` now exposes
+single-result LM Studio preview/apply, exact model and loopback endpoint selection,
+reject/once/persist consent, and private resumable state. Prompt content and response
+schema hashes invalidate stale resume entries. The next gate is a synthetic LM Studio
+smoke run followed by local benchmark/report execution. Cloud credentials, API calls,
+and cost remain separately gated.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

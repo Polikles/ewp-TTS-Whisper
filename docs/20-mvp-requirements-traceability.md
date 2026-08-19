@@ -93,11 +93,11 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
-| FR-K00, FR-K01, FR-K03, FR-K07 | partial | Provider-neutral protocol and mock application path feed the existing aligner and immutable revision storage. Revision-selected child correction and real adapters remain. |
-| FR-K02, FR-K04 | partial | Strict versioned response/change validation is implemented. The production faithful-repair prompt and its fixtures await provider selection. |
+| FR-K00, FR-K01, FR-K03, FR-K07 | partial | Provider-neutral protocol, mock path, and LM Studio adapter feed the existing aligner and immutable revision storage. Revision-selected child correction remains. |
+| FR-K02, FR-K04 | implemented | Strict versioned response/change validation and the hashed LM Studio faithful-repair prompt prohibit paraphrase, style/grammar repair, summary, translation, and meaningful deletion. |
 | FR-K05, FR-K06, NFR-015 | implemented | Deterministic gap-free editable chunks, bounded read-only overlap, operation hashes, configuration validation, and boundary tests. |
-| FR-K08, FR-K09, FR-K10, FR-K11, FR-K12, NFR-016 | partial | Pure local/cloud consent policy, strict-offline rejection, exact-scope private persistence, and sanitized provider failures are tested. CLI/provider wiring remains. |
-| FR-K13 | partial | LLM provenance models and mock revisions record provider/model/endpoint/prompt identity. Production adapter parameters remain. |
+| FR-K08, FR-K09, FR-K10, FR-K11, FR-K12, NFR-016 | implemented | Local/cloud consent policy, strict-offline rejection, exact-scope private persistence, CLI warning/choice behavior, zero-call rejection, and sanitized failures are tested. |
+| FR-K13 | implemented | LLM revisions record provider/model/endpoint kind and prompt ID/content hash; operation and resume identity include the actual prompt/schema hash. |
 | FR-K14, FR-K15 | implemented | Adapter timeout budgets, bounded explicit retries, validated resume entries, deterministic batches, failure isolation, and stop policy tests. |
 | FR-K16 | implemented | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
 | FR-K17, FR-K18 | partial | Exact-lineage canonical/revision benchmark cases and lexical reports are implemented. Change-quality, speaker/audit, and operational aggregate reporting remain. |

@@ -70,6 +70,8 @@ All notable changes to EWP-transcripts are documented here.
   infrastructure from provider-dependent prompt, CLI, benchmark, and review work.
 - Documented exact LM Studio model discovery, explicit local consent, safe preview/apply
   and resume paths, initial local benchmark candidates, and the deferred OpenRouter stage.
+- Updated implementation status after completing LM Studio CLI/consent wiring and exact
+  prompt-content provenance; the first real local smoke run remains an operator gate.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.
