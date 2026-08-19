@@ -18,6 +18,10 @@ All notable changes to EWP-transcripts are documented here.
   SSD) while deferring RAM/VRAM qualification to preset validation.
 - Recorded acceptance of the second model-free fresh-WSL installation and postponed
   redundant full model/runtime revalidation until later functional changes require it.
+- Assigned automated local/cloud correction and fresh-install onboarding to v0.3; moved
+  translation, synchronized HTML export and its acceptance tests, and optional
+  project-scoped dictionaries to v0.4. Kept advanced 3+ channel handling in the later
+  roadmap without assigning a release.
 
 ## 0.2.0 — internal release candidate — 2026-08-19
 

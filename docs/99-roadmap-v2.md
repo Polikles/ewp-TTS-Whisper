@@ -12,14 +12,18 @@ items belong to one monolithic "Version 2" release.
    [`21-v0.2.0-transcript-revision-plan.md`](21-v0.2.0-transcript-revision-plan.md).
 2. Retain the completed 24-episode corrected corpus privately, outside this repository,
    until every included episode is public and redistribution is appropriate.
-3. Automated transcript correction using local/cloud API models, configurable chunking,
-   read-only overlap, the same revision engine, benchmarking against the private corpus,
-   and manual revision of model output.
-4. Manual translation pipeline and structured translation artifact, using corrected
-   transcript by default while retaining an explicit raw/dirty source option.
-5. Automated translation using the same source/translation artifact contracts, followed
-   by optional manual revision.
-6. Synchronized HTML transcript/export and remaining publishing features.
+3. **v0.3 automated transcript correction** using local/cloud API models, configurable
+   chunking, read-only overlap, the same revision engine, benchmarking against the
+   private corpus, and manual revision of model output. v0.3 also includes the scoped
+   fresh-install/verification script and README onboarding work in section 14.
+4. **v0.4 manual and automated translation**, with a structured translation artifact,
+   corrected transcript as the normal source, an explicit raw/dirty source option, and
+   optional manual revision of automated output.
+5. **v0.4 synchronized HTML transcript/export**, including the mock player, seeking,
+   highlighting, accessibility, security, and raw/revised/translated-source tests in
+   section 12.
+6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence and
+   never implemented as a global dictionary.
 7. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
    based on observed value and risk.
 8. GUI after the planned core functions are stable; GUI reuses application services and
@@ -76,7 +80,7 @@ The following is no longer an unscheduled roadmap idea. It is the implemented v0
 
 Detailed design belongs in docs 13/21 rather than this roadmap.
 
-## 2. Automated transcript correction
+## 2. Automated transcript correction — planned for v0.3
 
 Automated correction follows manual correction so model performance can be measured
 against manually verified ground truth.
@@ -130,7 +134,7 @@ Exact defaults are deferred until automated-correction benchmarks. Overlap is co
 only: every editable source range belongs to exactly one chunk, preventing conflicting
 corrections in adjacent requests.
 
-## 3. Optional project-scoped dictionaries
+## 3. Optional project-scoped dictionaries — planned for v0.4
 
 Dictionary support remains conditional on benchmark evidence and is not part of v0.2.0.
 
@@ -154,7 +158,7 @@ forms such as `OpenAI` versus `Open AI`. Automatically discovered items are cand
 only: a user must approve them before they affect correction or translation. Benchmarks
 must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
 
-## 4. Manual translation pipeline
+## 4. Manual translation pipeline — planned for v0.4
 
 Translation is a separate pipeline, not a branch inside transcript correction, although
 it reuses common versioning, batch, editor, provenance, audit, and future GUI
@@ -182,7 +186,7 @@ Translation requirements:
 - the artifact records exactly which raw result or transcript revision was translated;
 - exact translation JSON Schema is deferred until this pipeline is designed.
 
-## 5. Automated translation
+## 5. Automated translation — planned for v0.4
 
 After manual translation establishes ground truth:
 
@@ -255,9 +259,10 @@ The expanded manual correction corpus should also become the reference source fo
 correction benchmarks. Separate timestamp and diarization ground truth is still required
 for timestamp/DER/JER evaluation.
 
-## 10. Advanced channel handling
+## 10. Advanced channel handling — later, release unassigned
 
-This is deferred to V2 or later and is not on the current critical path.
+This remains on the later roadmap without an assigned release and is not on the current
+critical path.
 
 - detect and remove duplicates caused by crosstalk;
 - compare channel transcripts with timestamps;
@@ -282,7 +287,7 @@ This is deferred to V2 or later and is not on the current critical path.
 - platform presets;
 - visual preview.
 
-## 12. Platform transcript delivery and HTML
+## 12. Platform transcript delivery and HTML — planned for v0.4
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;

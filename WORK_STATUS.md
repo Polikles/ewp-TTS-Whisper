@@ -108,20 +108,23 @@ operator runbook covering every shipped command and workflow.
 Do not hand-edit canonical JSON. Preserve each original result and store accepted
 corrections as immutable revision snapshots.
 
-## V2 priority order
+## Release priority order
 
 1. Preserve the completed 24-episode audio/corrected-transcript corpus privately outside
    Git and use it for future ASR, preset, correction, and translation benchmarks.
-2. Benchmark and add local/cloud API correction through the same revision engine and
-   consent contract.
-3. Add manual then automated translation using a separate immutable translation artifact.
-4. Add synchronized standalone/embeddable HTML export, including later bilingual output.
-5. Consider small project-scoped dictionaries only if benchmarks justify them; do not
-   add a global dictionary.
+2. In v0.3, benchmark and add local/cloud API correction through the same revision engine
+   and consent contract; also deliver the fresh-install verification script and README
+   onboarding restructure.
+3. In v0.4, add manual then automated translation using a separate immutable translation
+   artifact.
+4. In v0.4, add and test synchronized standalone/embeddable HTML export, including later
+   bilingual output.
+5. In v0.4, consider small project-scoped dictionaries only if benchmarks justify them;
+   do not add a global dictionary.
 6. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
    suitable references become available.
-7. Implement guarded 3+ channel isolated-speaker and program/surround handling in V2 or
-   later; it is explicitly not a current priority.
+7. Keep guarded 3+ channel isolated-speaker and program/surround handling in the later,
+   release-unassigned backlog; it is explicitly not a current priority.
 
 ## v0.2.0 release closure
 
