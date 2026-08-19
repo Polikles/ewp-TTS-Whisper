@@ -25,6 +25,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added application-facing mock correction preview and atomic apply operations that use
   resolved configuration, preserve the canonical result, and publish through the existing
   locked revision allocator.
+- Added deterministic non-recursive mock correction batches with natural result ordering,
+  preview/apply modes, per-result failure isolation, aggregate counts, and the existing
+  continue-or-stop batch policy.
 
 ### Documentation
 

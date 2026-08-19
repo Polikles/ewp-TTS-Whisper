@@ -108,6 +108,7 @@ __all__ = [
     "audit_revision_file",
     "preview_mock_correction",
     "apply_mock_correction",
+    "process_mock_correction_batch",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -245,6 +246,38 @@ class CorrectionApplyOutcome:
     base_result_path: Path
     revision: TranscriptRevision
     revision_path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class BatchCorrectionJobOutcome:
+    """One isolated automated-correction batch result."""
+
+    result_path: Path
+    status: Literal["previewed", "applied", "failed"]
+    revision: TranscriptRevision | None = None
+    revision_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchCorrectionOutcome:
+    """Deterministically ordered automated-correction batch summary."""
+
+    jobs: tuple[BatchCorrectionJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def previewed(self) -> int:
+        return sum(job.status == "previewed" for job in self.jobs)
+
+    @property
+    def applied(self) -> int:
+        return sum(job.status == "applied" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
 
 
 @dataclass(frozen=True, slots=True)
@@ -426,6 +459,68 @@ def apply_mock_correction(
         lock_timeout_seconds=config.runtime.lock_timeout_seconds,
     )
     return CorrectionApplyOutcome(preview.base_result_path, revision, path)
+
+
+def process_mock_correction_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: DeterministicMockCorrectionProvider,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    apply: bool = True,
+    prompt_id: str = "faithful-correction-v1",
+) -> BatchCorrectionOutcome:
+    """Preview or publish mock corrections with deterministic per-result isolation."""
+
+    result_paths = discover_review_results(input_path, recursive=recursive)
+    jobs: list[BatchCorrectionJobOutcome] = []
+    stopped_early = False
+    for result_path in result_paths:
+        try:
+            if apply:
+                applied = apply_mock_correction(
+                    result_path,
+                    config=config,
+                    provider=provider,
+                    output_directory=output_directory,
+                    prompt_id=prompt_id,
+                )
+                jobs.append(
+                    BatchCorrectionJobOutcome(
+                        result_path=result_path,
+                        status="applied",
+                        revision=applied.revision,
+                        revision_path=applied.revision_path,
+                    )
+                )
+            else:
+                previewed = preview_mock_correction(
+                    result_path,
+                    config=config,
+                    provider=provider,
+                    prompt_id=prompt_id,
+                )
+                jobs.append(
+                    BatchCorrectionJobOutcome(
+                        result_path=result_path,
+                        status="previewed",
+                        revision=previewed.revision,
+                    )
+                )
+        except Exception as error:
+            jobs.append(
+                BatchCorrectionJobOutcome(
+                    result_path=result_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchCorrectionOutcome(tuple(jobs), stopped_early=stopped_early)
 
 
 def audit_revision_file(
