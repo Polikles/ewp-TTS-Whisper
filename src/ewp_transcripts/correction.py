@@ -14,6 +14,7 @@ from ewp_transcripts.domain.correction import (
     CorrectionRequest,
     CorrectionResponse,
     CorrectionToken,
+    CorrectionUsage,
 )
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
@@ -186,6 +187,15 @@ class DeterministicMockCorrectionProvider:
             operation_id=request.operation_id,
             corrected_text=" ".join(corrected),
             proposed_changes=tuple(changes),
+            usage=CorrectionUsage(
+                input_tokens=(
+                    len(request.preceding_context)
+                    + len(request.editable_tokens)
+                    + len(request.following_context)
+                ),
+                output_tokens=len(corrected),
+                cost_usd_micros=0,
+            ),
         )
 
 

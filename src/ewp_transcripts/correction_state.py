@@ -62,7 +62,15 @@ def call_correction_resumable(
             entry.response,
             True,
             state_path,
-            CorrectionExecutionMetrics(attempts=0, retries=0, elapsed_ms=0),
+            CorrectionExecutionMetrics(
+                attempts=0,
+                retries=0,
+                elapsed_ms=0,
+                request_count=0,
+                input_tokens=0,
+                output_tokens=0,
+                cost_usd_micros=0,
+            ),
         )
 
     execution = execute_correction_call(provider, request, policy=execution_policy)
@@ -93,7 +101,15 @@ def call_correction_resumable(
                 entry.response,
                 True,
                 state_path,
-                CorrectionExecutionMetrics(attempts=0, retries=0, elapsed_ms=0),
+                CorrectionExecutionMetrics(
+                    attempts=0,
+                    retries=0,
+                    elapsed_ms=0,
+                    request_count=0,
+                    input_tokens=0,
+                    output_tokens=0,
+                    cost_usd_micros=0,
+                ),
             )
     finally:
         if temporary_path is not None:

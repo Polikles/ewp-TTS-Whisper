@@ -38,6 +38,10 @@ class CorrectionExecutionMetrics:
     attempts: int
     retries: int
     elapsed_ms: int
+    request_count: int
+    input_tokens: int | None
+    output_tokens: int | None
+    cost_usd_micros: int | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,6 +73,10 @@ def execute_correction_call(
                     attempts=attempt,
                     retries=attempt - 1,
                     elapsed_ms=elapsed_ms,
+                    request_count=attempt,
+                    input_tokens=(response.usage.input_tokens if response.usage else None),
+                    output_tokens=(response.usage.output_tokens if response.usage else None),
+                    cost_usd_micros=(response.usage.cost_usd_micros if response.usage else None),
                 ),
             )
         except RetryableCorrectionProviderError:

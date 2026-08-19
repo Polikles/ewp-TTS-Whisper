@@ -46,7 +46,8 @@ warnings, strict offline blocking, and exact-scope persistence without any HTTP 
 The atomic private consent store is implemented without credentials. Provider calls now
 have bounded explicit retries, adapter timeout budgets, and sanitized operational metrics.
 Provider exception details are suppressed at the application boundary. Wiring metrics into
-benchmark reports and completing broader artifact payload scans are next. Real
+benchmark reports and completing broader artifact payload scans are next. The neutral
+response now supports optional input/output token and micro-USD cost accounting. Real
 local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 

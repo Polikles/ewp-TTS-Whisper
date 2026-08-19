@@ -54,11 +54,20 @@ class CorrectionRequest(CorrectionModel):
     following_context: tuple[CorrectionToken, ...] = ()
 
 
+class CorrectionUsage(CorrectionModel):
+    """Optional non-secret usage reported by an adapter for one request."""
+
+    input_tokens: int | None = Field(default=None, ge=0)
+    output_tokens: int | None = Field(default=None, ge=0)
+    cost_usd_micros: int | None = Field(default=None, ge=0)
+
+
 class CorrectionResponse(CorrectionModel):
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
     corrected_text: str = Field(min_length=1)
     proposed_changes: tuple[CorrectionChange, ...]
+    usage: CorrectionUsage | None = None
 
 
 class CorrectionProvider(Protocol):

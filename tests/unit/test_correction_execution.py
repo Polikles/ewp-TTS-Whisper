@@ -79,6 +79,10 @@ def test_retryable_failures_are_bounded_and_reported() -> None:
     assert outcome.metrics.attempts == 2
     assert outcome.metrics.retries == 1
     assert outcome.metrics.elapsed_ms == 250
+    assert outcome.metrics.request_count == 2
+    assert outcome.metrics.input_tokens == 1
+    assert outcome.metrics.output_tokens == 1
+    assert outcome.metrics.cost_usd_micros == 0
 
 
 def test_retryable_failure_stops_at_attempt_limit() -> None:

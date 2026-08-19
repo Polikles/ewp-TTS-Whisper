@@ -48,6 +48,8 @@ All notable changes to EWP-transcripts are documented here.
   retryable/permanent failure classes, retry counts, and sanitized latency metrics.
 - Provider execution now replaces adapter exception details with stable sanitized errors,
   preventing request text, endpoint details, or credentials from escaping through failures.
+- The provider-neutral response contract now carries optional token and micro-USD usage;
+  execution outcomes combine it with request, retry, and latency measurements.
 
 ### Documentation
 
