@@ -160,7 +160,7 @@ in identity and provenance.
 ## 7. `export`
 
 ```text
-transcriber export RESULTS_JSON [OPTIONS]
+transcriber export RESULTS_JSON_OR_DIRECTORY [OPTIONS]
 ```
 
 Options:
@@ -176,14 +176,16 @@ Options:
 --config PATH
 --subtitle-preset youtube
 --speaker-labels on-change|always|never
---revision none|latest|PATH
+--revision none|latest|PATH_OR_DIRECTORY
+--recursive
+--json-output
 ```
 
 The command does not open audio or load models. An existing export is skipped without `--force`; with `--force`, the next version number is created.
 
 ### Revision selection
 
-`export` additionally accepts:
+For a single result, `export` additionally accepts:
 
 ```text
 --revision none|latest|PATH
@@ -193,6 +195,16 @@ Omitting `--revision` is equivalent to `--revision none` and preserves the v0.1 
 canonical export path. `latest` means the highest allocated revision number whose exact
 base-result SHA-256 matches `RESULTS_JSON`. Explicit paths are recommended for benchmark
 branches. Revision-aware export remains audio-free and model-free.
+
+When the positional input is a directory, canonical results are discovered in natural
+order and non-recursively unless `--recursive` is supplied. `--revision` may be `none`,
+`latest`, or a revision directory. A revision directory selects the highest compatible
+revision for each exact canonical base and ignores audit files. A single explicit
+revision file is invalid for directory input.
+
+Batch jobs are isolated according to the configured continue/stop policy. Any failure
+produces exit code 5 after reporting per-result outcomes; `--json-output` emits the same
+outcome as structured JSON. Duplicate replay without `--force` skips existing exports.
 
 ## 7a. `revise`
 

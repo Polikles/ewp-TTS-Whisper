@@ -50,7 +50,13 @@ from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
 
 # Re-exported here to keep user interfaces on the application boundary.
-from ewp_transcripts.export_service import ExportFormat, ExportOutcome, export_result
+from ewp_transcripts.export_service import (
+    BatchExportOutcome,
+    ExportFormat,
+    ExportOutcome,
+    export_batch,
+    export_result,
+)
 from ewp_transcripts.inspection import apply_explicit_speaker_labels, inspect_episode
 from ewp_transcripts.media import measure_file_channels
 from ewp_transcripts.pipeline import (
@@ -80,12 +86,14 @@ from ewp_transcripts.workdirs import (
 __all__ = [
     "ExportFormat",
     "ExportOutcome",
+    "BatchExportOutcome",
     "application_version",
     "clean_all_workdirs",
     "discover",
     "doctor",
     "dry_run",
     "export_result",
+    "export_batch",
     "inspect_input",
     "prepare_review_file",
     "prepare_review_batch",

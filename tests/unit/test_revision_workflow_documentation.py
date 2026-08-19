@@ -46,7 +46,9 @@ def test_revision_runbook_covers_complete_safe_workflow() -> None:
         "SUMMARY previewed=0 applied=24 failed=0 stopped_early=false",
         "Do not rerun the entire review directory",
         "runtime.continue_batch_after_error",
-        "Native bulk export remains planned work",
+        "SUMMARY exported=24 failed=0 written=96 skipped=0 stopped_early=false",
+        "batch export selects the highest compatible",
+        "rerunning batch export without `--force` is safe",
         "model-free and audio-free",
     ):
         assert invariant in document

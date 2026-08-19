@@ -252,9 +252,33 @@ exact base result plus its accepted revision.
 `--revision none`, or omitting `--revision`, regenerates raw canonical exports. Revised
 exports have `_revision_NNN` in their names and never overwrite raw exports.
 
-The current `transcriber export` command accepts one canonical result at a time; it does
-not yet accept a results directory. After bulk apply, export each accepted
-result/revision pair individually. Native bulk export remains planned work.
+After bulk apply, pass the canonical-results directory and accepted-revisions directory
+together:
+
+```bash
+uv run --locked transcriber export \
+  "C:\Users\YOUR_NAME\Documents\EWP\results" \
+  --revision "C:\Users\YOUR_NAME\Documents\EWP\revisions" \
+  --output-dir "C:\Users\YOUR_NAME\Documents\EWP\exports" \
+  --format txt --format srt --format vtt --format segments
+```
+
+For every discovered canonical result, batch export selects the highest compatible
+revision from the revision directory. Audit files are ignored. Discovery is
+non-recursive unless `--recursive` is supplied. Existing derived files are reported as
+`SKIP`; use `--force` only when a new export version is intentionally required.
+
+A clean 24-result run ends with:
+
+```text
+SUMMARY exported=24 failed=0 written=96 skipped=0 stopped_early=false
+```
+
+Failures are isolated and a mixed batch exits with code 5. Unlike immutable revision
+apply, rerunning batch export without `--force` is safe: completed derived files are
+skipped. Fix the failed result/revision pair and rerun the directory, or export that pair
+individually using explicit file paths. `--json-output` provides a machine-readable
+batch report.
 
 ## 6. Audit an existing revision
 

@@ -11,6 +11,7 @@ from typing import Annotated
 import typer
 
 from ewp_transcripts.application import (
+    BatchExportOutcome,
     BatchReviewPreparationOutcome,
     BatchRevisionOutcome,
     BatchTranscriptionOutcome,
@@ -22,6 +23,7 @@ from ewp_transcripts.application import (
     clean_all_workdirs,
     doctor,
     dry_run,
+    export_batch,
     export_result,
     inspect_input,
     prepare_review_batch,
@@ -255,6 +257,55 @@ def _print_revision_batch(outcome: BatchRevisionOutcome) -> None:
     typer.echo(
         f"SUMMARY previewed={outcome.previewed} applied={outcome.applied} "
         f"failed={outcome.failed} stopped_early={str(outcome.stopped_early).lower()}"
+    )
+
+
+def _export_batch_json(outcome: BatchExportOutcome) -> str:
+    return json.dumps(
+        {
+            "exported": outcome.exported,
+            "failed": outcome.failed,
+            "written": outcome.written,
+            "skipped": outcome.skipped,
+            "stopped_early": outcome.stopped_early,
+            "jobs": [
+                {
+                    "results_path": str(job.results_path),
+                    "status": job.status,
+                    "revision_path": (
+                        str(job.outcome.revision_path)
+                        if job.outcome and job.outcome.revision_path
+                        else None
+                    ),
+                    "written": ([str(path) for path in job.outcome.written] if job.outcome else []),
+                    "skipped": ([str(path) for path in job.outcome.skipped] if job.outcome else []),
+                    "failure_code": job.failure_code,
+                    "failure_message": job.failure_message,
+                }
+                for job in outcome.jobs
+            ],
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+def _print_export_batch(outcome: BatchExportOutcome) -> None:
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.results_path}")
+        if job.outcome is not None:
+            if job.outcome.revision_path is not None:
+                typer.echo(f"  REVISION {job.outcome.revision_path}")
+            for path in job.outcome.written:
+                typer.echo(f"  WROTE {path}")
+            for path in job.outcome.skipped:
+                typer.echo(f"  SKIP {path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY exported={outcome.exported} failed={outcome.failed} "
+        f"written={outcome.written} skipped={outcome.skipped} "
+        f"stopped_early={str(outcome.stopped_early).lower()}"
     )
 
 
@@ -1027,9 +1078,20 @@ def export_command(
         str,
         typer.Option(
             "--revision",
-            help="Corrected transcript selection: none, latest, or a revision JSON path.",
+            help=(
+                "Corrected transcript selection: none, latest, a revision JSON path, "
+                "or a revision directory for batch export."
+            ),
         ),
     ] = "none",
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include canonical results in subdirectories."),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the batch outcome as JSON."),
+    ] = False,
 ) -> None:
     """Regenerate exports from canonical JSON without opening source audio."""
 
@@ -1055,19 +1117,45 @@ def export_command(
                 )
                 if enabled
             ]
+        normalized_results = normalize_input_path(results_json)
         selected_revision: str | Path = revision
         if revision not in {"none", "latest"}:
             selected_revision = normalize_input_path(revision)
-        outcome = export_result(
-            normalize_input_path(results_json),
-            formats=tuple(requested),
-            output_directory=_optional_user_path(output_directory),
-            force=force,
-            subtitles_config=subtitles_config,
-            revision=selected_revision,
-        )
+        if normalized_results.is_dir():
+            if isinstance(selected_revision, Path) and not selected_revision.is_dir():
+                raise InvalidCanonicalResultError(
+                    "Directory export requires --revision none, latest, or a revision directory"
+                )
+            batch = export_batch(
+                normalized_results,
+                formats=tuple(requested),
+                output_directory=_optional_user_path(output_directory),
+                force=force,
+                subtitles_config=subtitles_config,
+                revision=selected_revision,
+                recursive=recursive,
+                continue_after_error=config.runtime.continue_batch_after_error,
+            )
+        else:
+            outcome = export_result(
+                normalized_results,
+                formats=tuple(requested),
+                output_directory=_optional_user_path(output_directory),
+                force=force,
+                subtitles_config=subtitles_config,
+                revision=selected_revision,
+            )
     except ApplicationError as error:
         _expected_error(error)
+
+    if normalized_results.is_dir():
+        if json_output:
+            typer.echo(_export_batch_json(batch))
+        else:
+            _print_export_batch(batch)
+        if batch.failed:
+            raise typer.Exit(code=5)
+        return
 
     typer.echo(f"Export version: {outcome.result_version}")
     if outcome.revision_number is not None:

@@ -40,6 +40,9 @@ All notable changes to EWP-transcripts are documented here.
   optional `revise apply --audit` publication without making audit data authoritative.
 - Added exact parent-revision identity verification, standalone child snapshots, and
   sibling revision behavior that shares a base without implying false lineage.
+- Added deterministic revision-aware directory export with compatible revision
+  selection, natural result ordering, per-result failure isolation, recursive opt-in,
+  safe duplicate replay, aggregate/JSON reporting, and mixed-batch exit code 5.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.

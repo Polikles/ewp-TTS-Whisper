@@ -40,9 +40,8 @@ Resume with this bulk-workflow plan:
 4. Run directory `revise preview` if desired, then directory `revise apply --audit` with
    explicit results and revision output directories. Verify per-item summaries and
    revision/audit pairing.
-5. Add and test deterministic directory/batch support for revision-aware `export` before
-   the operator bulk-export test; the current `transcriber export` command accepts one
-   canonical result at a time.
+5. Run the implemented deterministic revision-aware directory `export` and capture its
+   per-result and aggregate outcome.
 6. Export corrected TXT/SRT/VTT/segments for the complete batch and verify counts,
    provenance, collision-safe names, and failure isolation.
 7. Record usability defects before beginning correction of all 24 podcast episodes.
@@ -69,8 +68,8 @@ hallucination did not appear in the canonical transcripts. Treat these as separa
 review-rendering evidence; do not add phrase-specific filtering based on the log line.
 
 Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive environment.
-Step 3 requires the owner's manual transcript corrections. Step 5 is repository work and
-does not require user input unless a new product decision appears.
+Step 3 requires the owner's manual transcript corrections. Bulk revision-aware export is
+now implemented; its archive validation requires terminal evidence from the owner.
 
 Immutable revision models, exact base-result compatibility, anchored alignment,
 configuration, safe model-free single/batch review, effective transcript export,
@@ -82,8 +81,8 @@ corrections as immutable revision snapshots.
 
 ## V2 priority order
 
-1. Complete bulk revision-aware export and validate the full v0.2.0 batch correction
-   workflow.
+1. Validate bulk revision-aware export on the corrected archive and complete the full
+   v0.2.0 batch correction workflow.
 2. Manually revise all 24 podcast episodes to create the first ground-truth corpus and
    record revision-workflow defects.
 3. Benchmark and add local/cloud API correction through the same revision engine.

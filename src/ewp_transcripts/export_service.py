@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.errors import (
+    ApplicationError,
     InvalidCanonicalResultError,
     InvalidRevisionError,
     OutputReservationError,
@@ -38,6 +39,7 @@ from ewp_transcripts.exporters import (
     render_vtt,
 )
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.review_discovery import discover_review_results
 
 
 class ExportFormat(StrEnum):
@@ -69,6 +71,38 @@ class ExportOutcome:
     written: tuple[Path, ...]
     skipped: tuple[Path, ...]
     revision_number: int | None = None
+    revision_path: Path | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchExportJobOutcome:
+    results_path: Path
+    status: str
+    outcome: ExportOutcome | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchExportOutcome:
+    jobs: tuple[BatchExportJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def exported(self) -> int:
+        return sum(job.status == "exported" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
+
+    @property
+    def written(self) -> int:
+        return sum(len(job.outcome.written) for job in self.jobs if job.outcome is not None)
+
+    @property
+    def skipped(self) -> int:
+        return sum(len(job.outcome.skipped) for job in self.jobs if job.outcome is not None)
 
 
 def export_result(
@@ -160,7 +194,60 @@ def export_result(
             revision_number=(
                 selected_revision.revision_number if selected_revision is not None else None
             ),
+            revision_path=revision_path,
         )
+
+
+def export_batch(
+    input_path: Path,
+    *,
+    formats: tuple[ExportFormat, ...],
+    output_directory: Path | None = None,
+    force: bool = False,
+    subtitles_config: SubtitlesConfig | None = None,
+    revision: Path | str | None = None,
+    recursive: bool = False,
+    continue_after_error: bool = True,
+) -> BatchExportOutcome:
+    """Export discovered canonical results sequentially with per-result isolation."""
+
+    results = discover_review_results(input_path, recursive=recursive)
+    if not results:
+        raise InvalidCanonicalResultError(
+            f"No completed canonical result files were found in: {input_path}"
+        )
+    jobs: list[BatchExportJobOutcome] = []
+    stopped_early = False
+    for results_path in results:
+        try:
+            outcome = export_result(
+                results_path,
+                formats=formats,
+                output_directory=output_directory,
+                force=force,
+                subtitles_config=subtitles_config,
+                revision=revision,
+            )
+            jobs.append(
+                BatchExportJobOutcome(
+                    results_path=results_path,
+                    status="exported",
+                    outcome=outcome,
+                )
+            )
+        except ApplicationError as error:
+            jobs.append(
+                BatchExportJobOutcome(
+                    results_path=results_path,
+                    status="failed",
+                    failure_code=error.__class__.__name__,
+                    failure_message=str(error),
+                )
+            )
+            if not continue_after_error:
+                stopped_early = True
+                break
+    return BatchExportOutcome(tuple(jobs), stopped_early=stopped_early)
 
 
 def _select_revision(
@@ -196,9 +283,43 @@ def _select_revision(
     path = Path(requested).expanduser()
     if not path.is_absolute():
         path = (Path.cwd() / path).absolute()
+    if path.is_dir():
+        return _latest_compatible_revision(
+            path,
+            result=result,
+            results_sha256=results_sha256,
+        )
     selected = load_transcript_revision(path)
     validate_revision_base(selected, result, base_sha256=results_sha256)
     return selected, path
+
+
+def _latest_compatible_revision(
+    directory: Path,
+    *,
+    result: CanonicalResult,
+    results_sha256: str,
+) -> tuple[TranscriptRevision, Path]:
+    result_suffix = "" if result.result_version == 1 else f"_v{result.result_version:03d}"
+    pattern = re.compile(
+        rf"^{re.escape(result.job_id + result_suffix)}_revision_(?P<number>[0-9]{{3,}})\.json$"
+    )
+    candidates = sorted(
+        (
+            (int(match.group("number")), path)
+            for path in directory.iterdir()
+            if path.is_file() and (match := pattern.fullmatch(path.name)) is not None
+        ),
+        reverse=True,
+    )
+    for _, candidate_path in candidates:
+        candidate = load_transcript_revision(candidate_path)
+        try:
+            validate_revision_base(candidate, result, base_sha256=results_sha256)
+        except InvalidRevisionError:
+            continue
+        return candidate, candidate_path
+    raise InvalidRevisionError(f"No compatible transcript revision was found for {result.job_id}")
 
 
 def _read_result(path: Path) -> tuple[CanonicalResult, bytes]:
