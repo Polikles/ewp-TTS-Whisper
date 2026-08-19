@@ -10,6 +10,9 @@ All notable changes to EWP-transcripts are documented here.
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,
   proposed-change validation, scoped API consent, retry/resume/batch behavior, immutable
   revision provenance, private-corpus benchmark requirements, and acceptance checklist.
+- Added the first provider-neutral correction primitives: strict request/response/change
+  models, deterministic gap-free editable chunking with bounded read-only context, stable
+  operation/content hashes, and a network-free deterministic mock provider.
 
 ### Documentation
 

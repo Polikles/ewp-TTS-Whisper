@@ -1,0 +1,76 @@
+"""Provider-neutral automated-correction contracts."""
+
+from __future__ import annotations
+
+from typing import Literal, Protocol, Self
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+CorrectionCategory = Literal[
+    "asr_lexical",
+    "proper_name",
+    "punctuation",
+    "capitalization",
+    "sentence_boundary",
+]
+
+
+class CorrectionModel(BaseModel):
+    """Frozen strict model for one correction-provider boundary."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+
+class CorrectionToken(CorrectionModel):
+    # Editable tokens are zero-based. Preceding context deliberately uses negative
+    # positions and following context uses positions beyond the editable length.
+    local_index: int
+    token_id: str = Field(min_length=1)
+    text: str = Field(min_length=1)
+    speaker_id: str = Field(min_length=1)
+
+
+class CorrectionChange(CorrectionModel):
+    start_index: int = Field(ge=0)
+    end_index: int = Field(gt=0)
+    before: str = Field(min_length=1)
+    after: str = Field(min_length=1)
+    category: CorrectionCategory
+
+    @model_validator(mode="after")
+    def validate_span(self) -> Self:
+        if self.end_index <= self.start_index:
+            raise ValueError("correction change end must follow its start")
+        return self
+
+
+class CorrectionRequest(CorrectionModel):
+    schema_version: Literal["1.0"] = "1.0"
+    operation_id: str = Field(min_length=1)
+    prompt_id: str = Field(min_length=1)
+    language: Literal["pl", "en"]
+    preceding_context: tuple[CorrectionToken, ...] = ()
+    editable_tokens: tuple[CorrectionToken, ...] = Field(min_length=1)
+    following_context: tuple[CorrectionToken, ...] = ()
+
+
+class CorrectionResponse(CorrectionModel):
+    schema_version: Literal["1.0"] = "1.0"
+    operation_id: str = Field(min_length=1)
+    corrected_text: str = Field(min_length=1)
+    proposed_changes: tuple[CorrectionChange, ...]
+
+
+class CorrectionProvider(Protocol):
+    """Small adapter boundary shared by mock, local API, and cloud API providers."""
+
+    @property
+    def provider_id(self) -> str: ...
+
+    @property
+    def model_id(self) -> str: ...
+
+    @property
+    def endpoint_kind(self) -> Literal["local", "cloud", "mock"]: ...
+
+    def correct(self, request: CorrectionRequest) -> CorrectionResponse: ...
