@@ -103,7 +103,8 @@ All notable changes to EWP-transcripts are documented here.
 - Prevented plain-text sentence splitting after common abbreviations including `m.in.`,
   `np.`, `tzw.`, and `vs.`.
 - Prevented plain-text sentence splitting after `tys.` and address tokens ending in
-  `.pl`, `.com`, or `.edu`.
+  `.pl`, `.eu`, `.com`, or `.edu`, including the project domains `etykawpetli.pl` and
+  `ethicsintheloop.eu`.
 
 ## 0.1.1 — internal release candidate — 2026-08-14
 

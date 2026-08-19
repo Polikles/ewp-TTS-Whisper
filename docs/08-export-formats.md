@@ -27,8 +27,9 @@ Rules:
 - no stylistic or LLM correction.
 
 Common abbreviations such as `m.in.`, `np.`, `tzw.`, `tys.`, and `vs.`, and address
-tokens ending in `.pl`, `.com`, or `.edu`, do not create a sentence boundary merely
-because they end with a period.
+tokens ending in `.pl`, `.eu`, `.com`, or `.edu`, do not create a sentence boundary
+merely because they end with a period. Regression examples include `etykawpetli.pl` and
+`ethicsintheloop.eu`.
 
 Example:
 

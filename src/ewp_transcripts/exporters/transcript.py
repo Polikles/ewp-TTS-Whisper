@@ -28,7 +28,7 @@ _NON_BREAKING_ABBREVIATIONS = frozenset(
         "vs.",
     }
 )
-_NON_BREAKING_TOKEN_SUFFIXES = (".com", ".edu", ".pl")
+_NON_BREAKING_TOKEN_SUFFIXES = (".com", ".edu", ".eu", ".pl")
 
 
 def split_sentences(text: str) -> tuple[str, ...]:
