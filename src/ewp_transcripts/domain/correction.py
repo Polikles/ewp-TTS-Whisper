@@ -73,4 +73,9 @@ class CorrectionProvider(Protocol):
     @property
     def endpoint_kind(self) -> Literal["local", "cloud", "mock"]: ...
 
-    def correct(self, request: CorrectionRequest) -> CorrectionResponse: ...
+    def correct(
+        self,
+        request: CorrectionRequest,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> CorrectionResponse: ...

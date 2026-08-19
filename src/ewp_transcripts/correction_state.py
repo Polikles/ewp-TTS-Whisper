@@ -10,6 +10,11 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.correction import validate_correction_response
+from ewp_transcripts.correction_execution import (
+    CorrectionExecutionMetrics,
+    CorrectionExecutionPolicy,
+    execute_correction_call,
+)
 from ewp_transcripts.domain.correction import (
     CorrectionProvider,
     CorrectionRequest,
@@ -36,6 +41,7 @@ class CorrectionCallOutcome:
     response: CorrectionResponse
     resumed: bool
     state_path: Path
+    metrics: CorrectionExecutionMetrics
 
 
 def call_correction_resumable(
@@ -43,6 +49,7 @@ def call_correction_resumable(
     request: CorrectionRequest,
     *,
     state_directory: Path,
+    execution_policy: CorrectionExecutionPolicy | None = None,
 ) -> CorrectionCallOutcome:
     """Reuse only an exactly bound validated response or publish one new response."""
 
@@ -51,10 +58,15 @@ def call_correction_resumable(
     state_path = state_directory / f"{request.operation_id}.json"
     if state_path.exists():
         entry = _load_entry(state_path, provider, request)
-        return CorrectionCallOutcome(entry.response, True, state_path)
+        return CorrectionCallOutcome(
+            entry.response,
+            True,
+            state_path,
+            CorrectionExecutionMetrics(attempts=0, retries=0, elapsed_ms=0),
+        )
 
-    response = provider.correct(request)
-    validate_correction_response(request, response)
+    execution = execute_correction_call(provider, request, policy=execution_policy)
+    response = execution.response
     entry = CorrectionResumeEntry(
         schema_version="1.0",
         operation_id=request.operation_id,
@@ -77,11 +89,16 @@ def call_correction_resumable(
             os.link(temporary_path, state_path)
         except FileExistsError:
             entry = _load_entry(state_path, provider, request)
-            return CorrectionCallOutcome(entry.response, True, state_path)
+            return CorrectionCallOutcome(
+                entry.response,
+                True,
+                state_path,
+                CorrectionExecutionMetrics(attempts=0, retries=0, elapsed_ms=0),
+            )
     finally:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
-    return CorrectionCallOutcome(response, False, state_path)
+    return CorrectionCallOutcome(response, False, state_path, execution.metrics)
 
 
 def _load_entry(

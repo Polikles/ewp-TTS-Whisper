@@ -89,6 +89,18 @@ class InvalidCorrectionResponseError(ApplicationError):
     """Raised when provider output cannot be trusted as a correction proposal."""
 
 
+class CorrectionProviderError(ApplicationError):
+    """Base class for sanitized correction-provider failures."""
+
+
+class RetryableCorrectionProviderError(CorrectionProviderError):
+    """Raised for an explicitly retryable transport, rate-limit, or server failure."""
+
+
+class PermanentCorrectionProviderError(CorrectionProviderError):
+    """Raised for a provider failure that must not be retried automatically."""
+
+
 class CorrectionConsentError(ApplicationError):
     """Raised when an external correction API boundary is not authorized."""
 

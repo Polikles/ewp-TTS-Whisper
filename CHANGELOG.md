@@ -44,6 +44,8 @@ All notable changes to EWP-transcripts are documented here.
   reuse, mock bypass, and non-interactive denial by default.
 - Added an atomic private consent store containing only exact non-secret scopes, with
   missing-store denial semantics, strict corruption handling, and duplicate suppression.
+- Added bounded provider execution with adapter-enforced per-attempt timeouts, explicit
+  retryable/permanent failure classes, retry counts, and sanitized latency metrics.
 
 ### Documentation
 

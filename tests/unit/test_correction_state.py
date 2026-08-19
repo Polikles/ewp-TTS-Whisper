@@ -33,7 +33,13 @@ class CountingProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
-    def correct(self, request: CorrectionRequest) -> CorrectionResponse:
+    def correct(
+        self,
+        request: CorrectionRequest,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> CorrectionResponse:
+        del timeout_seconds
         self.calls += 1
         return DeterministicMockCorrectionProvider().correct(request)
 
@@ -75,6 +81,8 @@ def test_validated_response_is_resumed_without_second_provider_call(tmp_path: Pa
     assert second.resumed is True
     assert provider.calls == 1
     assert first.response == second.response
+    assert first.metrics.attempts == 1
+    assert second.metrics.attempts == 0
     assert first.state_path.stat().st_mode & 0o777 == 0o600
 
 

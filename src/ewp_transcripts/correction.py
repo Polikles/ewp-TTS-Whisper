@@ -157,7 +157,13 @@ class DeterministicMockCorrectionProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
-    def correct(self, request: CorrectionRequest) -> CorrectionResponse:
+    def correct(
+        self,
+        request: CorrectionRequest,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> CorrectionResponse:
+        del timeout_seconds
         corrected: list[str] = []
         changes: list[CorrectionChange] = []
         for index, token in enumerate(request.editable_tokens):
@@ -246,7 +252,9 @@ def build_mock_correction_revision(
             model_id=provider.model_id,
         )
         if resume_directory is None:
-            response = provider.correct(request)
+            from ewp_transcripts.correction_execution import execute_correction_call
+
+            response = execute_correction_call(provider, request).response
         else:
             # Local import keeps persistence dependent on the correction contract while
             # allowing the pure planner/validator module to remain independently usable.

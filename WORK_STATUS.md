@@ -43,8 +43,9 @@ resume directories are wired through single and batch application paths. Exact-h
 benchmark manifests validate canonical/intermediate/candidate/gold lineage and report
 the initial lexical baseline. The pure consent policy now covers distinct local/cloud
 warnings, strict offline blocking, and exact-scope persistence without any HTTP adapter.
-The atomic private consent store is implemented without credentials. Provider-level
-metrics and bounded retry execution are next. Real
+The atomic private consent store is implemented without credentials. Provider calls now
+have bounded explicit retries, adapter timeout budgets, and sanitized operational metrics.
+Wiring these metrics into benchmark reports and completing secret/payload scans are next. Real
 local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 

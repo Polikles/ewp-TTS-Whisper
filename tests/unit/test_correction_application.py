@@ -133,7 +133,13 @@ class _CountingProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
-    def correct(self, request: CorrectionRequest) -> CorrectionResponse:
+    def correct(
+        self,
+        request: CorrectionRequest,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> CorrectionResponse:
+        del timeout_seconds
         self.calls += 1
         return DeterministicMockCorrectionProvider().correct(request)
 
