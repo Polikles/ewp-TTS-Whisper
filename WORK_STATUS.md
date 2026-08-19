@@ -85,7 +85,11 @@ exact filename. The CLI path must be quoted; spaces are not stripped because doi
 could collapse distinct filenames. Three-or-more-channel media remains a documented
 limitation: the current ambiguous fallback can select only channel 0 and must not be
 treated as complete. The V2 design separates isolated-speaker multichannel splitting
-from layout-aware program/surround downmix and diarization.
+from layout-aware program/surround downmix and diarization. Separate synchronized mono
+files per speaker are the preferred input; split-speaker stereo is second-best, while
+ordinary multi-speaker stereo requires manual speaker-attribution review. Recognized 3+
+channel layouts will downmix automatically with a prominent warning; unknown layouts
+will require a dedicated topology choice rather than overloaded `--force`.
 
 Future cloud and loopback/local LLM APIs require distinct, explicit privacy warnings and
 reject, accept-once, or scoped persistent-consent choices. Strict offline mode blocks

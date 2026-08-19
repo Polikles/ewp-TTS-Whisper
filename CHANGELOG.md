@@ -47,6 +47,10 @@ All notable changes to EWP-transcripts are documented here.
   editing, with mandatory proposed-change lists and independently reconstructed audits.
 - Defined explicit multichannel topology handling, scoped cloud/local API privacy
   consent, and the complete future `Instructions/` operator-runbook release requirement.
+- Defined the input preference order: synchronized mono files per speaker first,
+  split-speaker stereo second, and reviewed diarization for mixed program audio. The
+  future 3+ channel fallback is automatic only for recognized layouts and uses a
+  dedicated topology confirmation—not `--force`—when layout evidence is insufficient.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.

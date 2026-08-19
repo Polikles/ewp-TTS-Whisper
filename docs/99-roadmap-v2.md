@@ -218,6 +218,9 @@ for timestamp/DER/JER evaluation.
   and warning, transcribe separately, and merge chronological timelines;
 - for general multichannel and cinematic 5.1/7.1 audio, use a layout-aware program
   downmix plus diarization and clearly report the transformation;
+- automatically use that fallback only for a recognized channel layout; require a
+  dedicated explicit `program-mix` topology choice for missing or unsupported layouts,
+  and do not overload output-versioning `--force`;
 - never silently use one channel as a complete transcription of 3+ channel media.
 
 ## 11. Subtitles

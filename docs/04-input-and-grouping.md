@@ -134,6 +134,27 @@ A path or filename alone is not a sufficient identity.
 
 Channel count and channel topology are different concepts. A container or ffprobe layout reported as `stereo` proves only that the stream has two channels. It does not establish whether those channels are dual mono, split speakers, mixed stereo, or ambiguous. Speaker count is also independent: one mono channel may contain several speakers, while a two-channel file may contain the same single speaker twice.
 
+### Preferred recording inputs
+
+For recordings made from isolated microphones, the preferred input is one synchronized
+mono file per speaker, grouped into one job. This preserves source-based speaker identity
+and avoids asking diarization to infer who spoke. A single two-channel file with one
+isolated speaker in each channel (`split-speakers`) is also suitable when its topology is
+classified correctly or explicitly confirmed.
+
+A normal two-channel stereo mix containing two or more speakers is accepted as
+`mixed-stereo`: the channels are downmixed and speakers are assigned by diarization.
+Transcription can be accurate, but speaker attribution is probabilistic and is not
+guaranteed. Review and manual speaker-attribution correction are required before treating
+that transcript as ground truth.
+
+Preference order for multi-speaker speech is therefore:
+
+1. separate synchronized mono speaker files;
+2. one two-channel file with one isolated speaker per channel;
+3. a mono, dual-mono, or mixed-stereo program mix followed by diarization and review;
+4. 3+ channel media only through the guarded multichannel fallback described below.
+
 | Mode | Channels | What is present in left/right | MVP processing |
 |---|---:|---|---|
 | `mono` | 1 | One waveform; it may contain one or many speakers | Process the single channel; use diarization when multiple speakers require it |
@@ -149,19 +170,27 @@ Channel count and channel topology are different concepts. A container or ffprob
 The current classifier is qualified only for mono and two-channel streams. In the
 current release, a 3+ channel stream is classified as ambiguous and falls back—with a
 warning—to channel 0. This can omit dialogue and must not be presented as complete
-multichannel transcription.
+multichannel transcription. Consequently, 3+ channel input should currently be avoided.
 
 Until explicit multichannel support is implemented, recordings with one isolated
 speaker per channel should be exported as separate synchronized mono files and supplied
 as one group. This is preferable to a single interleaved 3+ channel file because speaker
 identity is explicit and every channel is retained.
 
-Future multichannel handling must distinguish two explicit cases:
+The required fallback is a one-channel program downmix that retains contribution from
+the relevant channels, followed by ordinary ASR and diarization. It must distinguish two
+explicit cases:
 
 - `isolated-speakers`: split every selected channel, report the channel-to-speaker map,
   transcribe independently, and merge timelines while preserving overlap;
 - `program-mix`: perform a channel-layout-aware downmix and diarize it. This is the safe
-  default for video, 3+ channel music/program audio, and cinematic 5.1/7.1 layouts.
+  fallback for video, 3+ channel music/program audio, and cinematic 5.1/7.1 layouts.
+
+When the declared channel layout is recognized, `program-mix` downmixing may happen
+automatically with a prominent warning and recorded provenance. When the layout is
+missing, contradictory, or unsupported, transcription must stop and require a dedicated
+explicit channel-topology choice. Generic `--force` must not authorize this decision:
+it controls output versioning and must not acquire a second input-safety meaning.
 
 The application must never infer that every channel is a distinct speaker merely from
 channel count. Any split or downmix must be reported prominently in inspect/dry-run/run

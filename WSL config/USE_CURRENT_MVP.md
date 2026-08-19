@@ -82,6 +82,17 @@ coordinated `_vNNN` result/export set and never overwrites an existing file.
 
 ## 5. Choose the correct source topology
 
+The preferred multi-speaker input is one synchronized mono file per speaker. This gives
+the strongest speaker identity. A two-channel file with one isolated speaker per channel
+is the next-best option. Ordinary stereo containing two or more speakers is accepted and
+downmixed, but diarized speaker attribution is not guaranteed and must be reviewed and
+corrected manually before use as reference data.
+
+Avoid 3+ channel input in the current release. Its conservative classifier warns but can
+fall back to channel 0, which may omit dialogue. Until the guarded layout-aware downmix
+is implemented, export isolated channels as synchronized mono files or create a known
+good mono program mix before transcription.
+
 Automatic filename group:
 
 ```text
