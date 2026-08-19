@@ -12,6 +12,7 @@ from ewp_transcripts.domain.correction import (
     CorrectionResponse,
     CorrectionToken,
 )
+from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
 
 
@@ -161,6 +162,46 @@ class DeterministicMockCorrectionProvider:
         )
 
 
+def validate_correction_response(
+    request: CorrectionRequest,
+    response: CorrectionResponse,
+) -> tuple[str, ...]:
+    """Validate proposed spans and reconstruct the provider's corrected token stream."""
+
+    if response.operation_id != request.operation_id:
+        raise InvalidCorrectionResponseError("Correction response operation ID does not match")
+    changes = response.proposed_changes
+    previous_end = 0
+    corrected: list[str] = []
+    for change in changes:
+        if change.start_index < previous_end:
+            raise InvalidCorrectionResponseError(
+                "Correction response changes overlap or are unsorted"
+            )
+        if change.end_index > len(request.editable_tokens):
+            raise InvalidCorrectionResponseError(
+                "Correction response change is outside editable text"
+            )
+        corrected.extend(
+            token.text for token in request.editable_tokens[previous_end : change.start_index]
+        )
+        before = " ".join(
+            token.text for token in request.editable_tokens[change.start_index : change.end_index]
+        )
+        if before != change.before:
+            raise InvalidCorrectionResponseError(
+                "Correction response before text does not match the editable source"
+            )
+        corrected.extend(change.after.split())
+        previous_end = change.end_index
+    corrected.extend(token.text for token in request.editable_tokens[previous_end:])
+    if " ".join(corrected) != _normalize_provider_text(response.corrected_text):
+        raise InvalidCorrectionResponseError(
+            "Correction response proposed changes do not reconstruct corrected text"
+        )
+    return tuple(corrected)
+
+
 def _choose_editable_end(
     tokens: tuple[EffectiveToken, ...],
     start: int,
@@ -194,3 +235,7 @@ def _supported_language(language: str) -> Literal["pl", "en"]:
     if language == "en":
         return "en"
     raise ValueError(f"Automated correction requires a resolved language: {language}")
+
+
+def _normalize_provider_text(text: str) -> str:
+    return " ".join(text.split())

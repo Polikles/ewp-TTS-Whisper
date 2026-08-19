@@ -7,7 +7,10 @@ from ewp_transcripts.correction import (
     DeterministicMockCorrectionProvider,
     build_correction_request,
     plan_correction_chunks,
+    validate_correction_response,
 )
+from ewp_transcripts.domain.correction import CorrectionChange
+from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
 
 
@@ -83,6 +86,7 @@ def test_request_separates_context_and_mock_changes_only_editable_text() -> None
     assert response.proposed_changes[0].before == "token8"
     assert response.proposed_changes[0].after == "OpenAI"
     assert "token5" not in response.corrected_text
+    assert "OpenAI" in validate_correction_response(request, response)
 
 
 def test_short_transcript_produces_one_chunk_without_context() -> None:
@@ -93,3 +97,52 @@ def test_short_transcript_produces_one_chunk_without_context() -> None:
     assert (chunk.editable_start, chunk.editable_end) == (0, 3)
     assert request.preceding_context == ()
     assert request.following_context == ()
+
+
+def test_response_rejects_mismatched_before_text() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+    request = build_correction_request(transcript, chunk, prompt_id="faithful-pl-v1")
+    response = (
+        DeterministicMockCorrectionProvider()
+        .correct(request)
+        .model_copy(
+            update={
+                "corrected_text": "replacement token1 token2",
+                "proposed_changes": (
+                    CorrectionChange(
+                        start_index=0,
+                        end_index=1,
+                        before="not-the-source",
+                        after="replacement",
+                        category="asr_lexical",
+                    ),
+                ),
+            }
+        )
+    )
+
+    try:
+        validate_correction_response(request, response)
+    except InvalidCorrectionResponseError as error:
+        assert "before text" in str(error)
+    else:
+        raise AssertionError("invalid provider response was accepted")
+
+
+def test_response_rejects_changes_that_do_not_reconstruct_corrected_text() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+    request = build_correction_request(transcript, chunk, prompt_id="faithful-pl-v1")
+    response = (
+        DeterministicMockCorrectionProvider()
+        .correct(request)
+        .model_copy(update={"corrected_text": "silently rewritten text"})
+    )
+
+    try:
+        validate_correction_response(request, response)
+    except InvalidCorrectionResponseError as error:
+        assert "reconstruct" in str(error)
+    else:
+        raise AssertionError("unexplained provider rewrite was accepted")

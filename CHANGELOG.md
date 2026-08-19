@@ -13,6 +13,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added the first provider-neutral correction primitives: strict request/response/change
   models, deterministic gap-free editable chunking with bounded read-only context, stable
   operation/content hashes, and a network-free deterministic mock provider.
+- Added local provider-response verification that rejects wrong operation identities,
+  overlapping, unsorted, out-of-range, or source-mismatched proposals and any corrected
+  text that cannot be reconstructed exactly from the explicit proposed-change list.
 
 ### Documentation
 

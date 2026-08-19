@@ -85,6 +85,10 @@ class InvalidRevisionError(ApplicationError):
     """Raised when a transcript revision is invalid or incompatible with its base."""
 
 
+class InvalidCorrectionResponseError(ApplicationError):
+    """Raised when provider output cannot be trusted as a correction proposal."""
+
+
 class InvalidReviewError(InvalidRevisionError):
     """Raised with a stable code when an ``EWP-REVIEW`` file cannot be trusted."""
 
