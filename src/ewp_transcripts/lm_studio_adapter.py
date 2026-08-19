@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import urllib.error
 import urllib.request
@@ -76,6 +77,19 @@ class LmStudioCorrectionProvider:
     @property
     def endpoint_identity(self) -> str:
         return self._endpoint
+
+    def prompt_sha256(self, prompt_id: str) -> str:
+        material = json.dumps(
+            {
+                "prompt_id": prompt_id,
+                "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
+                "response_schema": CorrectionResponse.model_json_schema(),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return hashlib.sha256(material.encode()).hexdigest()
 
     def correct(
         self,

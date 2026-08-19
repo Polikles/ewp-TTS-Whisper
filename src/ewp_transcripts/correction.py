@@ -102,6 +102,7 @@ def build_correction_request(
     prompt_id: str,
     provider_id: str,
     model_id: str,
+    prompt_sha256: str | None = None,
 ) -> CorrectionRequest:
     """Build a provider request with editable ownership explicit in its structure."""
 
@@ -114,9 +115,11 @@ def build_correction_request(
             speaker_id=token.speaker_id,
         )
 
+    resolved_prompt_sha256 = prompt_sha256 or hashlib.sha256(prompt_id.encode()).hexdigest()
     operation_id = hashlib.sha256(
         (
-            f"{provider_id}\0{model_id}\0{prompt_id}\0{transcript.language}\0"
+            f"{provider_id}\0{model_id}\0{prompt_id}\0{resolved_prompt_sha256}\0"
+            f"{transcript.language}\0"
             f"{chunk.chunk_index}\0{chunk.editable_start}:{chunk.editable_end}\0"
             f"{chunk.context_start}:{chunk.context_end}\0{chunk.content_sha256}"
         ).encode()
@@ -124,6 +127,7 @@ def build_correction_request(
     return CorrectionRequest(
         operation_id=operation_id,
         prompt_id=prompt_id,
+        prompt_sha256=resolved_prompt_sha256,
         language=_supported_language(transcript.language),
         preceding_context=tuple(
             convert(index) for index in range(chunk.context_start, chunk.editable_start)
@@ -161,6 +165,9 @@ class DeterministicMockCorrectionProvider:
     @property
     def endpoint_identity(self) -> str:
         return "in-process"
+
+    def prompt_sha256(self, prompt_id: str) -> str:
+        return hashlib.sha256(f"ewp-mock-v1\0{prompt_id}".encode()).hexdigest()
 
     def correct(
         self,
@@ -270,6 +277,7 @@ def build_correction_revision(
             prompt_id=prompt_id,
             provider_id=provider.provider_id,
             model_id=provider.model_id,
+            prompt_sha256=provider.prompt_sha256(prompt_id),
         )
         if resume_directory is None:
             from ewp_transcripts.correction_execution import execute_correction_call
@@ -301,7 +309,7 @@ def build_correction_revision(
         )
     prepared = prepare_review(result_path)
     review = prepared.model_copy(update={"anchors": tuple(anchors)})
-    prompt_sha256 = hashlib.sha256(prompt_id.encode()).hexdigest()
+    prompt_sha256 = provider.prompt_sha256(prompt_id)
     return build_revision(
         review,
         base,

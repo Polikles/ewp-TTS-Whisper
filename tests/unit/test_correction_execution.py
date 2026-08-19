@@ -45,6 +45,7 @@ def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation",
         prompt_id="prompt",
+        prompt_sha256="0" * 64,
         language="pl",
         editable_tokens=(
             CorrectionToken(

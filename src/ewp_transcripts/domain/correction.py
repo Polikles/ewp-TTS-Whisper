@@ -48,6 +48,7 @@ class CorrectionRequest(CorrectionModel):
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
     prompt_id: str = Field(min_length=1)
+    prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     language: Literal["pl", "en"]
     preceding_context: tuple[CorrectionToken, ...] = ()
     editable_tokens: tuple[CorrectionToken, ...] = Field(min_length=1)
@@ -84,6 +85,8 @@ class CorrectionProvider(Protocol):
 
     @property
     def endpoint_identity(self) -> str: ...
+
+    def prompt_sha256(self, prompt_id: str) -> str: ...
 
     def correct(
         self,

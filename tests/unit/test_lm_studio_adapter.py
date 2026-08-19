@@ -19,6 +19,7 @@ def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
         prompt_id="faithful-correction-v1",
+        prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
             CorrectionToken(

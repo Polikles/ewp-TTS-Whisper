@@ -142,6 +142,30 @@ def test_operation_identity_changes_with_provider_or_model() -> None:
     assert len({first.operation_id, second.operation_id, third.operation_id}) == 3
 
 
+def test_operation_identity_changes_when_prompt_content_changes() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+
+    first = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="provider-a",
+        model_id="model-1",
+        prompt_sha256="1" * 64,
+    )
+    second = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="provider-a",
+        model_id="model-1",
+        prompt_sha256="2" * 64,
+    )
+
+    assert first.operation_id != second.operation_id
+
+
 def test_response_rejects_mismatched_before_text() -> None:
     transcript = _transcript(3)
     chunk = plan_correction_chunks(transcript)[0]

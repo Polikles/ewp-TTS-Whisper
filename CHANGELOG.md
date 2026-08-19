@@ -61,6 +61,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added `transcriber revise correct` for single-result LM Studio correction with exact
   model/endpoint selection, warning and reject/once/persist consent, preview/apply modes,
   private resumable chunk state, and zero-call rejection behavior.
+- Prompt provenance and resume identity now hash the adapter's actual system prompt and
+  structured-response schema, preventing stale response reuse after prompt-contract edits.
 
 ### Documentation
 

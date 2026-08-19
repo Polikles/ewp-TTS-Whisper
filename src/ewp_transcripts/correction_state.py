@@ -33,6 +33,7 @@ class CorrectionResumeEntry(BaseModel):
     provider_id: str = Field(min_length=1)
     model_id: str = Field(min_length=1)
     prompt_id: str = Field(min_length=1)
+    prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     response: CorrectionResponse
 
 
@@ -81,6 +82,7 @@ def call_correction_resumable(
         provider_id=provider.provider_id,
         model_id=provider.model_id,
         prompt_id=request.prompt_id,
+        prompt_sha256=request.prompt_sha256,
         response=response,
     )
     payload = (entry.model_dump_json(indent=2) + "\n").encode()
@@ -133,6 +135,7 @@ def _load_entry(
         or entry.provider_id != provider.provider_id
         or entry.model_id != provider.model_id
         or entry.prompt_id != request.prompt_id
+        or entry.prompt_sha256 != request.prompt_sha256
     ):
         raise InvalidCorrectionResponseError("Correction resume state identity does not match")
     validate_correction_response(request, entry.response)

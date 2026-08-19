@@ -37,6 +37,9 @@ class CountingProvider:
     def endpoint_identity(self) -> str:
         return "in-process"
 
+    def prompt_sha256(self, prompt_id: str) -> str:
+        return DeterministicMockCorrectionProvider().prompt_sha256(prompt_id)
+
     def correct(
         self,
         request: CorrectionRequest,
