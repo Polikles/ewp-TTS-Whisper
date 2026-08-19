@@ -102,6 +102,20 @@ def test_duration_difference_above_500_ms_requires_override(tmp_path: Path) -> N
     assert result.warnings[0].context["override_used"] is True
 
 
+def test_filename_whitespace_warns_but_is_preserved(tmp_path: Path) -> None:
+    episode = _episode(tmp_path, names=("episode one.wav",))
+
+    result = inspect_episode(
+        episode,
+        probe=_probe({"episode one.wav": 1000}),
+    )
+
+    assert result.sources[0].fingerprint.filename == "episode one.wav"
+    assert len(result.warnings) == 1
+    assert result.warnings[0].code is WarningCode.INPUT_FILENAME_WHITESPACE
+    assert result.warnings[0].context == {"filename": "episode one.wav"}
+
+
 def test_sample_rate_mismatch_is_rejected(tmp_path: Path) -> None:
     episode = _episode(tmp_path)
     probe = _probe(

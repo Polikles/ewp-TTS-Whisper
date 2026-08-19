@@ -212,7 +212,13 @@ for timestamp/DER/JER evaluation.
 - detect and remove duplicates caused by crosstalk;
 - compare channel transcripts with timestamps;
 - preserve legitimate single-word and rhetorical repetitions;
-- support for more than two channels in one file.
+- support more than two channels with explicit topology rather than treating channel
+  count as speaker count;
+- for isolated speaker channels, split selected channels, expose the channel/speaker map
+  and warning, transcribe separately, and merge chronological timelines;
+- for general multichannel and cinematic 5.1/7.1 audio, use a layout-aware program
+  downmix plus diarization and clearly report the transformation;
+- never silently use one channel as a complete transcription of 3+ channel media.
 
 ## 11. Subtitles
 
@@ -280,3 +286,9 @@ subprocess or maintain a second revision/translation model.
 - queue scheduling;
 - automatic cleanup of old work directories;
 - quality-trend reports between releases.
+
+Before the CLI is declared ready for general users, create a top-level `Instructions/`
+directory containing a concise operator runbook for every shipped command and workflow:
+installation/model preparation, doctor, inspect, dry-run, single/group/batch transcribe,
+revision prepare/preview/apply/audit, raw/revised batch export, cleanup, warnings,
+recovery, privacy, and command-specific `--help` discovery.

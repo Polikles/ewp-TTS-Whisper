@@ -45,6 +45,8 @@ All notable changes to EWP-transcripts are documented here.
   safe duplicate replay, aggregate/JSON reporting, and mixed-batch exit code 5.
 - Defined future LLM correction as conservative transcription repair rather than prose
   editing, with mandatory proposed-change lists and independently reconstructed audits.
+- Defined explicit multichannel topology handling, scoped cloud/local API privacy
+  consent, and the complete future `Instructions/` operator-runbook release requirement.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.
@@ -89,6 +91,8 @@ All notable changes to EWP-transcripts are documented here.
 - Invalid review-body directives and text placement now report the exact review-file line
   number, making isolated batch failures directly repairable without reapplying
   successful reviews.
+- Source filenames containing whitespace now emit a structured warning and remain
+  accepted unchanged when their complete CLI paths are quoted.
 
 ### Fixed
 

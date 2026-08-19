@@ -10,6 +10,11 @@ D:/podcast/S01E01.wav
 
 Creates one job with `job_id = S01E01`.
 
+Whitespace in a filename or path is supported when the complete CLI path is quoted. The
+application emits `INPUT_FILENAME_WHITESPACE` and continues without renaming, stripping,
+or otherwise interpreting the spaces. Preserving the exact name avoids collisions such
+as `episode one.wav` versus `episodeone.wav`.
+
 ### Directory
 
 ```text
@@ -138,6 +143,29 @@ Channel count and channel topology are different concepts. A container or ffprob
 | `ambiguous` | usually 2 | Measurements do not support any topology confidently | Warn and use one channel unless the user provides an explicit mode |
 
 `auto` is a configuration request to run classification. It is not a detected topology.
+
+### Streams with more than two channels
+
+The current classifier is qualified only for mono and two-channel streams. In the
+current release, a 3+ channel stream is classified as ambiguous and falls back—with a
+warning—to channel 0. This can omit dialogue and must not be presented as complete
+multichannel transcription.
+
+Until explicit multichannel support is implemented, recordings with one isolated
+speaker per channel should be exported as separate synchronized mono files and supplied
+as one group. This is preferable to a single interleaved 3+ channel file because speaker
+identity is explicit and every channel is retained.
+
+Future multichannel handling must distinguish two explicit cases:
+
+- `isolated-speakers`: split every selected channel, report the channel-to-speaker map,
+  transcribe independently, and merge timelines while preserving overlap;
+- `program-mix`: perform a channel-layout-aware downmix and diarize it. This is the safe
+  default for video, 3+ channel music/program audio, and cinematic 5.1/7.1 layouts.
+
+The application must never infer that every channel is a distinct speaker merely from
+channel count. Any split or downmix must be reported prominently in inspect/dry-run/run
+output and canonical provenance.
 
 ### `mono`
 

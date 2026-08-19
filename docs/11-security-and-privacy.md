@@ -34,6 +34,26 @@ Permitted network operations are separated from transcription:
 
 `transcribe` in offline mode should configure libraries so that missing models cannot be downloaded implicitly.
 
+### Future correction and translation APIs
+
+Cloud LLM/API use is never an offline operation. It must be explicitly selected and must
+show a clear data-transfer warning before transcript content leaves the machine. In an
+interactive session the choices are: reject and continue without the cloud operation,
+accept once, or accept persistently. Persistent consent is scoped to the exact provider,
+endpoint, operation class, and warning-policy version; changing any of them prompts
+again. Non-interactive use requires an explicit consent flag or matching stored consent
+and must never infer acceptance.
+
+A loopback/local LLM API is preferable for privacy but is still a separate process and
+API boundary. The application cannot guarantee what that server logs, retains, or
+forwards. Local API use therefore displays a distinct warning with the same reject,
+accept-once, and scoped persistent-consent choices. Documentation must not call a local
+API bulletproof or equate it with an in-process offline model.
+
+Strict offline mode blocks cloud endpoints. Secrets and consent records must never be
+written to canonical results, logs, audits, or revision content. Revision provenance may
+record provider/model/endpoint kind and a non-secret endpoint identity.
+
 ## 4. Paths in JSON
 
 `results.json` stores source paths for reproducibility. Paths may themselves be sensitive, and user documentation must state this clearly.

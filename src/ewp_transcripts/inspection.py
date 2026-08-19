@@ -166,6 +166,17 @@ def inspect_episode(
     channel_warnings: list[ApplicationWarning] = []
     for position, grouped_source in enumerate(episode.sources, start=1):
         result = probe(grouped_source.fingerprint.path)
+        if any(character.isspace() for character in grouped_source.fingerprint.filename):
+            channel_warnings.append(
+                ApplicationWarning(
+                    code=WarningCode.INPUT_FILENAME_WHITESPACE,
+                    message=(
+                        "The source filename contains whitespace; it is accepted unchanged. "
+                        "Quote the complete path in CLI commands."
+                    ),
+                    context={"filename": grouped_source.fingerprint.filename},
+                )
+            )
         stream = _select_audio_stream(result, stream_selection)
         metrics = channel_analyzer(result.path) if channel_analyzer is not None else None
         classification = classify_channels(

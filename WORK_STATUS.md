@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 385 automated checks pass;
+- all 386 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -29,7 +29,7 @@ The single-episode v0.2.0 revision pilot passed with the staged workflow documen
 audit, and revision-aware export all worked. The minimal workflow is accepted for the
 MVP, although manual editing remains intentionally labor-intensive.
 
-Resume with this bulk-workflow plan:
+The bulk-workflow plan has also passed:
 
 1. Transcribe the selected episode batch and verify that every expected canonical
    `*_results.json` completed successfully.
@@ -80,16 +80,29 @@ configuration, safe model-free single/batch review, effective transcript export,
 detailed audit, and parent/sibling full-snapshot lineage are implemented and covered by
 automated tests.
 
+Current input behavior now explicitly warns on filename whitespace while preserving the
+exact filename. The CLI path must be quoted; spaces are not stripped because doing so
+could collapse distinct filenames. Three-or-more-channel media remains a documented
+limitation: the current ambiguous fallback can select only channel 0 and must not be
+treated as complete. The V2 design separates isolated-speaker multichannel splitting
+from layout-aware program/surround downmix and diarization.
+
+Future cloud and loopback/local LLM APIs require distinct, explicit privacy warnings and
+reject, accept-once, or scoped persistent-consent choices. Strict offline mode blocks
+cloud endpoints. General-user readiness also requires a top-level `Instructions/`
+operator runbook covering every shipped command and workflow.
+
 Do not hand-edit canonical JSON. Preserve each original result and store accepted
 corrections as immutable revision snapshots.
 
 ## V2 priority order
 
-1. Validate bulk revision-aware export on the corrected archive and complete the full
-   v0.2.0 batch correction workflow.
-2. Manually revise all 24 podcast episodes to create the first ground-truth corpus and
-   record revision-workflow defects.
-3. Benchmark and add local/cloud API correction through the same revision engine.
+1. Package the corrected 24-episode corpus as private benchmark evidence and record the
+   remaining revision-workflow defects.
+2. Implement explicit safe handling for 3+ channel isolated-speaker and program/surround
+   topologies.
+3. Benchmark and add local/cloud API correction through the same revision engine and
+   consent contract.
 4. Add manual then automated translation using a separate immutable translation artifact.
 5. Add synchronized standalone/embeddable HTML export, including later bilingual output.
 6. Consider small project-scoped dictionaries only if benchmarks justify them; do not
