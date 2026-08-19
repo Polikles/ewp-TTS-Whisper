@@ -10,8 +10,8 @@ items belong to one monolithic "Version 2" release.
    increment and specified normatively in
    [`13-transcript-revisions.md`](13-transcript-revisions.md), ADR-0020, and
    [`21-v0.2.0-transcript-revision-plan.md`](21-v0.2.0-transcript-revision-plan.md).
-2. Expand the manually corrected corpus (initial target: 24 podcast episodes) and record
-   correction/alignment workflow defects.
+2. Retain the completed 24-episode corrected corpus privately, outside this repository,
+   until every included episode is public and redistribution is appropriate.
 3. Automated transcript correction using local/cloud API models, configurable chunking,
    read-only overlap, the same revision engine, and manual revision of model output.
 4. Manual translation pipeline and structured translation artifact, using corrected
@@ -27,6 +27,13 @@ items belong to one monolithic "Version 2" release.
 The earlier small production pilot requirement is superseded operationally by the larger
 manual-review corpus used to build correction ground truth. Existing accepted v0.1
 validation evidence remains valid.
+
+The 24-episode audio and corrected-transcript corpus is complete and is the private
+reference benchmark for future ASR model, preset, correction, and translation
+comparisons. It must not be committed while any included episode is non-public. Once all
+episodes are public, publication in this repository requires a separate licensing,
+privacy, size, and repository-distribution review; public availability alone does not
+implicitly authorize committing the corpus.
 
 ## 1. Manual transcript correction — promoted to v0.2.0
 
@@ -208,6 +215,8 @@ correction benchmarks. Separate timestamp and diarization ground truth is still 
 for timestamp/DER/JER evaluation.
 
 ## 10. Advanced channel handling
+
+This is deferred to V2 or later and is not on the current critical path.
 
 - detect and remove duplicates caused by crosstalk;
 - compare channel transcripts with timestamps;

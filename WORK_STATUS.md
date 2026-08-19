@@ -101,18 +101,22 @@ corrections as immutable revision snapshots.
 
 ## V2 priority order
 
-1. Package the corrected 24-episode corpus as private benchmark evidence and record the
-   remaining revision-workflow defects.
-2. Implement explicit safe handling for 3+ channel isolated-speaker and program/surround
-   topologies.
-3. Benchmark and add local/cloud API correction through the same revision engine and
+1. Preserve the completed 24-episode audio/corrected-transcript corpus privately outside
+   Git and use it for future ASR, preset, correction, and translation benchmarks.
+2. Benchmark and add local/cloud API correction through the same revision engine and
    consent contract.
-4. Add manual then automated translation using a separate immutable translation artifact.
-5. Add synchronized standalone/embeddable HTML export, including later bilingual output.
-6. Consider small project-scoped dictionaries only if benchmarks justify them; do not
+3. Add manual then automated translation using a separate immutable translation artifact.
+4. Add synchronized standalone/embeddable HTML export, including later bilingual output.
+5. Consider small project-scoped dictionaries only if benchmarks justify them; do not
    add a global dictionary.
-7. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
+6. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
    suitable references become available.
+7. Implement guarded 3+ channel isolated-speaker and program/surround handling in V2 or
+   later; it is explicitly not a current priority.
+
+Do not add the private corpus to Git merely because it exists. After every episode is
+public, conduct a separate licensing, privacy, artifact-size, and distribution review
+before adding any benchmark media or transcripts to the repository.
 
 ## Repository hygiene
 

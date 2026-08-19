@@ -51,6 +51,9 @@ All notable changes to EWP-transcripts are documented here.
   split-speaker stereo second, and reviewed diarization for mixed program audio. The
   future 3+ channel fallback is automatic only for recognized layouts and uses a
   dedicated topology confirmation—not `--force`—when layout evidence is insufficient.
+- Recorded that advanced 3+ channel implementation is deferred to V2 or later. The
+  completed 24-episode audio/corrected-transcript corpus remains a private benchmark
+  outside Git until all episodes are public and a separate publication review passes.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.
