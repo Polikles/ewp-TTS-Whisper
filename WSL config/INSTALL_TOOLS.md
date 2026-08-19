@@ -29,16 +29,18 @@ curl --version
 
 ## 3. Install `uv`
 
-Inspect the official installer before executing it:
+Download the official installer. Reviewing its contents is optional unless required by
+your organization's security policy; users are not expected to independently audit the
+installer:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | less
+curl -LsSf https://astral.sh/uv/install.sh -o /tmp/ewp-uv-install.sh
 ```
 
 Then install:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+sh /tmp/ewp-uv-install.sh
 ```
 
 Start a new shell or follow the PATH instruction printed by the installer, then run `uv --version`.

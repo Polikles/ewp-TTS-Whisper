@@ -8,6 +8,13 @@ covers every shipped command. The application is not yet a public release.
 The supported environment is Ubuntu 24.04 under WSL2 with Python 3.12, FFmpeg, `uv`, and
 an NVIDIA CUDA-capable GPU. Follow the detailed setup documents in order:
 
+The current locked environment downloads approximately 4–4.5 GB before model setup.
+The pinned ASR, Polish/English alignment, and diarization snapshots add approximately
+8.5 GB, making the complete network transfer roughly 13 GB. Reserve at least 20 GB of
+free space on the Linux filesystem, plus space for source audio and outputs. These are
+current 0.2.0 planning estimates; later presets will publish their own approximate disk,
+VRAM, and runtime requirements.
+
 1. [`../WSL config/SYSTEM_REQUIREMENTS.md`](../WSL%20config/SYSTEM_REQUIREMENTS.md)
 2. [`../WSL config/INSTALL_WSL.md`](../WSL%20config/INSTALL_WSL.md)
 3. [`../WSL config/INSTALL_TOOLS.md`](../WSL%20config/INSTALL_TOOLS.md)

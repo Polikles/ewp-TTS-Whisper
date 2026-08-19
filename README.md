@@ -20,6 +20,24 @@
 - The wheel passed isolated offline transcription, and the complete locked source installation passed in a fresh Ubuntu 24.04 WSL2 distribution.
 - Three-speaker and full-English quality validation remain deferred until representative archive-derived material exists.
 
+## Requirements
+
+- Ubuntu 24.04 on WSL2 is the validated environment. Bare-metal Ubuntu and an Ubuntu
+  virtual machine with working NVIDIA GPU passthrough are expected deployment shapes but
+  have not yet passed the complete release gate.
+- An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
+  performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM; minimum hardware requirements
+  for future presets have not yet been characterized.
+- Expect approximately 4–4.5 GB of downloads for the locked Python/CUDA environment and
+  approximately 8.5 GB for all currently pinned Hugging Face model snapshots, or roughly
+  13 GB in total. Reserve at least 20 GB of free Linux-filesystem space for installation,
+  caches, artifacts, and working headroom. Audio inputs and generated results require
+  additional space.
+
+These sizes describe the current 0.2.0 baseline and are estimates rather than download
+or per-preset guarantees. See [`Instructions/README.md`](Instructions/README.md) for the
+supported installation workflow.
+
 ## Primary outputs
 
 Every successfully completed job creates a canonical file:

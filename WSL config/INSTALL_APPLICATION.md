@@ -8,7 +8,7 @@ The supported installation is a source checkout synchronized from the committed
 ```bash
 mkdir -p "$HOME/transkrypcje"
 cd "$HOME/transkrypcje"
-git clone <AUTHENTICATED-REPOSITORY-URL> ewp-transcripts
+git clone https://github.com/Polikles/ewp-transcripts.git ewp-transcripts
 cd ewp-transcripts
 ```
 

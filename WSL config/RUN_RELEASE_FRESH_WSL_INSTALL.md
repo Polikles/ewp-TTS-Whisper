@@ -45,7 +45,9 @@ GPU passed through from Windows. Do not install a Linux NVIDIA display driver.
 
 ## 2. Install uv and clone the release candidate
 
-Download and inspect the official uv installer before running it:
+Download the official uv installer, optionally inspect it if your environment's security
+policy requires source review, and run the exact file you downloaded. Ordinary users are
+not expected to perform an undefined security audit of the script:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh -o /tmp/ewp-uv-install.sh
@@ -59,16 +61,22 @@ Open a new shell (or apply the PATH instruction printed by the installer), then 
 uv --version
 mkdir -p "$HOME/transkrypcje"
 cd "$HOME/transkrypcje"
-git clone <AUTHENTICATED-REPOSITORY-URL> ewp-transcripts
+git clone https://github.com/Polikles/ewp-transcripts.git ewp-transcripts
 cd ewp-transcripts
 git log -1 --oneline
 git status --short
 ```
 
-Replace the placeholder with the same authenticated repository used by the working
-distribution. Expected commit: `e850977` or later and an empty Git status.
+Expected commit: `f7d7b76` or later and an empty Git status.
 
 ## 3. Install exactly from the committed lock and build artifacts
+
+Allow for approximately 4–4.5 GB of network transfer for the locked Python/CUDA
+environment. The pinned model preparation performed later adds approximately 8.5 GB,
+for roughly 13 GB of total downloads. Reserve at least 20 GB of free Linux-filesystem
+space for the checkout, environment, model caches, build artifacts, and temporary files.
+These are measured/planning estimates for the current 0.2.0 baseline, not per-preset
+guarantees.
 
 ```bash
 uv sync --locked

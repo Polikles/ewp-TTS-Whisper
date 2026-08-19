@@ -19,6 +19,13 @@ The functional and operational MVP gates are complete:
 - short and complete-episode YouTube subtitle readability/timing reviews passed;
 - canonical JSON is the immutable source of truth for all derived exports.
 
+A second clean Ubuntu 24.04.4 WSL2 installation (`Ubuntu-test-repo-ewp`) independently
+passed release-runbook steps 0–4 at commit `f7d7b76`: base tools/GPU discovery, locked
+sync and package compatibility, all automated checks, 0.2.0 build/help, expected
+missing-model diagnostics, and model-free inspect/dry-run/cleanup. The checkout remained
+clean. Model download and installed-model transcription are the remaining steps for that
+fresh distribution if further independent runtime evidence is desired.
+
 Dataset-dependent English, three-speaker, timestamp, and DER/JER quality measurements
 remain explicitly deferred by ADR-0014. They are not implementation blockers.
 

@@ -332,6 +332,10 @@ subprocess or maintain a second revision/translation model.
 
 ## 14. Distribution
 
+- For v0.3, investigate a reviewable installation/bootstrap script that installs and
+  verifies prerequisites, the locked application environment, model readiness, and
+  diagnostics while retaining explicit consent for gated model access and avoiding
+  hidden system changes.
 - GPU-enabled Docker image;
 - pinned image versions;
 - local service/API;

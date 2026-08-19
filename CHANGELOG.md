@@ -4,6 +4,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Documentation
+
+- Clarified that review of the official `uv` installer is optional unless local policy
+  requires it, replaced the clone placeholder with the public repository URL, and added
+  current dependency/model download and free-space estimates to installation guidance.
+- Added a root Requirements section covering the validated WSL2/Ubuntu/RTX 3090 baseline,
+  expected but unvalidated Ubuntu deployment shapes, and future per-preset requirements.
+- Added a v0.3 backlog item for a reviewable installation and verification script.
+
 ## 0.2.0 — internal release candidate — 2026-08-19
 
 ### Added
