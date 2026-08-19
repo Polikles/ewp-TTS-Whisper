@@ -5,14 +5,23 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+import pytest
+
 from ewp_transcripts.application import (
     apply_mock_correction,
+    preview_correction,
     preview_mock_correction,
     process_mock_correction_batch,
 )
-from ewp_transcripts.config import ApplicationConfig, CorrectionConfig, RuntimeConfig
+from ewp_transcripts.config import (
+    ApplicationConfig,
+    CorrectionConfig,
+    GeneralConfig,
+    RuntimeConfig,
+)
 from ewp_transcripts.correction import DeterministicMockCorrectionProvider
 from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionResponse
+from ewp_transcripts.domain.errors import CorrectionConsentError
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
@@ -133,6 +142,10 @@ class _CountingProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
+    @property
+    def endpoint_identity(self) -> str:
+        return "in-process"
+
     def correct(
         self,
         request: CorrectionRequest,
@@ -168,3 +181,69 @@ def test_application_resume_directory_avoids_repeating_chunk_calls(tmp_path: Pat
     assert provider.calls == calls_after_first
     assert first.revision.transcript == second.revision.transcript
     assert len(tuple(resume.glob("*.json"))) == 2
+
+
+@dataclass
+class _LocalCountingProvider(_CountingProvider):
+    @property
+    def provider_id(self) -> str:
+        return "lm-studio"
+
+    @property
+    def endpoint_kind(self) -> Literal["local"]:
+        return "local"
+
+    @property
+    def endpoint_identity(self) -> str:
+        return "http://127.0.0.1:1234/v1"
+
+
+def _local_config(tmp_path: Path) -> ApplicationConfig:
+    return ApplicationConfig(
+        general=GeneralConfig(offline=True, interactive=False),
+        correction=CorrectionConfig(
+            provider="lm-studio",
+            model="v1",
+            target_tokens=4,
+            max_tokens=4,
+            context_tokens=1,
+            consent_store=tmp_path / "consent.json",
+        ),
+        runtime=RuntimeConfig(work_root=tmp_path / "work"),
+    )
+
+
+def test_local_provider_rejection_makes_zero_calls(tmp_path: Path) -> None:
+    base = tmp_path / EXAMPLE.name
+    base.write_bytes(EXAMPLE.read_bytes())
+    provider = _LocalCountingProvider()
+
+    with pytest.raises(CorrectionConsentError, match="rejected"):
+        preview_correction(
+            base,
+            config=_local_config(tmp_path),
+            provider=provider,
+            consent_choice="reject",
+        )
+
+    assert provider.calls == 0
+
+
+def test_persisted_local_consent_is_reused_for_exact_scope(tmp_path: Path) -> None:
+    base = tmp_path / EXAMPLE.name
+    base.write_bytes(EXAMPLE.read_bytes())
+    provider = _LocalCountingProvider()
+    config = _local_config(tmp_path)
+
+    preview_correction(
+        base,
+        config=config,
+        provider=provider,
+        consent_choice="accept_persistently",
+    )
+    first_calls = provider.calls
+    preview_correction(base, config=config, provider=provider)
+
+    assert first_calls == 2
+    assert provider.calls == 4
+    assert config.correction.consent_store.is_file()

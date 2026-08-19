@@ -53,6 +53,11 @@ All notable changes to EWP-transcripts are documented here.
 - Added the first real provider adapter for LM Studio's OpenAI-compatible loopback API,
   with a faithful-transcript structured prompt, strict JSON parsing, usage capture,
   injectable network-free tests, and rejection of remote or credential-bearing URLs.
+- Added disabled-by-default LM Studio correction configuration for exact model/endpoint,
+  prompt, chunking, timeout/retry policy, temperature, and private consent-store location.
+- Added the production correction application boundary: exact-scope consent is resolved
+  and optionally persisted before request construction, configured timeout/retry policy
+  is applied, and local/mock provenance records the provider's actual endpoint kind.
 
 ### Documentation
 

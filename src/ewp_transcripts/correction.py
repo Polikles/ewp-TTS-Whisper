@@ -158,6 +158,10 @@ class DeterministicMockCorrectionProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
+    @property
+    def endpoint_identity(self) -> str:
+        return "in-process"
+
     def correct(
         self,
         request: CorrectionRequest,
@@ -239,15 +243,21 @@ def validate_correction_response(
     return tuple(corrected)
 
 
-def build_mock_correction_revision(
+def build_correction_revision(
     result_path: Path,
     provider: CorrectionProvider,
     *,
     config: CorrectionChunkConfig | None = None,
     prompt_id: str = "faithful-correction-v1",
     resume_directory: Path | None = None,
+    execution_policy: object | None = None,
 ) -> TranscriptRevision:
-    """Exercise provider-to-review-to-revision flow without network or persistence."""
+    """Build one provider-backed revision without publishing it."""
+
+    from ewp_transcripts.correction_execution import CorrectionExecutionPolicy
+
+    if execution_policy is not None and not isinstance(execution_policy, CorrectionExecutionPolicy):
+        raise TypeError("execution_policy must be CorrectionExecutionPolicy")
 
     base = load_canonical_result(result_path)
     effective = resolve_effective_transcript(base)
@@ -264,7 +274,11 @@ def build_mock_correction_revision(
         if resume_directory is None:
             from ewp_transcripts.correction_execution import execute_correction_call
 
-            response = execute_correction_call(provider, request).response
+            response = execute_correction_call(
+                provider,
+                request,
+                policy=execution_policy,
+            ).response
         else:
             # Local import keeps persistence dependent on the correction contract while
             # allowing the pure planner/validator module to remain independently usable.
@@ -274,6 +288,7 @@ def build_mock_correction_revision(
                 provider,
                 request,
                 state_directory=resume_directory,
+                execution_policy=execution_policy,
             ).response
         corrected = validate_correction_response(request, response)
         speakers = _corrected_speakers(request, response)
@@ -297,13 +312,17 @@ def build_mock_correction_revision(
             llm=RevisionLlmProvenance(
                 provider=provider.provider_id,
                 model=provider.model_id,
-                endpoint_kind="mock",
+                endpoint_kind=provider.endpoint_kind,
                 prompt_id=prompt_id,
                 prompt_sha256=prompt_sha256,
                 parameters=None,
             ),
         ),
     )
+
+
+# Compatibility alias while the first network-free slice remains referenced by tests.
+build_mock_correction_revision = build_correction_revision
 
 
 def _corrected_speakers(

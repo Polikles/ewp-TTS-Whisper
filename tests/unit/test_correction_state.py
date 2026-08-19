@@ -33,6 +33,10 @@ class CountingProvider:
     def endpoint_kind(self) -> Literal["mock"]:
         return "mock"
 
+    @property
+    def endpoint_identity(self) -> str:
+        return "in-process"
+
     def correct(
         self,
         request: CorrectionRequest,

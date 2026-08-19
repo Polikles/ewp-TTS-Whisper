@@ -16,7 +16,17 @@ from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
-    build_mock_correction_revision,
+    build_correction_revision,
+)
+from ewp_transcripts.correction_consent import (
+    ConsentChoice,
+    CorrectionConsentScope,
+    authorize_correction_api,
+    load_correction_consents,
+    persist_correction_consent,
+)
+from ewp_transcripts.correction_execution import (
+    CorrectionExecutionPolicy,
 )
 from ewp_transcripts.discovery import (
     discover_explicit_group,
@@ -109,6 +119,8 @@ __all__ = [
     "preview_mock_correction",
     "apply_mock_correction",
     "process_mock_correction_batch",
+    "preview_correction",
+    "apply_correction",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -424,8 +436,30 @@ def preview_mock_correction(
 ) -> CorrectionPreviewOutcome:
     """Run the complete network-free correction path without publishing a revision."""
 
+    return preview_correction(
+        result_path,
+        config=config,
+        provider=provider,
+        prompt_id=prompt_id,
+        resume_directory=resume_directory,
+    )
+
+
+def preview_correction(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: CorrectionProvider,
+    consent_choice: ConsentChoice | None = None,
+    prompt_id: str | None = None,
+    resume_directory: Path | None = None,
+) -> CorrectionPreviewOutcome:
+    """Authorize and build one correction revision without publishing it."""
+
+    _authorize_correction_provider(config, provider, consent_choice)
+
     normalized = normalize_input_path(result_path)
-    revision = build_mock_correction_revision(
+    revision = build_correction_revision(
         normalized,
         provider,
         config=CorrectionChunkConfig(
@@ -433,10 +467,37 @@ def preview_mock_correction(
             max_tokens=config.correction.max_tokens,
             context_tokens=config.correction.context_tokens,
         ),
-        prompt_id=prompt_id,
+        prompt_id=prompt_id or config.correction.prompt_id,
         resume_directory=resume_directory,
+        execution_policy=CorrectionExecutionPolicy(
+            timeout_seconds=config.correction.timeout_seconds,
+            max_attempts=config.correction.max_attempts,
+            retry_delay_seconds=config.correction.retry_delay_seconds,
+        ),
     )
     return CorrectionPreviewOutcome(normalized, revision)
+
+
+def _authorize_correction_provider(
+    config: ApplicationConfig,
+    provider: CorrectionProvider,
+    choice: ConsentChoice | None,
+) -> None:
+    scope = CorrectionConsentScope(
+        provider_id=provider.provider_id,
+        endpoint_kind=provider.endpoint_kind,
+        endpoint_identity=provider.endpoint_identity,
+    )
+    records = load_correction_consents(config.correction.consent_store)
+    decision = authorize_correction_api(
+        scope,
+        offline=config.general.offline,
+        interactive=config.general.interactive,
+        choice=choice,
+        stored_records=records,
+    )
+    if decision.persist_scope is not None:
+        persist_correction_consent(config.correction.consent_store, decision.persist_scope)
 
 
 def apply_mock_correction(
@@ -454,6 +515,34 @@ def apply_mock_correction(
         result_path,
         config=config,
         provider=provider,
+        prompt_id=prompt_id,
+        resume_directory=resume_directory,
+    )
+    revision, path = publish_next_revision(
+        preview.revision,
+        output_directory=output_directory or preview.base_result_path.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return CorrectionApplyOutcome(preview.base_result_path, revision, path)
+
+
+def apply_correction(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: CorrectionProvider,
+    consent_choice: ConsentChoice | None = None,
+    output_directory: Path | None = None,
+    prompt_id: str | None = None,
+    resume_directory: Path | None = None,
+) -> CorrectionApplyOutcome:
+    """Authorize, validate, and atomically publish one correction revision."""
+
+    preview = preview_correction(
+        result_path,
+        config=config,
+        provider=provider,
+        consent_choice=consent_choice,
         prompt_id=prompt_id,
         resume_directory=resume_directory,
     )

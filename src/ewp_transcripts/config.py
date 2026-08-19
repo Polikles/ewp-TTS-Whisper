@@ -211,15 +211,31 @@ class RevisionConfig(StrictConfigModel):
 
 
 class CorrectionConfig(StrictConfigModel):
+    provider: Literal["", "lm-studio"] = ""
+    model: str = ""
+    endpoint: str = "http://127.0.0.1:1234/v1"
+    prompt_id: str = "faithful-correction-v1"
     target_tokens: int = Field(default=600, ge=1)
     max_tokens: int = Field(default=800, ge=1)
     context_tokens: int = Field(default=80, ge=0)
+    timeout_seconds: int = Field(default=120, ge=1)
+    max_attempts: int = Field(default=3, ge=1, le=10)
+    retry_delay_seconds: float = Field(default=1.0, ge=0, le=60)
+    temperature: float = Field(default=0.0, ge=0, le=2)
+    consent_store: Path = Path("~/.config/ewp-transcripts/correction-consent.json")
 
     @model_validator(mode="after")
     def validate_chunk_sizes(self) -> CorrectionConfig:
         if self.max_tokens < self.target_tokens:
             raise ValueError("correction max_tokens must be at least target_tokens")
+        if self.provider and not self.model.strip():
+            raise ValueError("correction model is required when provider is configured")
         return self
+
+    @field_validator("consent_store", mode="after")
+    @classmethod
+    def expand_consent_store(cls, value: Path) -> Path:
+        return value.expanduser()
 
 
 class RuntimeConfig(StrictConfigModel):

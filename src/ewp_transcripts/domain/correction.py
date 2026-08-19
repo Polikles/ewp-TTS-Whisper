@@ -82,6 +82,9 @@ class CorrectionProvider(Protocol):
     @property
     def endpoint_kind(self) -> Literal["local", "cloud", "mock"]: ...
 
+    @property
+    def endpoint_identity(self) -> str: ...
+
     def correct(
         self,
         request: CorrectionRequest,

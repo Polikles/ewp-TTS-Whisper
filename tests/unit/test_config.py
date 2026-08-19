@@ -35,6 +35,12 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.correction.target_tokens == 600
     assert config.correction.max_tokens == 800
     assert config.correction.context_tokens == 80
+    assert config.correction.provider == ""
+    assert config.correction.model == ""
+    assert config.correction.endpoint == "http://127.0.0.1:1234/v1"
+    assert config.correction.timeout_seconds == 120
+    assert config.correction.max_attempts == 3
+    assert config.correction.temperature == 0
     assert config.quality.warn_only is True
 
 
@@ -85,6 +91,13 @@ def test_invalid_correction_chunk_order_is_rejected(tmp_path: Path) -> None:
         tmp_path / "selected.toml",
         "[correction]\ntarget_tokens = 20\nmax_tokens = 19\n",
     )
+
+    with pytest.raises(InvalidConfigurationError, match="validation failed"):
+        load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+def test_configured_correction_provider_requires_model(tmp_path: Path) -> None:
+    selected = _write(tmp_path / "selected.toml", '[correction]\nprovider = "lm-studio"\n')
 
     with pytest.raises(InvalidConfigurationError, match="validation failed"):
         load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
