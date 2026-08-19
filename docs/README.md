@@ -24,6 +24,7 @@
 | [18 - Quality evaluation](18-quality-evaluation.md) | Manifest-driven WER/CER reports and review diffs |
 | [20 - MVP requirements traceability](20-mvp-requirements-traceability.md) | Requirement-by-requirement implementation, test, evidence, and deferral status |
 | [21 - v0.2.0 transcript revision plan](21-v0.2.0-transcript-revision-plan.md) | Consolidated implementation plan and future-compatibility decisions |
+| [22 - v0.3 automated correction](22-v0.3-automated-correction.md) | Provider-neutral correction, consent, chunking, provenance, benchmark, and acceptance contract |
 | [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 

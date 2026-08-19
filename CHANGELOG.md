@@ -4,6 +4,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Added
+
+- Added the normative v0.3 automated-correction contract: provider-neutral adapters,
+  faithful-repair policy, deterministic single-owner chunks with read-only overlap,
+  proposed-change validation, scoped API consent, retry/resume/batch behavior, immutable
+  revision provenance, private-corpus benchmark requirements, and acceptance checklist.
+
 ### Documentation
 
 - Clarified that review of the official `uv` installer is optional unless local policy

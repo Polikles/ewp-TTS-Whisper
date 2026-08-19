@@ -122,6 +122,28 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-J17** TXT, SRT, VTT, and `segments.json` generated from a revision MUST be derived from one resolved `EffectiveTranscript` and MUST NOT require source audio or ML models.
 - **FR-J18** Revision artifacts and revision-aware exports MUST use non-destructive allocation and atomic publication.
 
+### K. Automated transcript correction (planned for v0.3)
+
+- **FR-K00** Automated correction MUST consume a completed canonical result or compatible immutable revision and MUST publish corrections through the existing revision engine.
+- **FR-K01** Correction providers MUST implement one provider-neutral application protocol; provider-specific request/response objects MUST NOT enter the revision domain.
+- **FR-K02** Every provider response MUST contain corrected text and an explicit proposed-change list with source span, before text, after text, and correction category.
+- **FR-K03** The local application MUST independently align and audit provider output. Provider-proposed changes are evidence and MUST NOT be treated as the authoritative revision patch.
+- **FR-K04** Prompts MUST restrict correction to obvious ASR lexical errors, proper-name spelling, conservative punctuation, capitalization, and sentence boundaries. They MUST prohibit paraphrasing, stylistic repair, grammar repair, summarization, and removal of meaningful repetitions or self-corrections.
+- **FR-K05** Editable chunks MUST form an ordered, gap-free, non-overlapping partition of the selected effective transcript. Read-only context overlap MAY repeat surrounding tokens but MUST NOT create multiple owners for editable text.
+- **FR-K06** Chunk target size, hard maximum size, and read-only overlap MUST be configurable and validated before any provider call.
+- **FR-K07** Correction MUST preserve canonical word/speaker/timing anchors through the same deterministic alignment rules used by manual revision.
+- **FR-K08** Cloud correction MUST require explicit scoped consent before transcript content leaves the machine. Rejecting consent MUST make no provider request.
+- **FR-K09** Loopback/local API correction MUST display a distinct API-boundary privacy warning and require scoped consent; it MUST NOT be described as equivalent to in-process offline execution.
+- **FR-K10** Strict offline mode MUST block cloud correction regardless of stored consent.
+- **FR-K11** Non-interactive correction MUST require an explicit one-run consent flag or compatible stored consent and MUST never infer acceptance.
+- **FR-K12** Consent persistence MUST be scoped to provider, non-secret endpoint identity, operation class, and warning-policy version. Secrets MUST NOT appear in configuration artifacts, revisions, audits, logs, or benchmark reports.
+- **FR-K13** Provider provenance MUST record provider, model, endpoint kind, prompt identity/hash, and non-secret parameters in every LLM revision.
+- **FR-K14** Provider failures MUST use bounded timeout/retry behavior, distinguish retryable from permanent failures, and MUST NOT create a revision for an incomplete correction.
+- **FR-K15** Directory correction MUST be deterministic, resumable, failure-isolated, non-recursive by default, and governed by the existing batch continuation policy.
+- **FR-K16** A deterministic mock provider MUST exercise the complete correction path without network access, credentials, or heavyweight model loading.
+- **FR-K17** Benchmarking MUST support canonical-to-latest-gold and earlier-revision-to-latest-gold tasks selected by exact base hash and revision lineage, not timestamps.
+- **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, proposed-change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes.
+
 ## 2. Non-functional requirements
 
 - **NFR-001 Privacy:** the pipeline performs no upload of audio or transcript text - everything is processed locally.
@@ -139,3 +161,5 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 
 - **NFR-013 Revision determinism:** for the same base result, review content, configuration, and alignment-strategy version, revision mapping and preview classification must be deterministic.
 - **NFR-014 Revision extensibility:** the manual revision core must be reusable by future LLM and GUI adapters without introducing another corrected transcript model.
+- **NFR-015 Correction determinism:** identical selected input, chunk configuration, prompt, and deterministic provider responses MUST produce identical chunk ownership, alignment classification, and audit content apart from allocated identity and creation time.
+- **NFR-016 Correction privacy:** no transcript content or credential may cross a provider boundary until endpoint classification and applicable consent have succeeded.

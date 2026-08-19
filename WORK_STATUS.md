@@ -33,6 +33,11 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 ## Authoritative next step
 
+The v0.3 automated-correction contract is now defined in
+`docs/22-v0.3-automated-correction.md`. Implement the deterministic chunk planner and
+network-free mock-provider vertical slice first. Real local/cloud provider selection,
+credentials, API calls, and possible cost remain a user decision and must not be inferred.
+
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in
 `WSL config/REVISE_TRANSCRIPTS.md`: prepare, manual Windows VS Code edit, preview/apply,
 audit, and revision-aware export all worked. The minimal workflow is accepted for the

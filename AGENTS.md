@@ -17,7 +17,8 @@ The following are outside the MVP:
 - GUI;
 - Docker images and deployment;
 - automatic denoising or audio repair;
-- LLM-based text correction;
+- LLM-based text correction before v0.3 (provider-neutral correction work is now
+  explicitly authorized by the accepted v0.3 contract);
 - voice-cloning dataset generation;
 - automatic speaker recognition from voice biometrics;
 - internal drift correction between independently recorded files;
@@ -99,7 +100,8 @@ Mandatory boundaries:
 - Never log secrets or the Hugging Face token.
 - Avoid logging full transcript text by default.
 - Preserve meaningful repetitions and self-corrections in canonical text.
-- Do not add LLM-based rewriting to the MVP.
+- Automated correction MUST remain faithful transcription repair. Do not add LLM-based
+  rewriting, paraphrasing, or prose polishing.
 
 ## 7. Change strategy
 

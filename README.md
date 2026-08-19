@@ -87,6 +87,7 @@ Recommended starting documents:
 7. [`docs/13-transcript-revisions.md`](docs/13-transcript-revisions.md) — implemented v0.2.0 revision contract.
 8. [`docs/21-v0.2.0-transcript-revision-plan.md`](docs/21-v0.2.0-transcript-revision-plan.md) — implementation and acceptance plan.
 9. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — post-0.1 priorities.
+10. [`docs/22-v0.3-automated-correction.md`](docs/22-v0.3-automated-correction.md) — accepted v0.3 correction contract and acceptance checklist.
 
 ## Examples and schemas
 
