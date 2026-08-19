@@ -135,12 +135,17 @@ def export_result(
     )
     rendered_result = result
     if selected_revision is not None:
-        effective = resolve_effective_transcript(
-            result,
-            selected_revision,
-            base_path=results_path,
-        )
-        rendered_result = effective_canonical_result(result, effective)
+        try:
+            effective = resolve_effective_transcript(
+                result,
+                selected_revision,
+                base_path=results_path,
+            )
+            rendered_result = effective_canonical_result(result, effective)
+        except (ValidationError, ValueError) as error:
+            raise InvalidCanonicalResultError(
+                "Cannot resolve revised transcript for export"
+            ) from error
 
     with output_directory_lock(destination):
         if selected_revision is None:

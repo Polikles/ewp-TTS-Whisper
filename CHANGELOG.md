@@ -76,6 +76,9 @@ All notable changes to EWP-transcripts are documented here.
 - Passed the first real-episode staged revision pilot using Windows Notepad: review
   preparation, validation, immutable apply, audit, and corrected export completed
   without modifying the canonical result.
+- Passed revision-aware bulk export on 24 manually corrected podcast results: all TXT,
+  SRT, VTT, and segments outputs were generated (96 artifacts), and duplicate replay
+  skipped all 96 without creating new versions.
 
 ### Changed
 
@@ -87,6 +90,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Preserved canonical and timing-derived overlap metadata while projecting corrected
+  revision tokens, sorted reconstructed overlapping speaker groups chronologically, and
+  interpolated consecutive inserted tokens across bounded canonical gaps. This prevents
+  revised subtitle overlap and line-limit failures without changing accepted text or
+  canonical timing anchors.
 - Restored chronological ordering after final subtitle repartitioning so explicitly
   overlapping speaker cues cannot make SRT/VTT export fail after long silent intervals
   or fallback alignment.
