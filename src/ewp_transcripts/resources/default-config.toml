@@ -94,6 +94,11 @@ long_gap_warning_ms = 2000
 generate_audit = false
 editor = ""
 
+[correction]
+target_tokens = 600
+max_tokens = 800
+context_tokens = 80
+
 [runtime]
 work_root = "~/.cache/ewp-transcripts/work"
 keep_temp_on_success = false

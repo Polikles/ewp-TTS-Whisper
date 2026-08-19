@@ -210,6 +210,18 @@ class RevisionConfig(StrictConfigModel):
     editor: str = ""
 
 
+class CorrectionConfig(StrictConfigModel):
+    target_tokens: int = Field(default=600, ge=1)
+    max_tokens: int = Field(default=800, ge=1)
+    context_tokens: int = Field(default=80, ge=0)
+
+    @model_validator(mode="after")
+    def validate_chunk_sizes(self) -> CorrectionConfig:
+        if self.max_tokens < self.target_tokens:
+            raise ValueError("correction max_tokens must be at least target_tokens")
+        return self
+
+
 class RuntimeConfig(StrictConfigModel):
     work_root: Path = Path("~/.cache/ewp-transcripts/work")
     keep_temp_on_success: bool = False
@@ -240,6 +252,7 @@ class ApplicationConfig(StrictConfigModel):
     subtitles: SubtitlesConfig = SubtitlesConfig()
     outputs: OutputsConfig = OutputsConfig()
     revision: RevisionConfig = RevisionConfig()
+    correction: CorrectionConfig = CorrectionConfig()
     runtime: RuntimeConfig = RuntimeConfig()
 
 

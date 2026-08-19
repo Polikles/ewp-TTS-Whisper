@@ -20,6 +20,8 @@ All notable changes to EWP-transcripts are documented here.
   deterministic revision aligner, producing immutable LLM-provenance snapshots without
   letting providers construct mappings or artifacts. Added explicit `mock` endpoint
   provenance for network-free test revisions.
+- Added strict `[correction]` configuration for target, maximum editable, and read-only
+  context token counts, including packaged/example defaults and invalid-order rejection.
 
 ### Documentation
 

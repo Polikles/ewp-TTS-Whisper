@@ -44,6 +44,7 @@ Complete example: [`../examples/config.example.toml`](../examples/config.example
 - `[outputs]` — default exports and naming;
 - `[runtime]` — work directories, temporary files, locks, logging;
 - `[quality]` — diagnostics without audio repair.
+- `[correction]` — automated-correction editable chunk and read-only context sizes.
 
 ### Warning-only quality thresholds
 
@@ -136,9 +137,20 @@ editor = ""
 Revision batch failure behavior reuses the existing runtime batch policy rather than
 introducing a duplicate correction-only setting.
 
-## 8. Future automated-correction configuration
+## 8. Automated-correction configuration
 
-LLM correction is not part of v0.2.0. When implemented, chunk target size, maximum size,
-and read-only overlap MUST be configurable in TOML and overrideable by CLI/application
-request. Exact default values are deferred until automated-correction benchmarks. No
-backend model's maximum context window may be hard-coded into the revision engine.
+The first v0.3 correction slice defines:
+
+```toml
+[correction]
+target_tokens = 600
+max_tokens = 800
+context_tokens = 80
+```
+
+These count application transcript tokens, not provider-specific tokenizer units.
+`target_tokens` guides preferred boundary selection, `max_tokens` is a hard editable
+limit, and `context_tokens` bounds read-only context on each side. All must be
+overrideable through normal configuration/application requests. The maximum context of
+any provider model MUST NOT be hard-coded into the revision engine. Defaults remain
+subject to benchmark-driven adjustment before v0.3 acceptance.
