@@ -13,7 +13,8 @@ items belong to one monolithic "Version 2" release.
 2. Retain the completed 24-episode corrected corpus privately, outside this repository,
    until every included episode is public and redistribution is appropriate.
 3. Automated transcript correction using local/cloud API models, configurable chunking,
-   read-only overlap, the same revision engine, and manual revision of model output.
+   read-only overlap, the same revision engine, benchmarking against the private corpus,
+   and manual revision of model output.
 4. Manual translation pipeline and structured translation artifact, using corrected
    transcript by default while retaining an explicit raw/dirty source option.
 5. Automated translation using the same source/translation artifact contracts, followed
@@ -34,6 +35,11 @@ comparisons. It must not be committed while any included episode is non-public. 
 episodes are public, publication in this repository requires a separate licensing,
 privacy, size, and repository-distribution review; public availability alone does not
 implicitly authorize committing the corpus.
+
+The retained private package includes canonical results and raw exports, editable review
+files, immutable revision and audit artifacts, and revised TXT/SRT/VTT/segments exports.
+Future benchmark tooling must treat the accepted revisions as gold without requiring the
+corpus itself to live in this repository.
 
 ## 1. Manual transcript correction — promoted to v0.2.0
 
@@ -84,6 +90,17 @@ Requirements:
 - a model revision may later have a manual child revision, with parent provenance but a
   complete standalone child snapshot.
 
+Benchmarking must cover local and cloud providers separately and report at least lexical
+accuracy against manual gold, proposed-change precision/recall, unsupported or stylistic
+changes, speaker-attribution preservation, audit completeness, latency, request/token
+volume, estimated or actual cost, and failure/retry behavior. A reviewer must be able to
+prepare, manually correct, apply, audit, and export an LLM-produced revision through the
+same workflow used for manual revisions.
+
+Provider integration also requires deterministic mocked tests, secret-safe
+configuration, timeout/rate-limit/retry handling, resumable failure-isolated batches,
+and the consent/privacy contract in `11-security-and-privacy.md`.
+
 ### Configurable chunking
 
 Chunking is required for flexibility across local and cloud models and must not assume a
@@ -117,6 +134,12 @@ If implemented:
   provenance where it affects automated output;
 - ASR vocabulary biasing is not enabled by default because an irrelevant dictionary may
   reduce recognition quality.
+
+Dictionary entries may be supplied manually or proposed by analyzing accepted revision
+audits for frequent and consistent corrections, including proper names and canonical
+forms such as `OpenAI` versus `Open AI`. Automatically discovered items are candidates
+only: a user must approve them before they affect correction or translation. Benchmarks
+must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
 
 ## 4. Manual translation pipeline
 
@@ -157,6 +180,11 @@ After manual translation establishes ground truth:
 - allow manual revision of automated translations;
 - benchmark automated output against manual translations separately from transcript
   correction quality.
+
+Both manual and automated translation must support a later manual revision pass, exact
+source/parent lineage, batch resume and failure isolation, and deterministic regeneration
+of every translated export. Evaluation must keep translation quality separate from
+upstream ASR/correction quality.
 
 Useful benchmark paths include:
 
@@ -256,6 +284,12 @@ This is deferred to V2 or later and is not on the current critical path.
   accessible fallback;
 - define export presets for conservative platform interchange and web-native playback;
 - design translated/bilingual HTML after the translation artifact contract exists.
+
+Acceptance includes a self-contained mock/placeholder site with a real HTML audio player
+and time-linked transcript. Playback highlights or follows the active cue, and activating
+a transcript sentence seeks the player to that sentence's start time. Tests must cover
+keyboard operation, accessible semantics, escaping/untrusted transcript text, and use
+with both raw and revised transcript sources.
 
 ## 13. GUI
 

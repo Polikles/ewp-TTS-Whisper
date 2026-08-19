@@ -114,6 +114,26 @@ corrections as immutable revision snapshots.
 7. Implement guarded 3+ channel isolated-speaker and program/surround handling in V2 or
    later; it is explicitly not a current priority.
 
+## v0.2.0 release closure
+
+Do not expand v0.2.0 with LLM correction, dictionaries, translation, HTML, or 3+ channel
+support. Before declaring the manual-revision increment complete:
+
+1. reconcile the stale v0.2.0 acceptance checklist against implemented automated tests
+   and the completed 24-episode operator evidence;
+2. add tests for any real uncovered invariant, especially concurrent revision-number
+   allocation, rather than leaving ambiguous unchecked boxes;
+3. update remaining documentation from “planned” to “implemented” where appropriate and
+   ensure command-specific `--help` matches the accepted workflow;
+4. create the top-level `Instructions/` operator runbook covering every shipped command,
+   including complete batch revision and revised-export recovery;
+5. bump package/version metadata to `0.2.0`, update the lock and changelog release entry,
+   build wheel and sdist, and validate their contents/provenance;
+6. run the automated and integration gates plus a clean/fresh-WSL installed-wheel smoke
+   test for model-free revision and revision-aware export;
+7. keep the release internal unless a separate decision explicitly authorizes tagging or
+   public package publication.
+
 Do not add the private corpus to Git merely because it exists. After every episode is
 public, conduct a separate licensing, privacy, artifact-size, and distribution review
 before adding any benchmark media or transcripts to the repository.

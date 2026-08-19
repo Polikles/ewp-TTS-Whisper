@@ -54,6 +54,10 @@ All notable changes to EWP-transcripts are documented here.
 - Recorded that advanced 3+ channel implementation is deferred to V2 or later. The
   completed 24-episode audio/corrected-transcript corpus remains a private benchmark
   outside Git until all episodes are public and a separate publication review passes.
+- Expanded post-0.2 goals for local/cloud correction benchmarks, manual review of model
+  revisions, manual/automatic translation lineage, approved project-dictionary candidate
+  mining, and synchronized accessible HTML player testing. Added an explicit v0.2.0
+  release-closure checklist without importing those later features into its scope.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.
