@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.2.0` is an internal release candidate, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.2.0` remains an internal beta candidate, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
@@ -28,15 +28,13 @@
 - An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
   performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM; minimum hardware requirements
   for future presets have not yet been characterized.
-- Expect approximately 4–4.5 GB of downloads for the locked Python/CUDA environment and
-  approximately 8.5 GB for all currently pinned Hugging Face model snapshots, or roughly
-  13 GB in total. Reserve at least 20 GB of free Linux-filesystem space for installation,
-  caches, artifacts, and working headroom. Audio inputs and generated results require
-  additional space.
+- At least 20 GB of free Linux-filesystem space is recommended, preferably on an SSD.
+  This minimum applies across the planned presets; audio inputs and generated results
+  require additional space. RAM and VRAM requirements will be validated later and
+  documented per preset.
 
-These sizes describe the current 0.2.0 baseline and are estimates rather than download
-or per-preset guarantees. See [`Instructions/README.md`](Instructions/README.md) for the
-supported installation workflow.
+See [`Instructions/README.md`](Instructions/README.md) for the current manual installation
+workflow and its approximate download sizes.
 
 ## Primary outputs
 

@@ -4,7 +4,7 @@ Last updated: **2026-08-19**.
 
 ## Current state
 
-Version `0.2.0` is an **internal release candidate** on `main`. It is usable for the
+Version `0.2.0` is an **internal beta candidate** on `main`. It is usable for the
 owner's archive, but it is not tagged or published as a public release. The repository
 is public and is licensed under `AGPL-3.0-or-later`; the complete license is included in
 source and distribution artifacts.
@@ -23,8 +23,10 @@ A second clean Ubuntu 24.04.4 WSL2 installation (`Ubuntu-test-repo-ewp`) indepen
 passed release-runbook steps 0–4 at commit `f7d7b76`: base tools/GPU discovery, locked
 sync and package compatibility, all automated checks, 0.2.0 build/help, expected
 missing-model diagnostics, and model-free inspect/dry-run/cleanup. The checkout remained
-clean. Model download and installed-model transcription are the remaining steps for that
-fresh distribution if further independent runtime evidence is desired.
+clean. Repeating model download and full transcription on this second VM is intentionally
+postponed: those paths already passed on the previous fresh VM, while this run was scoped
+to reproducible installation and model-free behavior. Perform a new full fresh-machine
+runtime validation after later functional requirements materially change that path.
 
 Dataset-dependent English, three-speaker, timestamp, and DER/JER quality measurements
 remain explicitly deferred by ADR-0014. They are not implementation blockers.

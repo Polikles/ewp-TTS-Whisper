@@ -12,6 +12,12 @@ All notable changes to EWP-transcripts are documented here.
 - Added a root Requirements section covering the validated WSL2/Ubuntu/RTX 3090 baseline,
   expected but unvalidated Ubuntu deployment shapes, and future per-preset requirements.
 - Added a v0.3 backlog item for a reviewable installation and verification script.
+- Scoped the v0.3 installer to fresh installations, kept existing-installation updates
+  separate, and specified future README Prerequisites, How to install, and How to use
+  sections. Standardized storage guidance at a recommended 20 GB minimum (preferably
+  SSD) while deferring RAM/VRAM qualification to preset validation.
+- Recorded acceptance of the second model-free fresh-WSL installation and postponed
+  redundant full model/runtime revalidation until later functional changes require it.
 
 ## 0.2.0 — internal release candidate — 2026-08-19
 

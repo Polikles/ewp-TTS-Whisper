@@ -332,10 +332,18 @@ subprocess or maintain a second revision/translation model.
 
 ## 14. Distribution
 
-- For v0.3, investigate a reviewable installation/bootstrap script that installs and
+- For v0.3, provide a reviewable fresh-install and verification script that installs and
   verifies prerequisites, the locked application environment, model readiness, and
   diagnostics while retaining explicit consent for gated model access and avoiding
-  hidden system changes.
+  hidden system changes. Updating an existing installation is a separate workflow and
+  must not be silently folded into the fresh-install script.
+- For v0.3, restructure the root README with concise `Prerequisites`, `How to install`,
+  and `How to use` sections. Prerequisites must summarize supported WSL2/bare-metal
+  Ubuntu shapes, required Ubuntu packages, the validated software/hardware stack, a
+  recommended minimum of 20 GB on preferably SSD storage, and the fact that RAM/VRAM
+  requirements remain pending preset validation. Installation must briefly invoke the
+  fresh-install script. Usage must show representative transcription and staged review
+  command syntax and link to the complete `Instructions/` runbook.
 - GPU-enabled Docker image;
 - pinned image versions;
 - local service/API;

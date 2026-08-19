@@ -11,9 +11,9 @@ an NVIDIA CUDA-capable GPU. Follow the detailed setup documents in order:
 The current locked environment downloads approximately 4–4.5 GB before model setup.
 The pinned ASR, Polish/English alignment, and diarization snapshots add approximately
 8.5 GB, making the complete network transfer roughly 13 GB. Reserve at least 20 GB of
-free space on the Linux filesystem, plus space for source audio and outputs. These are
-current 0.2.0 planning estimates; later presets will publish their own approximate disk,
-VRAM, and runtime requirements.
+free space on the Linux filesystem, preferably on an SSD, plus space for source audio
+and outputs. The recommended storage minimum is not expected to vary materially by
+preset. RAM, VRAM, and runtime requirements will be characterized later per preset.
 
 1. [`../WSL config/SYSTEM_REQUIREMENTS.md`](../WSL%20config/SYSTEM_REQUIREMENTS.md)
 2. [`../WSL config/INSTALL_WSL.md`](../WSL%20config/INSTALL_WSL.md)

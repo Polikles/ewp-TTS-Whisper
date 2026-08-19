@@ -74,9 +74,9 @@ Expected commit: `f7d7b76` or later and an empty Git status.
 Allow for approximately 4–4.5 GB of network transfer for the locked Python/CUDA
 environment. The pinned model preparation performed later adds approximately 8.5 GB,
 for roughly 13 GB of total downloads. Reserve at least 20 GB of free Linux-filesystem
-space for the checkout, environment, model caches, build artifacts, and temporary files.
-These are measured/planning estimates for the current 0.2.0 baseline, not per-preset
-guarantees.
+space, preferably on an SSD, for the checkout, environment, model caches, build
+artifacts, and temporary files. Storage is not expected to differ materially by preset;
+RAM and VRAM requirements will be qualified later per preset.
 
 ```bash
 uv sync --locked
