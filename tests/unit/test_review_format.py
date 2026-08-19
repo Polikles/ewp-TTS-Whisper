@@ -45,6 +45,19 @@ Ostatni blok.
 """
 
 
+def _out_of_order_review_text() -> str:
+    return (
+        _complete_base_review_text()
+        .replace("@@ anchor word_000001..word_000004", "@@ anchor temporary", 1)
+        .replace(
+            "@@ anchor word_000005..word_000008",
+            "@@ anchor word_000001..word_000004",
+            1,
+        )
+        .replace("@@ anchor temporary", "@@ anchor word_000005..word_000008", 1)
+    )
+
+
 def test_example_parses_and_round_trips_deterministically() -> None:
     review = load_review(REVIEW_EXAMPLE)
     rendered = render_review(review)
@@ -178,3 +191,29 @@ def test_base_hash_mismatch_returns_stable_failure_code() -> None:
         validate_review_base(review, base, base_sha256=expected_hash)
 
     assert captured.value.code == "REVISION_BASE_HASH_MISMATCH"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        _complete_base_review_text().split("@@ anchor word_000005", 1)[0],
+        _complete_base_review_text().replace(
+            "@@ anchor word_000005..word_000008",
+            "@@ anchor word_000001..word_000004",
+        ),
+        _out_of_order_review_text(),
+    ],
+    ids=("missing", "duplicate", "out-of-order"),
+)
+def test_missing_duplicate_or_out_of_order_anchor_is_rejected(text: str) -> None:
+    review = parse_review(text)
+    base = load_canonical_result(RESULT_EXAMPLE)
+
+    with pytest.raises(InvalidReviewError) as captured:
+        validate_review_base(
+            review,
+            base,
+            base_sha256=hashlib.sha256(RESULT_EXAMPLE.read_bytes()).hexdigest(),
+        )
+
+    assert captured.value.code == "REVISION_ANCHOR_INVALID"

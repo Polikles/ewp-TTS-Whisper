@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 386 automated checks pass;
+- all 394 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -119,10 +119,11 @@ corrections as immutable revision snapshots.
 Do not expand v0.2.0 with LLM correction, dictionaries, translation, HTML, or 3+ channel
 support. Before declaring the manual-revision increment complete:
 
-1. reconcile the stale v0.2.0 acceptance checklist against implemented automated tests
-   and the completed 24-episode operator evidence;
-2. add tests for any real uncovered invariant, especially concurrent revision-number
-   allocation, rather than leaving ambiguous unchecked boxes;
+1. [completed] Reconcile the stale v0.2.0 acceptance checklist against implemented
+   automated tests and the completed 24-episode operator evidence.
+2. [completed] Add tests for real uncovered invariants: proper-name and sentence-boundary
+   edits, ambiguity and long-gap warnings, repetition preservation, anchor integrity,
+   base immutability, and concurrent revision-number allocation.
 3. update remaining documentation from “planned” to “implemented” where appropriate and
    ensure command-specific `--help` matches the accepted workflow;
 4. create the top-level `Instructions/` operator runbook covering every shipped command,

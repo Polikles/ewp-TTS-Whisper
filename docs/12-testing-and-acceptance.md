@@ -200,32 +200,32 @@ Perform a manual review in the target player or a private YouTube upload:
 - Polish characters.
 
 
-## 7. Transcript revision acceptance (planned v0.2.0)
+## 7. Transcript revision acceptance (implemented for v0.2.0)
 
 ### Review and alignment
 
-- [ ] `EWP-REVIEW 1` round-trip with no text edits.
-- [ ] Punctuation-only edit.
-- [ ] Proper-name/spelling substitution.
-- [ ] Sentence-boundary change through punctuation only.
-- [ ] One-to-one substitution.
-- [ ] N-to-1 merge.
-- [ ] 1-to-N split.
-- [ ] Insertion with adjacent canonical anchors.
-- [ ] Deletion.
-- [ ] Legitimate repeated words remain duplicated when not edited.
-- [ ] Short span reassigned to another existing speaker.
-- [ ] Ambiguous alignment is reported rather than silently selected.
+- [x] `EWP-REVIEW 1` round-trip with no text edits.
+- [x] Punctuation-only edit.
+- [x] Proper-name/spelling substitution.
+- [x] Sentence-boundary change through punctuation only.
+- [x] One-to-one substitution.
+- [x] N-to-1 merge.
+- [x] 1-to-N split.
+- [x] Insertion with adjacent canonical anchors.
+- [x] Deletion.
+- [x] Legitimate repeated words remain duplicated when not edited.
+- [x] Short span reassigned to another existing speaker.
+- [x] Ambiguous alignment is reported rather than silently selected.
 
 ### Review integrity
 
-- [ ] Modified anchor is rejected.
-- [ ] Missing anchor is rejected.
-- [ ] Duplicate/overlapping/out-of-order anchors are rejected.
-- [ ] Nonexistent canonical word ID is rejected.
-- [ ] Base-result SHA mismatch is rejected.
-- [ ] Unknown speaker ID is rejected.
-- [ ] Insert across configured long gap emits a structured warning.
+- [x] Modified anchor is rejected.
+- [x] Missing anchor is rejected.
+- [x] Duplicate/overlapping/out-of-order anchors are rejected.
+- [x] Nonexistent canonical word ID is rejected.
+- [x] Base-result SHA mismatch is rejected.
+- [x] Unknown speaker ID is rejected.
+- [x] Insert across configured long gap emits a structured warning.
 
 ### CLI and batch
 
@@ -241,14 +241,14 @@ Perform a manual review in the target player or a private YouTube upload:
 
 ### Persistence and provenance
 
-- [ ] Base `results.json` bytes remain unchanged.
+- [x] Base `results.json` bytes remain unchanged.
 - [x] Every revision is a full standalone snapshot.
 - [x] Sibling revisions can reference the same base result.
 - [x] Parent revision metadata does not make child export depend on parent replay.
-- [ ] Provenance, alignment metadata, statistics, and warnings are always present.
+- [x] Provenance, alignment metadata, statistics, and warnings are always present.
 - [x] `--audit` produces detailed diagnostics without becoming reconstruction state.
 - [x] Base-relative detailed audit can be regenerated later from base + revision.
-- [ ] Concurrent revision allocation cannot collide.
+- [x] Concurrent revision allocation cannot collide.
 
 ### Revision-aware exports
 
@@ -261,3 +261,14 @@ Perform a manual review in the target player or a private YouTube upload:
 - [x] Revised segments JSON is generated from the same effective transcript.
 - [x] Revision prepare/apply/export do not require source audio, GPU, ASR, alignment, or
   diarization models.
+
+Automated evidence is concentrated in `test_review_format.py`,
+`test_revision_service.py`, `test_revision_models.py`, `test_revision_storage.py`,
+`test_revision_application.py`, the revision CLI/batch tests, and the revision-aware
+export tests. Concurrency is exercised with two separate processes contending for the
+same output lock and allocating distinct immutable revision numbers.
+
+Operator evidence covers the complete private 24-episode workflow: deterministic batch
+prepare/apply, isolated repair of one malformed review, two revision generations with
+audits, and successful model-free batch regeneration of TXT/SRT/VTT/segments. The private
+corpus itself is not repository test data and is not required by the automated gate.

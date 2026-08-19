@@ -32,6 +32,7 @@ def test_apply_allocates_immutable_revision_numbers(tmp_path: Path) -> None:
     base.write_bytes(EXAMPLE.read_bytes())
     review_path = prepare_review_file(base, output_directory=tmp_path / "reviews").path
     config = ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work"))
+    original_base = base.read_bytes()
 
     first = apply_review_file(review_path, config=config)
     second = apply_review_file(review_path, config=config)
@@ -41,3 +42,4 @@ def test_apply_allocates_immutable_revision_numbers(tmp_path: Path) -> None:
     assert second.revision.revision_number == 2
     assert second.revision_path.name == "S01E01_revision_002.json"
     assert first.revision_path.read_bytes() != second.revision_path.read_bytes()
+    assert base.read_bytes() == original_base

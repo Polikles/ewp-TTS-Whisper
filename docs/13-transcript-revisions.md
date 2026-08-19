@@ -1,6 +1,7 @@
 # Transcript Revisions
 
-Status: implemented on `main` for v0.2.0; real-episode operator validation remains.
+Status: implemented on `main` for v0.2.0; single-episode and 24-episode batch operator
+validation passed.
 
 Machine-readable revision schema: [`../schemas/revision.schema.json`](../schemas/revision.schema.json).
 Human review format: [`../schemas/ewp-review.schema.md`](../schemas/ewp-review.schema.md).

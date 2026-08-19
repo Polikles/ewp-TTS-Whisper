@@ -61,6 +61,10 @@ All notable changes to EWP-transcripts are documented here.
 - Defined private-corpus gold selection: the highest compatible revision is accepted
   gold, while earlier revisions remain intermediate inputs for raw-to-gold and
   revision-to-gold correction benchmarks.
+- Closed the v0.2.0 manual-revision acceptance checklist against automated and private
+  24-episode operator evidence. Added explicit regression coverage for proper-name and
+  sentence-boundary edits, ambiguous alignment, long-gap insertion warnings, repeated
+  words, anchor integrity, base immutability, and concurrent revision allocation.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.

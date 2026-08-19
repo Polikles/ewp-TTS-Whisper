@@ -1,7 +1,9 @@
 """Tests for collision-safe immutable revision publication."""
 
 import json
+import multiprocessing
 from pathlib import Path
+from typing import Any
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -17,6 +19,20 @@ REVISION_SCHEMA = ROOT / "schemas/revision.schema.json"
 
 def _revision() -> TranscriptRevision:
     return TranscriptRevision.model_validate_json(REVISION_EXAMPLE.read_text(encoding="utf-8"))
+
+
+def _publish_after_start(
+    output_directory: Path,
+    start: Any,
+    results: Any,
+) -> None:
+    start.wait()
+    allocated, path = publish_next_revision(
+        _revision(),
+        output_directory=output_directory,
+        lock_timeout_seconds=5,
+    )
+    results.put((allocated.revision_number, path.name))
 
 
 def test_revision_filename_distinguishes_base_result_versions() -> None:
@@ -48,6 +64,28 @@ def test_publication_allocates_versions_without_overwriting(tmp_path: Path) -> N
     assert first_path.read_bytes() != b""
     assert load_transcript_revision(first_path) == first
     assert load_transcript_revision(second_path) == second
+
+
+def test_concurrent_publication_allocates_distinct_revision_numbers(tmp_path: Path) -> None:
+    context = multiprocessing.get_context("fork")
+    start = context.Event()
+    results = context.Queue()
+    processes = [
+        context.Process(target=_publish_after_start, args=(tmp_path, start, results))
+        for _ in range(2)
+    ]
+    for process in processes:
+        process.start()
+    start.set()
+    for process in processes:
+        process.join(timeout=10)
+
+    assert [process.exitcode for process in processes] == [0, 0]
+    allocations = sorted(results.get(timeout=1) for _ in processes)
+    assert allocations == [
+        (1, "revision-example_revision_001.json"),
+        (2, "revision-example_revision_002.json"),
+    ]
 
 
 def test_publication_uses_result_version_in_filename(tmp_path: Path) -> None:
