@@ -14,6 +14,11 @@ from uuid import UUID, uuid4
 
 from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig, load_config
+from ewp_transcripts.correction import (
+    CorrectionChunkConfig,
+    DeterministicMockCorrectionProvider,
+    build_mock_correction_revision,
+)
 from ewp_transcripts.discovery import (
     discover_explicit_group,
     discover_input,
@@ -101,6 +106,8 @@ __all__ = [
     "apply_review_file",
     "process_review_batch",
     "audit_revision_file",
+    "preview_mock_correction",
+    "apply_mock_correction",
     "transcribe_batch",
     "transcribe_one",
 ]
@@ -218,6 +225,23 @@ class RevisionApplyOutcome:
     """Atomically published immutable revision."""
 
     review_path: Path
+    base_result_path: Path
+    revision: TranscriptRevision
+    revision_path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class CorrectionPreviewOutcome:
+    """Validated unpublished automated-correction revision."""
+
+    base_result_path: Path
+    revision: TranscriptRevision
+
+
+@dataclass(frozen=True, slots=True)
+class CorrectionApplyOutcome:
+    """Atomically published automated-correction revision."""
+
     base_result_path: Path
     revision: TranscriptRevision
     revision_path: Path
@@ -355,6 +379,53 @@ def apply_review_file(
         revision,
         path,
     )
+
+
+def preview_mock_correction(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: DeterministicMockCorrectionProvider,
+    prompt_id: str = "faithful-correction-v1",
+) -> CorrectionPreviewOutcome:
+    """Run the complete network-free correction path without publishing a revision."""
+
+    normalized = normalize_input_path(result_path)
+    revision = build_mock_correction_revision(
+        normalized,
+        provider,
+        config=CorrectionChunkConfig(
+            target_tokens=config.correction.target_tokens,
+            max_tokens=config.correction.max_tokens,
+            context_tokens=config.correction.context_tokens,
+        ),
+        prompt_id=prompt_id,
+    )
+    return CorrectionPreviewOutcome(normalized, revision)
+
+
+def apply_mock_correction(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: DeterministicMockCorrectionProvider,
+    output_directory: Path | None = None,
+    prompt_id: str = "faithful-correction-v1",
+) -> CorrectionApplyOutcome:
+    """Validate and atomically publish one network-free mock correction revision."""
+
+    preview = preview_mock_correction(
+        result_path,
+        config=config,
+        provider=provider,
+        prompt_id=prompt_id,
+    )
+    revision, path = publish_next_revision(
+        preview.revision,
+        output_directory=output_directory or preview.base_result_path.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return CorrectionApplyOutcome(preview.base_result_path, revision, path)
 
 
 def audit_revision_file(

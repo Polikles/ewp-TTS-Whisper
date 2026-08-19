@@ -38,7 +38,8 @@ The v0.3 automated-correction contract is now defined in
 the deterministic single-owner chunk planner, network-free mock provider, strict response
 reconstruction validator, and mock-to-review-to-revision vertical slice are implemented.
 Strict correction chunk configuration is also implemented. Next, add application and
-batch boundaries. Real local/cloud provider selection,
+batch boundaries. Single-file mock preview/apply now exists at the application boundary;
+directory discovery and failure-isolated batching are next. Real local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in

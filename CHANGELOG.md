@@ -22,6 +22,9 @@ All notable changes to EWP-transcripts are documented here.
   provenance for network-free test revisions.
 - Added strict `[correction]` configuration for target, maximum editable, and read-only
   context token counts, including packaged/example defaults and invalid-order rejection.
+- Added application-facing mock correction preview and atomic apply operations that use
+  resolved configuration, preserve the canonical result, and publish through the existing
+  locked revision allocator.
 
 ### Documentation
 
