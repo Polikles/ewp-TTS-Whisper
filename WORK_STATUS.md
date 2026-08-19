@@ -41,7 +41,9 @@ Strict correction chunk configuration, single-file and failure-isolated director
 preview/apply, and private immutable validated resume entries are implemented. Explicit
 resume directories are wired through single and batch application paths. Exact-hash
 benchmark manifests validate canonical/intermediate/candidate/gold lineage and report
-the initial lexical baseline. Provider-level metrics and consent policy are next. Real
+the initial lexical baseline. The pure consent policy now covers distinct local/cloud
+warnings, strict offline blocking, and exact-scope persistence without any HTTP adapter.
+Provider-level metrics and consent persistence storage are next. Real
 local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 

@@ -89,6 +89,10 @@ class InvalidCorrectionResponseError(ApplicationError):
     """Raised when provider output cannot be trusted as a correction proposal."""
 
 
+class CorrectionConsentError(ApplicationError):
+    """Raised when an external correction API boundary is not authorized."""
+
+
 class InvalidReviewError(InvalidRevisionError):
     """Raised with a stable code when an ``EWP-REVIEW`` file cannot be trusted."""
 
