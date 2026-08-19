@@ -78,3 +78,18 @@ Macro averages are the primary initial comparison because each selected case con
 equally. Micro averages remain visible to show corpus-wide unit counts. The current
 three-case material is only an initial baseline; release thresholds require the larger
 licensed and manually verified archive-derived corpus.
+
+## 5. Automated-correction benchmark manifests
+
+v0.3 correction evaluation uses a separate strict manifest because every case binds four
+roles: exact canonical base, selected source (`canonical` or earlier `revision`),
+candidate revision, and latest accepted gold revision. Every path is safe and relative;
+every artifact has an expected SHA-256. Revision compatibility is validated against the
+exact canonical base before scoring.
+
+This supports both accepted private-corpus tasks: canonical to latest gold and earlier
+revision to later gold. Reports contain hashes, lineage revision numbers, baseline and
+candidate WER/CER, word-error reduction, and excess word errors, but no transcript text.
+The current report is the lexical foundation; proposed-change precision/recall,
+unsupported or stylistic changes, speaker preservation, audit completeness, latency,
+volume, cost, and retry outcomes remain required before provider acceptance.

@@ -33,6 +33,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added private, mode-restricted, immutable per-chunk resume entries. Only fully validated
   responses with an exact provider/model/prompt/operation identity are reused; corrupt or
   stale entries fail before another provider call.
+- Added strict hash-bound automated-correction benchmark manifests and lexical reports
+  for canonical-to-gold and earlier-revision-to-gold tasks, with exact base-lineage
+  validation and no transcript text in reports.
 
 ### Documentation
 
