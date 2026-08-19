@@ -89,7 +89,7 @@ def test_retryable_failure_stops_at_attempt_limit() -> None:
         ]
     )
 
-    with pytest.raises(RetryableCorrectionProviderError, match="still temporary"):
+    with pytest.raises(RetryableCorrectionProviderError, match="bounded retries") as raised:
         execute_correction_call(
             provider,
             _request(),
@@ -98,13 +98,16 @@ def test_retryable_failure_stops_at_attempt_limit() -> None:
         )
 
     assert provider.calls == 2
+    assert "still temporary" not in str(raised.value)
 
 
 def test_permanent_and_invalid_responses_are_not_retried() -> None:
-    permanent = _Provider(failures=[PermanentCorrectionProviderError("permanent")])
-    with pytest.raises(PermanentCorrectionProviderError):
+    secret = "private request content and credential"
+    permanent = _Provider(failures=[PermanentCorrectionProviderError(secret)])
+    with pytest.raises(PermanentCorrectionProviderError) as raised:
         execute_correction_call(permanent, _request())
     assert permanent.calls == 1
+    assert secret not in str(raised.value)
 
     class InvalidProvider(_Provider):
         def correct(

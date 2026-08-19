@@ -45,7 +45,8 @@ the initial lexical baseline. The pure consent policy now covers distinct local/
 warnings, strict offline blocking, and exact-scope persistence without any HTTP adapter.
 The atomic private consent store is implemented without credentials. Provider calls now
 have bounded explicit retries, adapter timeout budgets, and sanitized operational metrics.
-Wiring these metrics into benchmark reports and completing secret/payload scans are next. Real
+Provider exception details are suppressed at the application boundary. Wiring metrics into
+benchmark reports and completing broader artifact payload scans are next. Real
 local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 

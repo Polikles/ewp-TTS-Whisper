@@ -12,7 +12,10 @@ from ewp_transcripts.domain.correction import (
     CorrectionRequest,
     CorrectionResponse,
 )
-from ewp_transcripts.domain.errors import RetryableCorrectionProviderError
+from ewp_transcripts.domain.errors import (
+    PermanentCorrectionProviderError,
+    RetryableCorrectionProviderError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +73,12 @@ def execute_correction_call(
             )
         except RetryableCorrectionProviderError:
             if attempt == policy.max_attempts:
-                raise
+                raise RetryableCorrectionProviderError(
+                    "Correction provider failed after bounded retries"
+                ) from None
             sleep(policy.retry_delay_seconds)
+        except PermanentCorrectionProviderError:
+            raise PermanentCorrectionProviderError(
+                "Correction provider reported a permanent failure"
+            ) from None
     raise AssertionError("positive max_attempts guarantees a return or provider error")

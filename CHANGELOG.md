@@ -46,6 +46,8 @@ All notable changes to EWP-transcripts are documented here.
   missing-store denial semantics, strict corruption handling, and duplicate suppression.
 - Added bounded provider execution with adapter-enforced per-attempt timeouts, explicit
   retryable/permanent failure classes, retry counts, and sanitized latency metrics.
+- Provider execution now replaces adapter exception details with stable sanitized errors,
+  preventing request text, endpoint details, or credentials from escaping through failures.
 
 ### Documentation
 
