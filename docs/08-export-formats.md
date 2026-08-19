@@ -26,8 +26,9 @@ Rules:
 - with one speaker, the label is omitted;
 - no stylistic or LLM correction.
 
-Common abbreviations such as `m.in.`, `np.`, `tzw.`, and `vs.` do not create a sentence
-boundary merely because they end with a period.
+Common abbreviations such as `m.in.`, `np.`, `tzw.`, `tys.`, and `vs.`, and address
+tokens ending in `.pl`, `.com`, or `.edu`, do not create a sentence boundary merely
+because they end with a period.
 
 Example:
 
@@ -48,7 +49,15 @@ Filename:
 <job_id>_segments.json
 ```
 
-This is a lightweight derived format containing phrase-level and word-level timestamps, and speaker-change segments. It is not the source of truth and can be rebuilt from `results.json`. The purpose of this file is to be used as reference for future project of building a database for voice-recognition and voice-cloning.
+This is a lightweight derived format containing timestamped speaker turns, overlap
+metadata, speaker identities, text, and canonical word IDs. It is not the source of
+truth and can be rebuilt from `results.json`.
+
+Its primary role is downstream interchange without exposing the full canonical processing
+record: synchronized HTML/player navigation, searchable transcript indexing, corpus QA,
+and selecting candidate audio regions for future speech-recognition or voice-cloning
+datasets. It is not itself a voice-cloning dataset and contains no audio; exact word
+timestamps remain in canonical JSON.
 
 For corrected transcripts it is rebuilt from the exact canonical result plus the
 selected revision. Revision JSON intentionally stores corrected tokens and canonical

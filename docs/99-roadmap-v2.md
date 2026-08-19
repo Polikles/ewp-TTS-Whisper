@@ -64,10 +64,14 @@ Requirements:
   context, not the complete canonical processing/configuration payload;
 - corrected LLM output is passed through the same alignment and `RevisionEngine` used by
   manual review;
-- preserve repetitions and self-corrections unless the model output explicitly changes
-  them, and prompt the model not to stylistically rewrite faithful speech;
-- punctuation, sentence boundaries, proper names, obvious ASR lexical errors, and
-  grammatical endings are primary correction targets;
+- prompt the model to correct only obvious ASR lexical errors, misspelled proper names,
+  conservative punctuation, capitalization, and sentence boundaries;
+- preserve the speaker's actual wording, repetitions, self-corrections, fillers,
+  malformed sentences, grammatical mistakes, and stylistic quirks; never paraphrase,
+  polish prose, or silently repair how the person spoke;
+- require the provider response to include corrected text plus an explicit proposed
+  change list with source span, before/after text, and correction category; the local
+  revision engine independently reconstructs the authoritative audit;
 - model/prompt/config provenance is persisted without secrets;
 - LLM revisions may be direct siblings of manual gold for benchmark comparison;
 - a model revision may later have a manual child revision, with parent provenance but a

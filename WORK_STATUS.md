@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 380 automated checks pass;
+- all 384 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -71,8 +71,9 @@ Steps 1, 2, 4, and 6 require terminal evidence from the owner's WSL/archive envi
 The owner completed all 24 manual revisions. Revision-aware archive export was reproduced
 locally against the exact copied canonical/revision pairs after repairing revised overlap,
 insertion-gap, and group-order projection: 24 jobs and 96 derived artifacts passed, and
-duplicate replay skipped all 96. The owner still needs to rerun the corrected command in
-the archive destination and retain the resulting evidence.
+duplicate replay skipped all 96. The owner then completed the corrected archive export
+without errors and successfully exercised bulk reapply/re-export after fixing additional
+manual typos.
 
 Immutable revision models, exact base-result compatibility, anchored alignment,
 configuration, safe model-free single/batch review, effective transcript export,

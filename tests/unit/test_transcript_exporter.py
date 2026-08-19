@@ -56,11 +56,22 @@ def test_sentence_split_preserves_abbreviations_and_repetitions() -> None:
     )
 
 
-@pytest.mark.parametrize("abbreviation", ["m.in.", "np.", "tzw.", "vs."])
+@pytest.mark.parametrize("abbreviation", ["m.in.", "np.", "tzw.", "tys.", "vs."])
 def test_sentence_split_does_not_break_after_common_abbreviation(abbreviation: str) -> None:
     assert split_sentences(f"Obejmuje to {abbreviation} ten przykład. Następne zdanie.") == (
         f"Obejmuje to {abbreviation} ten przykład.",
         "Następne zdanie.",
+    )
+
+
+@pytest.mark.parametrize(
+    "address",
+    ["etykawpetli.pl", "example.com", "university.edu"],
+)
+def test_sentence_split_does_not_break_after_domain_suffix(address: str) -> None:
+    assert split_sentences(f"Więcej na {address} oraz w archiwum. Koniec.") == (
+        f"Więcej na {address} oraz w archiwum.",
+        "Koniec.",
     )
 
 

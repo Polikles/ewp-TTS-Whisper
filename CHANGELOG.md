@@ -43,6 +43,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added deterministic revision-aware directory export with compatible revision
   selection, natural result ordering, per-result failure isolation, recursive opt-in,
   safe duplicate replay, aggregate/JSON reporting, and mixed-batch exit code 5.
+- Defined future LLM correction as conservative transcription repair rather than prose
+  editing, with mandatory proposed-change lists and independently reconstructed audits.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.
@@ -100,6 +102,8 @@ All notable changes to EWP-transcripts are documented here.
   or fallback alignment.
 - Prevented plain-text sentence splitting after common abbreviations including `m.in.`,
   `np.`, `tzw.`, and `vs.`.
+- Prevented plain-text sentence splitting after `tys.` and address tokens ending in
+  `.pl`, `.com`, or `.edu`.
 
 ## 0.1.1 — internal release candidate — 2026-08-14
 

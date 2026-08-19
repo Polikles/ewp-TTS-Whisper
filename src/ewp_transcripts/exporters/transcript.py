@@ -24,9 +24,11 @@ _NON_BREAKING_ABBREVIATIONS = frozenset(
         "tj.",
         "tzn.",
         "tzw.",
+        "tys.",
         "vs.",
     }
 )
+_NON_BREAKING_TOKEN_SUFFIXES = (".com", ".edu", ".pl")
 
 
 def split_sentences(text: str) -> tuple[str, ...]:
@@ -40,7 +42,7 @@ def split_sentences(text: str) -> tuple[str, ...]:
     pending = pieces[0]
     for piece in pieces[1:]:
         final_token = pending.rsplit(maxsplit=1)[-1].casefold()
-        if final_token in _NON_BREAKING_ABBREVIATIONS or _looks_like_initial(final_token):
+        if _is_non_breaking_token(final_token):
             pending = f"{pending} {piece}"
         else:
             sentences.append(pending)
@@ -88,3 +90,11 @@ def _effective_speaker(segment: CanonicalSegment) -> str | None:
 
 def _looks_like_initial(token: str) -> bool:
     return len(token) == 2 and token[0].isalpha() and token[1] == "."
+
+
+def _is_non_breaking_token(token: str) -> bool:
+    return (
+        token in _NON_BREAKING_ABBREVIATIONS
+        or token.endswith(_NON_BREAKING_TOKEN_SUFFIXES)
+        or _looks_like_initial(token)
+    )
