@@ -214,7 +214,7 @@ TXT and subtitles use canonical transcript text. The sentence segmenter should:
 
 TXT, SRT, and VTT must not be corrected independently because their text, sentence
 boundaries, speaker labels, and timestamps would drift apart. The canonical result remains
-immutable evidence. Planned v0.2.0 stores correction as a separate full-snapshot revision
+immutable evidence. Version 0.2.0 stores correction as a separate full-snapshot revision
 linked to the exact canonical result hash and regenerates all derived formats from one
 `EffectiveTranscript`.
 

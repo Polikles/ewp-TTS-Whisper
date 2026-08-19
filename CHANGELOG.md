@@ -4,6 +4,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.2.0 — internal release candidate — 2026-08-19
+
 ### Added
 
 - Expanded the future GUI backlog with explicit About, License, and Source Code sections,
@@ -98,6 +100,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Validated
 
+- Built the internal 0.2.0 wheel and sdist with synchronized metadata, console entry
+  point, packaged defaults, AGPL license, and current source instructions. An isolated
+  wheel-provenance smoke test passed prepare, preview, apply, audit, and revised
+  TXT/SRT/VTT/segments export without audio or models.
 - Passed the first real-episode staged revision pilot using Windows Notepad: review
   preparation, validation, immutable apply, audit, and corrected export completed
   without modifying the canonical result.

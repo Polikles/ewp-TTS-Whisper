@@ -4,13 +4,13 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.1.1` is an internal release candidate, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.2.0` is an internal release candidate, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
 - Reference backend: WhisperX with pyannote speaker diarization.
 - The v0.2.0 transcript-revision workflow is implemented and acceptance-audited on
-  `main`; packaging remains before the internal release.
+  `main`; local wheel/sdist packaging and model-free installed-wheel validation passed.
 
 ## Known limitations before the first MVP release
 

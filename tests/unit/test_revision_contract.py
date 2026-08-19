@@ -1,4 +1,4 @@
-"""Validate the accepted planned v0.2.0 revision contract artifacts."""
+"""Validate the implemented v0.2.0 revision contract artifacts."""
 
 import json
 import re

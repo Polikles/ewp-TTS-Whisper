@@ -7,7 +7,7 @@ def _installed_version() -> str:
     try:
         return version("ewp-transcripts")
     except PackageNotFoundError:
-        return "0.1.1"
+        return "0.2.0"
 
 
 __version__ = _installed_version()

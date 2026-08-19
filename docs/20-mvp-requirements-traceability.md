@@ -73,7 +73,7 @@ Status meanings:
    ADR-0014 until annotated archive-derived references exist.
 
 
-## v0.2.0 planned transcript-revision requirements
+## v0.2.0 implemented transcript-revision requirements
 
 These requirements are intentionally **planned**, not implementation claims. Their
 normative definitions are in `02-requirements.md` and `13-transcript-revisions.md`.

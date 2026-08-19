@@ -81,7 +81,7 @@ uv run --locked transcriber --help
 sha256sum uv.lock dist/ewp_transcripts-*.whl dist/ewp_transcripts-*.tar.gz
 ```
 
-Expected: 289 or more tests, compatible installed packages, version `0.1.1`, all six MVP
+Expected: 400 or more tests, compatible installed packages, version `0.2.0`, all seven MVP
 commands in help, and both wheel and source distribution artifacts.
 
 ## 4. Validate clean-machine diagnostics

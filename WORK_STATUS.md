@@ -4,7 +4,7 @@ Last updated: **2026-08-19**.
 
 ## Current state
 
-Version `0.1.1` is an **internal release candidate** on `main`. It is usable for the
+Version `0.2.0` is an **internal release candidate** on `main`. It is usable for the
 owner's archive, but it is not tagged or published as a public release. The repository
 is public and is licensed under `AGPL-3.0-or-later`; the complete license is included in
 source and distribution artifacts.
@@ -129,12 +129,22 @@ support. Before declaring the manual-revision increment complete:
    accepted workflow.
 4. [completed] Create the top-level `Instructions/` operator runbook covering every
    shipped command, including complete batch revision and revised-export recovery.
-5. bump package/version metadata to `0.2.0`, update the lock and changelog release entry,
-   build wheel and sdist, and validate their contents/provenance;
-6. run the automated and integration gates plus a clean/fresh-WSL installed-wheel smoke
-   test for model-free revision and revision-aware export;
+5. [completed] Bump package/version metadata to `0.2.0`, update the lock and changelog
+   release entry, build wheel and sdist, and validate their contents/provenance.
+6. [local portion completed] Run the automated and integration gates and an isolated
+   installed-wheel smoke test for model-free prepare/preview/apply/audit and
+   revision-aware TXT/SRT/VTT/segments export. A clean/fresh-WSL install with independently
+   resolved locked CUDA dependencies remains external operator validation.
 7. keep the release internal unless a separate decision explicitly authorizes tagging or
    public package publication.
+
+Local 0.2.0 artifacts were built successfully. The wheel reports installed provenance
+from its temporary `site-packages`, includes the console entry point, packaged defaults,
+and AGPL license, while the sdist includes the license, project metadata, current
+`Instructions/`, schemas, examples, source, and tests. The model-free installed-wheel
+revision round trip and all four corrected exports passed. The sandbox could not perform
+a fully isolated offline dependency install because its uv cache lacks the pinned CUDA
+Torch wheels; do not misclassify that cache limitation as fresh-install acceptance.
 
 Do not add the private corpus to Git merely because it exists. After every episode is
 public, conduct a separate licensing, privacy, artifact-size, and distribution review
