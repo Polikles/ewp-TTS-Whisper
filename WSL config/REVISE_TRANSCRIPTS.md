@@ -276,6 +276,11 @@ changes. They are diagnostic output, not correction state.
 - Invalid anchor: restore the generated anchors or prepare a new review and copy only
   corrected ordinary text into it.
 - Unknown speaker: use an existing `speaker_NNN` from the generated review/base result.
+- Transcript text before a speaker directive: open the reported review at the exact line
+  number. After every `@@ anchor ...`, the first non-empty line must be an existing
+  `@@ speaker speaker_NNN` directive. Restore the accidentally removed/moved directive,
+  run `revise preview` on that one file, then apply only that review. Do not rerun a
+  partially successful directory apply.
 - Ambiguous alignment warning: inspect that anchor carefully, especially repeated words;
   the condition is reported rather than silently hidden.
 - Editor failure or non-zero exit: the review remains saved and no revision is created.

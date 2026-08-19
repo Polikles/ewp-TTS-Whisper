@@ -89,6 +89,17 @@ def test_malformed_known_directive_has_specific_code(old: str, new: str, code: s
     assert captured.value.code == code
 
 
+def test_text_before_speaker_reports_the_exact_review_line() -> None:
+    text = _complete_base_review_text().replace("@@ speaker speaker_001\n", "", 1)
+    expected_line = text.splitlines().index("Pierwszy blok.") + 1
+
+    with pytest.raises(
+        InvalidReviewError,
+        match=rf"Transcript text appears before a speaker directive at line {expected_line}$",
+    ):
+        parse_review(text)
+
+
 @pytest.mark.parametrize(
     ("replacement", "message"),
     [

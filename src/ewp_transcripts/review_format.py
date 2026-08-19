@@ -116,7 +116,7 @@ def _normalized_text(lines: list[str]) -> str:
     return " ".join(" ".join(unescaped).split())
 
 
-def _parse_body(lines: list[str]) -> tuple[ReviewAnchor, ...]:
+def _parse_body(lines: list[str], *, first_line_number: int = 1) -> tuple[ReviewAnchor, ...]:
     anchors: list[ReviewAnchor] = []
     current_range: tuple[str, str] | None = None
     blocks: list[ReviewSpeakerBlock] = []
@@ -149,32 +149,44 @@ def _parse_body(lines: list[str]) -> tuple[ReviewAnchor, ...]:
         current_range = None
         blocks = []
 
-    for line in lines:
+    for line_number, line in enumerate(lines, start=first_line_number):
         anchor_match = _ANCHOR.fullmatch(line)
         if anchor_match is not None:
             finish_anchor()
             current_range = (anchor_match.group("first"), anchor_match.group("last"))
             continue
         if line.startswith("@@ anchor "):
-            raise _invalid("Malformed review anchor directive", code="REVISION_ANCHOR_INVALID")
+            raise _invalid(
+                f"Malformed review anchor directive at line {line_number}",
+                code="REVISION_ANCHOR_INVALID",
+            )
         speaker_match = _SPEAKER.fullmatch(line)
         if speaker_match is not None:
             if current_range is None:
-                raise _invalid("Speaker directive appears before the first anchor")
+                raise _invalid(
+                    f"Speaker directive appears before the first anchor at line {line_number}"
+                )
             finish_block()
             speaker_id = speaker_match.group("speaker")
             continue
         if line.startswith("@@ speaker "):
-            raise _invalid("Malformed review speaker directive", code="REVISION_SPEAKER_INVALID")
+            raise _invalid(
+                f"Malformed review speaker directive at line {line_number}",
+                code="REVISION_SPEAKER_INVALID",
+            )
         if line.startswith("@@ "):
-            raise _invalid(f"Unknown review directive: {line}")
+            raise _invalid(f"Unknown review directive at line {line_number}: {line}")
         if current_range is None:
             if line:
-                raise _invalid("Transcript text appears before the first anchor")
+                raise _invalid(
+                    f"Transcript text appears before the first anchor at line {line_number}"
+                )
             continue
         if speaker_id is None:
             if line:
-                raise _invalid("Transcript text appears before a speaker directive")
+                raise _invalid(
+                    f"Transcript text appears before a speaker directive at line {line_number}"
+                )
             continue
         text_lines.append(line)
 
@@ -197,7 +209,7 @@ def parse_review(text: str) -> TranscriptReview:
     except ValueError as error:
         raise _invalid("Review header must end with a blank line") from error
     header = _parse_header(lines[1:header_end])
-    anchors = _parse_body(lines[header_end + 1 :])
+    anchors = _parse_body(lines[header_end + 1 :], first_line_number=header_end + 2)
     return TranscriptReview(format_version=1, header=header, anchors=anchors)
 
 

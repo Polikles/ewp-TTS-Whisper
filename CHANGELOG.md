@@ -78,6 +78,9 @@ All notable changes to EWP-transcripts are documented here.
 
 - Export failures now identify the failing format and a fixed allowlist of safe renderer
   invariants while continuing to suppress arbitrary internal or transcript details.
+- Invalid review-body directives and text placement now report the exact review-file line
+  number, making isolated batch failures directly repairable without reapplying
+  successful reviews.
 
 ### Fixed
 
