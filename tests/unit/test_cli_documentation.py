@@ -10,13 +10,26 @@ from ewp_transcripts.cli import app
 ROOT = Path(__file__).resolve().parents[2]
 SPECIFICATION = ROOT / "docs" / "05-cli-specification.md"
 COMMANDS = ("doctor", "inspect", "dry-run", "transcribe", "export", "clean")
+REVISION_COMMANDS = ("prepare", "preview", "apply", "edit", "audit")
 
 
 def _section(document: str, command: str) -> str:
-    match = re.search(rf"^## [0-9]+\. `{re.escape(command)}`$", document, re.MULTILINE)
+    match = re.search(rf"^## [0-9]+[a-z]?\. `{re.escape(command)}`$", document, re.MULTILINE)
     assert match is not None
     body = document[match.end() :]
     return body.split("\n## ", maxsplit=1)[0]
+
+
+def _revision_section(document: str, command: str) -> str:
+    match = re.search(rf"^### `{re.escape(f'revise {command}')}`$", document, re.MULTILINE)
+    assert match is not None
+    body = document[match.end() :]
+    return re.split(r"\n#{2,3} ", body, maxsplit=1)[0]
+
+
+def _revision_common(document: str) -> str:
+    section = _section(document, "revise")
+    return section.split("\n### ", maxsplit=1)[0]
 
 
 def test_every_command_help_option_is_named_in_its_specification_section() -> None:
@@ -32,4 +45,25 @@ def test_every_command_help_option_is_named_in_its_specification_section() -> No
             if option.startswith("--") and option != "--help"
         }
         documented_options = set(re.findall(r"--[a-z][a-z-]*", _section(document, command)))
+        assert help_options <= documented_options, command
+
+
+def test_every_revision_help_option_is_named_in_its_specification_section() -> None:
+    document = SPECIFICATION.read_text(encoding="utf-8")
+    revise = get_command(app).commands["revise"]
+
+    for command in REVISION_COMMANDS:
+        cli_command = revise.commands[command]
+        help_options = {
+            option
+            for parameter in cli_command.params
+            for option in getattr(parameter, "opts", ())
+            if option.startswith("--") and option != "--help"
+        }
+        documented_options = set(
+            re.findall(
+                r"--[a-z][a-z-]*",
+                _revision_common(document) + _revision_section(document, command),
+            )
+        )
         assert help_options <= documented_options, command

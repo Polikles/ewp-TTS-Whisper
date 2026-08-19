@@ -56,7 +56,7 @@ Evaluation must also measure harmful changes to text that was already correct.
 
 ## 1. Manual transcript correction — promoted to v0.2.0
 
-The following is no longer an unscheduled roadmap idea. It is the planned v0.2.0 contract:
+The following is no longer an unscheduled roadmap idea. It is the implemented v0.2.0 contract:
 
 - immutable canonical `results.json`;
 - versioned full-snapshot revision artifacts linked by base-result SHA-256;

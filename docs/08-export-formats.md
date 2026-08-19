@@ -3,7 +3,7 @@
 ## 1. Principle
 
 An export is a deterministic transformation of a selected transcript source. In v0.1
-the source is raw `results.json`; planned v0.2.0 revision-aware export first resolves raw
+the source is raw `results.json`; implemented v0.2.0 revision-aware export first resolves raw
 canonical text or a compatible revision into `EffectiveTranscript`. Exporting must not
 run WhisperX, pyannote, or open source audio.
 

@@ -57,7 +57,10 @@ app = typer.Typer(
 )
 revise_app = typer.Typer(
     name="revise",
-    help="Prepare, validate, and publish transcript corrections without source audio.",
+    help=(
+        "Prepare, validate, and publish transcript corrections without source audio. "
+        "Run 'transcriber revise COMMAND --help' for command-specific options."
+    ),
     no_args_is_help=True,
 )
 app.add_typer(revise_app, name="revise")
@@ -313,7 +316,10 @@ def _print_export_batch(outcome: BatchExportOutcome) -> None:
 def revise_preview_command(
     review_path: Annotated[
         Path,
-        typer.Argument(help="EWP-REVIEW file to validate and align.", metavar="REVIEW"),
+        typer.Argument(
+            help="EWP-REVIEW file or directory to validate and align.",
+            metavar="REVIEW_OR_DIRECTORY",
+        ),
     ],
     results_directory: Annotated[
         Path | None,
@@ -370,7 +376,10 @@ def revise_preview_command(
 def revise_apply_command(
     review_path: Annotated[
         Path,
-        typer.Argument(help="EWP-REVIEW file to validate and apply.", metavar="REVIEW"),
+        typer.Argument(
+            help="EWP-REVIEW file or directory to validate and apply.",
+            metavar="REVIEW_OR_DIRECTORY",
+        ),
     ],
     results_directory: Annotated[
         Path | None,
@@ -1044,7 +1053,10 @@ def dry_run_command(
 def export_command(
     results_json: Annotated[
         Path,
-        typer.Argument(help="Completed canonical results JSON.", metavar="RESULTS_JSON"),
+        typer.Argument(
+            help="Completed canonical result or directory containing results.",
+            metavar="RESULTS_OR_DIRECTORY",
+        ),
     ],
     formats: Annotated[
         list[ExportFormat] | None,

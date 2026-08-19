@@ -1,0 +1,293 @@
+# EWP Transcriber — complete CLI runbook
+
+This is the current operator entry point for the internal command-line application. It
+covers every shipped command. The application is not yet a public release.
+
+## 1. Install and prepare the machine
+
+The supported environment is Ubuntu 24.04 under WSL2 with Python 3.12, FFmpeg, `uv`, and
+an NVIDIA CUDA-capable GPU. Follow the detailed setup documents in order:
+
+1. [`../WSL config/SYSTEM_REQUIREMENTS.md`](../WSL%20config/SYSTEM_REQUIREMENTS.md)
+2. [`../WSL config/INSTALL_WSL.md`](../WSL%20config/INSTALL_WSL.md)
+3. [`../WSL config/INSTALL_TOOLS.md`](../WSL%20config/INSTALL_TOOLS.md)
+4. [`../WSL config/CUDA_SETUP.md`](../WSL%20config/CUDA_SETUP.md)
+5. [`../WSL config/INSTALL_APPLICATION.md`](../WSL%20config/INSTALL_APPLICATION.md)
+6. [`../WSL config/MODEL_SETUP.md`](../WSL%20config/MODEL_SETUP.md)
+7. [`../WSL config/OFFLINE_MODE.md`](../WSL%20config/OFFLINE_MODE.md)
+
+Normal source-checkout use begins in the repository:
+
+```bash
+cd "$HOME/transkrypcje/ewp-transcripts"
+uv sync --locked
+uv pip check
+uv run --locked transcriber --version
+uv run --locked transcriber --help
+```
+
+The top-level help lists commands. Every command has its own options:
+
+```bash
+uv run --locked transcriber COMMAND --help
+uv run --locked transcriber revise COMMAND --help
+```
+
+## 2. Configuration and paths
+
+Configuration precedence, from lowest to highest, is:
+
+1. packaged defaults;
+2. selected preset;
+3. `$HOME/.config/ewp-transcripts/config.toml`;
+4. `transcriber.toml` in the terminal's current working directory;
+5. the file supplied with `--config PATH`;
+6. CLI options.
+
+For the normal source checkout, the project file is exactly:
+
+```text
+/home/<user>/transkrypcje/ewp-transcripts/transcriber.toml
+```
+
+Run commands from that directory or pass `--config` explicitly. Paths containing spaces
+are supported and preserved; quote the complete path. Windows paths such as
+`C:\Users\name\recordings` and WSL paths such as `/mnt/c/Users/name/recordings` are both
+accepted. Linux-side output/work directories are faster for large jobs.
+
+## 3. Check readiness: `doctor`
+
+```bash
+uv run --locked transcriber doctor
+uv run --locked transcriber doctor --json-output
+```
+
+`doctor` checks Python, WSL/Ubuntu, FFmpeg, GPU/CUDA, pinned local models, and whether
+`HF_TOKEN` is present without printing the secret. On a fresh installation, missing model
+messages point to `WSL config/MODEL_SETUP.md`. Do not transcribe until required checks
+pass.
+
+## 4. Inspect inputs: `inspect`
+
+Always inspect unfamiliar material before transcription:
+
+```bash
+uv run --locked transcriber inspect "/path/to/episode.wav"
+uv run --locked transcriber inspect "/path/to/season"
+uv run --locked transcriber inspect "/path/to/season" --json-output
+```
+
+Inspection is model-free. It reports discovery/grouping, duration, streams, channel mode,
+speaker-source hints, hashes, and warnings. Directory discovery is non-recursive unless
+`--recursive` is supplied.
+
+Preferred multi-speaker input order:
+
+1. one synchronized mono file per speaker;
+2. one two-channel file with an isolated speaker in each channel;
+3. a mono/stereo program mix followed by diarization and manual attribution review.
+
+Avoid 3+ channel sources in the current release: the warning fallback can use only
+channel 0 and may omit dialogue. Ordinary two-speaker stereo is accepted, but inferred
+speaker attribution is not guaranteed.
+
+## 5. Group synchronized speaker files
+
+Automatic filename grouping uses final suffixes such as:
+
+```text
+episode-Damian.wav
+episode-Szymon.wav
+```
+
+For unrelated filenames, provide an explicit collision-safe group identity:
+
+```bash
+uv run --locked transcriber inspect \
+  --group "/path/to/left.wav" \
+  --group "/path/to/right.wav" \
+  --group-id "episode-001"
+```
+
+Repeat `--group` for every source. Use `--speaker-map "left.wav=Damian"` and another
+mapping for `right.wav` during `transcribe` when filename labels are unsuitable. Grouped
+files must share a timeline and sample rate. `--allow-duration-mismatch` is the dedicated
+override for differences above the normal limit; `--force` does not bypass input checks.
+
+## 6. Plan safely: `dry-run`
+
+```bash
+uv run --locked transcriber dry-run "/path/to/season" \
+  --speaker-count auto \
+  --output-dir "/path/to/output"
+```
+
+Review every `PROCESS`, `SKIP`, source assignment, channel decision, warning, result
+version, and output path. Dry-run creates no final output or work directory and loads no
+model. Use `--speaker-count 1` only for a genuine one-speaker recording; use an exact
+positive count when known, otherwise `auto`.
+
+## 7. Transcribe: `transcribe`
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+uv run --locked transcriber transcribe "/path/to/season" \
+  --speaker-count auto \
+  --output-dir "/path/to/output" \
+  --non-interactive
+```
+
+Polish is the default. `--language en` and `--language auto` are supported but not yet
+quality-qualified on a representative English corpus. Useful options include:
+
+- `--format txt|srt|vtt` (repeatable) and `--segments`;
+- `--speaker NAME` for one known single-speaker source;
+- repeatable `--speaker-map SOURCE=NAME` for grouped sources;
+- `--channel-mode split-speakers` only with source knowledge;
+- `--keep-temp` to retain an owned successful workspace;
+- `--force` to create the next `_vNNN` result set without overwriting.
+
+Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/segments are
+derived and regenerable. Duplicate matching jobs skip safely. Never edit canonical JSON.
+
+## 8. Export raw results: `export`
+
+Single result:
+
+```bash
+uv run --locked transcriber export "/path/to/episode_results.json" \
+  --format txt --format srt --format vtt --format segments \
+  --output-dir "/path/to/exports"
+```
+
+Directory batch:
+
+```bash
+uv run --locked transcriber export "/path/to/results" \
+  --format txt --format srt --format vtt --format segments \
+  --output-dir "/path/to/exports"
+```
+
+Export is audio-free, model-free, and non-recursive unless `--recursive` is supplied.
+Existing identical destinations skip; `--force` creates later export versions.
+`--speaker-labels on-change|always|never` changes subtitle labels.
+
+## 9. Correct transcripts: `revise`
+
+The recommended workflow is `prepare -> edit in Windows VS Code -> preview -> apply ->
+export`. Keep canonical results, reviews, revisions, audits, and exports in separate
+directories.
+
+### Prepare one or many reviews
+
+```bash
+uv run --locked transcriber revise prepare "/path/to/results" \
+  --output-dir "/path/to/reviews"
+```
+
+Edit `*.review.txt` in Windows VS Code. Its search and **Change All Occurrences** tools
+are preferable for long transcripts. Preserve all `#` metadata, `@@ anchor`, and
+`@@ speaker` directives. Edit only transcript text and existing speaker assignments.
+
+### Preview without writing
+
+```bash
+uv run --locked transcriber revise preview "/path/to/reviews" \
+  --results-dir "/path/to/results"
+```
+
+This is equivalent to `revise apply ... --no-apply`. A failed item in a continuing batch
+does not invalidate successful items, but the command returns exit code 5.
+
+### Apply and optionally audit
+
+```bash
+uv run --locked transcriber revise apply "/path/to/reviews" \
+  --results-dir "/path/to/results" \
+  --output-dir "/path/to/revisions" \
+  --audit
+```
+
+Apply publishes immutable `*_revision_NNN.json`; `--audit` adds reconstructable detailed
+diagnostics. If one review fails, repair and apply only that file—do not rerun the entire
+directory unless additional revisions are intended.
+
+### External-editor shortcut
+
+```bash
+uv run --locked transcriber revise edit "/path/to/episode_results.json" \
+  --editor "nano" --audit
+```
+
+Successful editor close automatically applies only if the review changed, unless
+`--no-apply` is supplied. GUI launchers can return before a file closes; the staged VS
+Code workflow above is safer. `VISUAL` and `EDITOR` are environment-variable names whose
+values must contain an installed editor command; they are not literal commands.
+
+### Reconstruct an audit
+
+```bash
+uv run --locked transcriber revise audit "/path/to/episode_revision_001.json" \
+  --results-dir "/path/to/results" \
+  --output-dir "/path/to/revisions"
+```
+
+Use `--no-write --json-output` to inspect reconstructed diagnostics without publication.
+
+The detailed revision guide is
+[`../WSL config/REVISE_TRANSCRIPTS.md`](../WSL%20config/REVISE_TRANSCRIPTS.md).
+
+## 10. Export corrected transcripts
+
+Latest compatible revision per result:
+
+```bash
+uv run --locked transcriber export "/path/to/results" \
+  --revision "/path/to/revisions" \
+  --format txt --format srt --format vtt --format segments \
+  --output-dir "/path/to/corrected"
+```
+
+For one result, use `--revision latest` or an explicit revision JSON. Use
+`--revision none` for raw canonical text. Directory export with a revision directory
+selects the highest revision whose exact base-result hash matches each result. Duplicate
+replay skips safely without `--force`.
+
+## 11. Recover from failures
+
+- Exit 3: run `doctor`; install the missing dependency/model explicitly.
+- Exit 4: inspect the input, streams, grouping, and supported extension.
+- Exit 5: a batch partially failed; use the per-item error and retry only failed items.
+- Exit 6: user cancellation; the failed state and owned workdir are retained for review.
+- Exit 7: another process owns the output lock; wait or use another output directory.
+- Exit 8: canonical/revision/schema mismatch; do not hand-edit JSON.
+
+Failed/interrupted transcription restarts from the beginning. Successful items and
+immutable results remain safe. See
+[`../WSL config/TROUBLESHOOTING.md`](../WSL%20config/TROUBLESHOOTING.md).
+
+## 12. Clean retained workspaces: `clean`
+
+Preview first:
+
+```bash
+uv run --locked transcriber clean all-workdirs --dry-run --older-than 7
+```
+
+Then explicitly remove only the marker-verified selection:
+
+```bash
+uv run --locked transcriber clean all-workdirs --yes --older-than 7
+```
+
+Cleanup never removes source audio, final results/exports, unknown directories, model
+caches, configuration, or tokens.
+
+## 13. Privacy and evidence
+
+Normal transcription and revision are local-first. Keep `HF_TOKEN`, source recordings,
+canonical paths, transcripts, revisions, audits, and private benchmark material out of
+Git and shared logs. Cloud/API correction is not implemented in this release.
+
+For later benchmark feedback, use
+[`../WSL config/FEEDBACK_FOR_V2.md`](../WSL%20config/FEEDBACK_FOR_V2.md).

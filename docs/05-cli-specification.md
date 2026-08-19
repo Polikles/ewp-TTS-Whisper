@@ -160,7 +160,7 @@ in identity and provenance.
 ## 7. `export`
 
 ```text
-transcriber export RESULTS_JSON_OR_DIRECTORY [OPTIONS]
+transcriber export RESULTS_OR_DIRECTORY [OPTIONS]
 ```
 
 Options:
@@ -240,7 +240,7 @@ result. Batch prepare is part of v0.2.0, not a later convenience feature.
 ### `revise apply`
 
 ```text
-transcriber revise apply REVIEW [--no-apply] [--audit] [OPTIONS]
+transcriber revise apply REVIEW_OR_DIRECTORY [--no-apply] [--audit] [OPTIONS]
 ```
 
 Normal apply parses the review, verifies the exact base-result SHA-256, runs deterministic
@@ -254,7 +254,7 @@ does not publish a revision or derived exports.
 ### `revise preview`
 
 ```text
-transcriber revise preview REVIEW [OPTIONS]
+transcriber revise preview REVIEW_OR_DIRECTORY [OPTIONS]
 ```
 
 This is the user-facing alias for the non-mutating apply path. It is semantically

@@ -272,7 +272,7 @@ Do not hardcode WSL-specific paths in core logic. WSL is the development/runtime
 Prefer the smallest module structure that preserves the boundaries above. Add a new package or abstraction only when it removes real duplication, isolates an optional dependency, creates a stable contract, or improves independent testability.
 
 
-## 17. Transcript revision boundary (planned v0.2.0)
+## 17. Transcript revision boundary (implemented for v0.2.0)
 
 Transcript revision follows the same interface-independent rules as transcription. CLI,
 future GUI, and future LLM adapters call application services; none may implement their

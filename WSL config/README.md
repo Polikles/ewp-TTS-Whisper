@@ -3,6 +3,10 @@
 This directory contains only current instructions for installing and using the internal
 `0.1.1` release candidate and for collecting feedback needed for V2.
 
+For one complete command-oriented entry point, start with
+[`../Instructions/README.md`](../Instructions/README.md). The files below provide the
+detailed WSL setup and revision procedures linked from that runbook.
+
 ## Fresh WSL installation
 
 Follow these documents in order:

@@ -160,7 +160,7 @@ cleanup path must remain compatible with version-1 markers until their retained
 workspaces have expired or been explicitly removed.
 
 
-## 10. Revision state and publication (planned v0.2.0)
+## 10. Revision state and publication (implemented for v0.2.0)
 
 Transcript revisions are final immutable artifacts and use the same non-destructive
 persistence principles as canonical outputs. Revision number allocation occurs under the

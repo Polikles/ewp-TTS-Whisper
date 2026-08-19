@@ -138,7 +138,7 @@ The JSON result records:
 - Exporters do not depend on ML backends.
 
 
-## 8. Transcript revision architecture (planned v0.2.0)
+## 8. Transcript revision architecture (implemented for v0.2.0)
 
 Transcript correction is a post-ASR application pipeline. It does not reopen source audio.
 

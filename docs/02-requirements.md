@@ -100,7 +100,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-I01** Diagnostics MUST be warning-only and MUST NOT modify or repair source audio.
 - **FR-I02** MVP diagnostics MUST cover clipping, low level, channel-level imbalance, and high silence ratio.
 
-### J. Transcript revisions (planned v0.2.0)
+### J. Transcript revisions (implemented for v0.2.0)
 
 - **FR-J00** Final canonical `results.json` MUST remain immutable during all transcript-revision operations.
 - **FR-J01** `revise prepare` MUST accept one completed canonical result or a directory of completed results and create `EWP-REVIEW 1` work files without loading source audio or ML models.

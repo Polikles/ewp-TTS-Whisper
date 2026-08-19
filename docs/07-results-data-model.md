@@ -145,7 +145,7 @@ After finalization, `results.json` is not modified by later `export` operations.
 - CI validates the schema against examples and integration-test outputs.
 
 
-## 9. Relationship to transcript revisions (planned v0.2.0)
+## 9. Relationship to transcript revisions (implemented for v0.2.0)
 
 Transcript correction does not change this schema or the meaning of canonical words and
 segments. `results.json` continues to record what the ASR/alignment/diarization pipeline

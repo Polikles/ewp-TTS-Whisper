@@ -9,8 +9,8 @@
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
 - Reference backend: WhisperX with pyannote speaker diarization.
-- The v0.2.0 transcript-revision workflow is implemented on `main`; real-episode
-  operator validation is the next acceptance step before release.
+- The v0.2.0 transcript-revision workflow is implemented and acceptance-audited on
+  `main`; packaging remains before the internal release.
 
 ## Known limitations before the first MVP release
 
@@ -47,6 +47,10 @@ Reprocessing the same source with `--force` creates a consistently versioned res
 ```
 
 ## Documentation
+
+Start with the complete current CLI operator runbook in
+[`Instructions/README.md`](Instructions/README.md). It covers installation links and all
+shipped commands, including batch transcription, revision, export, recovery, and cleanup.
 
 The complete index is available in [`docs/README.md`](docs/README.md).
 

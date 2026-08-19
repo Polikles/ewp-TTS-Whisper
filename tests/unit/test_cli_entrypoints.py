@@ -30,6 +30,25 @@ def test_command_help_exposes_command_specific_options() -> None:
     assert "--channel-mode" in result.stdout
 
 
+def test_root_and_revision_help_explain_command_specific_discovery() -> None:
+    root = runner.invoke(app, ["--help"])
+    revise = runner.invoke(app, ["revise", "--help"])
+
+    assert "transcriber COMMAND --help" in root.stdout
+    assert "transcriber revise COMMAND --help" in revise.stdout
+
+
+def test_batch_capable_help_names_file_or_directory_inputs() -> None:
+    for arguments in (
+        ["export", "--help"],
+        ["revise", "preview", "--help"],
+        ["revise", "apply", "--help"],
+    ):
+        result = runner.invoke(app, arguments)
+        assert result.exit_code == 0
+        assert "directory" in result.stdout
+
+
 def test_version_reports_installed_package_version() -> None:
     result = runner.invoke(app, ["--version"])
 

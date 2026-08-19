@@ -11,7 +11,7 @@ source and distribution artifacts.
 
 The functional and operational MVP gates are complete:
 
-- all 394 automated checks pass;
+- all 400 automated checks pass;
 - locked installation passed in a fresh Ubuntu 24.04.4 WSL2 distribution;
 - installed-wheel transcription passed offline on the RTX 3090;
 - realistic Polish inputs through 151 minutes, sequential batches, interruption/restart,
@@ -124,10 +124,11 @@ support. Before declaring the manual-revision increment complete:
 2. [completed] Add tests for real uncovered invariants: proper-name and sentence-boundary
    edits, ambiguity and long-gap warnings, repetition preservation, anchor integrity,
    base immutability, and concurrent revision-number allocation.
-3. update remaining documentation from “planned” to “implemented” where appropriate and
-   ensure command-specific `--help` matches the accepted workflow;
-4. create the top-level `Instructions/` operator runbook covering every shipped command,
-   including complete batch revision and revised-export recovery;
+3. [completed] Update remaining documentation from “planned” to “implemented” where
+   appropriate and ensure root, revision, and command-specific `--help` match the
+   accepted workflow.
+4. [completed] Create the top-level `Instructions/` operator runbook covering every
+   shipped command, including complete batch revision and revised-export recovery.
 5. bump package/version metadata to `0.2.0`, update the lock and changelog release entry,
    build wheel and sdist, and validate their contents/provenance;
 6. run the automated and integration gates plus a clean/fresh-WSL installed-wheel smoke
