@@ -77,7 +77,13 @@ def test_request_separates_context_and_mock_changes_only_editable_text() -> None
         transcript,
         CorrectionChunkConfig(target_tokens=7, max_tokens=8, context_tokens=2),
     )
-    request = build_correction_request(transcript, chunks[1], prompt_id="faithful-pl-v1")
+    request = build_correction_request(
+        transcript,
+        chunks[1],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
     provider = DeterministicMockCorrectionProvider({"token8": ("OpenAI", "proper_name")})
 
     response = provider.correct(request)
@@ -94,17 +100,58 @@ def test_request_separates_context_and_mock_changes_only_editable_text() -> None
 def test_short_transcript_produces_one_chunk_without_context() -> None:
     transcript = _transcript(3)
     chunk = plan_correction_chunks(transcript)[0]
-    request = build_correction_request(transcript, chunk, prompt_id="faithful-pl-v1")
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
 
     assert (chunk.editable_start, chunk.editable_end) == (0, 3)
     assert request.preceding_context == ()
     assert request.following_context == ()
 
 
+def test_operation_identity_changes_with_provider_or_model() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+
+    first = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="provider-a",
+        model_id="model-1",
+    )
+    second = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="provider-b",
+        model_id="model-1",
+    )
+    third = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="provider-a",
+        model_id="model-2",
+    )
+
+    assert len({first.operation_id, second.operation_id, third.operation_id}) == 3
+
+
 def test_response_rejects_mismatched_before_text() -> None:
     transcript = _transcript(3)
     chunk = plan_correction_chunks(transcript)[0]
-    request = build_correction_request(transcript, chunk, prompt_id="faithful-pl-v1")
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
     response = (
         DeterministicMockCorrectionProvider()
         .correct(request)
@@ -135,7 +182,13 @@ def test_response_rejects_mismatched_before_text() -> None:
 def test_response_rejects_changes_that_do_not_reconstruct_corrected_text() -> None:
     transcript = _transcript(3)
     chunk = plan_correction_chunks(transcript)[0]
-    request = build_correction_request(transcript, chunk, prompt_id="faithful-pl-v1")
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
     response = (
         DeterministicMockCorrectionProvider()
         .correct(request)

@@ -98,6 +98,8 @@ def build_correction_request(
     chunk: CorrectionChunk,
     *,
     prompt_id: str,
+    provider_id: str,
+    model_id: str,
 ) -> CorrectionRequest:
     """Build a provider request with editable ownership explicit in its structure."""
 
@@ -111,7 +113,11 @@ def build_correction_request(
         )
 
     operation_id = hashlib.sha256(
-        f"{prompt_id}:{transcript.language}:{chunk.chunk_index}:{chunk.content_sha256}".encode()
+        (
+            f"{provider_id}\0{model_id}\0{prompt_id}\0{transcript.language}\0"
+            f"{chunk.chunk_index}\0{chunk.editable_start}:{chunk.editable_end}\0"
+            f"{chunk.context_start}:{chunk.context_end}\0{chunk.content_sha256}"
+        ).encode()
     ).hexdigest()
     return CorrectionRequest(
         operation_id=operation_id,
@@ -230,7 +236,13 @@ def build_mock_correction_revision(
     chunks = plan_correction_chunks(effective, config)
     anchors: list[ReviewAnchor] = []
     for chunk in chunks:
-        request = build_correction_request(effective, chunk, prompt_id=prompt_id)
+        request = build_correction_request(
+            effective,
+            chunk,
+            prompt_id=prompt_id,
+            provider_id=provider.provider_id,
+            model_id=provider.model_id,
+        )
         response = provider.correct(request)
         corrected = validate_correction_response(request, response)
         speakers = _corrected_speakers(request, response)

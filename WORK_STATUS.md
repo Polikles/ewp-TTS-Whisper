@@ -40,7 +40,9 @@ reconstruction validator, and mock-to-review-to-revision vertical slice are impl
 Strict correction chunk configuration is also implemented. Next, add application and
 batch boundaries. Single-file and deterministic failure-isolated directory mock
 preview/apply now exist at the application boundary. Resumable chunk response state is
-next. Real local/cloud provider selection,
+implemented as private immutable validated entries with exact operation identity. Next,
+wire resume directories into correction application/batches and add benchmark manifests.
+Real local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in

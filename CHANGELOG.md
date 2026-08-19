@@ -28,6 +28,11 @@ All notable changes to EWP-transcripts are documented here.
 - Added deterministic non-recursive mock correction batches with natural result ordering,
   preview/apply modes, per-result failure isolation, aggregate counts, and the existing
   continue-or-stop batch policy.
+- Hardened resumable correction operation identities with provider, model, prompt,
+  language, editable/context bounds, chunk index, and content hash.
+- Added private, mode-restricted, immutable per-chunk resume entries. Only fully validated
+  responses with an exact provider/model/prompt/operation identity are reused; corrupt or
+  stale entries fail before another provider call.
 
 ### Documentation
 
