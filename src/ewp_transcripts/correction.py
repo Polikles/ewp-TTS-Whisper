@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
+from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.domain.correction import (
     CorrectionChange,
     CorrectionRequest,
@@ -13,7 +15,19 @@ from ewp_transcripts.domain.correction import (
     CorrectionToken,
 )
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
-from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
+from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
+from ewp_transcripts.domain.revision import (
+    RevisionLlmProvenance,
+    RevisionProvenance,
+    TranscriptRevision,
+)
+from ewp_transcripts.effective_transcript import (
+    EffectiveToken,
+    EffectiveTranscript,
+    resolve_effective_transcript,
+)
+from ewp_transcripts.review_service import prepare_review
+from ewp_transcripts.revision_service import build_revision
 
 
 @dataclass(frozen=True, slots=True)
@@ -200,6 +214,95 @@ def validate_correction_response(
             "Correction response proposed changes do not reconstruct corrected text"
         )
     return tuple(corrected)
+
+
+def build_mock_correction_revision(
+    result_path: Path,
+    provider: DeterministicMockCorrectionProvider,
+    *,
+    config: CorrectionChunkConfig | None = None,
+    prompt_id: str = "faithful-correction-v1",
+) -> TranscriptRevision:
+    """Exercise provider-to-review-to-revision flow without network or persistence."""
+
+    base = load_canonical_result(result_path)
+    effective = resolve_effective_transcript(base)
+    chunks = plan_correction_chunks(effective, config)
+    anchors: list[ReviewAnchor] = []
+    for chunk in chunks:
+        request = build_correction_request(effective, chunk, prompt_id=prompt_id)
+        response = provider.correct(request)
+        corrected = validate_correction_response(request, response)
+        speakers = _corrected_speakers(request, response)
+        anchors.append(
+            ReviewAnchor(
+                first_word_id=effective.tokens[chunk.editable_start].source_word_ids[0],
+                last_word_id=effective.tokens[chunk.editable_end - 1].source_word_ids[-1],
+                speaker_blocks=_group_corrected_blocks(corrected, speakers),
+            )
+        )
+    prepared = prepare_review(result_path)
+    review = prepared.model_copy(update={"anchors": tuple(anchors)})
+    prompt_sha256 = hashlib.sha256(prompt_id.encode()).hexdigest()
+    return build_revision(
+        review,
+        base,
+        base_path=result_path,
+        provenance=RevisionProvenance(
+            method="llm",
+            interface="api",
+            llm=RevisionLlmProvenance(
+                provider=provider.provider_id,
+                model=provider.model_id,
+                endpoint_kind="mock",
+                prompt_id=prompt_id,
+                prompt_sha256=prompt_sha256,
+                parameters=None,
+            ),
+        ),
+    )
+
+
+def _corrected_speakers(
+    request: CorrectionRequest,
+    response: CorrectionResponse,
+) -> tuple[str, ...]:
+    speakers: list[str] = []
+    previous_end = 0
+    for change in response.proposed_changes:
+        speakers.extend(
+            token.speaker_id for token in request.editable_tokens[previous_end : change.start_index]
+        )
+        changed_speakers = {
+            token.speaker_id
+            for token in request.editable_tokens[change.start_index : change.end_index]
+        }
+        if len(changed_speakers) != 1:
+            raise InvalidCorrectionResponseError(
+                "Correction response change crosses a speaker boundary"
+            )
+        speakers.extend([next(iter(changed_speakers))] * len(change.after.split()))
+        previous_end = change.end_index
+    speakers.extend(token.speaker_id for token in request.editable_tokens[previous_end:])
+    return tuple(speakers)
+
+
+def _group_corrected_blocks(
+    corrected: tuple[str, ...],
+    speakers: tuple[str, ...],
+) -> tuple[ReviewSpeakerBlock, ...]:
+    blocks: list[ReviewSpeakerBlock] = []
+    current_speaker: str | None = None
+    words: list[str] = []
+    for word, speaker in zip(corrected, speakers, strict=True):
+        if current_speaker is not None and speaker != current_speaker:
+            blocks.append(ReviewSpeakerBlock(speaker_id=current_speaker, text=" ".join(words)))
+            words = []
+        current_speaker = speaker
+        words.append(word)
+    if current_speaker is not None:
+        blocks.append(ReviewSpeakerBlock(speaker_id=current_speaker, text=" ".join(words)))
+    return tuple(blocks)
 
 
 def _choose_editable_end(

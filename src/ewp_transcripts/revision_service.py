@@ -113,6 +113,7 @@ def build_revision(
     created_at: datetime | None = None,
     parent_revision: TranscriptRevision | None = None,
     parent_path: Path | None = None,
+    provenance: RevisionProvenance | None = None,
 ) -> TranscriptRevision:
     """Validate and align one review into a complete unpublished revision snapshot."""
 
@@ -263,7 +264,7 @@ def build_revision(
             filename=base_path.name,
         ),
         parent_revision=parent,
-        provenance=RevisionProvenance(method="manual", interface="cli"),
+        provenance=provenance or RevisionProvenance(method="manual", interface="cli"),
         transcript=RevisionTranscript(language=review.header.language, tokens=tuple(tokens)),
         alignment=RevisionAlignment(
             strategy="anchored-token-v1",

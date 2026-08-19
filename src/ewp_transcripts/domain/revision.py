@@ -38,7 +38,7 @@ class RevisionParent(RevisionModel):
 class RevisionLlmProvenance(RevisionModel):
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)
-    endpoint_kind: Literal["local", "cloud"]
+    endpoint_kind: Literal["local", "cloud", "mock"]
     prompt_id: str | None = Field(default=None, min_length=1)
     prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     parameters: dict[str, str | int | float | bool | None] | None = None

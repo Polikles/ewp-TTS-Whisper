@@ -1,11 +1,13 @@
 """Tests for provider-neutral deterministic correction primitives."""
 
 from dataclasses import replace
+from pathlib import Path
 
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
     DeterministicMockCorrectionProvider,
     build_correction_request,
+    build_mock_correction_revision,
     plan_correction_chunks,
     validate_correction_response,
 )
@@ -146,3 +148,22 @@ def test_response_rejects_changes_that_do_not_reconstruct_corrected_text() -> No
         assert "reconstruct" in str(error)
     else:
         raise AssertionError("unexplained provider rewrite was accepted")
+
+
+def test_mock_provider_builds_llm_revision_through_existing_aligner() -> None:
+    result = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    provider = DeterministicMockCorrectionProvider({"transcription.": ("OpenAI.", "proper_name")})
+
+    revision = build_mock_correction_revision(
+        result,
+        provider,
+        config=CorrectionChunkConfig(target_tokens=4, max_tokens=4, context_tokens=1),
+        prompt_id="faithful-en-v1",
+    )
+
+    assert revision.provenance.method == "llm"
+    assert revision.provenance.llm is not None
+    assert revision.provenance.llm.endpoint_kind == "mock"
+    assert revision.statistics.substitutions == 1
+    assert revision.transcript.tokens[-1].text == "OpenAI."
+    assert revision.transcript.tokens[-1].source_word_ids == ("word_000008",)

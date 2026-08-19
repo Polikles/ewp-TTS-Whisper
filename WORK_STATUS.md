@@ -35,9 +35,9 @@ remain explicitly deferred by ADR-0014. They are not implementation blockers.
 
 The v0.3 automated-correction contract is now defined in
 `docs/22-v0.3-automated-correction.md`. Provider-neutral request/response/change models,
-the deterministic single-owner chunk planner, network-free mock provider, and strict
-response reconstruction validator are implemented. Next, connect validated mock output
-to the existing review alignment/revision engine. Real local/cloud provider selection,
+the deterministic single-owner chunk planner, network-free mock provider, strict response
+reconstruction validator, and mock-to-review-to-revision vertical slice are implemented.
+Next, add correction configuration and application/batch boundaries. Real local/cloud provider selection,
 credentials, API calls, and possible cost remain a user decision and must not be inferred.
 
 The single-episode v0.2.0 revision pilot passed with the staged workflow documented in

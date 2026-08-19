@@ -16,6 +16,10 @@ All notable changes to EWP-transcripts are documented here.
 - Added local provider-response verification that rejects wrong operation identities,
   overlapping, unsorted, out-of-range, or source-mismatched proposals and any corrected
   text that cannot be reconstructed exactly from the explicit proposed-change list.
+- Connected validated mock responses to ordinary review anchors and the existing
+  deterministic revision aligner, producing immutable LLM-provenance snapshots without
+  letting providers construct mappings or artifacts. Added explicit `mock` endpoint
+  provenance for network-free test revisions.
 
 ### Documentation
 

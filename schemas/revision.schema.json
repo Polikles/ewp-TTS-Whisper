@@ -210,7 +210,8 @@
         "endpoint_kind": {
           "enum": [
             "local",
-            "cloud"
+            "cloud",
+            "mock"
           ]
         },
         "prompt_id": {
