@@ -48,8 +48,10 @@ have bounded explicit retries, adapter timeout budgets, and sanitized operationa
 Provider exception details are suppressed at the application boundary. Wiring metrics into
 benchmark reports and completing broader artifact payload scans are next. The neutral
 response now supports optional input/output token and micro-USD cost accounting. Real
-local/cloud provider selection,
-credentials, API calls, and possible cost remain a user decision and must not be inferred.
+provider selection is now recorded: LM Studio is the first local OpenAI-compatible
+backend, with Ollama deferred; OpenRouter follows only after local benchmarks. The LM
+Studio adapter and network-free contract tests are implemented, but no real transcript
+has yet been sent to it. Cloud credentials, API calls, and cost remain separately gated.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

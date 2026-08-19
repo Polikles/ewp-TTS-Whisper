@@ -1,0 +1,199 @@
+"""OpenAI-compatible local correction adapter for LM Studio."""
+
+from __future__ import annotations
+
+import json
+import urllib.error
+import urllib.request
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
+from typing import Any, Literal
+from urllib.parse import urlsplit, urlunsplit
+
+from pydantic import ValidationError
+
+from ewp_transcripts.domain.correction import (
+    CorrectionRequest,
+    CorrectionResponse,
+    CorrectionUsage,
+)
+from ewp_transcripts.domain.errors import (
+    InvalidCorrectionResponseError,
+    PermanentCorrectionProviderError,
+    RetryableCorrectionProviderError,
+)
+
+JsonObject = dict[str, Any]
+HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
+
+FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You correct faithful speech transcripts.
+Change only obvious ASR lexical errors, proper-name spelling, conservative punctuation,
+capitalization, or sentence boundaries. Preserve speakers, meaning, malformed speech,
+fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, summarize,
+translate, censor, or add facts. Context is read-only. Return only the requested JSON.
+"""
+
+
+@dataclass(frozen=True, slots=True)
+class LmStudioAdapterConfig:
+    model_id: str
+    endpoint: str = "http://127.0.0.1:1234/v1"
+    temperature: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not self.model_id.strip():
+            raise ValueError("LM Studio model_id must not be empty")
+        if not 0 <= self.temperature <= 2:
+            raise ValueError("LM Studio temperature must be between 0 and 2")
+        _normalized_loopback_endpoint(self.endpoint)
+
+
+class LmStudioCorrectionProvider:
+    """Provider-neutral adapter for LM Studio's loopback chat-completions API."""
+
+    def __init__(
+        self,
+        config: LmStudioAdapterConfig,
+        *,
+        transport: HttpTransport | None = None,
+    ) -> None:
+        self._config = config
+        self._endpoint = _normalized_loopback_endpoint(config.endpoint)
+        self._transport = transport or _urllib_transport
+
+    @property
+    def provider_id(self) -> str:
+        return "lm-studio"
+
+    @property
+    def model_id(self) -> str:
+        return self._config.model_id
+
+    @property
+    def endpoint_kind(self) -> Literal["local"]:
+        return "local"
+
+    @property
+    def endpoint_identity(self) -> str:
+        return self._endpoint
+
+    def correct(
+        self,
+        request: CorrectionRequest,
+        *,
+        timeout_seconds: float | None = None,
+    ) -> CorrectionResponse:
+        if timeout_seconds is None or timeout_seconds <= 0:
+            raise ValueError("LM Studio calls require a positive timeout")
+        payload = json.dumps(
+            _chat_request(self._config, request),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        document = self._transport(
+            f"{self._endpoint}/chat/completions",
+            {"Content-Type": "application/json"},
+            payload,
+            timeout_seconds,
+        )
+        return _parse_chat_response(document, request)
+
+
+def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> JsonObject:
+    transcript = {
+        "operation_id": request.operation_id,
+        "language": request.language,
+        "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
+        "editable_tokens": [token.model_dump() for token in request.editable_tokens],
+        "following_read_only_context": [token.model_dump() for token in request.following_context],
+    }
+    return {
+        "model": config.model_id,
+        "temperature": config.temperature,
+        "messages": [
+            {"role": "system", "content": FAITHFUL_CORRECTION_SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(transcript, ensure_ascii=False)},
+        ],
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "correction_response",
+                "strict": True,
+                "schema": CorrectionResponse.model_json_schema(),
+            },
+        },
+    }
+
+
+def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> CorrectionResponse:
+    try:
+        choices = document["choices"]
+        content = choices[0]["message"]["content"]
+        if not isinstance(content, str):
+            raise TypeError
+        response = CorrectionResponse.model_validate_json(content)
+        usage = document.get("usage")
+        if isinstance(usage, dict):
+            response = response.model_copy(
+                update={
+                    "usage": CorrectionUsage(
+                        input_tokens=_optional_nonnegative_int(usage.get("prompt_tokens")),
+                        output_tokens=_optional_nonnegative_int(usage.get("completion_tokens")),
+                    )
+                }
+            )
+    except (IndexError, KeyError, TypeError, ValidationError, ValueError) as error:
+        raise InvalidCorrectionResponseError(
+            "LM Studio returned an invalid correction response"
+        ) from error
+    if response.operation_id != request.operation_id:
+        raise InvalidCorrectionResponseError("LM Studio response operation ID does not match")
+    return response
+
+
+def _optional_nonnegative_int(value: object) -> int | None:
+    if value is None:
+        return None
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise ValueError("invalid usage")
+    return value
+
+
+def _normalized_loopback_endpoint(endpoint: str) -> str:
+    parsed = urlsplit(endpoint)
+    if (
+        parsed.scheme != "http"
+        or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("LM Studio endpoint must be an uncredentialed loopback HTTP URL")
+    path = parsed.path.rstrip("/")
+    if not path.endswith("/v1"):
+        raise ValueError("LM Studio endpoint path must end in /v1")
+    return urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
+
+
+def _urllib_transport(
+    url: str,
+    headers: Mapping[str, str],
+    payload: bytes,
+    timeout_seconds: float,
+) -> JsonObject:
+    request = urllib.request.Request(url, data=payload, headers=dict(headers), method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:  # noqa: S310
+            document = json.loads(response.read())
+    except urllib.error.HTTPError as error:
+        if error.code in {408, 409, 425, 429} or error.code >= 500:
+            raise RetryableCorrectionProviderError("LM Studio request failed") from None
+        raise PermanentCorrectionProviderError("LM Studio request was rejected") from None
+    except (TimeoutError, urllib.error.URLError):
+        raise RetryableCorrectionProviderError("LM Studio is temporarily unavailable") from None
+    except (OSError, json.JSONDecodeError):
+        raise PermanentCorrectionProviderError("LM Studio returned unreadable data") from None
+    if not isinstance(document, dict):
+        raise PermanentCorrectionProviderError("LM Studio returned unreadable data")
+    return document

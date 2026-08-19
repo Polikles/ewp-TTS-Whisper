@@ -50,6 +50,9 @@ All notable changes to EWP-transcripts are documented here.
   preventing request text, endpoint details, or credentials from escaping through failures.
 - The provider-neutral response contract now carries optional token and micro-USD usage;
   execution outcomes combine it with request, retry, and latency measurements.
+- Added the first real provider adapter for LM Studio's OpenAI-compatible loopback API,
+  with a faithful-transcript structured prompt, strict JSON parsing, usage capture,
+  injectable network-free tests, and rejection of remote or credential-bearing URLs.
 
 ### Documentation
 
