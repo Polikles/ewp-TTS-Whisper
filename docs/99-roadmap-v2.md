@@ -41,6 +41,19 @@ files, immutable revision and audit artifacts, and revised TXT/SRT/VTT/segments 
 Future benchmark tooling must treat the accepted revisions as gold without requiring the
 corpus itself to live in this repository.
 
+Within each compatible base-result lineage, the highest revision number is the accepted
+gold transcript. Lower revisions remain immutable historical/intermediate states rather
+than being discarded. Benchmark manifests must resolve this by exact base-result hash
+and revision number, never modification time or filename order alone. They should expose
+at least two correction tasks when an intermediate revision exists:
+
+- raw canonical result -> latest accepted gold, measuring complete ASR correction;
+- earlier revision -> latest accepted gold, measuring incremental cleanup of text that
+  has already received human review.
+
+Earlier revisions are useful benchmark inputs but are not alternate gold references.
+Evaluation must also measure harmful changes to text that was already correct.
+
 ## 1. Manual transcript correction — promoted to v0.2.0
 
 The following is no longer an unscheduled roadmap idea. It is the planned v0.2.0 contract:

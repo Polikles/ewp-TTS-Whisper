@@ -138,6 +138,13 @@ Do not add the private corpus to Git merely because it exists. After every episo
 public, conduct a separate licensing, privacy, artifact-size, and distribution review
 before adding any benchmark media or transcripts to the repository.
 
+The private package currently contains 24 canonical results, 24 reviews, two immutable
+revisions plus audits per result, and both revision generations of all four revised
+exports. Runtime lock files have been removed. For future manifests, revision 002 is the
+current accepted gold for every episode; revision 001 remains an intermediate benchmark
+input. Benchmark both canonical-to-gold and revision-001-to-gold correction, resolving
+lineage by base hash and revision number rather than timestamps.
+
 ## Repository hygiene
 
 - Current operator documentation lives under `WSL config/`.

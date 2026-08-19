@@ -58,6 +58,9 @@ All notable changes to EWP-transcripts are documented here.
   revisions, manual/automatic translation lineage, approved project-dictionary candidate
   mining, and synchronized accessible HTML player testing. Added an explicit v0.2.0
   release-closure checklist without importing those later features into its scope.
+- Defined private-corpus gold selection: the highest compatible revision is accepted
+  gold, while earlier revisions remain intermediate inputs for raw-to-gold and
+  revision-to-gold correction benchmarks.
 - Added a concise WSL operator runbook for preparing, editing, previewing, applying,
   auditing, exporting, retaining, and recovering transcript revisions.
 - Added optional audit publication to the automatic `revise edit` apply path.
