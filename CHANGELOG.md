@@ -101,8 +101,9 @@ All notable changes to EWP-transcripts are documented here.
   manual faithfulness review, and gated sequential full-corpus candidate generation.
   Final scoring remains blocked on the operator-facing manifest/report slice.
 - Added content-free correction-span mismatch diagnostics (span, token counts, and
-  truncated hashes) so private provider failures can be investigated without logging
-  transcript text. Documented that Bash requires WSL paths even though the application
+  character counts, alternate source positions, and truncated hashes) so private provider
+  failures can be investigated without logging transcript text. Documented that Bash
+  requires WSL paths even though the application
   accepts Windows paths, and that LM Studio developer logs expose full transcript payloads.
 - Recorded the safely rejected three-case Qwen pilot and its observed RTX 3090 load of
   approximately 23.3 GB VRAM at 95%+ utilization; full-corpus execution remains blocked.

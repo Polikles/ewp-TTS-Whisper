@@ -147,8 +147,12 @@ def test_before_mismatch_diagnostic_is_useful_without_exposing_text() -> None:
     assert "span=1:2" in message
     assert "expected_tokens=1" in message
     assert "reported_tokens=1" in message
+    assert "expected_chars=6" in message
+    assert f"reported_chars={len(private_text)}" in message
     assert "expected_sha256=" in message
     assert "reported_sha256=" in message
+    assert "reported_match_count=0" in message
+    assert "reported_match_positions=none" in message
     assert private_text not in message
 
 
