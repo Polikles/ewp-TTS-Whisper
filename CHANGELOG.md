@@ -92,6 +92,9 @@ All notable changes to EWP-transcripts are documented here.
   `0.00767339` WER against manual gold versus `0.00747664` for raw ASR, so it does not yet
   pass the correction-quality gate. Private transcript text and artifacts remain outside
   the repository.
+- Manual audit classified Bielik's five affected tokens: one correct repair, one still-wrong
+  plausible repair, one newly wrong substitution, and a harmful two-word deletion. The
+  resulting net two additional word errors exactly account for the measured regression.
 
 ### Documentation
 
