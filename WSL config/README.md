@@ -25,6 +25,13 @@ and [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) when a check fails. The complete
 clean-distribution acceptance procedure is retained as
 [`RUN_RELEASE_FRESH_WSL_INSTALL.md`](RUN_RELEASE_FRESH_WSL_INSTALL.md).
 
+## v0.3 local correction benchmark
+
+[`RUN_V03_LOCAL_LLM_BENCHMARK.md`](RUN_V03_LOCAL_LLM_BENCHMARK.md) is the current
+private-corpus operator procedure. It generates Qwen/LM Studio correction candidates in a
+private run directory, requires a short/medium/long pilot before the full corpus, and
+records resume, permission, timing, and hash evidence. It does not authorize cloud calls.
+
 ## Use the current MVP
 
 - [`USE_CURRENT_MVP.md`](USE_CURRENT_MVP.md) — inspect, plan, transcribe, export,

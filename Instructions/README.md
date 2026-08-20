@@ -40,6 +40,10 @@ uv run --locked transcriber COMMAND --help
 uv run --locked transcriber revise COMMAND --help
 ```
 
+The staged private-corpus procedure for v0.3 local LLM correction candidates is in
+[`../WSL config/RUN_V03_LOCAL_LLM_BENCHMARK.md`](../WSL%20config/RUN_V03_LOCAL_LLM_BENCHMARK.md).
+It requires a three-case pilot before any full-corpus run.
+
 ## 2. Configuration and paths
 
 Configuration precedence, from lowest to highest, is:

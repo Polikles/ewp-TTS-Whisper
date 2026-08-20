@@ -96,6 +96,10 @@ All notable changes to EWP-transcripts are documented here.
   `faithful-correction-v3`: 8 revision tokens, zero warnings, and no publication. Cached
   response reuse and immutable apply subsequently passed without another provider request;
   all generated state and revision artifacts were mode `0600`.
+- Added the operator runbook for the local Qwen correction benchmark: private path setup,
+  exact input evidence, a short/medium/long pilot, resume-backed immutable publication,
+  manual faithfulness review, and gated sequential full-corpus candidate generation.
+  Final scoring remains blocked on the operator-facing manifest/report slice.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

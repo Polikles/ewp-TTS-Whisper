@@ -31,7 +31,8 @@ def test_live_operator_directory_contains_only_current_runbook() -> None:
     operator_root = ROOT / "WSL config"
 
     assert {path.name for path in operator_root.glob("RUN_*.md")} == {
-        "RUN_RELEASE_FRESH_WSL_INSTALL.md"
+        "RUN_RELEASE_FRESH_WSL_INSTALL.md",
+        "RUN_V03_LOCAL_LLM_BENCHMARK.md",
     }
     assert (operator_root / "USE_CURRENT_MVP.md").is_file()
     assert (operator_root / "FEEDBACK_FOR_V2.md").is_file()

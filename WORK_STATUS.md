@@ -75,7 +75,10 @@ The v3 synthetic preview then passed end to end against the configured LM Studio
 immutable apply also passed: the same validated response was reused without a second LM
 Studio request, and `S01E01_revision_001.json` was published separately from the unchanged
 canonical input. Resume, revision, and lock artifacts were all mode `0600`. The synthetic
-LM Studio adapter smoke gate is complete; representative local-model benchmarking is next.
+LM Studio adapter smoke gate is complete. A private-corpus operator runbook now gates the
+Qwen baseline behind short/medium/long pilot review before sequential full-corpus candidate
+generation. Operator-facing manifest construction and report generation remain the next
+implementation slice before final benchmark scores can be claimed.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 
