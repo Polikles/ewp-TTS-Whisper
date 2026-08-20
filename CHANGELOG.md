@@ -72,6 +72,7 @@ All notable changes to EWP-transcripts are documented here.
 
 - Updated v0.3 traceability and acceptance status to distinguish implemented neutral
   infrastructure from provider-dependent prompt, CLI, benchmark, and review work.
+
 - Documented exact LM Studio model discovery, explicit local consent, safe preview/apply
   and resume paths, initial local benchmark candidates, and the deferred OpenRouter stage.
 - Updated implementation status after completing LM Studio CLI/consent wiring and exact
@@ -154,6 +155,12 @@ All notable changes to EWP-transcripts are documented here.
   translation, synchronized HTML export and its acceptance tests, and optional
   project-scoped dictionaries to v0.4. Kept advanced 3+ channel handling in the later
   roadmap without assigning a release.
+
+### Fixed
+
+- Replaced the quadratic full-matrix lexical scorer with an exact adaptive-banded
+  implementation, allowing long near-matching podcast transcripts to produce WER/CER
+  correction reports in seconds rather than stalling on character-level comparison.
 
 ## 0.2.0 — internal release candidate — 2026-08-19
 
