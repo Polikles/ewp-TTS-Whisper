@@ -101,6 +101,11 @@ All notable changes to EWP-transcripts are documented here.
 - Manual audit classified Bielik's five affected tokens: one correct repair, one still-wrong
   plausible repair, one newly wrong substitution, and a harmful two-word deletion. The
   resulting net two additional word errors exactly account for the measured regression.
+- The compact-contract Qwen 2.5 32B three-case pilot completed without warnings and
+  improved lexical WER by 1.3% over raw ASR, but took about 36 minutes 41 seconds. Manual
+  audit found five useful repairs, two harmful changes, and two context-dependent
+  punctuation edits, so a larger-chunk performance/quality pilot is required before any
+  full-corpus run.
 
 ### Documentation
 
