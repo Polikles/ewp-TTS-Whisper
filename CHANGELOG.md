@@ -84,6 +84,10 @@ All notable changes to EWP-transcripts are documented here.
   Multilingual LibriSpeech for lexical evaluation; VoxConverse and AMI for diarization;
   strict split/license/provenance rules; an optional separate general Polish dictionary;
   and a later licensed three-or-more-speaker public-podcast evaluation tier.
+- Revised the LM Studio faithful-correction prompt to v2 after the first synthetic smoke
+  response failed strict validation. The prompt now defines zero-based half-open token
+  spans, verbatim `before` text, exact reconstruction, sorted changes, context exclusion,
+  and the required no-change response without weakening local validation.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

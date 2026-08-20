@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v1",
+        prompt_id="faithful-correction-v2",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -81,7 +81,10 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert captured["url"] == "http://127.0.0.1:1234/v1/chat/completions"
     assert captured["timeout"] == 9
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "before MUST equal" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "zero-based half-open" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
+    assert "end_index is exclusive" in user["index_contract"]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
     assert user["editable_tokens"][0]["token_id"] == "word_000002"
     assert response.corrected_text == "OpenAI"

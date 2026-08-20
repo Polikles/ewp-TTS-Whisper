@@ -62,6 +62,10 @@ The first local runtime identity is `qwen2.5-14b-instruct`; LM Studio loaded its
 variant at 32K context using approximately 18.5 GB VRAM on the RTX 3090. The operator's
 server uses a Tailscale-like address, so non-loopback endpoints require explicit opt-in
 and a stronger warning rather than being silently treated as loopback.
+The first synthetic Qwen smoke request reached LM Studio but was safely rejected because
+its proposed `before` text did not exactly match the indexed editable source. No validated
+resume state or revision was published. The prompt contract is now `faithful-correction-v2`
+with explicit index/verbatim reconstruction rules; the same smoke case must be rerun.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

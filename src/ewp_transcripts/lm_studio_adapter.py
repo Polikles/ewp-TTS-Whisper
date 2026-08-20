@@ -31,7 +31,17 @@ FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You correct faithful speech transcripts.
 Change only obvious ASR lexical errors, proper-name spelling, conservative punctuation,
 capitalization, or sentence boundaries. Preserve speakers, meaning, malformed speech,
 fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, summarize,
-translate, censor, or add facts. Context is read-only. Return only the requested JSON.
+translate, censor, or add facts. Do not change text merely to make it sound more natural.
+Context is read-only. Return only the requested JSON.
+
+The proposed_changes indexes are zero-based half-open positions in editable_tokens, not
+character offsets and not token local_index values. For every change, before MUST equal
+the source token texts in editable_tokens[start_index:end_index] joined with exactly one
+ASCII space, including original punctuation and capitalization. Changes MUST be sorted
+and non-overlapping. corrected_text MUST exactly equal all editable token texts after
+applying proposed_changes, joined with exactly one ASCII space. Copy operation_id exactly.
+Never include read-only context in corrected_text or changes. If no correction is clearly
+necessary, return the editable text unchanged and an empty proposed_changes list.
 """
 
 
@@ -121,6 +131,10 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
     transcript = {
         "operation_id": request.operation_id,
         "language": request.language,
+        "index_contract": (
+            "start_index/end_index address the zero-based editable_tokens array; "
+            "end_index is exclusive; before is the exact one-space join of that slice"
+        ),
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
         "following_read_only_context": [token.model_dump() for token in request.following_context],

@@ -39,6 +39,7 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.correction.model == ""
     assert config.correction.endpoint == "http://127.0.0.1:1234/v1"
     assert config.correction.allow_remote_endpoint is False
+    assert config.correction.prompt_id == "faithful-correction-v2"
     assert config.correction.timeout_seconds == 120
     assert config.correction.max_attempts == 3
     assert config.correction.temperature == 0
