@@ -10,6 +10,7 @@ from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionToken
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.lm_studio_adapter import (
     FAITHFUL_CORRECTION_SYSTEM_PROMPT,
+    JSON_TEXT_OUTPUT_INSTRUCTION,
     LmStudioAdapterConfig,
     LmStudioCorrectionProvider,
 )
@@ -111,6 +112,10 @@ def test_json_text_mode_omits_response_format_and_keeps_strict_parsing() -> None
     response = provider.correct(_request(), timeout_seconds=2)
 
     assert "response_format" not in captured["payload"]
+    assert JSON_TEXT_OUTPUT_INSTRUCTION in captured["payload"]["messages"][0]["content"]
+    assert "TASK_INPUT:" in captured["payload"]["messages"][1]["content"]
+    assert "REQUIRED_RESPONSE_TEMPLATE:" in captured["payload"]["messages"][1]["content"]
+    assert '"schema_version": "1.0"' in captured["payload"]["messages"][1]["content"]
     assert response.corrected_text == "OpenAI"
 
 

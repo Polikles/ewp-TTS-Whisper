@@ -78,6 +78,9 @@ All notable changes to EWP-transcripts are documented here.
   combinations that fail grammar-constrained structured output. JSON Schema remains the
   default; the fallback omits only `response_format`, retains strict whole-response schema
   parsing and all correction safety gates, and has a distinct prompt/resume identity.
+- Plain-JSON compatibility requests now include an initialized response template and
+  explicitly distinguish immutable task input from the only allowed response keys. This
+  prevents unconstrained models from echoing request fields as their response contract.
 
 ### Documentation
 

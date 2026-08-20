@@ -58,6 +58,19 @@ difference, verify that it is the smallest possible span and repairs recognition
 the speaker's language. Prefer no change whenever uncertain.
 """
 
+JSON_TEXT_OUTPUT_INSTRUCTION = """PLAIN-JSON COMPATIBILITY MODE:
+The user message contains TASK_INPUT followed by REQUIRED_RESPONSE_TEMPLATE. TASK_INPUT is
+source data, not the response shape. Do not copy its language, output_contract,
+editable_tokens, editable_speaker_blocks, or context keys into the answer.
+
+Return exactly one raw JSON object matching REQUIRED_RESPONSE_TEMPLATE. The only permitted
+top-level keys are schema_version, operation_id, and speaker_blocks. Every speaker_blocks
+item must contain exactly speaker_id and corrected_text. Start from the supplied template,
+copy schema_version and operation_id unchanged, preserve every block and speaker_id, and
+edit only corrected_text when a correction is clearly necessary. Do not use Markdown code
+fences and do not add explanations before or after the JSON object.
+"""
+
 
 class _LmStudioSpeakerBlock(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
@@ -125,13 +138,16 @@ class LmStudioCorrectionProvider:
         return self._endpoint
 
     def prompt_sha256(self, prompt_id: str) -> str:
+        identity: JsonObject = {
+            "prompt_id": prompt_id,
+            "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
+            "output_mode": self._config.output_mode,
+            "response_schema": _LmStudioResponse.model_json_schema(),
+        }
+        if self._config.output_mode == "json-text":
+            identity["json_text_instruction"] = JSON_TEXT_OUTPUT_INSTRUCTION
         material = json.dumps(
-            {
-                "prompt_id": prompt_id,
-                "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
-                "output_mode": self._config.output_mode,
-                "response_schema": _LmStudioResponse.model_json_schema(),
-            },
+            identity,
             ensure_ascii=False,
             sort_keys=True,
             separators=(",", ":"),
@@ -174,12 +190,31 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         ],
         "following_read_only_context": [token.model_dump() for token in request.following_context],
     }
+    system_prompt = FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    user_content = json.dumps(transcript, ensure_ascii=False)
+    if config.output_mode == "json-text":
+        template = {
+            "schema_version": "1.0",
+            "operation_id": request.operation_id,
+            "speaker_blocks": [
+                {"speaker_id": speaker_id, "corrected_text": text}
+                for speaker_id, _start, _end, text in editable_blocks
+            ],
+        }
+        system_prompt = f"{system_prompt}\n{JSON_TEXT_OUTPUT_INSTRUCTION}"
+        user_content = (
+            "TASK_INPUT:\n"
+            f"{json.dumps(transcript, ensure_ascii=False)}\n\n"
+            "REQUIRED_RESPONSE_TEMPLATE:\n"
+            f"{json.dumps(template, ensure_ascii=False)}\n\n"
+            "Return only the completed REQUIRED_RESPONSE_TEMPLATE JSON object."
+        )
     payload: JsonObject = {
         "model": config.model_id,
         "temperature": config.temperature,
         "messages": [
-            {"role": "system", "content": FAITHFUL_CORRECTION_SYSTEM_PROMPT},
-            {"role": "user", "content": json.dumps(transcript, ensure_ascii=False)},
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
         ],
     }
     if config.output_mode == "json-schema":
