@@ -3,6 +3,8 @@
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
+
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
     DeterministicMockCorrectionProvider,
@@ -11,7 +13,7 @@ from ewp_transcripts.correction import (
     plan_correction_chunks,
     validate_correction_response,
 )
-from ewp_transcripts.domain.correction import CorrectionChange
+from ewp_transcripts.domain.correction import CorrectionChange, CorrectionResponse
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
 
@@ -111,6 +113,43 @@ def test_short_transcript_produces_one_chunk_without_context() -> None:
     assert (chunk.editable_start, chunk.editable_end) == (0, 3)
     assert request.preceding_context == ()
     assert request.following_context == ()
+
+
+def test_before_mismatch_diagnostic_is_useful_without_exposing_text() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    private_text = "private-transcript-fragment"
+    response = CorrectionResponse(
+        operation_id=request.operation_id,
+        corrected_text="token0 token1 token2",
+        proposed_changes=(
+            CorrectionChange(
+                start_index=1,
+                end_index=2,
+                before=private_text,
+                after="token1",
+                category="asr_lexical",
+            ),
+        ),
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError) as raised:
+        validate_correction_response(request, response)
+
+    message = str(raised.value)
+    assert "span=1:2" in message
+    assert "expected_tokens=1" in message
+    assert "reported_tokens=1" in message
+    assert "expected_sha256=" in message
+    assert "reported_sha256=" in message
+    assert private_text not in message
 
 
 def test_operation_identity_changes_with_provider_or_model() -> None:

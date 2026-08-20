@@ -50,6 +50,12 @@ forwards. Local API use therefore displays a distinct warning with the same reje
 accept-once, and scoped persistent-consent choices. Documentation must not call a local
 API bulletproof or equate it with an in-process offline model.
 
+LM Studio's developer log may display complete request and response bodies, including
+full transcript chunks. Those logs are private transcript artifacts: do not expose them
+on shared infrastructure, do not include them in ordinary benchmark evidence, and apply
+an explicit local retention/deletion policy. Hosting the API on the same private machine
+reduces exposure but does not change this logging behavior.
+
 Loopback is the default LM Studio boundary. A non-loopback LAN/VPN/Tailscale-like server
 requires a dedicated configuration or CLI opt-in and an additional network-transfer
 warning. Plain HTTP may rely on protection supplied by the underlying private overlay;

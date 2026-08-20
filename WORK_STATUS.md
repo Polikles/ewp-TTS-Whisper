@@ -79,6 +79,12 @@ LM Studio adapter smoke gate is complete. A private-corpus operator runbook now 
 Qwen baseline behind short/medium/long pilot review before sequential full-corpus candidate
 generation. Operator-facing manifest construction and report generation remain the next
 implementation slice before final benchmark scores can be claimed.
+The first real-corpus Qwen pilot stopped safely on all three cases because provider
+`before` spans did not exactly match editable source text. No candidate revisions were
+published. Observed runtime load was approximately 23.3 GB VRAM with 95%+ GPU utilization.
+Privacy review also confirmed that LM Studio developer logs display full transcript
+payloads. A content-free mismatch diagnostic is being added before rerunning only the
+shortest case; the full corpus remains blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

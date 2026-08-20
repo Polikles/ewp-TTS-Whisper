@@ -238,8 +238,14 @@ def validate_correction_response(
             token.text for token in request.editable_tokens[change.start_index : change.end_index]
         )
         if before != change.before:
+            expected_sha256 = hashlib.sha256(before.encode("utf-8")).hexdigest()[:16]
+            reported_sha256 = hashlib.sha256(change.before.encode("utf-8")).hexdigest()[:16]
             raise InvalidCorrectionResponseError(
-                "Correction response before text does not match the editable source"
+                "Correction response before text does not match the editable source "
+                f"(span={change.start_index}:{change.end_index}, "
+                f"expected_tokens={change.end_index - change.start_index}, "
+                f"reported_tokens={len(change.before.split())}, "
+                f"expected_sha256={expected_sha256}, reported_sha256={reported_sha256})"
             )
         if not _change_category_matches(change.before, change.after, change.category):
             raise InvalidCorrectionResponseError(

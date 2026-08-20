@@ -23,6 +23,8 @@ Q8_0 model with 32K context and temperature zero. Keep the LM Studio developer l
 Set paths for this machine. `EWP_CORPUS_ROOT` must be the private benchmark directory
 that contains `1 canonical outputs` and `3 apply`. The endpoint may be loopback, LAN, VPN,
 or a Tailscale-like address; non-loopback endpoints require the explicit CLI opt-in below.
+These variables are interpreted by Bash, not by `transcriber`, so use a WSL path such as
+`/mnt/c/Users/name/...`; a `C:\Users\...` value will not work in `test`, `find`, or loops.
 
 ```bash
 export EWP_CORPUS_ROOT="/absolute/path/to/private benchmark"
@@ -101,6 +103,11 @@ done
 Both privacy warnings are expected for the configured non-loopback endpoint. Any error,
 retry exhaustion, unexpected model identity, or malformed response stops the pilot. Do not
 weaken validation or edit resume JSON.
+
+LM Studio's developer log displays full API request and response payloads, including
+private transcript text. Treat that log as private corpus data. Do not enable or share it
+on a shared machine, and clear it according to the local retention policy after collecting
+only the non-content evidence required by this runbook.
 
 After all previews pass, publish the three immutable candidates. These commands must reuse
 the validated resume entries, so LM Studio should log no new completion requests:
