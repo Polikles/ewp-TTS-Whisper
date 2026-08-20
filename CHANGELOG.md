@@ -80,6 +80,10 @@ All notable changes to EWP-transcripts are documented here.
   use while retaining loopback by default, exact-scope consent, and an additional network
   warning. Recorded the Qwen 14B Q8_0 32K/18.5 GB VRAM observation and planned Bielik
   Q8_0 versus CPU-offloaded F16 comparison as configuration-specific evidence.
+- Added the post-functional public benchmark plan: BIGOS, FLEURS, Common Voice, and
+  Multilingual LibriSpeech for lexical evaluation; VoxConverse and AMI for diarization;
+  strict split/license/provenance rules; an optional separate general Polish dictionary;
+  and a later licensed three-or-more-speaker public-podcast evaluation tier.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

@@ -22,11 +22,14 @@ items belong to one monolithic "Version 2" release.
 5. **v0.4 synchronized HTML transcript/export**, including the mock player, seeking,
    highlighting, accessibility, security, and raw/revised/translated-source tests in
    section 12.
-6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence and
-   never implemented as a global dictionary.
-7. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
+6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence;
+   later public-corpus work may also propose a separate optional general Polish resource,
+   but neither kind is inherited or enabled silently.
+7. After functional requirements and private-corpus validation, run separately licensed
+   public-corpus WER and diarization benchmarks described in section 9.
+8. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
    based on observed value and risk.
-8. GUI after the planned core functions are stable; GUI reuses application services and
+9. GUI after the planned core functions are stable; GUI reuses application services and
    does not implement a parallel pipeline.
 
 The earlier small production pilot requirement is superseded operationally by the larger
@@ -134,13 +137,12 @@ Exact defaults are deferred until automated-correction benchmarks. Overlap is co
 only: every editable source range belongs to exactly one chunk, preventing conflicting
 corrections in adjacent requests.
 
-## 3. Optional project-scoped dictionaries — planned for v0.4
+## 3. Optional dictionaries — project-scoped work planned for v0.4
 
 Dictionary support remains conditional on benchmark evidence and is not part of v0.2.0.
 
-If implemented:
+Project dictionaries, if implemented:
 
-- there is no global dictionary;
 - users may create/select multiple small named dictionaries scoped to a project, for
   example `podcast`,
   `training`, or `history_lectures`;
@@ -157,6 +159,15 @@ audits for frequent and consistent corrections, including proper names and canon
 forms such as `OpenAI` versus `Open AI`. Automatically discovered items are candidates
 only: a user must approve them before they affect correction or translation. Benchmarks
 must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
+
+After all functional requirements and the private benchmark are complete, BIGOS may also
+be evaluated as a candidate source for an optional general Polish dictionary. Such a
+resource must live in a separate repository catalog from project dictionaries, be
+versioned and disabled by default, and require explicit selection. Dataset license and
+redistribution terms must be reviewed before committing derived entries. Training or
+dictionary-extraction partitions must be disjoint from held-out evaluation partitions;
+the same examples cannot both teach the dictionary and inflate its reported WER result.
+The no-dictionary baseline remains mandatory.
 
 ## 4. Manual translation pipeline — planned for v0.4
 
@@ -315,6 +326,36 @@ quantization, cost, and benchmark provenance.
 The expanded manual correction corpus should also become the reference source for lexical
 correction benchmarks. Separate timestamp and diarization ground truth is still required
 for timestamp/DER/JER evaluation.
+
+### Public-dataset validation after functional completion
+
+After all functional requirements pass and private-corpus evaluation is complete, add a
+reproducible public-dataset matrix comparing supported ASR models, presets, correction
+paths, and optional dictionaries. Candidate lexical/recording corpora are:
+
+- BIGOS, for Polish WER evaluation and possible general-dictionary candidate extraction;
+- Google FLEURS, for multilingual recordings and references;
+- Mozilla Common Voice;
+- Multilingual LibriSpeech.
+
+Candidate diarization corpora are:
+
+- VoxConverse;
+- AMI Meeting Corpus.
+
+Every dataset requires a pinned version/configuration, source and license record,
+download/preparation hashes, official split preservation, normalization declaration,
+language/subset selection, and a report of exclusions. WER/CER comparisons must not mix
+dictionary-training material into their held-out test split. Diarization experiments must
+report DER/JER methodology, collar and overlap policy, speaker-count assumptions, and the
+exact pyannote/segmentation settings. Results should be presented as a table alongside
+the private real-podcast benchmark, not merged into one opaque score.
+
+An optional later real-world tier may add a small number of long-form public YouTube
+podcast discussions with three or more speakers. Inclusion requires a separate license,
+terms, privacy, and redistribution review plus manually verified references. URLs or
+public availability alone do not authorize committing media or transcripts. This tier is
+supplementary and does not replace controlled WER or diarization corpora.
 
 ## 10. Advanced channel handling — later, release unassigned
 

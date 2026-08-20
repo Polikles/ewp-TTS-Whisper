@@ -93,3 +93,18 @@ candidate WER/CER, word-error reduction, and excess word errors, but no transcri
 The current report is the lexical foundation; proposed-change precision/recall,
 unsupported or stylistic changes, speaker preservation, audit completeness, latency,
 volume, cost, and retry outcomes remain required before provider acceptance.
+
+## 6. Later public benchmark matrix
+
+After functional requirements and private-corpus evaluation, qualify public datasets in
+separate, versioned manifests. Initial candidates are BIGOS, Google FLEURS, Mozilla
+Common Voice, and Multilingual LibriSpeech for lexical/multilingual evaluation, plus
+VoxConverse and AMI Meeting Corpus for diarization settings. Dataset licenses, official
+splits, preparation hashes, normalization, exclusions, and metric policies must be
+recorded per corpus rather than assumed interchangeable.
+
+Any general Polish dictionary derived from BIGOS must use a training partition disjoint
+from the held-out WER partition and remain an optional, separately versioned artifact.
+Reports retain a no-dictionary baseline and compare datasets in a table without collapsing
+them into one score. A later supplementary three-or-more-speaker YouTube podcast tier
+requires independently verified references and explicit permission/licensing review.

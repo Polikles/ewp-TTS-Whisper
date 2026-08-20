@@ -151,8 +151,10 @@ corrections as immutable revision snapshots.
    artifact.
 4. In v0.4, add and test synchronized standalone/embeddable HTML export, including later
    bilingual output.
-5. In v0.4, consider small project-scoped dictionaries only if benchmarks justify them;
-   do not add a global dictionary.
+5. In v0.4, consider small project-scoped dictionaries only if benchmarks justify them.
+   Later public-corpus work may separately evaluate an optional, disabled-by-default
+   general Polish dictionary derived from licensed training splits without contaminating
+   held-out WER evaluation.
 6. Reopen English, three-speaker, timestamp, DER/JER, preset, and hardware gates as
    suitable references become available.
 7. Keep guarded 3+ channel isolated-speaker and program/surround handling in the later,
@@ -162,6 +164,10 @@ corrections as immutable revision snapshots.
    Apple Silicon build tested on rented MacinCloud and/or Scaleway hardware. Candidate
    model/quantization matrices are recorded in `docs/99-roadmap-v2.md`; none are current
    support claims.
+9. After functional and private-benchmark completion, add pinned public-corpus tables:
+   BIGOS, FLEURS, Common Voice, and Multilingual LibriSpeech for lexical evaluation;
+   VoxConverse and AMI for diarization; and only later an optional licensed/manual-gold
+   tier of long three-or-more-speaker public podcast discussions.
 
 ## v0.2.0 release closure
 
