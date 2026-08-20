@@ -158,8 +158,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
-- Replaced the quadratic full-matrix lexical scorer with an exact adaptive-banded
-  implementation, allowing long near-matching podcast transcripts to produce WER/CER
+- Replaced the quadratic pure-Python lexical scorer with RapidFuzz's exact optimized
+  Levenshtein edit operations, allowing long podcast transcripts to produce WER/CER
   correction reports in seconds rather than stalling on character-level comparison.
 
 ## 0.2.0 — internal release candidate — 2026-08-19

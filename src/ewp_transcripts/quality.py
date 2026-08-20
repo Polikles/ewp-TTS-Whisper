@@ -9,6 +9,8 @@ from dataclasses import asdict, dataclass
 from difflib import SequenceMatcher
 from pathlib import Path
 
+from rapidfuzz.distance import Levenshtein
+
 NORMALIZATION_VERSION = "ewp-phase0-lexical-v1"
 
 
@@ -42,56 +44,17 @@ def normalize_transcript(text: str) -> str:
 
 
 def error_counts[Item](reference: Sequence[Item], hypothesis: Sequence[Item]) -> ErrorCounts:
-    """Return exact deterministic Levenshtein counts using an adaptive diagonal band."""
+    """Return exact deterministic Levenshtein counts through optimized native editops."""
 
-    reference_length = len(reference)
-    hypothesis_length = len(hypothesis)
-    band = max(abs(reference_length - hypothesis_length), 32)
-    while True:
-        outcome = _banded_error_counts(reference, hypothesis, band=band)
-        if outcome is not None and outcome[0] <= band:
-            break
-        if band >= max(reference_length, hypothesis_length):
-            raise RuntimeError("Levenshtein scorer failed to cover the complete matrix")
-        band = min(max(reference_length, hypothesis_length), band * 2)
-    _, substitutions, deletions, insertions = outcome
+    substitutions = deletions = insertions = 0
+    for operation in Levenshtein.editops(reference, hypothesis):
+        if operation.tag == "replace":
+            substitutions += 1
+        elif operation.tag == "delete":
+            deletions += 1
+        else:
+            insertions += 1
     return ErrorCounts(substitutions, deletions, insertions, len(reference))
-
-
-def _banded_error_counts[Item](
-    reference: Sequence[Item], hypothesis: Sequence[Item], *, band: int
-) -> tuple[int, int, int, int] | None:
-    """Evaluate only cells that can belong to a path with at most ``band`` edits."""
-
-    reference_length = len(reference)
-    previous = {index: (index, 0, index, 0) for index in range(min(reference_length, band) + 1)}
-    for hypothesis_index, hypothesis_item in enumerate(hypothesis, start=1):
-        start = max(0, hypothesis_index - band)
-        end = min(reference_length, hypothesis_index + band)
-        current: dict[int, tuple[int, int, int, int]] = {}
-        if start == 0:
-            current[0] = (hypothesis_index, 0, 0, hypothesis_index)
-        for reference_index in range(max(1, start), end + 1):
-            diagonal = previous.get(reference_index - 1)
-            if diagonal is not None and reference[reference_index - 1] == hypothesis_item:
-                current[reference_index] = diagonal
-                continue
-            candidates: list[tuple[int, int, int, int]] = []
-            if diagonal is not None:
-                candidates.append((diagonal[0] + 1, diagonal[1] + 1, diagonal[2], diagonal[3]))
-            left = current.get(reference_index - 1)
-            if left is not None:
-                candidates.append((left[0] + 1, left[1], left[2] + 1, left[3]))
-            above = previous.get(reference_index)
-            if above is not None:
-                candidates.append((above[0] + 1, above[1], above[2], above[3] + 1))
-            if candidates:
-                current[reference_index] = min(
-                    candidates,
-                    key=lambda value: (value[0], value[2] + value[3], value[3]),
-                )
-        previous = current
-    return previous.get(reference_length)
 
 
 def score(reference_text: str, hypothesis_text: str) -> dict[str, object]:

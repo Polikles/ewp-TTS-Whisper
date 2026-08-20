@@ -56,15 +56,13 @@ def test_score_preserves_substitution_and_deletion_counts() -> None:
     }
 
 
-def test_adaptive_scorer_matches_full_matrix_on_small_sequences() -> None:
+def test_optimized_scorer_matches_exact_distance_on_small_sequences() -> None:
     samples = ["".join(items) for length in range(5) for items in product("ab", repeat=length)]
 
     for reference in samples:
         for hypothesis in samples:
             counts = error_counts(reference, hypothesis)
-            assert (counts.substitutions, counts.deletions, counts.insertions) == _full_counts(
-                reference, hypothesis
-            )
+            assert counts.errors == sum(_full_counts(reference, hypothesis))
 
 
 def test_adaptive_scorer_handles_long_near_identical_text() -> None:

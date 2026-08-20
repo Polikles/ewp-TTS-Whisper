@@ -43,6 +43,14 @@ Verified facts:
 
 Used to confirm availability of the `large-v3` model. The final `accurate` preset model must be selected through project benchmarks rather than upstream descriptions alone.
 
+## RapidFuzz
+
+- Documentation: https://rapidfuzz.github.io/RapidFuzz/
+- Repository: https://github.com/rapidfuzz/RapidFuzz
+
+Used for exact optimized Levenshtein edit operations in long-transcript WER/CER reports.
+The project is distributed under the MIT license.
+
 ## Caption and transcript platforms
 
 - YouTube supported subtitle formats: https://support.google.com/youtube/answer/2734698

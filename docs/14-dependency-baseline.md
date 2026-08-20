@@ -6,7 +6,7 @@ promoted application lock had SHA-256
 Later schema-validation development tooling added `jsonschema` and its lock-only
 transitive packages without changing the accepted runtime ML versions. The current
 committed `uv.lock` SHA-256 is
-`b4bdea1f4c28aa66ce36a3820e33ba2ab81d4edc70d89b19c0f84de42c3faf61`.
+`9e2743e7afcca09ef5a934fc1e346cc410293bdd9272b271dfde0d4a22bf18b7`.
 
 ## 1. Environment
 
@@ -19,6 +19,7 @@ committed `uv.lock` SHA-256 is
 | GPU | NVIDIA RTX 3090, 24 GB |
 | Dependency management | `uv` + lockfile |
 | Media tooling | FFmpeg + ffprobe |
+| Exact WER/CER edit operations | RapidFuzz 3.14.x |
 
 Ubuntu 26.04 LTS has been released, but 24.04 remains the baseline until the complete ML/CUDA compatibility matrix passes.
 
@@ -43,7 +44,7 @@ The ML dependency versions are frozen by `pyproject.toml` and the promoted `uv.l
 - models and validation: Pydantic 2;
 - tests: pytest and Hypothesis;
 - code quality: Ruff and mypy or pyright;
-- WER/CER: jiwer;
+- WER/CER: RapidFuzz exact Levenshtein edit operations;
 - JSON Schema: Draft 2020-12;
 - logging: structlog, or different structured layer that prevents secret leakage.
 
