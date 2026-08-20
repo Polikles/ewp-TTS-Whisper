@@ -64,11 +64,12 @@ source data, not the response shape. Do not copy its language, output_contract,
 editable_tokens, editable_speaker_blocks, or context keys into the answer.
 
 Return exactly one raw JSON object matching REQUIRED_RESPONSE_TEMPLATE. The only permitted
-top-level keys are schema_version, operation_id, and speaker_blocks. Every speaker_blocks
-item must contain exactly speaker_id and corrected_text. Start from the supplied template,
-copy schema_version and operation_id unchanged, preserve every block and speaker_id, and
-edit only corrected_text when a correction is clearly necessary. Do not use Markdown code
-fences and do not add explanations before or after the JSON object.
+top-level key is speaker_blocks. Every speaker_blocks item must contain exactly speaker_id
+and corrected_text. Start from the supplied template, preserve every block and speaker_id,
+and edit only corrected_text when a correction is clearly necessary. The application binds
+this synchronous response to the request locally; do not return operation_id or any other
+metadata. Do not use Markdown code fences and do not add explanations before or after the
+JSON object.
 """
 
 
@@ -84,6 +85,14 @@ class _LmStudioResponse(BaseModel):
 
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
+    speaker_blocks: tuple[_LmStudioSpeakerBlock, ...] = Field(min_length=1)
+
+
+class _LmStudioTextResponse(BaseModel):
+    """Minimal synchronous fallback response without redundant opaque identifiers."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
     speaker_blocks: tuple[_LmStudioSpeakerBlock, ...] = Field(min_length=1)
 
 
@@ -142,7 +151,11 @@ class LmStudioCorrectionProvider:
             "prompt_id": prompt_id,
             "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
             "output_mode": self._config.output_mode,
-            "response_schema": _LmStudioResponse.model_json_schema(),
+            "response_schema": (
+                _LmStudioTextResponse.model_json_schema()
+                if self._config.output_mode == "json-text"
+                else _LmStudioResponse.model_json_schema()
+            ),
         }
         if self._config.output_mode == "json-text":
             identity["json_text_instruction"] = JSON_TEXT_OUTPUT_INSTRUCTION
@@ -173,7 +186,7 @@ class LmStudioCorrectionProvider:
             payload,
             timeout_seconds,
         )
-        return _parse_chat_response(document, request)
+        return _parse_chat_response(document, request, output_mode=self._config.output_mode)
 
 
 def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> JsonObject:
@@ -194,8 +207,6 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
     user_content = json.dumps(transcript, ensure_ascii=False)
     if config.output_mode == "json-text":
         template = {
-            "schema_version": "1.0",
-            "operation_id": request.operation_id,
             "speaker_blocks": [
                 {"speaker_id": speaker_id, "corrected_text": text}
                 for speaker_id, _start, _end, text in editable_blocks
@@ -229,15 +240,29 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
     return payload
 
 
-def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> CorrectionResponse:
+def _parse_chat_response(
+    document: JsonObject,
+    request: CorrectionRequest,
+    *,
+    output_mode: Literal["json-schema", "json-text"],
+) -> CorrectionResponse:
     try:
         choices = document["choices"]
         content = choices[0]["message"]["content"]
         if not isinstance(content, str):
             raise TypeError
-        wire_response = _LmStudioResponse.model_validate_json(content)
-        if wire_response.operation_id != request.operation_id:
-            raise InvalidCorrectionResponseError("LM Studio response operation ID does not match")
+        if output_mode == "json-text":
+            text_response = _LmStudioTextResponse.model_validate_json(content)
+            wire_response = _LmStudioResponse(
+                operation_id=request.operation_id,
+                speaker_blocks=text_response.speaker_blocks,
+            )
+        else:
+            wire_response = _LmStudioResponse.model_validate_json(content)
+            if wire_response.operation_id != request.operation_id:
+                raise InvalidCorrectionResponseError(
+                    "LM Studio response operation ID does not match"
+                )
         usage = document.get("usage")
         correction_usage = None
         if isinstance(usage, dict):

@@ -94,7 +94,6 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
 def test_json_text_mode_omits_response_format_and_keeps_strict_parsing() -> None:
     captured: dict[str, Any] = {}
     content = {
-        "operation_id": "operation-1",
         "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
     }
 
@@ -115,13 +114,12 @@ def test_json_text_mode_omits_response_format_and_keeps_strict_parsing() -> None
     assert JSON_TEXT_OUTPUT_INSTRUCTION in captured["payload"]["messages"][0]["content"]
     assert "TASK_INPUT:" in captured["payload"]["messages"][1]["content"]
     assert "REQUIRED_RESPONSE_TEMPLATE:" in captured["payload"]["messages"][1]["content"]
-    assert '"schema_version": "1.0"' in captured["payload"]["messages"][1]["content"]
+    assert '"speaker_blocks"' in captured["payload"]["messages"][1]["content"]
     assert response.corrected_text == "OpenAI"
 
 
 def test_json_text_mode_rejects_markdown_wrapped_json() -> None:
     content = {
-        "operation_id": "operation-1",
         "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
     }
     provider = LmStudioCorrectionProvider(
@@ -132,6 +130,20 @@ def test_json_text_mode_rejects_markdown_wrapped_json() -> None:
     )
 
     with pytest.raises(InvalidCorrectionResponseError, match="schema_errors="):
+        provider.correct(_request(), timeout_seconds=2)
+
+
+def test_json_text_mode_rejects_redundant_operation_id() -> None:
+    content = {
+        "operation_id": "operation-1,",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="bielik", output_mode="json-text"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError, match="operation_id:extra_forbidden"):
         provider.correct(_request(), timeout_seconds=2)
 
 

@@ -81,6 +81,9 @@ All notable changes to EWP-transcripts are documented here.
 - Plain-JSON compatibility requests now include an initialized response template and
   explicitly distinguish immutable task input from the only allowed response keys. This
   prevents unconstrained models from echoing request fields as their response contract.
+- Removed the redundant opaque operation ID from the synchronous plain-JSON fallback
+  response after Bielik copied it with a one-character mutation. The application binds the
+  response locally while retaining exact block count, order, speaker, text, and drift gates.
 
 ### Documentation
 
