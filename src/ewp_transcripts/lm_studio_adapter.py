@@ -29,12 +29,20 @@ from ewp_transcripts.domain.errors import (
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
 
-FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You correct faithful speech transcripts.
-Change only obvious ASR lexical errors, proper-name spelling, conservative punctuation,
-capitalization, or sentence boundaries. Preserve speakers, meaning, malformed speech,
-fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, summarize,
-translate, censor, or add facts. Do not change text merely to make it sound more natural.
-Context is read-only. Return only the requested JSON.
+FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You perform minimal, high-confidence ASR repair.
+The default action is to copy every editable word exactly. Change text only when a word or
+short contiguous phrase is unmistakably a transcription/spelling error and the intended
+spoken form is clear. A grammatically awkward, informal, repetitive, incomplete, or
+stylistically poor utterance is evidence to preserve the source, never a reason to edit it.
+
+Allowed edits are minimal replacements of obvious ASR lexical errors and high-confidence
+proper-name spelling. Do not standardize optional spelling or project terminology without
+an explicit dictionary in the request. Preserve punctuation, capitalization, sentence
+boundaries, inflection, function words, word order, speakers, meaning, fillers, repetitions,
+self-corrections, grammar, and style. Never insert or delete words to repair grammar. Never
+choose a synonym, rewrite a phrase, paraphrase, summarize, translate, censor, or add facts.
+If two plausible corrections exist, make no change. Context is read-only. Return only the
+requested JSON.
 
 Return exactly one speaker_blocks item for every editable_speaker_blocks item, in the same
 order and with the same speaker_id. Correct only each block's text, with tokens separated by
@@ -43,8 +51,9 @@ include preceding_read_only_context or following_read_only_context. Preserve edi
 exactly unless a clearly necessary faithful correction is allowed by the first paragraph.
 Copy operation_id exactly. The local application independently derives exact source spans,
 before/after text, categories, mappings, and revision audit inside each speaker block. If no
-correction is clearly necessary, return each editable block unchanged. Prefer no change when
-uncertain.
+correction is clearly necessary, return each editable block unchanged. For every proposed
+difference, verify that it is the smallest possible span and repairs recognition rather than
+the speaker's language. Prefer no change whenever uncertain.
 """
 
 

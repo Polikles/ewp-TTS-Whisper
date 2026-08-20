@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v10",
+        prompt_id="faithful-correction-v11",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -72,6 +72,9 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert captured["url"] == "http://127.0.0.1:1234/v1/chat/completions"
     assert captured["timeout"] == 9
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "Never insert or delete words to repair grammar" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "If two plausible corrections exist, make no change" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "explicit dictionary" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "same speaker_id" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
     assert "same ordered speaker blocks" in user["output_contract"]

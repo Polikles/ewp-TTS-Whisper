@@ -70,6 +70,10 @@ All notable changes to EWP-transcripts are documented here.
 - Added correction-specific lexical normalization that excludes balanced parenthetical
   and square-bracket review annotations, preventing manual speaker notes from being
   counted as ASR or LLM errors.
+- Tightened the LM Studio correction prompt to v11 after the Qwen 14B v10 pilot scored
+  worse than raw ASR against manual gold. Copying is now the default; grammar repair,
+  stylistic rewriting, ambiguous edits, and dictionary-free terminology normalization
+  are explicitly forbidden.
 
 ### Documentation
 
