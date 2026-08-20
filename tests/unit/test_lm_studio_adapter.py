@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v6",
+        prompt_id="faithful-correction-v7",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -83,6 +83,8 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert "before MUST equal" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Never count array positions" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Never group non-adjacent corrections" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "smallest contiguous source span" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert '"before":"anna."' in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Lexical\nword-form changes" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
     assert "every changed editable token ID" in user["index_contract"]

@@ -121,6 +121,9 @@ All notable changes to EWP-transcripts are documented here.
 - Clarified in prompt v6 that every proposed-change object represents one contiguous source
   replacement and that non-adjacent corrections require separate objects. Content-free
   failures now include only the referenced numeric positions and count.
+- Added prompt-v7 minimal-span and copy-only-before rules with a concrete generic example
+  after Qwen removed punctuation from otherwise correctly addressed source evidence. Exact
+  local before-text validation remains unchanged.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

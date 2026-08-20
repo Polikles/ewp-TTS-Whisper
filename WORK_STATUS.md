@@ -92,7 +92,10 @@ v5 now requires the explicit ordered list of every changed token ID, eliminating
 interpretation entirely. Only the shortest case must be rerun next; the full corpus remains
 blocked. The value-free diagnostic showed a structurally valid response that grouped
 non-adjacent token IDs into one change. Prompt v6 now defines one contiguous replacement
-per object and separate objects for non-adjacent edits. The shortest case must be rerun.
+per object and separate objects for non-adjacent edits. The next response used a correct
+contiguous span but removed punctuation inside its `before` audit copy. Prompt v7 now
+requires minimal spans and copy-only `before` evidence with a concrete generic example.
+The shortest case must be rerun; the full corpus remains blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

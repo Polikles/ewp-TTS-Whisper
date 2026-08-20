@@ -54,6 +54,13 @@ change letter case only; sentence_boundary may change punctuation/case only. Lex
 word-form changes are never punctuation changes. Before returning JSON, reconstruct
 corrected_text from the proposed changes yourself. If it differs from your proposed
 corrected_text, remove or fix the inconsistent change. Prefer no change when uncertain.
+
+Use the smallest contiguous source span that fully contains the edit. `before` is copy-only
+audit evidence: copy it from the source before writing `after`, and never apply any intended
+correction to `before`. Example: if editable token `word_17` is `anna.` and the following
+token is `Witamy`, a capitalization-only correction is
+{"source_token_ids":["word_17"],"before":"anna.","after":"Anna.","category":"capitalization"}.
+Do not include the unchanged following token, and do not write `before` as `Anna.` or `anna`.
 """
 
 
