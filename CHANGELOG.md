@@ -124,6 +124,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added prompt-v7 minimal-span and copy-only-before rules with a concrete generic example
   after Qwen removed punctuation from otherwise correctly addressed source evidence. Exact
   local before-text validation remains unchanged.
+- Simplified prompt v8 to one stable start token ID plus verbatim `before` after Qwen copied
+  an exact 11-token span but listed only four IDs. The adapter derives one unique contiguous
+  end locally and rejects unknown/context starts or unmatched source text.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

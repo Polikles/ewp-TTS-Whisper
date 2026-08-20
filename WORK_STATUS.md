@@ -95,7 +95,9 @@ non-adjacent token IDs into one change. Prompt v6 now defines one contiguous rep
 per object and separate objects for non-adjacent edits. The next response used a correct
 contiguous span but removed punctuation inside its `before` audit copy. Prompt v7 now
 requires minimal spans and copy-only `before` evidence with a concrete generic example.
-The shortest case must be rerun; the full corpus remains blocked.
+The next response copied an exact 11-token source span but listed only four IDs. Prompt v8
+now requires one stable start ID plus exact `before`; the adapter derives the unique
+contiguous end locally. The shortest case must be rerun; the full corpus remains blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

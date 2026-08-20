@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v7",
+        prompt_id="faithful-correction-v8",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -60,7 +60,7 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
             "corrected_text": "OpenAI",
             "proposed_changes": [
                 {
-                    "source_token_ids": ["word_000002", "word_000003"],
+                    "start_token_id": "word_000002",
                     "before": "Open AI",
                     "after": "OpenAI",
                     "category": "proper_name",
@@ -81,13 +81,13 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert captured["timeout"] == 9
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "before MUST equal" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "Never count array positions" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "count array positions" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Never group non-adjacent corrections" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "smallest contiguous source span" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert '"before":"anna."' in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Lexical\nword-form changes" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
-    assert "every changed editable token ID" in user["index_contract"]
+    assert "application derives its end" in user["index_contract"]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
     assert user["editable_tokens"][0]["token_id"] == "word_000002"
     assert response.corrected_text == "OpenAI"
@@ -163,7 +163,7 @@ def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
         provider.correct(_request(), timeout_seconds=2)
 
     message = str(raised.value)
-    assert "proposed_changes.0.source_token_ids:missing" in message
+    assert "proposed_changes.0.start_token_id:missing" in message
     assert "proposed_changes.0.obsolete_start_index:extra_forbidden" in message
     assert private_text not in message
 
@@ -174,7 +174,7 @@ def test_adapter_rejects_change_that_references_read_only_token_id() -> None:
         "corrected_text": "Open AI",
         "proposed_changes": [
             {
-                "source_token_ids": ["word_000001"],
+                "start_token_id": "word_000001",
                 "before": "private",
                 "after": "changed",
                 "category": "asr_lexical",
@@ -191,27 +191,14 @@ def test_adapter_rejects_change_that_references_read_only_token_id() -> None:
         provider.correct(_request(), timeout_seconds=2)
 
 
-def test_adapter_rejects_noncontiguous_change_token_ids() -> None:
-    request = _request().model_copy(
-        update={
-            "editable_tokens": (
-                *_request().editable_tokens,
-                CorrectionToken(
-                    local_index=2,
-                    token_id="word_000004",
-                    text="dalej",
-                    speaker_id="speaker_001",
-                ),
-            )
-        }
-    )
+def test_adapter_rejects_before_that_does_not_identify_span_from_start() -> None:
     content = {
         "operation_id": "operation-1",
         "corrected_text": "Open AI dalej",
         "proposed_changes": [
             {
-                "source_token_ids": ["word_000002", "word_000004"],
-                "before": "private",
+                "start_token_id": "word_000002",
+                "before": "Open dalej",
                 "after": "changed",
                 "category": "asr_lexical",
             }
@@ -223,5 +210,5 @@ def test_adapter_rejects_noncontiguous_change_token_ids() -> None:
     )
 
     with pytest.raises(InvalidCorrectionResponseError) as raised:
-        provider.correct(request, timeout_seconds=2)
-    assert "positions=0,2, count=2" in str(raised.value)
+        provider.correct(_request(), timeout_seconds=2)
+    assert "start=0, matching_end_count=0" in str(raised.value)

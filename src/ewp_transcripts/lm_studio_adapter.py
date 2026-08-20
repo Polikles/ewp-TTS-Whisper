@@ -36,15 +36,14 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-Each proposed_changes item is exactly one contiguous source replacement. Its
-source_token_ids MUST list every token in that one contiguous span in original order,
-including any internally unchanged token needed inside a multi-token replacement. Copy
-these IDs exactly. Never group non-adjacent corrections into one item; emit a separate
-change item for every non-adjacent correction. The list MUST be non-empty and contain no
-read-only context ID. Never count array positions and never invent boundary semantics.
-For every change, before MUST equal the source token texts named by
-source_token_ids joined with exactly one ASCII space, including original punctuation and
-capitalization. Changes MUST be sorted and non-overlapping. corrected_text MUST exactly
+Each proposed_changes item is exactly one contiguous source replacement. Copy
+start_token_id from the first changed editable token. Never group non-adjacent corrections
+into one item; emit a separate change item for every non-adjacent correction. Never use a
+read-only context ID, count array positions, calculate an end boundary, or list the other
+token IDs. For every change, before MUST equal the complete contiguous source text beginning
+at start_token_id, joined with exactly one ASCII space and including original punctuation
+and capitalization. The local application derives the end from this exact text. Changes
+MUST be sorted and non-overlapping. corrected_text MUST exactly
 equal all editable token texts after applying proposed_changes, joined with exactly one
 ASCII space. Copy operation_id exactly.
 Never include read-only context in corrected_text or changes. If no correction is clearly
@@ -59,7 +58,7 @@ Use the smallest contiguous source span that fully contains the edit. `before` i
 audit evidence: copy it from the source before writing `after`, and never apply any intended
 correction to `before`. Example: if editable token `word_17` is `anna.` and the following
 token is `Witamy`, a capitalization-only correction is
-{"source_token_ids":["word_17"],"before":"anna.","after":"Anna.","category":"capitalization"}.
+{"start_token_id":"word_17","before":"anna.","after":"Anna.","category":"capitalization"}.
 Do not include the unchanged following token, and do not write `before` as `Anna.` or `anna`.
 """
 
@@ -67,7 +66,7 @@ Do not include the unchanged following token, and do not write `before` as `Anna
 class _LmStudioChange(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
-    source_token_ids: tuple[str, ...] = Field(min_length=1)
+    start_token_id: str = Field(min_length=1)
     before: str = Field(min_length=1)
     after: str = Field(min_length=1)
     category: CorrectionCategory
@@ -169,8 +168,8 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         "operation_id": request.operation_id,
         "language": request.language,
         "index_contract": (
-            "source_token_ids lists every changed editable token ID in original contiguous "
-            "order; before is the exact one-space join of those token texts"
+            "start_token_id is copied from the first changed editable token; exact before "
+            "text identifies the complete contiguous span and the application derives its end"
         ),
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
@@ -241,22 +240,24 @@ def _to_correction_response(
     changes: list[CorrectionChange] = []
     for change in response.proposed_changes:
         try:
-            change_positions = [positions[token_id] for token_id in change.source_token_ids]
+            start = positions[change.start_token_id]
         except KeyError as error:
             raise ValueError("LM Studio change references a non-editable token ID") from error
-        if len(change_positions) != len(set(change_positions)):
-            raise ValueError("LM Studio change token IDs are duplicated")
-        start = change_positions[0]
-        if change_positions != list(range(start, start + len(change_positions))):
-            summary = ",".join(str(position) for position in change_positions[:16])
+        matching_ends = [
+            end
+            for end in range(start + 1, len(request.editable_tokens) + 1)
+            if " ".join(token.text for token in request.editable_tokens[start:end]) == change.before
+        ]
+        if len(matching_ends) != 1:
             raise ValueError(
-                "LM Studio change token IDs are not ordered and contiguous "
-                f"(positions={summary}, count={len(change_positions)})"
+                "LM Studio before text does not identify one exact contiguous source span "
+                f"(start={start}, matching_end_count={len(matching_ends)})"
             )
+        end = matching_ends[0]
         changes.append(
             CorrectionChange(
                 start_index=start,
-                end_index=start + len(change_positions),
+                end_index=end,
                 before=change.before,
                 after=change.after,
                 category=change.category,
