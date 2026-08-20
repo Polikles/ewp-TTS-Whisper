@@ -153,6 +153,11 @@ corrections as immutable revision snapshots.
    suitable references become available.
 7. Keep guarded 3+ channel isolated-speaker and program/surround handling in the later,
    release-unassigned backlog; it is explicitly not a current priority.
+8. After functional requirements, qualify correction presets: a GTX 1070 low-VRAM floor,
+   optional 16 GB RAM CPU-only operation, and a separate optional 16 GB unified-memory
+   Apple Silicon build tested on rented MacinCloud and/or Scaleway hardware. Candidate
+   model/quantization matrices are recorded in `docs/99-roadmap-v2.md`; none are current
+   support claims.
 
 ## v0.2.0 release closure
 

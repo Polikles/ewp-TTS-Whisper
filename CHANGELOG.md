@@ -72,6 +72,10 @@ All notable changes to EWP-transcripts are documented here.
   and resume paths, initial local benchmark candidates, and the deferred OpenRouter stage.
 - Updated implementation status after completing LM Studio CLI/consent wiring and exact
   prompt-content provenance; the first real local smoke run remains an operator gate.
+- Added benchmark-gated correction preset targets: GTX 1070 as the lowest planned GPU
+  validation floor, optional CPU-only operation with 16 GB recommended RAM, and a later
+  separate Apple Silicon build with 16 GB unified memory. Recorded candidate model and
+  quantization matrices plus rented MacinCloud/Scaleway CLI/GUI validation provenance.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

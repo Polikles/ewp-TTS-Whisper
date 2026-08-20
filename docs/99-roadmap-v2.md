@@ -244,7 +244,8 @@ raw PL -> automated correction -> automated translation -> compare with EN gold
 
 - `balanced`;
 - `low-vram`;
-- `cpu`;
+- optional `cpu-only`;
+- optional Apple Silicon preset after a compatible application build exists;
 - automatic batch-size selection;
 - bundled or explicitly downloaded licensed audio samples;
 - benchmark of speed, VRAM, WER, timestamps, and diarization;
@@ -254,6 +255,55 @@ raw PL -> automated correction -> automated translation -> compare with EN gold
   compared without relying on terminal summaries;
 - HTML/JSON report;
 - hardware comparison.
+
+These names are roadmap targets, not current compatibility or quality claims. Preset
+acceptance requires complete transcription and correction benchmarks on its stated
+hardware. No preset below the GTX 1070 target is planned.
+
+### Low-VRAM local correction target
+
+The lowest planned GPU tier will be physically validated on a PC with an NVIDIA GTX 1070
+in addition to later testing on the reference RTX 3090. Candidate instruction models and
+quantizations are:
+
+- Bielik 3.0 11B Instruct: IQ4_XS or Q3_K_L;
+- Qwen 2.5 7B Instruct: Q5_K_M or Q6_K;
+- Llama 3.1 8B Instruct: Q5_K_M;
+- Gemma 2 9B Instruct: Q4_K_M.
+
+Final membership depends on measured load success, memory headroom, throughput, correction
+quality, faithful-speech behavior, and complete-job stability. Merely loading a model does
+not qualify it.
+
+### Optional CPU-only correction target
+
+The CPU-only preset targets a recommended minimum of 16 GB system RAM. Candidates are:
+
+- Bielik 3.0 11B Instruct: Q5_K_M or Q6_K;
+- Qwen 2.5 14B Instruct: Q4_K_M;
+- Mistral NeMo 12B Instruct: Q4_K_M.
+
+Benchmark reports must include CPU model, usable RAM, thread settings, latency, throughput,
+peak process RAM, correction quality, and whether swapping occurred. The 16 GB figure is a
+planned validation floor, not an accepted requirement until those runs pass.
+
+### Optional Apple Silicon correction target
+
+Apple Silicon support is deferred until all functional requirements are complete and a
+separate compatible transcriber build has been prepared. The planned minimum is 16 GB
+unified memory. Candidates are:
+
+- Bielik 3.0 11B Instruct: Q5_K_M, Q4_K_M, or MLX 4-bit;
+- Qwen 2.5 14B Instruct: Q4_K_M or MLX 4-bit;
+- Mistral NeMo 12B Instruct: Q4_K_M;
+- Qwen 2.5 7B Instruct: Q8;
+- Llama 3.1 8B Instruct: Q8.
+
+Because no local Mac is available, validation may use explicitly rented Apple hardware
+from MacinCloud and/or Scaleway. This is infrastructure access, not permission to send the
+private corpus to an unrelated LLM API. Tests should cover the native CLI first and the GUI
+when available, and record the exact Apple chip, unified memory, OS, runtime/backend,
+quantization, cost, and benchmark provenance.
 
 The expanded manual correction corpus should also become the reference source for lexical
 correction benchmarks. Separate timestamp and diarization ground truth is still required
