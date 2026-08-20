@@ -79,6 +79,7 @@ class LmStudioAdapterConfig:
     model_id: str
     endpoint: str = "http://127.0.0.1:1234/v1"
     allow_remote_endpoint: bool = False
+    output_mode: Literal["json-schema", "json-text"] = "json-schema"
     temperature: float = 0.0
 
     def __post_init__(self) -> None:
@@ -86,6 +87,8 @@ class LmStudioAdapterConfig:
             raise ValueError("LM Studio model_id must not be empty")
         if not 0 <= self.temperature <= 2:
             raise ValueError("LM Studio temperature must be between 0 and 2")
+        if self.output_mode not in {"json-schema", "json-text"}:
+            raise ValueError("LM Studio output_mode must be json-schema or json-text")
         _normalized_endpoint(self.endpoint, allow_remote=self.allow_remote_endpoint)
 
 
@@ -126,6 +129,7 @@ class LmStudioCorrectionProvider:
             {
                 "prompt_id": prompt_id,
                 "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
+                "output_mode": self._config.output_mode,
                 "response_schema": _LmStudioResponse.model_json_schema(),
             },
             ensure_ascii=False,
@@ -170,22 +174,24 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         ],
         "following_read_only_context": [token.model_dump() for token in request.following_context],
     }
-    return {
+    payload: JsonObject = {
         "model": config.model_id,
         "temperature": config.temperature,
         "messages": [
             {"role": "system", "content": FAITHFUL_CORRECTION_SYSTEM_PROMPT},
             {"role": "user", "content": json.dumps(transcript, ensure_ascii=False)},
         ],
-        "response_format": {
+    }
+    if config.output_mode == "json-schema":
+        payload["response_format"] = {
             "type": "json_schema",
             "json_schema": {
                 "name": "correction_response",
                 "strict": True,
                 "schema": _LmStudioResponse.model_json_schema(),
             },
-        },
-    }
+        }
+    return payload
 
 
 def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> CorrectionResponse:

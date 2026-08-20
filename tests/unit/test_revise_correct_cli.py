@@ -18,6 +18,7 @@ def test_correct_help_exposes_provider_safety_controls() -> None:
     assert "--model" in result.stdout
     assert "--endpoint" in result.stdout
     assert "--allow-remote-endpoint" in result.stdout
+    assert "--output-mode" in result.stdout
     assert "--consent" in result.stdout
     assert "--resume-dir" in result.stdout
     assert "--preview" in result.stdout

@@ -215,6 +215,7 @@ class CorrectionConfig(StrictConfigModel):
     model: str = ""
     endpoint: str = "http://127.0.0.1:1234/v1"
     allow_remote_endpoint: bool = False
+    output_mode: Literal["json-schema", "json-text"] = "json-schema"
     prompt_id: str = "faithful-correction-v11"
     target_tokens: int = Field(default=600, ge=1)
     max_tokens: int = Field(default=800, ge=1)

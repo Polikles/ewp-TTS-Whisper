@@ -609,6 +609,13 @@ def revise_correct_command(
             help="Explicitly allow a non-loopback LM Studio HTTP(S) endpoint.",
         ),
     ] = False,
+    output_mode: Annotated[
+        str | None,
+        typer.Option(
+            "--output-mode",
+            help="LM Studio response mode: json-schema (default) or explicit json-text fallback.",
+        ),
+    ] = None,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Write the immutable revision to this directory."),
@@ -643,6 +650,8 @@ def revise_correct_command(
             overrides["endpoint"] = endpoint
         if allow_remote_endpoint:
             overrides["allow_remote_endpoint"] = True
+        if output_mode is not None:
+            overrides["output_mode"] = output_mode
         config = load_config(
             explicit_path=config_path,
             cli_overrides={"correction": overrides},

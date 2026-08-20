@@ -74,6 +74,10 @@ All notable changes to EWP-transcripts are documented here.
   worse than raw ASR against manual gold. Copying is now the default; grammar repair,
   stylistic rewriting, ambiguous edits, and dictionary-free terminology normalization
   are explicitly forbidden.
+- Added an explicit LM Studio `json-text` compatibility mode for model/chat-template
+  combinations that fail grammar-constrained structured output. JSON Schema remains the
+  default; the fallback omits only `response_format`, retains strict whole-response schema
+  parsing and all correction safety gates, and has a distinct prompt/resume identity.
 
 ### Documentation
 

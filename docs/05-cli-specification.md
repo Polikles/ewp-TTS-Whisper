@@ -227,6 +227,7 @@ LM Studio provider. Loopback is the default; remote use requires a separate opt-
 --model EXACT_MODEL_ID
 --endpoint HTTP_OR_HTTPS_V1_URL
 --allow-remote-endpoint
+--output-mode json-schema|json-text
 --output-dir PATH
 --resume-dir PATH
 --preview
@@ -240,6 +241,9 @@ consent is exact-scope only; otherwise interactive execution prompts and non-int
 execution fails unless `--consent once|persist` is explicit. `reject` makes zero calls.
 Non-loopback HTTP(S) requires `--allow-remote-endpoint`, emits an additional network
 warning, and remains bound to the exact endpoint in persisted consent.
+`--output-mode json-text` is an explicit compatibility fallback for LM Studio model builds
+whose chat-template control tokens conflict with grammar-constrained JSON. It never falls
+back automatically and does not relax local response validation.
 Directory operations use deterministic natural ordering and do not recurse unless
 `--recursive` is supplied.
 

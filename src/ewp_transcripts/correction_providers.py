@@ -21,6 +21,7 @@ def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
                 model_id=correction.model,
                 endpoint=correction.endpoint,
                 allow_remote_endpoint=correction.allow_remote_endpoint,
+                output_mode=correction.output_mode,
                 temperature=correction.temperature,
             )
         except ValueError as error:

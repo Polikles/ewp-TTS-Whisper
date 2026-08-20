@@ -81,12 +81,62 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert user["editable_speaker_blocks"] == [{"speaker_id": "speaker_001", "text": "Open AI"}]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
     assert user["editable_tokens"][0]["token_id"] == "word_000002"
+    assert captured["payload"]["response_format"]["type"] == "json_schema"
     assert response.corrected_text == "OpenAI"
     assert response.proposed_changes[0].start_index == 0
     assert response.proposed_changes[0].end_index == 2
     assert response.usage is not None
     assert response.usage.input_tokens == 100
     assert response.usage.output_tokens == 25
+
+
+def test_json_text_mode_omits_response_format_and_keeps_strict_parsing() -> None:
+    captured: dict[str, Any] = {}
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
+    }
+
+    def transport(
+        url: str, headers: Mapping[str, str], payload: bytes, timeout: float
+    ) -> dict[str, Any]:
+        captured.update(payload=json.loads(payload))
+        return {"choices": [{"message": {"content": json.dumps(content)}}]}
+
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="bielik", output_mode="json-text"),
+        transport=transport,
+    )
+
+    response = provider.correct(_request(), timeout_seconds=2)
+
+    assert "response_format" not in captured["payload"]
+    assert response.corrected_text == "OpenAI"
+
+
+def test_json_text_mode_rejects_markdown_wrapped_json() -> None:
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="bielik", output_mode="json-text"),
+        transport=lambda *args: {
+            "choices": [{"message": {"content": f"```json\n{json.dumps(content)}\n```"}}]
+        },
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError, match="schema_errors="):
+        provider.correct(_request(), timeout_seconds=2)
+
+
+def test_output_mode_changes_prompt_identity() -> None:
+    schema_provider = LmStudioCorrectionProvider(LmStudioAdapterConfig(model_id="model"))
+    text_provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model", output_mode="json-text")
+    )
+
+    assert schema_provider.prompt_sha256("prompt") != text_provider.prompt_sha256("prompt")
 
 
 @pytest.mark.parametrize(

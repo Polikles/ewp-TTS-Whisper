@@ -147,6 +147,7 @@ provider = "" # disabled; set to "lm-studio" explicitly
 model = "" # exact identifier reported by the loaded LM Studio model
 endpoint = "http://127.0.0.1:1234/v1"
 allow_remote_endpoint = false
+output_mode = "json-schema"
 prompt_id = "faithful-correction-v11"
 target_tokens = 600
 max_tokens = 800
@@ -171,5 +172,13 @@ uncredentialed HTTP(S) endpoint whose path ends in `/v1`. Loopback is required u
 VPN, or Tailscale-like address. This opt-in does not make a remote process private or
 guarantee transport confidentiality. `model` must be the exact identifier exposed by
 LM Studio. Timeouts and retry counts are per chunk.
+`output_mode = "json-schema"` is the default and requests grammar-constrained structured
+output from LM Studio. Use `output_mode = "json-text"` only as an explicit compatibility
+fallback when a model/chat-template combination cannot initialize LM Studio's JSON-schema
+grammar. The fallback omits the API `response_format`, but the application still requires
+the entire response to be one schema-valid JSON document and retains all reconstruction,
+speaker, and token-drift safety gates. Markdown fences, explanatory prose, and malformed
+JSON are rejected. The selected mode is included in the prompt hash, so resume state from
+one mode cannot be reused by the other.
 The consent store contains only non-secret exact scopes and is created with private
 permissions; API keys never belong in this configuration.
