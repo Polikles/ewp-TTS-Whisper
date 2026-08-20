@@ -165,6 +165,9 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Added model-independent automated-correction safety gates: LM Studio speaker blocks
+  cannot exceed conservative token-count drift, and revision alignment cannot publish
+  any automated speaker reassignment.
 - Replaced the quadratic pure-Python lexical scorer with RapidFuzz's exact optimized
   Levenshtein edit operations, allowing long podcast transcripts to produce WER/CER
   correction reports in seconds rather than stalling on character-level comparison.

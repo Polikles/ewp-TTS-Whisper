@@ -34,6 +34,9 @@ from ewp_transcripts.effective_transcript import (
 from ewp_transcripts.review_service import prepare_review
 from ewp_transcripts.revision_service import build_revision
 
+_TOKEN_DRIFT_RATIO = 0.10
+_TOKEN_DRIFT_FLOOR = 4
+
 
 @dataclass(frozen=True, slots=True)
 class CorrectionChunkConfig:
@@ -390,6 +393,7 @@ def build_correction_revision(
                 execution_policy=execution_policy,
             ).response
         corrected = validate_correction_response(request, response)
+        _require_conservative_token_drift(request, response)
         speakers = _corrected_speakers(request, response)
         anchors.append(
             ReviewAnchor(
@@ -401,7 +405,7 @@ def build_correction_revision(
     prepared = prepare_review(result_path)
     review = prepared.model_copy(update={"anchors": tuple(anchors)})
     prompt_sha256 = provider.prompt_sha256(prompt_id)
-    return build_revision(
+    revision = build_revision(
         review,
         base,
         base_path=result_path,
@@ -418,10 +422,30 @@ def build_correction_revision(
             ),
         ),
     )
+    if revision.statistics.speaker_changes:
+        raise InvalidCorrectionResponseError(
+            "Automated correction changed speaker attribution during revision alignment"
+        )
+    return revision
 
 
 # Compatibility alias while the first network-free slice remains referenced by tests.
 build_mock_correction_revision = build_correction_revision
+
+
+def _require_conservative_token_drift(
+    request: CorrectionRequest, response: CorrectionResponse
+) -> None:
+    source_count = len(request.editable_tokens)
+    corrected_count = len(response.corrected_text.split())
+    allowed_drift = max(
+        _TOKEN_DRIFT_FLOOR,
+        int(source_count * _TOKEN_DRIFT_RATIO + 0.999999),
+    )
+    if abs(corrected_count - source_count) > allowed_drift:
+        raise InvalidCorrectionResponseError(
+            "Automated correction changed editable token count beyond the conservative safety limit"
+        )
 
 
 def _corrected_speakers(

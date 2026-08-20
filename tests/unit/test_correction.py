@@ -9,6 +9,7 @@ from ewp_transcripts.correction import (
     CorrectionChunkConfig,
     DeterministicMockCorrectionProvider,
     _corrected_speakers,
+    _require_conservative_token_drift,
     build_correction_request,
     build_mock_correction_revision,
     derive_correction_response,
@@ -272,6 +273,21 @@ def test_response_rejects_changes_that_do_not_reconstruct_corrected_text() -> No
         raise AssertionError("unexplained provider rewrite was accepted")
 
 
+def test_response_rejects_excessive_token_drift_after_resume_validation() -> None:
+    transcript = _transcript(20)
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = derive_correction_response(request, corrected_text="token0")
+
+    with pytest.raises(InvalidCorrectionResponseError, match="conservative safety limit"):
+        _require_conservative_token_drift(request, response)
+
+
 def test_response_rejects_lexical_edit_labeled_as_punctuation() -> None:
     transcript = _transcript(3)
     chunk = plan_correction_chunks(transcript)[0]
@@ -433,3 +449,18 @@ def test_mock_provider_builds_llm_revision_through_existing_aligner() -> None:
     assert revision.statistics.substitutions == 1
     assert revision.transcript.tokens[-1].text == "OpenAI."
     assert revision.transcript.tokens[-1].source_word_ids == ("word_000008",)
+
+
+def test_automated_revision_rejects_speaker_reassignment(monkeypatch: pytest.MonkeyPatch) -> None:
+    import ewp_transcripts.correction as correction_module
+
+    result = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    provider = DeterministicMockCorrectionProvider({})
+    accepted = build_mock_correction_revision(result, provider)
+    changed = accepted.model_copy(
+        update={"statistics": accepted.statistics.model_copy(update={"speaker_changes": 1})}
+    )
+    monkeypatch.setattr(correction_module, "build_revision", lambda *args, **kwargs: changed)
+
+    with pytest.raises(InvalidCorrectionResponseError, match="speaker attribution"):
+        build_mock_correction_revision(result, provider)

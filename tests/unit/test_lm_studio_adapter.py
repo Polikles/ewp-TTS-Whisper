@@ -193,3 +193,27 @@ def test_adapter_derives_changes_independently_inside_speaker_blocks() -> None:
         (0, 1),
         (1, 2),
     ]
+
+
+def test_adapter_rejects_excessive_speaker_block_token_drift() -> None:
+    tokens = tuple(
+        CorrectionToken(
+            local_index=index,
+            token_id=f"word_{index + 1:06d}",
+            text=f"token{index}",
+            speaker_id="speaker_001",
+        )
+        for index in range(20)
+    )
+    request = _request().model_copy(update={"editable_tokens": tokens})
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "token0"}],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError, match="conservative safety limit"):
+        provider.correct(request, timeout_seconds=2)

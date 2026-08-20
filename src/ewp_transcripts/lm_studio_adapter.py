@@ -28,6 +28,8 @@ from ewp_transcripts.domain.errors import (
 
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
+_BLOCK_TOKEN_DRIFT_RATIO = 0.10
+_BLOCK_TOKEN_DRIFT_FLOOR = 4
 
 FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You perform minimal, high-confidence ASR repair.
 The default action is to copy every editable word exactly. Change text only when a word or
@@ -272,6 +274,17 @@ def _derive_blocked_response(
             block_request,
             corrected_text=returned.corrected_text,
         )
+        source_count = end - start
+        corrected_count = len(derived.corrected_text.split())
+        allowed_drift = max(
+            _BLOCK_TOKEN_DRIFT_FLOOR,
+            int(source_count * _BLOCK_TOKEN_DRIFT_RATIO + 0.999999),
+        )
+        if abs(corrected_count - source_count) > allowed_drift:
+            raise ValueError(
+                "LM Studio changed an editable speaker block token count beyond the "
+                "conservative safety limit"
+            )
         corrected_tokens.extend(derived.corrected_text.split())
         changes.extend(
             change.model_copy(
