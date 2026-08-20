@@ -109,6 +109,10 @@ All notable changes to EWP-transcripts are documented here.
   approximately 23.3 GB VRAM at 95%+ utilization; full-corpus execution remains blocked.
 - Made both pilot loops stop at the first failed preview or apply instead of proceeding to
   later private-corpus cases.
+- Replaced model-counted numeric spans in the LM Studio wire contract with copied stable
+  first/last editable token IDs after the private pilot proved a six-position indexing
+  error. Prompt v4 maps IDs deterministically back to core half-open spans and still rejects
+  unknown/context/reversed IDs, non-verbatim before text, and inconsistent reconstruction.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

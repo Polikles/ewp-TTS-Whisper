@@ -84,7 +84,10 @@ The first real-corpus Qwen pilot stopped safely on all three cases because provi
 published. Observed runtime load was approximately 23.3 GB VRAM with 95%+ GPU utilization.
 Privacy review also confirmed that LM Studio developer logs display full transcript
 payloads. A content-free mismatch diagnostic is being added before rerunning only the
-shortest case; the full corpus remains blocked.
+shortest case. That diagnostic proved Qwen copied the token at editable position 65 but
+reported span 59:60. The LM Studio wire protocol now uses stable inclusive token IDs and
+prompt v4; the adapter maps them to validated half-open core spans. Only the shortest case
+must be rerun next; the full corpus remains blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

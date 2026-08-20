@@ -11,9 +11,11 @@ from dataclasses import dataclass
 from typing import Any, Literal
 from urllib.parse import urlsplit, urlunsplit
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ewp_transcripts.domain.correction import (
+    CorrectionCategory,
+    CorrectionChange,
     CorrectionRequest,
     CorrectionResponse,
     CorrectionUsage,
@@ -34,12 +36,14 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-The proposed_changes indexes are zero-based half-open positions in editable_tokens, not
-character offsets and not token local_index values. For every change, before MUST equal
-the source token texts in editable_tokens[start_index:end_index] joined with exactly one
-ASCII space, including original punctuation and capitalization. Changes MUST be sorted
-and non-overlapping. corrected_text MUST exactly equal all editable token texts after
-applying proposed_changes, joined with exactly one ASCII space. Copy operation_id exactly.
+For each proposed change, copy start_token_id from the first changed editable token and
+end_token_id from the last changed editable token. Both IDs are inclusive and MUST name
+tokens in editable_tokens. Never count array positions and never use read-only context IDs.
+For every change, before MUST equal the source token texts from start_token_id through
+end_token_id joined with exactly one ASCII space, including original punctuation and
+capitalization. Changes MUST be sorted and non-overlapping. corrected_text MUST exactly
+equal all editable token texts after applying proposed_changes, joined with exactly one
+ASCII space. Copy operation_id exactly.
 Never include read-only context in corrected_text or changes. If no correction is clearly
 necessary, return the editable text unchanged and an empty proposed_changes list.
 Category rules are strict: punctuation may change punctuation only; capitalization may
@@ -48,6 +52,25 @@ word-form changes are never punctuation changes. Before returning JSON, reconstr
 corrected_text from the proposed changes yourself. If it differs from your proposed
 corrected_text, remove or fix the inconsistent change. Prefer no change when uncertain.
 """
+
+
+class _LmStudioChange(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    start_token_id: str = Field(min_length=1)
+    end_token_id: str = Field(min_length=1)
+    before: str = Field(min_length=1)
+    after: str = Field(min_length=1)
+    category: CorrectionCategory
+
+
+class _LmStudioResponse(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    schema_version: Literal["1.0"] = "1.0"
+    operation_id: str = Field(min_length=1)
+    corrected_text: str = Field(min_length=1)
+    proposed_changes: tuple[_LmStudioChange, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,7 +125,7 @@ class LmStudioCorrectionProvider:
             {
                 "prompt_id": prompt_id,
                 "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
-                "response_schema": CorrectionResponse.model_json_schema(),
+                "response_schema": _LmStudioResponse.model_json_schema(),
             },
             ensure_ascii=False,
             sort_keys=True,
@@ -137,8 +160,8 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         "operation_id": request.operation_id,
         "language": request.language,
         "index_contract": (
-            "start_index/end_index address the zero-based editable_tokens array; "
-            "end_index is exclusive; before is the exact one-space join of that slice"
+            "start_token_id/end_token_id are copied from the first/last changed editable "
+            "tokens and are inclusive; before is the exact one-space join of that span"
         ),
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
@@ -156,7 +179,7 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
             "json_schema": {
                 "name": "correction_response",
                 "strict": True,
-                "schema": CorrectionResponse.model_json_schema(),
+                "schema": _LmStudioResponse.model_json_schema(),
             },
         },
     }
@@ -168,7 +191,8 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
         content = choices[0]["message"]["content"]
         if not isinstance(content, str):
             raise TypeError
-        response = CorrectionResponse.model_validate_json(content)
+        wire_response = _LmStudioResponse.model_validate_json(content)
+        response = _to_correction_response(wire_response, request)
         usage = document.get("usage")
         if isinstance(usage, dict):
             response = response.model_copy(
@@ -186,6 +210,36 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
     if response.operation_id != request.operation_id:
         raise InvalidCorrectionResponseError("LM Studio response operation ID does not match")
     return response
+
+
+def _to_correction_response(
+    response: _LmStudioResponse,
+    request: CorrectionRequest,
+) -> CorrectionResponse:
+    positions = {token.token_id: index for index, token in enumerate(request.editable_tokens)}
+    changes: list[CorrectionChange] = []
+    for change in response.proposed_changes:
+        try:
+            start = positions[change.start_token_id]
+            inclusive_end = positions[change.end_token_id]
+        except KeyError as error:
+            raise ValueError("LM Studio change references a non-editable token ID") from error
+        if inclusive_end < start:
+            raise ValueError("LM Studio change token IDs are reversed")
+        changes.append(
+            CorrectionChange(
+                start_index=start,
+                end_index=inclusive_end + 1,
+                before=change.before,
+                after=change.after,
+                category=change.category,
+            )
+        )
+    return CorrectionResponse(
+        operation_id=response.operation_id,
+        corrected_text=response.corrected_text,
+        proposed_changes=tuple(changes),
+    )
 
 
 def _optional_nonnegative_int(value: object) -> int | None:
