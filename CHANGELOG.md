@@ -106,6 +106,8 @@ All notable changes to EWP-transcripts are documented here.
   accepts Windows paths, and that LM Studio developer logs expose full transcript payloads.
 - Recorded the safely rejected three-case Qwen pilot and its observed RTX 3090 load of
   approximately 23.3 GB VRAM at 95%+ utilization; full-corpus execution remains blocked.
+- Made both pilot loops stop at the first failed preview or apply instead of proceeding to
+  later private-corpus cases.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

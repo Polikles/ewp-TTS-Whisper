@@ -96,7 +96,7 @@ do
       --consent once \
       --preview \
       --resume-dir "$EWP_LM_RUN/resume" \
-    2>&1 | tee "$EWP_LM_RUN/logs/${name}.preview.txt"
+    2>&1 | tee "$EWP_LM_RUN/logs/${name}.preview.txt" || break
 done
 ```
 
@@ -126,7 +126,7 @@ do
     --consent once \
     --output-dir "$EWP_LM_RUN/revisions" \
     --resume-dir "$EWP_LM_RUN/resume" \
-    2>&1 | tee "$EWP_LM_RUN/logs/${name}.apply.txt"
+    2>&1 | tee "$EWP_LM_RUN/logs/${name}.apply.txt" || break
 done
 ```
 
