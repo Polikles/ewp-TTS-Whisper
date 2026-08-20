@@ -133,7 +133,36 @@ def test_adapter_rejects_malformed_content_without_exposing_it() -> None:
     )
     with pytest.raises(InvalidCorrectionResponseError) as raised:
         provider.correct(_request(), timeout_seconds=2)
+    assert "schema_errors=" in str(raised.value)
     assert secret not in str(raised.value)
+
+
+def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
+    private_text = "private transcript response"
+    content = {
+        "operation_id": "operation-1",
+        "corrected_text": "Open AI",
+        "proposed_changes": [
+            {
+                "obsolete_start_index": 0,
+                "before": private_text,
+                "after": "changed",
+                "category": "asr_lexical",
+            }
+        ],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError) as raised:
+        provider.correct(_request(), timeout_seconds=2)
+
+    message = str(raised.value)
+    assert "proposed_changes.0.source_token_ids:missing" in message
+    assert "proposed_changes.0.obsolete_start_index:extra_forbidden" in message
+    assert private_text not in message
 
 
 def test_adapter_rejects_change_that_references_read_only_token_id() -> None:

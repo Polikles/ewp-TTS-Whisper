@@ -202,7 +202,19 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
                     )
                 }
             )
-    except (IndexError, KeyError, TypeError, ValidationError, ValueError) as error:
+    except ValidationError as error:
+        details = ",".join(
+            f"{'.'.join(str(part) for part in item['loc']) or '<root>'}:{item['type']}"
+            for item in error.errors(include_url=False, include_input=False)[:8]
+        )
+        raise InvalidCorrectionResponseError(
+            f"LM Studio returned an invalid correction response (schema_errors={details})"
+        ) from error
+    except ValueError as error:
+        raise InvalidCorrectionResponseError(
+            f"LM Studio returned an invalid correction response ({error})"
+        ) from error
+    except (IndexError, KeyError, TypeError) as error:
         raise InvalidCorrectionResponseError(
             "LM Studio returned an invalid correction response"
         ) from error

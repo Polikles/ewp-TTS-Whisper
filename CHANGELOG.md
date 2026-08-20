@@ -116,6 +116,8 @@ All notable changes to EWP-transcripts are documented here.
 - Replaced the ambiguous inclusive start/end token-ID pair with an explicit ordered list of
   every changed token ID after Qwen treated the end ID as exclusive. Prompt v5 requires
   non-empty, unique, contiguous editable IDs before the adapter derives a core span.
+- Added content-free LM Studio schema diagnostics that report only failing field paths and
+  validation error types, never raw response values or transcript payloads.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.
