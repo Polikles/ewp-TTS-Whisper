@@ -126,8 +126,8 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 
 - **FR-K00** Automated correction MUST consume a completed canonical result or compatible immutable revision and MUST publish corrections through the existing revision engine.
 - **FR-K01** Correction providers MUST implement one provider-neutral application protocol; provider-specific request/response objects MUST NOT enter the revision domain.
-- **FR-K02** Every provider response MUST contain corrected text and an explicit proposed-change list with source span, before text, after text, and correction category.
-- **FR-K03** The local application MUST independently align and audit provider output. Provider-proposed changes are evidence and MUST NOT be treated as the authoritative revision patch.
+- **FR-K02** Every provider response MUST contain corrected editable text. The local application MUST derive an explicit change list with source span, before text, after text, and deterministic correction category before revision construction. Optional provider annotations are advisory evidence only.
+- **FR-K03** The local application MUST independently align and audit provider output. Provider text or optional annotations MUST NOT be treated as an authoritative revision patch.
 - **FR-K04** Prompts MUST restrict correction to obvious ASR lexical errors, proper-name spelling, conservative punctuation, capitalization, and sentence boundaries. They MUST prohibit paraphrasing, stylistic repair, grammar repair, summarization, and removal of meaningful repetitions or self-corrections.
 - **FR-K05** Editable chunks MUST form an ordered, gap-free, non-overlapping partition of the selected effective transcript. Read-only context overlap MAY repeat surrounding tokens but MUST NOT create multiple owners for editable text.
 - **FR-K06** Chunk target size, hard maximum size, and read-only overlap MUST be configurable and validated before any provider call.
@@ -142,7 +142,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-K15** Directory correction MUST be deterministic, resumable, failure-isolated, non-recursive by default, and governed by the existing batch continuation policy.
 - **FR-K16** A deterministic mock provider MUST exercise the complete correction path without network access, credentials, or heavyweight model loading.
 - **FR-K17** Benchmarking MUST support canonical-to-latest-gold and earlier-revision-to-latest-gold tasks selected by exact base hash and revision lineage, not timestamps.
-- **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, proposed-change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes.
+- **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, locally derived change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes. Provider-annotation precision/recall MUST be reported only for providers that emit such annotations.
 
 ## 2. Non-functional requirements
 

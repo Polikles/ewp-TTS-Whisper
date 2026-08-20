@@ -13,9 +13,8 @@ from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from ewp_transcripts.correction import derive_correction_response
 from ewp_transcripts.domain.correction import (
-    CorrectionCategory,
-    CorrectionChange,
     CorrectionRequest,
     CorrectionResponse,
     CorrectionUsage,
@@ -36,40 +35,14 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-Each proposed_changes item is exactly one contiguous source replacement. Copy
-start_token_id from the first changed editable token. Never group non-adjacent corrections
-into one item; emit a separate change item for every non-adjacent correction. Never use a
-read-only context ID, count array positions, calculate an end boundary, or list the other
-token IDs. For every change, before MUST equal the complete contiguous source text beginning
-at start_token_id, joined with exactly one ASCII space and including original punctuation
-and capitalization. The local application derives the end from this exact text. Changes
-MUST be sorted and non-overlapping. corrected_text MUST exactly
-equal all editable token texts after applying proposed_changes, joined with exactly one
-ASCII space. Copy operation_id exactly.
-Never include read-only context in corrected_text or changes. If no correction is clearly
-necessary, return the editable text unchanged and an empty proposed_changes list.
-Category rules are strict: punctuation may change punctuation only; capitalization may
-change letter case only; sentence_boundary may change punctuation/case only. Lexical
-word-form changes are never punctuation changes. Before returning JSON, reconstruct
-corrected_text from the proposed changes yourself. If it differs from your proposed
-corrected_text, remove or fix the inconsistent change. Prefer no change when uncertain.
-
-Use the smallest contiguous source span that fully contains the edit. `before` is copy-only
-audit evidence: copy it from the source before writing `after`, and never apply any intended
-correction to `before`. Example: if editable token `word_17` is `anna.` and the following
-token is `Witamy`, a capitalization-only correction is
-{"start_token_id":"word_17","before":"anna.","after":"Anna.","category":"capitalization"}.
-Do not include the unchanged following token, and do not write `before` as `Anna.` or `anna`.
+Return corrected_text for editable_tokens only, with tokens separated by one ASCII space.
+Never include preceding_read_only_context or following_read_only_context. Preserve the
+editable token text exactly unless a clearly necessary faithful correction is allowed by
+the first paragraph. Copy operation_id exactly. The local application independently derives
+the exact source spans, before/after text, categories, speaker mapping, and revision audit.
+If no correction is clearly necessary, return the editable text unchanged. Prefer no change
+when uncertain.
 """
-
-
-class _LmStudioChange(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
-
-    start_token_id: str = Field(min_length=1)
-    before: str = Field(min_length=1)
-    after: str = Field(min_length=1)
-    category: CorrectionCategory
 
 
 class _LmStudioResponse(BaseModel):
@@ -78,7 +51,6 @@ class _LmStudioResponse(BaseModel):
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
     corrected_text: str = Field(min_length=1)
-    proposed_changes: tuple[_LmStudioChange, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -167,10 +139,7 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
     transcript = {
         "operation_id": request.operation_id,
         "language": request.language,
-        "index_contract": (
-            "start_token_id is copied from the first changed editable token; exact before "
-            "text identifies the complete contiguous span and the application derives its end"
-        ),
+        "output_contract": "return corrected text for editable_tokens only",
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
         "following_read_only_context": [token.model_dump() for token in request.following_context],
@@ -200,17 +169,20 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
         if not isinstance(content, str):
             raise TypeError
         wire_response = _LmStudioResponse.model_validate_json(content)
-        response = _to_correction_response(wire_response, request)
+        if wire_response.operation_id != request.operation_id:
+            raise InvalidCorrectionResponseError("LM Studio response operation ID does not match")
         usage = document.get("usage")
+        correction_usage = None
         if isinstance(usage, dict):
-            response = response.model_copy(
-                update={
-                    "usage": CorrectionUsage(
-                        input_tokens=_optional_nonnegative_int(usage.get("prompt_tokens")),
-                        output_tokens=_optional_nonnegative_int(usage.get("completion_tokens")),
-                    )
-                }
+            correction_usage = CorrectionUsage(
+                input_tokens=_optional_nonnegative_int(usage.get("prompt_tokens")),
+                output_tokens=_optional_nonnegative_int(usage.get("completion_tokens")),
             )
+        response = derive_correction_response(
+            request,
+            corrected_text=wire_response.corrected_text,
+            usage=correction_usage,
+        )
     except ValidationError as error:
         details = ",".join(
             f"{'.'.join(str(part) for part in item['loc']) or '<root>'}:{item['type']}"
@@ -227,47 +199,7 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
         raise InvalidCorrectionResponseError(
             "LM Studio returned an invalid correction response"
         ) from error
-    if response.operation_id != request.operation_id:
-        raise InvalidCorrectionResponseError("LM Studio response operation ID does not match")
     return response
-
-
-def _to_correction_response(
-    response: _LmStudioResponse,
-    request: CorrectionRequest,
-) -> CorrectionResponse:
-    positions = {token.token_id: index for index, token in enumerate(request.editable_tokens)}
-    changes: list[CorrectionChange] = []
-    for change in response.proposed_changes:
-        try:
-            start = positions[change.start_token_id]
-        except KeyError as error:
-            raise ValueError("LM Studio change references a non-editable token ID") from error
-        matching_ends = [
-            end
-            for end in range(start + 1, len(request.editable_tokens) + 1)
-            if " ".join(token.text for token in request.editable_tokens[start:end]) == change.before
-        ]
-        if len(matching_ends) != 1:
-            raise ValueError(
-                "LM Studio before text does not identify one exact contiguous source span "
-                f"(start={start}, matching_end_count={len(matching_ends)})"
-            )
-        end = matching_ends[0]
-        changes.append(
-            CorrectionChange(
-                start_index=start,
-                end_index=end,
-                before=change.before,
-                after=change.after,
-                category=change.category,
-            )
-        )
-    return CorrectionResponse(
-        operation_id=response.operation_id,
-        corrected_text=response.corrected_text,
-        proposed_changes=tuple(changes),
-    )
 
 
 def _optional_nonnegative_int(value: object) -> int | None:

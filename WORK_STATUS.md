@@ -97,7 +97,11 @@ contiguous span but removed punctuation inside its `before` audit copy. Prompt v
 requires minimal spans and copy-only `before` evidence with a concrete generic example.
 The next response copied an exact 11-token source span but listed only four IDs. Prompt v8
 now requires one stable start ID plus exact `before`; the adapter derives the unique
-contiguous end locally. The shortest case must be rerun; the full corpus remains blocked.
+contiguous end locally. A 120/160-token small-chunk rerun still selected the wrong start,
+proving chunk size was not the root cause. The approved prompt-v9 redesign now requests
+corrected editable text only and derives exact changes, categories, speaker mapping, and
+revision audit locally, analogous to the existing human-review boundary. The shortest case
+must be rerun; the full corpus remains blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

@@ -90,9 +90,11 @@ exact canonical base before scoring.
 This supports both accepted private-corpus tasks: canonical to latest gold and earlier
 revision to later gold. Reports contain hashes, lineage revision numbers, baseline and
 candidate WER/CER, word-error reduction, and excess word errors, but no transcript text.
-The current report is the lexical foundation; proposed-change precision/recall,
+The current report is the lexical foundation; locally derived change precision/recall,
 unsupported or stylistic changes, speaker preservation, audit completeness, latency,
 volume, cost, and retry outcomes remain required before provider acceptance.
+Optional provider-annotation precision/recall is reported only for providers that expose
+annotations; annotations never replace the local change list.
 
 ## 6. Later public benchmark matrix
 

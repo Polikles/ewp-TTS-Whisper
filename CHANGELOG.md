@@ -8,14 +8,14 @@ All notable changes to EWP-transcripts are documented here.
 
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,
-  proposed-change validation, scoped API consent, retry/resume/batch behavior, immutable
+  locally derived change validation, scoped API consent, retry/resume/batch behavior, immutable
   revision provenance, private-corpus benchmark requirements, and acceptance checklist.
 - Added the first provider-neutral correction primitives: strict request/response/change
   models, deterministic gap-free editable chunking with bounded read-only context, stable
   operation/content hashes, and a network-free deterministic mock provider.
-- Added local provider-response verification that rejects wrong operation identities,
-  overlapping, unsorted, out-of-range, or source-mismatched proposals and any corrected
-  text that cannot be reconstructed exactly from the explicit proposed-change list.
+- Added local provider-response verification that rejects wrong operation identities and
+  deterministically derives exact insert/delete/replace changes from corrected editable
+  text before revision construction.
 - Connected validated mock responses to ordinary review anchors and the existing
   deterministic revision aligner, producing immutable LLM-provenance snapshots without
   letting providers construct mappings or artifacts. Added explicit `mock` endpoint
@@ -127,6 +127,10 @@ All notable changes to EWP-transcripts are documented here.
 - Simplified prompt v8 to one stable start token ID plus verbatim `before` after Qwen copied
   an exact 11-token span but listed only four IDs. The adapter derives one unique contiguous
   end locally and rejects unknown/context starts or unmatched source text.
+- Redesigned prompt v9 after both default and 120/160-token pilots proved redundant model
+  patch metadata unreliable. LM Studio now returns corrected editable text; the application
+  deterministically derives exact insert/delete/replace spans, before/after text, categories,
+  speaker mapping, alignment, and audit. Optional provider annotations are advisory only.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

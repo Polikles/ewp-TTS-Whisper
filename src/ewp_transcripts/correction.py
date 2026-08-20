@@ -5,11 +5,13 @@ from __future__ import annotations
 import hashlib
 import unicodedata
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal
 
 from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.domain.correction import (
+    CorrectionCategory,
     CorrectionChange,
     CorrectionProvider,
     CorrectionRequest,
@@ -274,6 +276,54 @@ def validate_correction_response(
     return tuple(corrected)
 
 
+def derive_correction_response(
+    request: CorrectionRequest,
+    *,
+    corrected_text: str,
+    usage: CorrectionUsage | None = None,
+) -> CorrectionResponse:
+    """Derive an exact local change list from provider-corrected editable text."""
+
+    source = tuple(token.text for token in request.editable_tokens)
+    corrected = tuple(corrected_text.split())
+    changes: list[CorrectionChange] = []
+    matcher = SequenceMatcher(a=source, b=corrected, autojunk=False)
+    for tag, source_start, source_end, corrected_start, corrected_end in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        before = " ".join(source[source_start:source_end])
+        after = " ".join(corrected[corrected_start:corrected_end])
+        changes.append(
+            CorrectionChange(
+                start_index=source_start,
+                end_index=source_end,
+                before=before,
+                after=after,
+                category=_derived_category(before, after),
+            )
+        )
+    response = CorrectionResponse(
+        operation_id=request.operation_id,
+        corrected_text=" ".join(corrected),
+        proposed_changes=tuple(changes),
+        usage=usage,
+    )
+    validate_correction_response(request, response)
+    return response
+
+
+def _derived_category(before: str, after: str) -> CorrectionCategory:
+    if not before or not after:
+        return "asr_lexical"
+    if before.casefold() == after.casefold():
+        return "capitalization"
+    if _without_punctuation(before) == _without_punctuation(after):
+        return "punctuation"
+    if _without_punctuation(before).casefold() == _without_punctuation(after).casefold():
+        return "sentence_boundary"
+    return "asr_lexical"
+
+
 def _change_category_matches(before: str, after: str, category: str) -> bool:
     if category == "punctuation":
         return _without_punctuation(before) == _without_punctuation(after)
@@ -388,6 +438,17 @@ def _corrected_speakers(
             token.speaker_id
             for token in request.editable_tokens[change.start_index : change.end_index]
         }
+        if not changed_speakers:
+            adjacent_speakers = {
+                request.editable_tokens[index].speaker_id
+                for index in (change.start_index - 1, change.start_index)
+                if 0 <= index < len(request.editable_tokens)
+            }
+            if len(adjacent_speakers) != 1:
+                raise InvalidCorrectionResponseError(
+                    "Correction response insertion is at an ambiguous speaker boundary"
+                )
+            changed_speakers = adjacent_speakers
         if len(changed_speakers) != 1:
             raise InvalidCorrectionResponseError(
                 "Correction response change crosses a speaker boundary"

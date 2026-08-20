@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v8",
+        prompt_id="faithful-correction-v9",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -58,14 +58,6 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
         content = {
             "operation_id": "operation-1",
             "corrected_text": "OpenAI",
-            "proposed_changes": [
-                {
-                    "start_token_id": "word_000002",
-                    "before": "Open AI",
-                    "after": "OpenAI",
-                    "category": "proper_name",
-                }
-            ],
         }
         return {
             "choices": [{"message": {"content": json.dumps(content)}}],
@@ -80,14 +72,9 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert captured["url"] == "http://127.0.0.1:1234/v1/chat/completions"
     assert captured["timeout"] == 9
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "before MUST equal" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "count array positions" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "Never group non-adjacent corrections" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "smallest contiguous source span" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert '"before":"anna."' in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "Lexical\nword-form changes" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "independently derives" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
-    assert "application derives its end" in user["index_contract"]
+    assert "editable_tokens only" in user["output_contract"]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
     assert user["editable_tokens"][0]["token_id"] == "word_000002"
     assert response.corrected_text == "OpenAI"
@@ -145,14 +132,7 @@ def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
     content = {
         "operation_id": "operation-1",
         "corrected_text": "Open AI",
-        "proposed_changes": [
-            {
-                "obsolete_start_index": 0,
-                "before": private_text,
-                "after": "changed",
-                "category": "asr_lexical",
-            }
-        ],
+        "obsolete_private_field": private_text,
     }
     provider = LmStudioCorrectionProvider(
         LmStudioAdapterConfig(model_id="model"),
@@ -163,52 +143,5 @@ def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
         provider.correct(_request(), timeout_seconds=2)
 
     message = str(raised.value)
-    assert "proposed_changes.0.start_token_id:missing" in message
-    assert "proposed_changes.0.obsolete_start_index:extra_forbidden" in message
+    assert "obsolete_private_field:extra_forbidden" in message
     assert private_text not in message
-
-
-def test_adapter_rejects_change_that_references_read_only_token_id() -> None:
-    content = {
-        "operation_id": "operation-1",
-        "corrected_text": "Open AI",
-        "proposed_changes": [
-            {
-                "start_token_id": "word_000001",
-                "before": "private",
-                "after": "changed",
-                "category": "asr_lexical",
-            }
-        ],
-    }
-
-    provider = LmStudioCorrectionProvider(
-        LmStudioAdapterConfig(model_id="model"),
-        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
-    )
-
-    with pytest.raises(InvalidCorrectionResponseError, match="invalid correction response"):
-        provider.correct(_request(), timeout_seconds=2)
-
-
-def test_adapter_rejects_before_that_does_not_identify_span_from_start() -> None:
-    content = {
-        "operation_id": "operation-1",
-        "corrected_text": "Open AI dalej",
-        "proposed_changes": [
-            {
-                "start_token_id": "word_000002",
-                "before": "Open dalej",
-                "after": "changed",
-                "category": "asr_lexical",
-            }
-        ],
-    }
-    provider = LmStudioCorrectionProvider(
-        LmStudioAdapterConfig(model_id="model"),
-        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
-    )
-
-    with pytest.raises(InvalidCorrectionResponseError) as raised:
-        provider.correct(_request(), timeout_seconds=2)
-    assert "start=0, matching_end_count=0" in str(raised.value)

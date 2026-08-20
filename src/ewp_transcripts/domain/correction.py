@@ -32,15 +32,17 @@ class CorrectionToken(CorrectionModel):
 
 class CorrectionChange(CorrectionModel):
     start_index: int = Field(ge=0)
-    end_index: int = Field(gt=0)
-    before: str = Field(min_length=1)
-    after: str = Field(min_length=1)
+    end_index: int = Field(ge=0)
+    before: str
+    after: str
     category: CorrectionCategory
 
     @model_validator(mode="after")
     def validate_span(self) -> Self:
-        if self.end_index <= self.start_index:
-            raise ValueError("correction change end must follow its start")
+        if self.end_index < self.start_index:
+            raise ValueError("correction change end must not precede its start")
+        if not self.before and not self.after:
+            raise ValueError("correction changes must insert, delete, or replace text")
         return self
 
 

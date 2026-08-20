@@ -102,18 +102,19 @@ Requirements:
 - preserve the speaker's actual wording, repetitions, self-corrections, fillers,
   malformed sentences, grammatical mistakes, and stylistic quirks; never paraphrase,
   polish prose, or silently repair how the person spoke;
-- require the provider response to include corrected text plus an explicit proposed
-  change list with source span, before/after text, and correction category; the local
-  revision engine independently reconstructs the authoritative audit;
+- require corrected editable text from the provider; the local revision engine derives
+  exact source spans, before/after text, deterministic categories, and the authoritative
+  audit. Optional provider change annotations remain advisory evidence;
 - model/prompt/config provenance is persisted without secrets;
 - LLM revisions may be direct siblings of manual gold for benchmark comparison;
 - a model revision may later have a manual child revision, with parent provenance but a
   complete standalone child snapshot.
 
 Benchmarking must cover local and cloud providers separately and report at least lexical
-accuracy against manual gold, proposed-change precision/recall, unsupported or stylistic
+accuracy against manual gold, locally derived change precision/recall, unsupported or stylistic
 changes, speaker-attribution preservation, audit completeness, latency, request/token
-volume, estimated or actual cost, and failure/retry behavior. A reviewer must be able to
+volume, estimated or actual cost, and failure/retry behavior. Provider-annotation precision
+is reported separately only where annotations exist. A reviewer must be able to
 prepare, manually correct, apply, audit, and export an LLM-produced revision through the
 same workflow used for manual revisions.
 

@@ -8,8 +8,10 @@ import pytest
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
     DeterministicMockCorrectionProvider,
+    _corrected_speakers,
     build_correction_request,
     build_mock_correction_revision,
+    derive_correction_response,
     plan_correction_chunks,
     validate_correction_response,
 )
@@ -344,6 +346,74 @@ def test_response_accepts_category_compatible_surface_edits() -> None:
     )
 
     assert validate_correction_response(request, response) == ("Token0", "token1,", "token2")
+
+
+@pytest.mark.parametrize(
+    ("corrected_text", "start", "end", "before", "after"),
+    [
+        ("token0 added token1 token2", 1, 1, "", "added"),
+        ("token0 token2", 1, 2, "token1", ""),
+        ("Token0 token1 token2", 0, 1, "token0", "Token0"),
+    ],
+)
+def test_local_derivation_builds_exact_insert_delete_and_replace_changes(
+    corrected_text: str,
+    start: int,
+    end: int,
+    before: str,
+    after: str,
+) -> None:
+    transcript = _transcript(3)
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+
+    response = derive_correction_response(request, corrected_text=corrected_text)
+
+    assert len(response.proposed_changes) == 1
+    change = response.proposed_changes[0]
+    assert (change.start_index, change.end_index) == (start, end)
+    assert (change.before, change.after) == (before, after)
+    assert validate_correction_response(request, response) == tuple(corrected_text.split())
+
+
+def test_local_insertion_inherits_unambiguous_adjacent_speaker() -> None:
+    transcript = _transcript(3)
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = derive_correction_response(
+        request,
+        corrected_text="token0 added token1 token2",
+    )
+
+    assert _corrected_speakers(request, response) == ("speaker_001",) * 4
+
+
+def test_local_insertion_rejects_ambiguous_speaker_boundary() -> None:
+    transcript = _transcript(3, speaker_change=1)
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = derive_correction_response(
+        request,
+        corrected_text="token0 added token1 token2",
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError, match="ambiguous speaker boundary"):
+        _corrected_speakers(request, response)
 
 
 def test_mock_provider_builds_llm_revision_through_existing_aligner() -> None:
