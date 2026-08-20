@@ -106,6 +106,9 @@ All notable changes to EWP-transcripts are documented here.
   audit found five useful repairs, two harmful changes, and two context-dependent
   punctuation edits, so a larger-chunk performance/quality pilot is required before any
   full-corpus run.
+- Clarified that correction scoring excludes complete balanced round/square editorial
+  annotations, whereas quotation marks alone are normalized away and all quoted words
+  remain scored. Manual review accepted both Qwen 32B punctuation-only edits.
 
 ### Documentation
 

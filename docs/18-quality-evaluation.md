@@ -79,6 +79,9 @@ normalization and additionally removes balanced `(...)` and `[...]` review annot
 from every side of the comparison. These annotations may document speaker corrections or
 editorial context rather than spoken/ASR content. Unbalanced delimiters remain lexical
 content so a malformed annotation cannot silently discard the remainder of a transcript.
+Quotation marks are ordinary punctuation: straight or typographic quote characters are
+ignored by lexical normalization, but every word between them remains part of the score.
+Quoted speech is therefore never excluded as an annotation.
 
 Macro averages are the primary initial comparison because each selected case contributes
 equally. Micro averages remain visible to show corpus-wide unit counts. The current
