@@ -6,7 +6,7 @@ from contextlib import nullcontext, redirect_stdout
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import typer
 
@@ -36,6 +36,11 @@ from ewp_transcripts.application import (
     transcribe_one,
 )
 from ewp_transcripts.config import ApplicationConfig, load_config
+from ewp_transcripts.correction_benchmark import (
+    build_correction_benchmark_bundle,
+    evaluate_correction_benchmark,
+    load_correction_benchmark_manifest,
+)
 from ewp_transcripts.correction_consent import (
     REMOTE_LOCAL_API_WARNING,
     ConsentChoice,
@@ -75,7 +80,19 @@ revise_app = typer.Typer(
     ),
     no_args_is_help=True,
 )
+benchmark_app = typer.Typer(
+    name="benchmark",
+    help="Build and evaluate private, exact-hash benchmark bundles.",
+    no_args_is_help=True,
+)
+correction_benchmark_app = typer.Typer(
+    name="correction",
+    help="Benchmark automated transcript corrections against manual gold revisions.",
+    no_args_is_help=True,
+)
 app.add_typer(revise_app, name="revise")
+app.add_typer(benchmark_app, name="benchmark")
+benchmark_app.add_typer(correction_benchmark_app, name="correction")
 
 
 class RequestedChannelMode(StrEnum):
@@ -116,6 +133,72 @@ class RequestedTranscribeFormat(StrEnum):
 
 class CleanTarget(StrEnum):
     ALL_WORKDIRS = "all-workdirs"
+
+
+@correction_benchmark_app.command("build")
+def correction_benchmark_build_command(
+    base_directory: Annotated[Path, typer.Argument(help="Directory containing canonical results.")],
+    candidate_directory: Annotated[
+        Path, typer.Option("--candidate-dir", help="Directory containing one candidate per job.")
+    ],
+    gold_directory: Annotated[
+        Path, typer.Option("--gold-dir", help="Directory containing accepted manual revisions.")
+    ],
+    output_directory: Annotated[
+        Path, typer.Option("--output-dir", help="Private directory for the staged bundle.")
+    ],
+) -> None:
+    """Build a private manifest bundle using the latest compatible manual gold."""
+
+    try:
+        manifest = build_correction_benchmark_bundle(
+            base_directory=normalize_input_path(base_directory),
+            candidate_directory=normalize_input_path(candidate_directory),
+            gold_directory=normalize_input_path(gold_directory),
+            output_directory=normalize_input_path(output_directory),
+        )
+        loaded = load_correction_benchmark_manifest(manifest)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    typer.echo(f"MANIFEST {manifest}")
+    typer.echo(f"SUMMARY cases={len(loaded.cases)}")
+
+
+@correction_benchmark_app.command("report")
+def correction_benchmark_report_command(
+    manifest_path: Annotated[Path, typer.Argument(help="Exact-hash correction manifest.")],
+    output_path: Annotated[
+        Path | None,
+        typer.Option("--output", help="Write the content-free JSON report to this path."),
+    ] = None,
+) -> None:
+    """Evaluate canonical, candidate, and manual-gold lexical differences."""
+
+    try:
+        manifest = load_correction_benchmark_manifest(normalize_input_path(manifest_path))
+        report = evaluate_correction_benchmark(manifest)
+        serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        normalized_output = _optional_user_path(output_path)
+        if normalized_output is not None:
+            normalized_output.parent.mkdir(parents=True, exist_ok=True)
+            normalized_output.write_text(serialized, encoding="utf-8")
+            normalized_output.chmod(0o600)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    if normalized_output is None:
+        typer.echo(serialized, nl=False)
+        return
+    typer.echo(f"REPORT {normalized_output}")
+    aggregate = cast(dict[str, dict[str, object]], report["aggregate"])
+    typer.echo(
+        "SUMMARY "
+        f"cases={report['case_count']} "
+        f"canonical_gold_wer={cast(float, aggregate['baseline']['wer']):.8f} "
+        f"canonical_llm_wer={cast(float, aggregate['source_to_candidate']['wer']):.8f} "
+        f"gold_llm_wer={cast(float, aggregate['candidate']['wer']):.8f}"
+    )
 
 
 class RequestedCorrectionConsent(StrEnum):

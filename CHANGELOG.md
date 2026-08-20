@@ -63,6 +63,10 @@ All notable changes to EWP-transcripts are documented here.
   private resumable chunk state, and zero-call rejection behavior.
 - Prompt provenance and resume identity now hash the adapter's actual system prompt and
   structured-response schema, preventing stale response reuse after prompt-contract edits.
+- Added `transcriber benchmark correction build|report` to create private exact-hash
+  bundles, select the latest compatible manual gold, and report separate
+  canonical-to-gold, canonical-to-LLM, and gold-to-LLM lexical comparisons without
+  transcript text.
 
 ### Documentation
 

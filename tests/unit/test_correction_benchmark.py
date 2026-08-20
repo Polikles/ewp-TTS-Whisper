@@ -1,15 +1,19 @@
 """Tests for exact-lineage automated-correction benchmark manifests."""
 
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from ewp_transcripts.cli import app
 from ewp_transcripts.correction import (
     DeterministicMockCorrectionProvider,
     build_mock_correction_revision,
 )
 from ewp_transcripts.correction_benchmark import (
+    build_correction_benchmark_bundle,
     evaluate_correction_benchmark,
     load_correction_benchmark_manifest,
 )
@@ -74,8 +78,12 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
     case = report["cases"][0]
     assert case["source_kind"] == source_kind
     assert case["candidate"]["wer"] == 0.0
+    assert case["source_to_candidate"]["word_errors"]["errors"] == 1
     assert case["word_error_reduction"] == 1
     assert case["excess_word_errors"] == 0
+    assert report["aggregate"]["baseline"]["word_errors"] == 1
+    assert report["aggregate"]["source_to_candidate"]["word_errors"] == 1
+    assert report["aggregate"]["candidate"]["word_errors"] == 0
 
 
 def test_benchmark_rejects_changed_candidate(tmp_path: Path) -> None:
@@ -98,3 +106,81 @@ def test_benchmark_rejects_parent_path_escape(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="safe relative"):
         load_correction_benchmark_manifest(path)
+
+
+def test_bundle_builder_selects_latest_compatible_gold_and_stages_private_files(
+    tmp_path: Path,
+) -> None:
+    bases = tmp_path / "bases"
+    candidates = tmp_path / "candidates"
+    gold = tmp_path / "gold"
+    for directory in (bases, candidates, gold):
+        directory.mkdir()
+    base = bases / "base_results.json"
+    base.write_bytes(EXAMPLE.read_bytes())
+    (candidates / "base_results.json").write_bytes(EXAMPLE.read_bytes())
+    (gold / "base_results.json").write_bytes(EXAMPLE.read_bytes())
+    _write_revision(candidates / "episode_revision_001.json", 1, corrected=True)
+    _write_revision(gold / "episode_revision_001.json", 1, corrected=False)
+    _write_revision(gold / "episode_revision_002.json", 2, corrected=True)
+
+    manifest_path = build_correction_benchmark_bundle(
+        base_directory=bases,
+        candidate_directory=candidates,
+        gold_directory=gold,
+        output_directory=tmp_path / "bundle",
+    )
+    manifest = load_correction_benchmark_manifest(manifest_path)
+    report = evaluate_correction_benchmark(manifest)
+
+    assert manifest.cases[0].gold_path.name == "episode_revision_002.json"
+    assert report["case_count"] == 1
+    assert manifest_path.stat().st_mode & 0o777 == 0o600
+    for path in (tmp_path / "bundle" / "artifacts").rglob("*.json"):
+        assert path.stat().st_mode & 0o777 == 0o600
+
+
+def test_correction_benchmark_cli_builds_and_reports_bundle(tmp_path: Path) -> None:
+    bases = tmp_path / "bases"
+    candidates = tmp_path / "candidates"
+    gold = tmp_path / "gold"
+    for directory in (bases, candidates, gold):
+        directory.mkdir()
+        (directory / "base_results.json").write_bytes(EXAMPLE.read_bytes())
+    _write_revision(candidates / "episode_revision_001.json", 1, corrected=True)
+    _write_revision(gold / "episode_revision_002.json", 2, corrected=True)
+    bundle = tmp_path / "bundle"
+    report = tmp_path / "report.json"
+    runner = CliRunner()
+
+    built = runner.invoke(
+        app,
+        [
+            "benchmark",
+            "correction",
+            "build",
+            str(bases),
+            "--candidate-dir",
+            str(candidates),
+            "--gold-dir",
+            str(gold),
+            "--output-dir",
+            str(bundle),
+        ],
+    )
+    scored = runner.invoke(
+        app,
+        [
+            "benchmark",
+            "correction",
+            "report",
+            str(bundle / "manifest.toml"),
+            "--output",
+            str(report),
+        ],
+    )
+
+    assert built.exit_code == scored.exit_code == 0
+    assert "SUMMARY cases=1" in built.stdout
+    assert "gold_llm_wer=0.00000000" in scored.stdout
+    assert json.loads(report.read_text(encoding="utf-8"))["case_count"] == 1

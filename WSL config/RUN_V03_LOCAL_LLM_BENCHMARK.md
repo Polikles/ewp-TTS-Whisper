@@ -31,11 +31,20 @@ export EWP_CORPUS_ROOT="/absolute/path/to/private benchmark"
 export EWP_LM_ENDPOINT="http://100.99.201.120:1234/v1"
 export EWP_LM_MODEL="qwen2.5-14b-instruct"
 export EWP_LM_RUN="$(mktemp -d "$HOME/ewp-qwen14b-q8-XXXXXXXX")"
+export EWP_LM_CONFIG="$EWP_LM_RUN/qwen14b-q8-small-chunks.toml"
 set -o pipefail
 
 mkdir -p "$EWP_LM_RUN/revisions" "$EWP_LM_RUN/resume" "$EWP_LM_RUN/logs"
 chmod 700 "$EWP_LM_RUN" "$EWP_LM_RUN/revisions" "$EWP_LM_RUN/resume" "$EWP_LM_RUN/logs"
 printf 'run=%s\n' "$EWP_LM_RUN"
+
+cp examples/config.example.toml "$EWP_LM_CONFIG"
+sed -i \
+  -e 's/target_tokens = 600/target_tokens = 120/' \
+  -e 's/max_tokens = 800/max_tokens = 160/' \
+  -e 's/context_tokens = 80/context_tokens = 30/' \
+  "$EWP_LM_CONFIG"
+grep -E '^(prompt_id|target_tokens|max_tokens|context_tokens|temperature) =' "$EWP_LM_CONFIG"
 ```
 
 Verify the paths and model identity without printing transcript contents:
@@ -90,6 +99,7 @@ do
   name="$(basename "$result" .json)"
   /usr/bin/time -v -o "$EWP_LM_RUN/logs/${name}.preview.time.txt" \
     uv run --locked transcriber revise correct "$result" \
+      --config "$EWP_LM_CONFIG" \
       --model "$EWP_LM_MODEL" \
       --endpoint "$EWP_LM_ENDPOINT" \
       --allow-remote-endpoint \
@@ -120,6 +130,7 @@ for result in \
 do
   name="$(basename "$result" .json)"
   uv run --locked transcriber revise correct "$result" \
+    --config "$EWP_LM_CONFIG" \
     --model "$EWP_LM_MODEL" \
     --endpoint "$EWP_LM_ENDPOINT" \
     --allow-remote-endpoint \
@@ -173,6 +184,7 @@ do
   name="$(basename "$result" .json)"
   /usr/bin/time -v -o "$EWP_LM_RUN/logs/${name}.time.txt" \
     uv run --locked transcriber revise correct "$result" \
+      --config "$EWP_LM_CONFIG" \
       --model "$EWP_LM_MODEL" \
       --endpoint "$EWP_LM_ENDPOINT" \
       --allow-remote-endpoint \
@@ -202,14 +214,31 @@ sha256sum "$EWP_LM_RUN/revisions"/*_revision_*.json \
 
 Expected revision count is 24 and the permission check should print nothing.
 
-## 5. Scoring status
+## 5. Build and score the exact-hash bundle
 
-Candidate generation is runnable now. The strict correction benchmark core already checks
-canonical hashes, revision compatibility, latest-gold lineage, WER/CER, word-error reduction,
-and excess errors. The operator-facing manifest builder and report command are not yet
-shipped, so do not hand-write a 24-case manifest or claim final benchmark scores.
+Build a private, self-contained bundle. The builder resolves each candidate by canonical
+job/base hash, selects the highest compatible manual revision as gold, and stages only the
+required JSON artifacts with mode `0600`:
 
-After candidate generation, preserve the complete run directory. The next implementation
-slice will build and audit its exact-hash manifest, generate the non-secret aggregate report,
-and add the manual harmful-change review table. Local models are benchmarked separately;
-OpenRouter remains blocked until explicit paid-run authorization and a later cloud runbook.
+```bash
+uv run --locked transcriber benchmark correction build \
+  "$EWP_CORPUS_ROOT/1 canonical outputs" \
+  --candidate-dir "$EWP_LM_RUN/revisions" \
+  --gold-dir "$EWP_CORPUS_ROOT/3 apply" \
+  --output-dir "$EWP_LM_RUN/benchmark"
+
+uv run --locked transcriber benchmark correction report \
+  "$EWP_LM_RUN/benchmark/manifest.toml" \
+  --output "$EWP_LM_RUN/logs/correction-report.json"
+```
+
+The summary reports three separate normalized lexical comparisons:
+
+- `canonical_gold_wer`: human corrections relative to the canonical transcript;
+- `canonical_llm_wer`: LLM changes relative to the canonical transcript;
+- `gold_llm_wer`: remaining LLM disagreement with manually accepted gold.
+
+The content-free JSON retains per-case hashes, lineage, WER/CER, error counts, reduction,
+and excess errors. It cannot classify alternate grammatical repairs, paraphrases, or
+stylistic changes; record those in the human review table. Local and cloud models remain
+separate, and OpenRouter requires explicit paid-run authorization.
