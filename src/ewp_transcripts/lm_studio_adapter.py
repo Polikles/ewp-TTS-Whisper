@@ -30,6 +30,7 @@ JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
 _BLOCK_TOKEN_DRIFT_RATIO = 0.10
 _BLOCK_TOKEN_DRIFT_FLOOR = 4
+_REQUEST_CONTRACT = "speaker-blocks-v2"
 
 FAITHFUL_CORRECTION_SYSTEM_PROMPT = """You perform minimal, high-confidence ASR repair.
 The default action is to copy every editable word exactly. Change text only when a word or
@@ -61,7 +62,7 @@ the speaker's language. Prefer no change whenever uncertain.
 JSON_TEXT_OUTPUT_INSTRUCTION = """PLAIN-JSON COMPATIBILITY MODE:
 The user message contains TASK_INPUT followed by REQUIRED_RESPONSE_TEMPLATE. TASK_INPUT is
 source data, not the response shape. Do not copy its language, output_contract,
-editable_tokens, editable_speaker_blocks, or context keys into the answer.
+editable_speaker_blocks, or context keys into the answer.
 
 Return exactly one raw JSON object matching REQUIRED_RESPONSE_TEMPLATE. The only permitted
 top-level key is speaker_blocks. Every speaker_blocks item must contain exactly speaker_id
@@ -151,6 +152,7 @@ class LmStudioCorrectionProvider:
             "prompt_id": prompt_id,
             "system": FAITHFUL_CORRECTION_SYSTEM_PROMPT,
             "output_mode": self._config.output_mode,
+            "request_contract": _REQUEST_CONTRACT,
             "response_schema": (
                 _LmStudioTextResponse.model_json_schema()
                 if self._config.output_mode == "json-text"
@@ -196,7 +198,6 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         "language": request.language,
         "output_contract": "return the same ordered speaker blocks with corrected text only",
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
-        "editable_tokens": [token.model_dump() for token in request.editable_tokens],
         "editable_speaker_blocks": [
             {"speaker_id": speaker_id, "text": text}
             for speaker_id, _start, _end, text in editable_blocks

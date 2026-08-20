@@ -81,7 +81,7 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert "same ordered speaker blocks" in user["output_contract"]
     assert user["editable_speaker_blocks"] == [{"speaker_id": "speaker_001", "text": "Open AI"}]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
-    assert user["editable_tokens"][0]["token_id"] == "word_000002"
+    assert "editable_tokens" not in user
     assert captured["payload"]["response_format"]["type"] == "json_schema"
     assert response.corrected_text == "OpenAI"
     assert response.proposed_changes[0].start_index == 0
@@ -154,6 +154,29 @@ def test_output_mode_changes_prompt_identity() -> None:
     )
 
     assert schema_provider.prompt_sha256("prompt") != text_provider.prompt_sha256("prompt")
+
+
+def test_request_omits_redundant_editable_token_metadata() -> None:
+    captured: dict[str, Any] = {}
+
+    def transport(
+        url: str, headers: Mapping[str, str], payload: bytes, timeout: float
+    ) -> dict[str, Any]:
+        captured.update(payload=json.loads(payload))
+        content = {
+            "operation_id": "operation-1",
+            "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "Open AI"}],
+        }
+        return {"choices": [{"message": {"content": json.dumps(content)}}]}
+
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"), transport=transport
+    )
+    provider.correct(_request(), timeout_seconds=2)
+
+    task = json.loads(captured["payload"]["messages"][1]["content"])
+    assert "editable_tokens" not in task
+    assert task["editable_speaker_blocks"] == [{"speaker_id": "speaker_001", "text": "Open AI"}]
 
 
 @pytest.mark.parametrize(

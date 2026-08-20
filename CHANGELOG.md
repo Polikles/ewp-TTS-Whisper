@@ -86,6 +86,10 @@ All notable changes to EWP-transcripts are documented here.
   response locally while retaining exact block count, order, speaker, text, and drift gates.
 - Added the correction `output_mode` setting to the editable example configuration and a
   parity regression test; it was already present in packaged defaults and the CLI.
+- Removed obsolete per-token metadata from LM Studio requests after a 120-token Qwen 32B
+  chunk exhausted an 8K context before completing its JSON response. Speaker-block text and
+  bounded context remain provider-visible; exact token identity stays local. The versioned
+  wire contract now participates in prompt/resume identity.
 
 ### Validation
 
