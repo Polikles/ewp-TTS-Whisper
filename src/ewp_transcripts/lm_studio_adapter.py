@@ -36,11 +36,11 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-For each proposed change, copy start_token_id from the first changed editable token and
-end_token_id from the last changed editable token. Both IDs are inclusive and MUST name
-tokens in editable_tokens. Never count array positions and never use read-only context IDs.
-For every change, before MUST equal the source token texts from start_token_id through
-end_token_id joined with exactly one ASCII space, including original punctuation and
+For each proposed change, source_token_ids MUST list every changed editable token ID in
+its original order. Copy these IDs exactly. The list MUST be non-empty, contiguous, and
+contain no read-only context ID. Never count array positions and never invent boundary
+semantics. For every change, before MUST equal the source token texts named by
+source_token_ids joined with exactly one ASCII space, including original punctuation and
 capitalization. Changes MUST be sorted and non-overlapping. corrected_text MUST exactly
 equal all editable token texts after applying proposed_changes, joined with exactly one
 ASCII space. Copy operation_id exactly.
@@ -57,8 +57,7 @@ corrected_text, remove or fix the inconsistent change. Prefer no change when unc
 class _LmStudioChange(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
-    start_token_id: str = Field(min_length=1)
-    end_token_id: str = Field(min_length=1)
+    source_token_ids: tuple[str, ...] = Field(min_length=1)
     before: str = Field(min_length=1)
     after: str = Field(min_length=1)
     category: CorrectionCategory
@@ -160,8 +159,8 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
         "operation_id": request.operation_id,
         "language": request.language,
         "index_contract": (
-            "start_token_id/end_token_id are copied from the first/last changed editable "
-            "tokens and are inclusive; before is the exact one-space join of that span"
+            "source_token_ids lists every changed editable token ID in original contiguous "
+            "order; before is the exact one-space join of those token texts"
         ),
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
@@ -220,16 +219,18 @@ def _to_correction_response(
     changes: list[CorrectionChange] = []
     for change in response.proposed_changes:
         try:
-            start = positions[change.start_token_id]
-            inclusive_end = positions[change.end_token_id]
+            change_positions = [positions[token_id] for token_id in change.source_token_ids]
         except KeyError as error:
             raise ValueError("LM Studio change references a non-editable token ID") from error
-        if inclusive_end < start:
-            raise ValueError("LM Studio change token IDs are reversed")
+        if len(change_positions) != len(set(change_positions)):
+            raise ValueError("LM Studio change token IDs are duplicated")
+        start = change_positions[0]
+        if change_positions != list(range(start, start + len(change_positions))):
+            raise ValueError("LM Studio change token IDs are not ordered and contiguous")
         changes.append(
             CorrectionChange(
                 start_index=start,
-                end_index=inclusive_end + 1,
+                end_index=start + len(change_positions),
                 before=change.before,
                 after=change.after,
                 category=change.category,

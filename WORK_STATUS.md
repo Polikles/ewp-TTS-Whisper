@@ -87,7 +87,10 @@ payloads. A content-free mismatch diagnostic is being added before rerunning onl
 shortest case. That diagnostic proved Qwen copied the token at editable position 65 but
 reported span 59:60. The LM Studio wire protocol now uses stable inclusive token IDs and
 prompt v4; the adapter maps them to validated half-open core spans. Only the shortest case
-must be rerun next; the full corpus remains blocked.
+was rerun, revealing that Qwen treated the declared inclusive end ID as exclusive. Prompt
+v5 now requires the explicit ordered list of every changed token ID, eliminating boundary
+interpretation entirely. Only the shortest case must be rerun next; the full corpus remains
+blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 
