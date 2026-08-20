@@ -82,6 +82,9 @@ content so a malformed annotation cannot silently discard the remainder of a tra
 Quotation marks are ordinary punctuation: straight or typographic quote characters are
 ignored by lexical normalization, but every word between them remains part of the score.
 Quoted speech is therefore never excluded as an annotation.
+Consequently, lexical WER/CER cannot certify that quotation marks—or punctuation more
+generally—are correct. Automated candidates require a separate manual punctuation and
+quotation review before final acceptance.
 
 Macro averages are the primary initial comparison because each selected case contributes
 equally. Micro averages remain visible to show corpus-wide unit counts. The current

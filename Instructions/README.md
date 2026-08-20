@@ -255,6 +255,13 @@ the three-model acceptance run. In LM Studio, load exactly the intended model an
 its local OpenAI-compatible server. Confirm the exact identifier without sending a
 transcript:
 
+An automated revision is always a **review candidate**, never a final or accepted
+transcript. WER/CER does not validate punctuation or quotation marks, and tested models
+can miss ASR errors or introduce plausible-looking substitutions, deletions, paraphrases,
+and improper names. Manually review wording, speaker attribution, punctuation, quotation
+marks, and sentence boundaries before exporting it as accepted work. Only a manually
+accepted revision may serve as final publication text or benchmark gold.
+
 ```bash
 curl -fsS http://127.0.0.1:1234/v1/models | \
   uv run --locked python -c \

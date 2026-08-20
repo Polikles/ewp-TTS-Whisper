@@ -101,3 +101,4 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 | FR-K14, FR-K15 | implemented | Adapter timeout budgets, bounded explicit retries, validated resume entries, deterministic batches, failure isolation, and stop policy tests. |
 | FR-K16 | implemented | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
 | FR-K17, FR-K18 | partial | Exact-lineage canonical/revision benchmark cases and lexical reports are implemented. Change-quality, speaker/audit, and operational aggregate reporting remain. |
+| FR-K19 | implemented | CLI and operator documentation label automated output as a non-final candidate and require manual wording/speaker/punctuation/quotation review before final or gold use. |

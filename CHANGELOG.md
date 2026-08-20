@@ -109,6 +109,10 @@ All notable changes to EWP-transcripts are documented here.
 - Clarified that correction scoring excludes complete balanced round/square editorial
   annotations, whereas quotation marks alone are normalized away and all quoted words
   remain scored. Manual review accepted both Qwen 32B punctuation-only edits.
+- Automated correction is now explicitly labelled in CLI output, help, requirements, and
+  operator instructions as a non-final review candidate. Manual acceptance must verify
+  wording, speakers, punctuation, quotation marks, and sentence boundaries before final
+  publication or benchmark-gold use.
 
 ### Documentation
 

@@ -640,7 +640,7 @@ def revise_correct_command(
         typer.Option("--config", help="Read an explicit TOML configuration file."),
     ] = None,
 ) -> None:
-    """Correct faithfully through an explicitly configured local LM Studio API."""
+    """Generate a non-final review candidate through an explicit LM Studio API."""
 
     try:
         overrides: dict[str, object] = {"provider": "lm-studio"}
@@ -658,6 +658,12 @@ def revise_correct_command(
         )
         provider = create_correction_provider(config)
         choice = _correction_consent_choice(config, provider, consent)
+        typer.echo(
+            "WARNING: Automated correction creates a review candidate, not a final "
+            "transcript. Manually verify wording, speakers, punctuation, and quotation "
+            "marks before acceptance.",
+            err=True,
+        )
         normalized_result = normalize_input_path(results_json)
         state_directory = _optional_user_path(resume_directory) or (
             normalized_result.parent / "correction-state-ewp-transcripts"

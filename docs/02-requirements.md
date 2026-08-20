@@ -143,6 +143,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-K16** A deterministic mock provider MUST exercise the complete correction path without network access, credentials, or heavyweight model loading.
 - **FR-K17** Benchmarking MUST support canonical-to-latest-gold and earlier-revision-to-latest-gold tasks selected by exact base hash and revision lineage, not timestamps.
 - **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, locally derived change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes. Provider-annotation precision/recall MUST be reported only for providers that emit such annotations.
+- **FR-K19** Every automated correction artifact and CLI outcome MUST be described as a non-final review candidate. Manual acceptance MUST verify wording, speaker attribution, punctuation, quotation marks, and sentence boundaries before the artifact is treated as final publication text or benchmark gold.
 
 ## 2. Non-functional requirements
 

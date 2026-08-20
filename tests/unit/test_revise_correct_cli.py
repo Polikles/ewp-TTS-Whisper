@@ -15,6 +15,7 @@ def test_correct_help_exposes_provider_safety_controls() -> None:
     result = runner.invoke(app, ["revise", "correct", "--help"])
 
     assert result.exit_code == 0
+    assert "non-final review candidate" in result.stdout
     assert "--model" in result.stdout
     assert "--endpoint" in result.stdout
     assert "--allow-remote-endpoint" in result.stdout
