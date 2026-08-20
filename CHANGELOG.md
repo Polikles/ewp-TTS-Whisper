@@ -85,6 +85,14 @@ All notable changes to EWP-transcripts are documented here.
   response after Bielik copied it with a one-character mutation. The application binds the
   response locally while retaining exact block count, order, speaker, text, and drift gates.
 
+### Validation
+
+- The three-case private Bielik 3.0 11B Q8_0 pilot passed the explicit plain-JSON adapter
+  contract with no speaker changes. It remained deliberately conservative but scored
+  `0.00767339` WER against manual gold versus `0.00747664` for raw ASR, so it does not yet
+  pass the correction-quality gate. Private transcript text and artifacts remain outside
+  the repository.
+
 ### Documentation
 
 - Updated v0.3 traceability and acceptance status to distinguish implemented neutral
