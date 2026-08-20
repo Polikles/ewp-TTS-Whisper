@@ -90,8 +90,9 @@ prompt v4; the adapter maps them to validated half-open core spans. Only the sho
 was rerun, revealing that Qwen treated the declared inclusive end ID as exclusive. Prompt
 v5 now requires the explicit ordered list of every changed token ID, eliminating boundary
 interpretation entirely. Only the shortest case must be rerun next; the full corpus remains
-blocked. Its first v5 response failed wire-schema parsing; a value-free field/type diagnostic
-is required before deciding whether the prompt or LM Studio schema support is at fault.
+blocked. The value-free diagnostic showed a structurally valid response that grouped
+non-adjacent token IDs into one change. Prompt v6 now defines one contiguous replacement
+per object and separate objects for non-adjacent edits. The shortest case must be rerun.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

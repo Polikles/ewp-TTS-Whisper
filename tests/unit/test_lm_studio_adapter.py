@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v5",
+        prompt_id="faithful-correction-v6",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -82,6 +82,7 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "before MUST equal" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Never count array positions" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "Never group non-adjacent corrections" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     assert "Lexical\nword-form changes" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
     assert "every changed editable token ID" in user["index_contract"]
@@ -219,5 +220,6 @@ def test_adapter_rejects_noncontiguous_change_token_ids() -> None:
         transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
     )
 
-    with pytest.raises(InvalidCorrectionResponseError, match="invalid correction response"):
+    with pytest.raises(InvalidCorrectionResponseError) as raised:
         provider.correct(request, timeout_seconds=2)
+    assert "positions=0,2, count=2" in str(raised.value)

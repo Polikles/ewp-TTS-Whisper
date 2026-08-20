@@ -36,10 +36,13 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-For each proposed change, source_token_ids MUST list every changed editable token ID in
-its original order. Copy these IDs exactly. The list MUST be non-empty, contiguous, and
-contain no read-only context ID. Never count array positions and never invent boundary
-semantics. For every change, before MUST equal the source token texts named by
+Each proposed_changes item is exactly one contiguous source replacement. Its
+source_token_ids MUST list every token in that one contiguous span in original order,
+including any internally unchanged token needed inside a multi-token replacement. Copy
+these IDs exactly. Never group non-adjacent corrections into one item; emit a separate
+change item for every non-adjacent correction. The list MUST be non-empty and contain no
+read-only context ID. Never count array positions and never invent boundary semantics.
+For every change, before MUST equal the source token texts named by
 source_token_ids joined with exactly one ASCII space, including original punctuation and
 capitalization. Changes MUST be sorted and non-overlapping. corrected_text MUST exactly
 equal all editable token texts after applying proposed_changes, joined with exactly one
@@ -238,7 +241,11 @@ def _to_correction_response(
             raise ValueError("LM Studio change token IDs are duplicated")
         start = change_positions[0]
         if change_positions != list(range(start, start + len(change_positions))):
-            raise ValueError("LM Studio change token IDs are not ordered and contiguous")
+            summary = ",".join(str(position) for position in change_positions[:16])
+            raise ValueError(
+                "LM Studio change token IDs are not ordered and contiguous "
+                f"(positions={summary}, count={len(change_positions)})"
+            )
         changes.append(
             CorrectionChange(
                 start_index=start,

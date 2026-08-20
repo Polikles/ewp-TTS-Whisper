@@ -118,6 +118,9 @@ All notable changes to EWP-transcripts are documented here.
   non-empty, unique, contiguous editable IDs before the adapter derives a core span.
 - Added content-free LM Studio schema diagnostics that report only failing field paths and
   validation error types, never raw response values or transcript payloads.
+- Clarified in prompt v6 that every proposed-change object represents one contiguous source
+  replacement and that non-adjacent corrections require separate objects. Content-free
+  failures now include only the referenced numeric positions and count.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.
