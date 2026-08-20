@@ -84,6 +84,8 @@ All notable changes to EWP-transcripts are documented here.
 - Removed the redundant opaque operation ID from the synchronous plain-JSON fallback
   response after Bielik copied it with a one-character mutation. The application binds the
   response locally while retaining exact block count, order, speaker, text, and drift gates.
+- Added the correction `output_mode` setting to the editable example configuration and a
+  parity regression test; it was already present in packaged defaults and the CLI.
 
 ### Validation
 

@@ -8,6 +8,8 @@ from ewp_transcripts.config import load_config
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import InvalidConfigurationError
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def _write(path: Path, content: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -45,6 +47,16 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.correction.max_attempts == 3
     assert config.correction.temperature == 0
     assert config.quality.warn_only is True
+
+
+def test_editable_example_exposes_correction_output_mode(tmp_path: Path) -> None:
+    config = load_config(
+        explicit_path=ROOT / "examples/config.example.toml",
+        cwd=tmp_path,
+        home=tmp_path,
+    )
+
+    assert config.correction.output_mode == "json-schema"
 
 
 def test_documented_precedence_is_applied(tmp_path: Path) -> None:
