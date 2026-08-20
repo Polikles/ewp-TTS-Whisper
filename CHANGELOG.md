@@ -131,6 +131,9 @@ All notable changes to EWP-transcripts are documented here.
   patch metadata unreliable. LM Studio now returns corrected editable text; the application
   deterministically derives exact insert/delete/replace spans, before/after text, categories,
   speaker mapping, alignment, and audit. Optional provider annotations are advisory only.
+- Added prompt-v10 speaker-block round-tripping after a text-only local diff crossed a
+  speaker boundary. Block count/order/IDs are immutable and correction changes are derived
+  independently inside each block.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

@@ -18,7 +18,7 @@ from ewp_transcripts.lm_studio_adapter import (
 def _request() -> CorrectionRequest:
     return CorrectionRequest(
         operation_id="operation-1",
-        prompt_id="faithful-correction-v9",
+        prompt_id="faithful-correction-v10",
         prompt_sha256="0" * 64,
         language="pl",
         preceding_context=(
@@ -57,7 +57,7 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
         )
         content = {
             "operation_id": "operation-1",
-            "corrected_text": "OpenAI",
+            "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
         }
         return {
             "choices": [{"message": {"content": json.dumps(content)}}],
@@ -72,9 +72,10 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
     assert captured["url"] == "http://127.0.0.1:1234/v1/chat/completions"
     assert captured["timeout"] == 9
     assert "paraphrase" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
-    assert "independently derives" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
+    assert "same speaker_id" in FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user = json.loads(captured["payload"]["messages"][1]["content"])
-    assert "editable_tokens only" in user["output_contract"]
+    assert "same ordered speaker blocks" in user["output_contract"]
+    assert user["editable_speaker_blocks"] == [{"speaker_id": "speaker_001", "text": "Open AI"}]
     assert user["preceding_read_only_context"][0]["text"] == "kontekst"
     assert user["editable_tokens"][0]["token_id"] == "word_000002"
     assert response.corrected_text == "OpenAI"
@@ -131,7 +132,7 @@ def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
     private_text = "private transcript response"
     content = {
         "operation_id": "operation-1",
-        "corrected_text": "Open AI",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "Open AI"}],
         "obsolete_private_field": private_text,
     }
     provider = LmStudioCorrectionProvider(
@@ -145,3 +146,47 @@ def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
     message = str(raised.value)
     assert "obsolete_private_field:extra_forbidden" in message
     assert private_text not in message
+
+
+def test_adapter_rejects_changed_speaker_block_identity() -> None:
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [{"speaker_id": "speaker_002", "corrected_text": "Open AI"}],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError, match="speaker-block identity"):
+        provider.correct(_request(), timeout_seconds=2)
+
+
+def test_adapter_derives_changes_independently_inside_speaker_blocks() -> None:
+    request = _request().model_copy(
+        update={
+            "editable_tokens": (
+                _request().editable_tokens[0],
+                _request().editable_tokens[1].model_copy(update={"speaker_id": "speaker_002"}),
+            )
+        }
+    )
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [
+            {"speaker_id": "speaker_001", "corrected_text": "OPEN"},
+            {"speaker_id": "speaker_002", "corrected_text": "AI."},
+        ],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    response = provider.correct(request, timeout_seconds=2)
+
+    assert response.corrected_text == "OPEN AI."
+    assert [(change.start_index, change.end_index) for change in response.proposed_changes] == [
+        (0, 1),
+        (1, 2),
+    ]

@@ -13,8 +13,9 @@ from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from ewp_transcripts.correction import derive_correction_response
+from ewp_transcripts.correction import derive_correction_response, validate_correction_response
 from ewp_transcripts.domain.correction import (
+    CorrectionChange,
     CorrectionRequest,
     CorrectionResponse,
     CorrectionUsage,
@@ -35,14 +36,23 @@ fillers, repetitions, self-corrections, grammar, and style. Never paraphrase, su
 translate, censor, or add facts. Do not change text merely to make it sound more natural.
 Context is read-only. Return only the requested JSON.
 
-Return corrected_text for editable_tokens only, with tokens separated by one ASCII space.
-Never include preceding_read_only_context or following_read_only_context. Preserve the
-editable token text exactly unless a clearly necessary faithful correction is allowed by
-the first paragraph. Copy operation_id exactly. The local application independently derives
-the exact source spans, before/after text, categories, speaker mapping, and revision audit.
-If no correction is clearly necessary, return the editable text unchanged. Prefer no change
-when uncertain.
+Return exactly one speaker_blocks item for every editable_speaker_blocks item, in the same
+order and with the same speaker_id. Correct only each block's text, with tokens separated by
+one ASCII space. Never merge, split, add, delete, reorder, or relabel speaker blocks. Never
+include preceding_read_only_context or following_read_only_context. Preserve editable text
+exactly unless a clearly necessary faithful correction is allowed by the first paragraph.
+Copy operation_id exactly. The local application independently derives exact source spans,
+before/after text, categories, mappings, and revision audit inside each speaker block. If no
+correction is clearly necessary, return each editable block unchanged. Prefer no change when
+uncertain.
 """
+
+
+class _LmStudioSpeakerBlock(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    speaker_id: str = Field(min_length=1)
+    corrected_text: str = Field(min_length=1)
 
 
 class _LmStudioResponse(BaseModel):
@@ -50,7 +60,7 @@ class _LmStudioResponse(BaseModel):
 
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
-    corrected_text: str = Field(min_length=1)
+    speaker_blocks: tuple[_LmStudioSpeakerBlock, ...] = Field(min_length=1)
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,12 +146,17 @@ class LmStudioCorrectionProvider:
 
 
 def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> JsonObject:
+    editable_blocks = _speaker_blocks(request)
     transcript = {
         "operation_id": request.operation_id,
         "language": request.language,
-        "output_contract": "return corrected text for editable_tokens only",
+        "output_contract": "return the same ordered speaker blocks with corrected text only",
         "preceding_read_only_context": [token.model_dump() for token in request.preceding_context],
         "editable_tokens": [token.model_dump() for token in request.editable_tokens],
+        "editable_speaker_blocks": [
+            {"speaker_id": speaker_id, "text": text}
+            for speaker_id, _start, _end, text in editable_blocks
+        ],
         "following_read_only_context": [token.model_dump() for token in request.following_context],
     }
     return {
@@ -178,9 +193,9 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
                 input_tokens=_optional_nonnegative_int(usage.get("prompt_tokens")),
                 output_tokens=_optional_nonnegative_int(usage.get("completion_tokens")),
             )
-        response = derive_correction_response(
+        response = _derive_blocked_response(
             request,
-            corrected_text=wire_response.corrected_text,
+            wire_response,
             usage=correction_usage,
         )
     except ValidationError as error:
@@ -199,6 +214,72 @@ def _parse_chat_response(document: JsonObject, request: CorrectionRequest) -> Co
         raise InvalidCorrectionResponseError(
             "LM Studio returned an invalid correction response"
         ) from error
+    return response
+
+
+def _speaker_blocks(request: CorrectionRequest) -> list[tuple[str, int, int, str]]:
+    blocks: list[tuple[str, int, int, str]] = []
+    start = 0
+    while start < len(request.editable_tokens):
+        speaker_id = request.editable_tokens[start].speaker_id
+        end = start + 1
+        while (
+            end < len(request.editable_tokens)
+            and request.editable_tokens[end].speaker_id == speaker_id
+        ):
+            end += 1
+        text = " ".join(token.text for token in request.editable_tokens[start:end])
+        blocks.append((speaker_id, start, end, text))
+        start = end
+    return blocks
+
+
+def _derive_blocked_response(
+    request: CorrectionRequest,
+    wire_response: _LmStudioResponse,
+    *,
+    usage: CorrectionUsage | None,
+) -> CorrectionResponse:
+    source_blocks = _speaker_blocks(request)
+    if len(wire_response.speaker_blocks) != len(source_blocks):
+        raise ValueError("LM Studio changed the editable speaker-block count")
+    corrected_tokens: list[str] = []
+    changes: list[CorrectionChange] = []
+    for returned, (speaker_id, start, end, _text) in zip(
+        wire_response.speaker_blocks,
+        source_blocks,
+        strict=True,
+    ):
+        if returned.speaker_id != speaker_id:
+            raise ValueError("LM Studio changed editable speaker-block identity or order")
+        block_request = request.model_copy(
+            update={
+                "editable_tokens": request.editable_tokens[start:end],
+                "preceding_context": (),
+                "following_context": (),
+            }
+        )
+        derived = derive_correction_response(
+            block_request,
+            corrected_text=returned.corrected_text,
+        )
+        corrected_tokens.extend(derived.corrected_text.split())
+        changes.extend(
+            change.model_copy(
+                update={
+                    "start_index": change.start_index + start,
+                    "end_index": change.end_index + start,
+                }
+            )
+            for change in derived.proposed_changes
+        )
+    response = CorrectionResponse(
+        operation_id=request.operation_id,
+        corrected_text=" ".join(corrected_tokens),
+        proposed_changes=tuple(changes),
+        usage=usage,
+    )
+    validate_correction_response(request, response)
     return response
 
 

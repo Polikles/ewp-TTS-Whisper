@@ -101,7 +101,10 @@ contiguous end locally. A 120/160-token small-chunk rerun still selected the wro
 proving chunk size was not the root cause. The approved prompt-v9 redesign now requests
 corrected editable text only and derives exact changes, categories, speaker mapping, and
 revision audit locally, analogous to the existing human-review boundary. The shortest case
-must be rerun; the full corpus remains blocked.
+produced a local diff crossing a speaker boundary because plain corrected text omitted that
+boundary. Prompt v10 now round-trips the exact ordered speaker-block structure and derives
+changes independently per block. The shortest case must be rerun; the full corpus remains
+blocked.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 
