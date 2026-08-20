@@ -221,11 +221,12 @@ transcriber revise correct RESULTS_JSON [OPTIONS]
 `apply` and `preview` accept an `EWP-REVIEW 1` file or a directory of review files.
 
 `correct` currently accepts one completed canonical result and an explicitly configured
-LM Studio loopback provider. Its options are:
+LM Studio provider. Loopback is the default; remote use requires a separate opt-in.
 
 ```text
 --model EXACT_MODEL_ID
---endpoint LOOPBACK_V1_URL
+--endpoint HTTP_OR_HTTPS_V1_URL
+--allow-remote-endpoint
 --output-dir PATH
 --resume-dir PATH
 --preview
@@ -237,6 +238,8 @@ LM Studio loopback provider. Its options are:
 does not publish a revision. Consent is enforced before request serialization. Stored
 consent is exact-scope only; otherwise interactive execution prompts and non-interactive
 execution fails unless `--consent once|persist` is explicit. `reject` makes zero calls.
+Non-loopback HTTP(S) requires `--allow-remote-endpoint`, emits an additional network
+warning, and remains bound to the exact endpoint in persisted consent.
 Directory operations use deterministic natural ordering and do not recurse unless
 `--recursive` is supplied.
 

@@ -275,6 +275,12 @@ Final membership depends on measured load success, memory headroom, throughput, 
 quality, faithful-speech behavior, and complete-job stability. Merely loading a model does
 not qualify it.
 
+Initial reference-workstation evidence for the quality-first local tier: Qwen 2.5 14B
+Instruct Q8_0 loaded in LM Studio with a 32K context and used approximately 18.5 GB VRAM
+on the 24 GB RTX 3090. Bielik 3.0 11B Instruct will compare Q8_0 against F16 with CPU
+offload. These observations are configuration-specific baselines, not guarantees for
+other systems.
+
 ### Optional CPU-only correction target
 
 The CPU-only preset targets a recommended minimum of 16 GB system RAM. Candidates are:
@@ -285,7 +291,8 @@ The CPU-only preset targets a recommended minimum of 16 GB system RAM. Candidate
 
 Benchmark reports must include CPU model, usable RAM, thread settings, latency, throughput,
 peak process RAM, correction quality, and whether swapping occurred. The 16 GB figure is a
-planned validation floor, not an accepted requirement until those runs pass.
+planned validation floor, not an accepted requirement until those runs pass. The planned
+physical CPU-only validation machine has 32 GB RAM; operation below 16 GB is out of scope.
 
 ### Optional Apple Silicon correction target
 

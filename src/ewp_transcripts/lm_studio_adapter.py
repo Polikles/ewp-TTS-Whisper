@@ -39,6 +39,7 @@ translate, censor, or add facts. Context is read-only. Return only the requested
 class LmStudioAdapterConfig:
     model_id: str
     endpoint: str = "http://127.0.0.1:1234/v1"
+    allow_remote_endpoint: bool = False
     temperature: float = 0.0
 
     def __post_init__(self) -> None:
@@ -46,11 +47,11 @@ class LmStudioAdapterConfig:
             raise ValueError("LM Studio model_id must not be empty")
         if not 0 <= self.temperature <= 2:
             raise ValueError("LM Studio temperature must be between 0 and 2")
-        _normalized_loopback_endpoint(self.endpoint)
+        _normalized_endpoint(self.endpoint, allow_remote=self.allow_remote_endpoint)
 
 
 class LmStudioCorrectionProvider:
-    """Provider-neutral adapter for LM Studio's loopback chat-completions API."""
+    """Provider-neutral adapter for an explicitly scoped LM Studio API."""
 
     def __init__(
         self,
@@ -59,7 +60,10 @@ class LmStudioCorrectionProvider:
         transport: HttpTransport | None = None,
     ) -> None:
         self._config = config
-        self._endpoint = _normalized_loopback_endpoint(config.endpoint)
+        self._endpoint = _normalized_endpoint(
+            config.endpoint,
+            allow_remote=config.allow_remote_endpoint,
+        )
         self._transport = transport or _urllib_transport
 
     @property
@@ -173,17 +177,25 @@ def _optional_nonnegative_int(value: object) -> int | None:
     return value
 
 
-def _normalized_loopback_endpoint(endpoint: str) -> str:
+def is_loopback_endpoint(endpoint: str) -> bool:
+    """Return whether a syntactically valid endpoint names the local host."""
+
+    return urlsplit(endpoint).hostname in {"127.0.0.1", "localhost", "::1"}
+
+
+def _normalized_endpoint(endpoint: str, *, allow_remote: bool) -> str:
     parsed = urlsplit(endpoint)
     if (
-        parsed.scheme != "http"
-        or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
+        parsed.scheme not in {"http", "https"}
+        or parsed.hostname is None
         or parsed.username is not None
         or parsed.password is not None
         or parsed.query
         or parsed.fragment
     ):
-        raise ValueError("LM Studio endpoint must be an uncredentialed loopback HTTP URL")
+        raise ValueError("LM Studio endpoint must be an uncredentialed HTTP(S) URL")
+    if not is_loopback_endpoint(endpoint) and not allow_remote:
+        raise ValueError("Remote LM Studio endpoint requires explicit opt-in")
     path = parsed.path.rstrip("/")
     if not path.endswith("/v1"):
         raise ValueError("LM Studio endpoint path must end in /v1")

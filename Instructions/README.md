@@ -284,8 +284,17 @@ Use `--consent persist` only to remember the exact LM Studio provider and endpoi
 model and prompt identity still participate in operation/resume hashes. `--consent reject`
 guarantees no API request. Even a loopback server is a separate process that may log or
 forward text, so EWP Transcriber displays its local-API warning. The endpoint must be an
-uncredentialed `http://localhost.../v1`, `127.0.0.1`, or `::1` URL. Remote addresses are
-rejected by this adapter.
+uncredentialed HTTP(S) `/v1` URL. Loopback (`localhost`, `127.0.0.1`, or `::1`) is the
+default. A LAN, VPN, or Tailscale-like address additionally requires
+`--allow-remote-endpoint` and produces a stronger warning; plain HTTP confidentiality
+then depends on the underlying network or overlay and is not verified by this program:
+
+```bash
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --model "qwen2.5-14b-instruct" \
+  --endpoint "http://100.99.201.120:1234/v1" \
+  --allow-remote-endpoint --consent once --preview
+```
 
 ## 10. Export corrected transcripts
 

@@ -39,3 +39,18 @@ def test_remote_lm_studio_endpoint_is_rejected_as_configuration_error() -> None:
 
     with pytest.raises(InvalidConfigurationError, match="Invalid LM Studio"):
         create_correction_provider(config)
+
+
+def test_explicit_remote_lm_studio_endpoint_is_constructed() -> None:
+    provider = create_correction_provider(
+        ApplicationConfig(
+            correction=CorrectionConfig(
+                provider="lm-studio",
+                model="qwen2.5-14b-instruct",
+                endpoint="http://100.99.201.120:1234/v1",
+                allow_remote_endpoint=True,
+            )
+        )
+    )
+
+    assert provider.endpoint_identity == "http://100.99.201.120:1234/v1"

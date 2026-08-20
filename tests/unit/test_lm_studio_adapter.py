@@ -93,15 +93,26 @@ def test_adapter_sends_structured_faithful_request_and_parses_usage() -> None:
 @pytest.mark.parametrize(
     "endpoint",
     [
-        "https://127.0.0.1:1234/v1",
+        "ftp://127.0.0.1:1234/v1",
         "http://192.168.1.2:1234/v1",
         "http://user:secret@localhost:1234/v1",
         "http://localhost:1234/api",
     ],
 )
-def test_adapter_rejects_non_loopback_or_credentialed_endpoint(endpoint: str) -> None:
+def test_adapter_rejects_unsafe_or_unapproved_endpoint(endpoint: str) -> None:
     with pytest.raises(ValueError, match="LM Studio endpoint"):
         LmStudioAdapterConfig(model_id="model", endpoint=endpoint)
+
+
+def test_adapter_accepts_remote_endpoint_only_with_explicit_opt_in() -> None:
+    config = LmStudioAdapterConfig(
+        model_id="model",
+        endpoint="http://100.99.201.120:1234/v1",
+        allow_remote_endpoint=True,
+    )
+    provider = LmStudioCorrectionProvider(config, transport=lambda *args: {})
+
+    assert provider.endpoint_identity == "http://100.99.201.120:1234/v1"
 
 
 def test_adapter_rejects_malformed_content_without_exposing_it() -> None:

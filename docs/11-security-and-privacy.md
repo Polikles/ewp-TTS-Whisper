@@ -50,6 +50,12 @@ forwards. Local API use therefore displays a distinct warning with the same reje
 accept-once, and scoped persistent-consent choices. Documentation must not call a local
 API bulletproof or equate it with an in-process offline model.
 
+Loopback is the default LM Studio boundary. A non-loopback LAN/VPN/Tailscale-like server
+requires a dedicated configuration or CLI opt-in and an additional network-transfer
+warning. Plain HTTP may rely on protection supplied by the underlying private overlay;
+the application does not verify that protection. Persistent consent remains scoped to
+the exact endpoint identity, and a changed address prompts again.
+
 Strict offline mode blocks cloud endpoints. Secrets and consent records must never be
 written to canonical results, logs, audits, or revision content. Revision provenance may
 record provider/model/endpoint kind and a non-secret endpoint identity.

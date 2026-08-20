@@ -7,6 +7,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -19,6 +20,11 @@ WARNING_POLICY_VERSION: Literal["correction-api-v1"] = "correction-api-v1"
 LOCAL_API_WARNING = (
     "Transcript text will be sent to a separate local API process. EWP Transcriber "
     "cannot guarantee what that process logs, retains, or forwards."
+)
+REMOTE_LOCAL_API_WARNING = (
+    "Transcript text will be sent over the network to a separately operated API endpoint. "
+    "EWP Transcriber cannot guarantee transport confidentiality or what that server logs, "
+    "retains, or forwards."
 )
 CLOUD_API_WARNING = (
     "Transcript text will leave this machine and be sent to a cloud API provider. "
@@ -62,6 +68,17 @@ def correction_api_warning(endpoint_kind: EndpointKind) -> str | None:
     return None
 
 
+def correction_scope_warning(scope: CorrectionConsentScope) -> str | None:
+    warning = correction_api_warning(scope.endpoint_kind)
+    if (
+        warning is not None
+        and scope.endpoint_kind == "local"
+        and urlsplit(scope.endpoint_identity).hostname not in {"127.0.0.1", "localhost", "::1"}
+    ):
+        return f"{warning} {REMOTE_LOCAL_API_WARNING}"
+    return warning
+
+
 def authorize_correction_api(
     scope: CorrectionConsentScope,
     *,
@@ -74,7 +91,7 @@ def authorize_correction_api(
 
     if scope.endpoint_kind == "mock":
         return ConsentDecision(True, None, None)
-    warning = correction_api_warning(scope.endpoint_kind)
+    warning = correction_scope_warning(scope)
     assert warning is not None
     if offline and scope.endpoint_kind == "cloud":
         raise CorrectionConsentError("Strict offline mode blocks cloud correction APIs")

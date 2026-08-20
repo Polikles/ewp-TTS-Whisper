@@ -58,6 +58,10 @@ reject/once/persist consent, and private resumable state. Prompt content and res
 schema hashes invalidate stale resume entries. The next gate is a synthetic LM Studio
 smoke run followed by local benchmark/report execution. Cloud credentials, API calls,
 and cost remain separately gated.
+The first local runtime identity is `qwen2.5-14b-instruct`; LM Studio loaded its Q8_0
+variant at 32K context using approximately 18.5 GB VRAM on the RTX 3090. The operator's
+server uses a Tailscale-like address, so non-loopback endpoints require explicit opt-in
+and a stronger warning rather than being silently treated as loopback.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

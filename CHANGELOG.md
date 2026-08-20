@@ -76,6 +76,10 @@ All notable changes to EWP-transcripts are documented here.
   validation floor, optional CPU-only operation with 16 GB recommended RAM, and a later
   separate Apple Silicon build with 16 GB unified memory. Recorded candidate model and
   quantization matrices plus rented MacinCloud/Scaleway CLI/GUI validation provenance.
+- Made non-loopback LM Studio endpoints explicitly configurable for LAN/VPN/Tailscale-like
+  use while retaining loopback by default, exact-scope consent, and an additional network
+  warning. Recorded the Qwen 14B Q8_0 32K/18.5 GB VRAM observation and planned Bielik
+  Q8_0 versus CPU-offloaded F16 comparison as configuration-specific evidence.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

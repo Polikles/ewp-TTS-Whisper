@@ -12,6 +12,7 @@ from ewp_transcripts.correction_consent import (
     EndpointKind,
     authorize_correction_api,
     correction_api_warning,
+    correction_scope_warning,
     load_correction_consents,
     persist_correction_consent,
 )
@@ -109,6 +110,16 @@ def test_local_and_cloud_warnings_are_distinct() -> None:
     assert correction_api_warning("local") == LOCAL_API_WARNING
     assert correction_api_warning("cloud") == CLOUD_API_WARNING
     assert LOCAL_API_WARNING != CLOUD_API_WARNING
+
+
+def test_remote_local_scope_adds_network_warning() -> None:
+    scope = _scope("local", endpoint="http://100.99.201.120:1234/v1")
+
+    warning = correction_scope_warning(scope)
+
+    assert warning is not None
+    assert LOCAL_API_WARNING in warning
+    assert "sent over the network" in warning
 
 
 def test_persistent_store_is_private_atomic_and_deduplicated(tmp_path: Path) -> None:

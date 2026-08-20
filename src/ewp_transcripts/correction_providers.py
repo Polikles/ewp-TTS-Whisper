@@ -20,6 +20,7 @@ def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
             adapter_config = LmStudioAdapterConfig(
                 model_id=correction.model,
                 endpoint=correction.endpoint,
+                allow_remote_endpoint=correction.allow_remote_endpoint,
                 temperature=correction.temperature,
             )
         except ValueError as error:

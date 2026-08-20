@@ -146,6 +146,7 @@ The first v0.3 correction slice defines:
 provider = "" # disabled; set to "lm-studio" explicitly
 model = "" # exact identifier reported by the loaded LM Studio model
 endpoint = "http://127.0.0.1:1234/v1"
+allow_remote_endpoint = false
 prompt_id = "faithful-correction-v1"
 target_tokens = 600
 max_tokens = 800
@@ -164,9 +165,11 @@ overrideable through normal configuration/application requests. The maximum cont
 any provider model MUST NOT be hard-coded into the revision engine. Defaults remain
 subject to benchmark-driven adjustment before v0.3 acceptance.
 
-Automated correction remains disabled while `provider` is empty. `lm-studio` accepts
-only an uncredentialed loopback HTTP endpoint whose path ends in `/v1`; it does not make
-remote addresses local merely because the operator labels them local. `model` must be
-the exact identifier exposed by LM Studio. Timeouts and retry counts are per chunk.
+Automated correction remains disabled while `provider` is empty. `lm-studio` accepts an
+uncredentialed HTTP(S) endpoint whose path ends in `/v1`. Loopback is required unless
+`allow_remote_endpoint = true` or the matching CLI flag explicitly opts into a LAN,
+VPN, or Tailscale-like address. This opt-in does not make a remote process private or
+guarantee transport confidentiality. `model` must be the exact identifier exposed by
+LM Studio. Timeouts and retry counts are per chunk.
 The consent store contains only non-secret exact scopes and is created with private
 permissions; API keys never belong in this configuration.

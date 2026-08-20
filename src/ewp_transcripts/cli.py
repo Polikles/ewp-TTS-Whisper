@@ -37,6 +37,7 @@ from ewp_transcripts.application import (
 )
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction_consent import (
+    REMOTE_LOCAL_API_WARNING,
     ConsentChoice,
     CorrectionConsentScope,
     correction_api_warning,
@@ -55,6 +56,7 @@ from ewp_transcripts.domain.errors import (
     OutputLockUnavailableError,
     OutputReservationError,
 )
+from ewp_transcripts.lm_studio_adapter import is_loopback_endpoint
 from ewp_transcripts.revision_editor import open_review_in_editor, require_review_change
 
 app = typer.Typer(
@@ -515,8 +517,15 @@ def revise_correct_command(
     ] = None,
     endpoint: Annotated[
         str | None,
-        typer.Option("--endpoint", help="LM Studio loopback /v1 endpoint."),
+        typer.Option("--endpoint", help="LM Studio HTTP(S) /v1 endpoint."),
     ] = None,
+    allow_remote_endpoint: Annotated[
+        bool,
+        typer.Option(
+            "--allow-remote-endpoint",
+            help="Explicitly allow a non-loopback LM Studio HTTP(S) endpoint.",
+        ),
+    ] = False,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Write the immutable revision to this directory."),
@@ -549,6 +558,8 @@ def revise_correct_command(
             overrides["model"] = model
         if endpoint is not None:
             overrides["endpoint"] = endpoint
+        if allow_remote_endpoint:
+            overrides["allow_remote_endpoint"] = True
         config = load_config(
             explicit_path=config_path,
             cli_overrides={"correction": overrides},
@@ -609,6 +620,8 @@ def _correction_consent_choice(
     warning = correction_api_warning(scope.endpoint_kind)
     if warning is not None:
         typer.echo(f"WARNING: {warning}", err=True)
+    if scope.endpoint_kind == "local" and not is_loopback_endpoint(scope.endpoint_identity):
+        typer.echo(f"WARNING: {REMOTE_LOCAL_API_WARNING}", err=True)
     records = load_correction_consents(config.correction.consent_store)
     if any(record.scope == scope for record in records):
         return None
