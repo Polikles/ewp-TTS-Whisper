@@ -227,6 +227,82 @@ def test_response_rejects_changes_that_do_not_reconstruct_corrected_text() -> No
         raise AssertionError("unexplained provider rewrite was accepted")
 
 
+def test_response_rejects_lexical_edit_labeled_as_punctuation() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = (
+        DeterministicMockCorrectionProvider()
+        .correct(request)
+        .model_copy(
+            update={
+                "corrected_text": "token0 tokens1 token2",
+                "proposed_changes": (
+                    CorrectionChange(
+                        start_index=1,
+                        end_index=2,
+                        before="token1",
+                        after="tokens1",
+                        category="punctuation",
+                    ),
+                ),
+            }
+        )
+    )
+
+    try:
+        validate_correction_response(request, response)
+    except InvalidCorrectionResponseError as error:
+        assert "category" in str(error)
+    else:
+        raise AssertionError("misclassified lexical edit was accepted")
+
+
+def test_response_accepts_category_compatible_surface_edits() -> None:
+    transcript = _transcript(3)
+    chunk = plan_correction_chunks(transcript)[0]
+    request = build_correction_request(
+        transcript,
+        chunk,
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = (
+        DeterministicMockCorrectionProvider()
+        .correct(request)
+        .model_copy(
+            update={
+                "corrected_text": "Token0 token1, token2",
+                "proposed_changes": (
+                    CorrectionChange(
+                        start_index=0,
+                        end_index=1,
+                        before="token0",
+                        after="Token0",
+                        category="capitalization",
+                    ),
+                    CorrectionChange(
+                        start_index=1,
+                        end_index=2,
+                        before="token1",
+                        after="token1,",
+                        category="punctuation",
+                    ),
+                ),
+            }
+        )
+    )
+
+    assert validate_correction_response(request, response) == ("Token0", "token1,", "token2")
+
+
 def test_mock_provider_builds_llm_revision_through_existing_aligner() -> None:
     result = Path(__file__).resolve().parents[2] / "examples/results.example.json"
     provider = DeterministicMockCorrectionProvider({"transcription.": ("OpenAI.", "proper_name")})

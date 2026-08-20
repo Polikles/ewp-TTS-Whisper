@@ -88,6 +88,10 @@ All notable changes to EWP-transcripts are documented here.
   response failed strict validation. The prompt now defines zero-based half-open token
   spans, verbatim `before` text, exact reconstruction, sorted changes, context exclusion,
   and the required no-change response without weakening local validation.
+- Revised the prompt to v3 after Qwen returned a contradictory lexical edit and unchanged
+  corrected text. Added deterministic category semantics, explicit final reconstruction,
+  and conservative uncertainty rules; punctuation/capitalization/sentence-boundary labels
+  can no longer conceal lexical changes.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.

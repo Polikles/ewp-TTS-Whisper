@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -240,6 +241,10 @@ def validate_correction_response(
             raise InvalidCorrectionResponseError(
                 "Correction response before text does not match the editable source"
             )
+        if not _change_category_matches(change.before, change.after, change.category):
+            raise InvalidCorrectionResponseError(
+                "Correction response change category does not match its text edit"
+            )
         corrected.extend(change.after.split())
         previous_end = change.end_index
     corrected.extend(token.text for token in request.editable_tokens[previous_end:])
@@ -248,6 +253,23 @@ def validate_correction_response(
             "Correction response proposed changes do not reconstruct corrected text"
         )
     return tuple(corrected)
+
+
+def _change_category_matches(before: str, after: str, category: str) -> bool:
+    if category == "punctuation":
+        return _without_punctuation(before) == _without_punctuation(after)
+    if category == "capitalization":
+        return before.casefold() == after.casefold()
+    if category == "sentence_boundary":
+        return _without_punctuation(before).casefold() == _without_punctuation(after).casefold()
+    return True
+
+
+def _without_punctuation(value: str) -> str:
+    characters = "".join(
+        character for character in value if not unicodedata.category(character).startswith("P")
+    )
+    return " ".join(characters.split())
 
 
 def build_correction_revision(

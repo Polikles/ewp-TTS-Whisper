@@ -66,6 +66,10 @@ The first synthetic Qwen smoke request reached LM Studio but was safely rejected
 its proposed `before` text did not exactly match the indexed editable source. No validated
 resume state or revision was published. The prompt contract is now `faithful-correction-v2`
 with explicit index/verbatim reconstruction rules; the same smoke case must be rerun.
+The v2 rerun also failed safely: Qwen proposed `transcription.` to `transcriptions.` as
+`punctuation` while leaving corrected text unchanged. Prompt v3 now requires a final
+reconstruction check and local validation enforces category-compatible edits. Rerun remains
+the next gate; contradictory content is not auto-repaired or persisted.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

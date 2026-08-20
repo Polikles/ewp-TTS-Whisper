@@ -42,6 +42,11 @@ and non-overlapping. corrected_text MUST exactly equal all editable token texts 
 applying proposed_changes, joined with exactly one ASCII space. Copy operation_id exactly.
 Never include read-only context in corrected_text or changes. If no correction is clearly
 necessary, return the editable text unchanged and an empty proposed_changes list.
+Category rules are strict: punctuation may change punctuation only; capitalization may
+change letter case only; sentence_boundary may change punctuation/case only. Lexical
+word-form changes are never punctuation changes. Before returning JSON, reconstruct
+corrected_text from the proposed changes yourself. If it differs from your proposed
+corrected_text, remove or fix the inconsistent change. Prefer no change when uncertain.
 """
 
 
