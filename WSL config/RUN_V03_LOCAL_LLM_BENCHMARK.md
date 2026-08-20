@@ -238,6 +238,10 @@ The summary reports three separate normalized lexical comparisons:
 - `canonical_llm_wer`: LLM changes relative to the canonical transcript;
 - `gold_llm_wer`: remaining LLM disagreement with manually accepted gold.
 
+Correction normalization excludes balanced `(...)` and `[...]` review annotations, which
+may describe manual speaker fixes rather than ASR text. Rebuild the bundle whenever the
+manifest reports an older normalization version; reports never silently reinterpret it.
+
 The content-free JSON retains per-case hashes, lineage, WER/CER, error counts, reduction,
 and excess errors. It cannot classify alternate grammatical repairs, paraphrases, or
 stylistic changes; record those in the human review table. Local and cloud models remain

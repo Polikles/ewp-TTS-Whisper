@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import tomllib
 from dataclasses import dataclass
@@ -17,9 +18,11 @@ from ewp_transcripts.domain.revision import (
     load_transcript_revision,
     validate_revision_base,
 )
-from ewp_transcripts.quality import NORMALIZATION_VERSION, score
+from ewp_transcripts.quality import score
 
 SourceKind = Literal["canonical", "revision"]
+CORRECTION_NORMALIZATION_VERSION = "ewp-correction-lexical-v2"
+_ANNOTATION = re.compile(r"\([^()]*\)|\[[^\[\]]*\]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,7 +114,11 @@ def build_correction_benchmark_bundle(
             }
         )
     manifest_path = output_directory / "manifest.toml"
-    lines = ['manifest_version = "1.0"', f'normalization = "{NORMALIZATION_VERSION}"', ""]
+    lines = [
+        'manifest_version = "1.0"',
+        f'normalization = "{CORRECTION_NORMALIZATION_VERSION}"',
+        "",
+    ]
     for case in cases:
         lines.append("[[cases]]")
         lines.extend(f"{key} = {json.dumps(value)}" for key, value in case.items())
@@ -142,7 +149,7 @@ def load_correction_benchmark_manifest(path: Path) -> CorrectionBenchmarkManifes
         raise ValueError("Correction benchmark manifest has undocumented root fields")
     if document["manifest_version"] != "1.0":
         raise ValueError("Unsupported correction benchmark manifest version")
-    if document["normalization"] != NORMALIZATION_VERSION:
+    if document["normalization"] != CORRECTION_NORMALIZATION_VERSION:
         raise ValueError("Correction benchmark normalization does not match")
     raw_cases = document["cases"]
     if not isinstance(raw_cases, list) or not raw_cases:
@@ -220,9 +227,9 @@ def evaluate_correction_benchmark(
             source_revision_number = source.revision_number
         gold_text = _revision_text(gold)
         candidate_text = _revision_text(candidate)
-        baseline = score(gold_text, source_text)
-        result = score(gold_text, candidate_text)
-        source_to_candidate = score(source_text, candidate_text)
+        baseline = _correction_score(gold_text, source_text)
+        result = _correction_score(gold_text, candidate_text)
+        source_to_candidate = _correction_score(source_text, candidate_text)
         baseline_errors = cast(dict[str, int], baseline["word_errors"])["errors"]
         candidate_errors = cast(dict[str, int], result["word_errors"])["errors"]
         reports.append(
@@ -244,9 +251,9 @@ def evaluate_correction_benchmark(
             }
         )
     return {
-        "report_version": "ewp-correction-benchmark-v1",
+        "report_version": "ewp-correction-benchmark-v2",
         "manifest_sha256": _sha256(manifest.path),
-        "normalization": NORMALIZATION_VERSION,
+        "normalization": CORRECTION_NORMALIZATION_VERSION,
         "case_count": len(reports),
         "aggregate": _aggregate(reports),
         "cases": reports,
@@ -274,6 +281,22 @@ def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
         }
         for name, total in totals.items()
     }
+
+
+def _correction_score(reference_text: str, hypothesis_text: str) -> dict[str, object]:
+    metric = score(_without_annotations(reference_text), _without_annotations(hypothesis_text))
+    metric["normalization"] = CORRECTION_NORMALIZATION_VERSION
+    return metric
+
+
+def _without_annotations(text: str) -> str:
+    """Remove balanced round/square review annotations, including nested annotations."""
+
+    while True:
+        stripped = _ANNOTATION.sub(" ", text)
+        if stripped == text:
+            return stripped
+        text = stripped
 
 
 def _validated_revision(

@@ -74,6 +74,12 @@ WER/CER uses deterministic Levenshtein counts. The review diff uses a memory-bou
 sequence comparison and is explanatory rather than another metric; its displayed edit
 grouping need not equal the WER alignment decomposition.
 
+Automated-correction reports use `ewp-correction-lexical-v2`: it applies the same lexical
+normalization and additionally removes balanced `(...)` and `[...]` review annotations
+from every side of the comparison. These annotations may document speaker corrections or
+editorial context rather than spoken/ASR content. Unbalanced delimiters remain lexical
+content so a malformed annotation cannot silently discard the remainder of a transcript.
+
 Macro averages are the primary initial comparison because each selected case contributes
 equally. Micro averages remain visible to show corpus-wide unit counts. The current
 three-case material is only an initial baseline; release thresholds require the larger

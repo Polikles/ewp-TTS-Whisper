@@ -48,7 +48,7 @@ def _manifest(tmp_path: Path, *, source_kind: str = "canonical") -> Path:
     manifest = tmp_path / "correction-benchmark.toml"
     manifest.write_text(
         f'''manifest_version = "1.0"
-normalization = "ewp-phase0-lexical-v1"
+normalization = "ewp-correction-lexical-v2"
 
 [[cases]]
 case_id = "episode-1"
@@ -73,7 +73,7 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
 
     report = evaluate_correction_benchmark(manifest)
 
-    assert report["report_version"] == "ewp-correction-benchmark-v1"
+    assert report["report_version"] == "ewp-correction-benchmark-v2"
     assert report["case_count"] == 1
     case = report["cases"][0]
     assert case["source_kind"] == source_kind
@@ -184,3 +184,22 @@ def test_correction_benchmark_cli_builds_and_reports_bundle(tmp_path: Path) -> N
     assert "SUMMARY cases=1" in built.stdout
     assert "gold_llm_wer=0.00000000" in scored.stdout
     assert json.loads(report.read_text(encoding="utf-8"))["case_count"] == 1
+
+
+def test_correction_benchmark_ignores_balanced_review_annotations(tmp_path: Path) -> None:
+    manifest = load_correction_benchmark_manifest(_manifest(tmp_path))
+    gold_path = tmp_path / "gold_revision.json"
+    gold = json.loads(gold_path.read_text(encoding="utf-8"))
+    gold["transcript"]["tokens"][0]["text"] += " (speaker correction [editor note])"
+    gold_path.write_text(json.dumps(gold), encoding="utf-8")
+    manifest_path = tmp_path / "correction-benchmark.toml"
+    manifest_path.write_text(
+        manifest_path.read_text(encoding="utf-8").replace(
+            manifest.cases[0].gold_sha256, _sha(gold_path)
+        ),
+        encoding="utf-8",
+    )
+
+    report = evaluate_correction_benchmark(load_correction_benchmark_manifest(manifest_path))
+
+    assert report["cases"][0]["candidate"]["wer"] == 0.0

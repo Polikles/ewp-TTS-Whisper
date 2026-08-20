@@ -67,6 +67,9 @@ All notable changes to EWP-transcripts are documented here.
   bundles, select the latest compatible manual gold, and report separate
   canonical-to-gold, canonical-to-LLM, and gold-to-LLM lexical comparisons without
   transcript text.
+- Added correction-specific lexical normalization that excludes balanced parenthetical
+  and square-bracket review annotations, preventing manual speaker notes from being
+  counted as ASR or LLM errors.
 
 ### Documentation
 

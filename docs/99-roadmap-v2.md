@@ -161,6 +161,18 @@ forms such as `OpenAI` versus `Open AI`. Automatically discovered items are cand
 only: a user must approve them before they affect correction or translation. Benchmarks
 must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
 
+The correction benchmark must test two dictionary hypotheses explicitly:
+
+- whether the same LLM with an approved project dictionary is materially closer to manual
+  gold than the identical model/prompt without one, especially for recurring proper names
+  and project spelling conventions;
+- whether manual review starting from an LLM candidate reduces reviewer time and accepted
+  edit count relative to starting from raw ASR, both without and with dictionary context.
+
+Use a four-branch matrix—raw ASR, LLM only, dictionary-assisted LLM, and manual gold—and
+record lexical error, harmful/style changes, reviewer corrections, and review time. A
+dictionary is accepted only if gains are not offset by confident harmful replacements.
+
 After all functional requirements and the private benchmark are complete, BIGOS may also
 be evaluated as a candidate source for an optional general Polish dictionary. Such a
 resource must live in a separate repository catalog from project dictionaries, be
