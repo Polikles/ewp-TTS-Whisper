@@ -70,6 +70,9 @@ The v2 rerun also failed safely: Qwen proposed `transcription.` to `transcriptio
 `punctuation` while leaving corrected text unchanged. Prompt v3 now requires a final
 reconstruction check and local validation enforces category-compatible edits. Rerun remains
 the next gate; contradictory content is not auto-repaired or persisted.
+The v3 synthetic preview then passed end to end against the configured LM Studio endpoint:
+8 revision tokens, zero warnings, and no published revision. Cached-response reuse and
+immutable apply are the next runtime gates.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 
