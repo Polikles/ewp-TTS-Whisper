@@ -72,7 +72,10 @@ reconstruction check and local validation enforces category-compatible edits. Re
 the next gate; contradictory content is not auto-repaired or persisted.
 The v3 synthetic preview then passed end to end against the configured LM Studio endpoint:
 8 revision tokens, zero warnings, and no published revision. Cached-response reuse and
-immutable apply are the next runtime gates.
+immutable apply also passed: the same validated response was reused without a second LM
+Studio request, and `S01E01_revision_001.json` was published separately from the unchanged
+canonical input. Resume, revision, and lock artifacts were all mode `0600`. The synthetic
+LM Studio adapter smoke gate is complete; representative local-model benchmarking is next.
 The traceability matrix now marks each v0.3 requirement as implemented or partial rather
 than leaving completed neutral infrastructure labelled merely planned.
 

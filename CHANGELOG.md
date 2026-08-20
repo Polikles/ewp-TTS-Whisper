@@ -94,7 +94,8 @@ All notable changes to EWP-transcripts are documented here.
   can no longer conceal lexical changes.
 - Recorded the successful public synthetic LM Studio preview under
   `faithful-correction-v3`: 8 revision tokens, zero warnings, and no publication. Cached
-  response reuse and immutable apply remain the next runtime checks.
+  response reuse and immutable apply subsequently passed without another provider request;
+  all generated state and revision artifacts were mode `0600`.
 - Clarified that review of the official `uv` installer is optional unless local policy
   requires it, replaced the clone placeholder with the public repository URL, and added
   current dependency/model download and free-space estimates to installation guidance.
