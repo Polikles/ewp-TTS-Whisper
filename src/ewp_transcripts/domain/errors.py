@@ -85,6 +85,10 @@ class InvalidRevisionError(ApplicationError):
     """Raised when a transcript revision is invalid or incompatible with its base."""
 
 
+class InvalidTranslationError(ApplicationError):
+    """Raised when a translation artifact is invalid or incompatible with its source."""
+
+
 class InvalidCorrectionResponseError(ApplicationError):
     """Raised when provider output cannot be trusted as a correction proposal."""
 

@@ -40,6 +40,7 @@ from ewp_transcripts.domain.revision import (
     load_transcript_revision,
     validate_revision_base,
 )
+from ewp_transcripts.domain.translation import TranscriptTranslation, load_transcript_translation
 
 __all__ = [
     "ApplicationWarning",
@@ -72,7 +73,9 @@ __all__ = [
     "SourceFingerprint",
     "TranscriptRevision",
     "TranscriptReview",
+    "TranscriptTranslation",
     "load_transcript_revision",
+    "load_transcript_translation",
     "validate_revision_base",
     "validate_review_base",
     "WarningCode",

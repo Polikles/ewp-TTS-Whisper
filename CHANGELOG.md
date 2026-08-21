@@ -22,6 +22,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added the first strict v0.4 translation domain models for language direction, style,
+  exact canonical/revision source identity, source verification status, parent lineage,
+  manual/LLM provenance, speaker-safe timed units, statistics, warnings, and immutable
+  complete snapshots. Contradictory verification, duplicate source ownership, invalid
+  timing, and inconsistent statistics fail validation.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
