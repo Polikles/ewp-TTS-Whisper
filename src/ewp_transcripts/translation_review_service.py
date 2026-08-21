@@ -25,6 +25,33 @@ from ewp_transcripts.effective_transcript import resolve_effective_transcript
 from ewp_transcripts.translation_units import plan_translation_units
 
 
+def validate_translation_review_source(
+    review: TranslationReview,
+    result_path: Path,
+    *,
+    revision_path: Path | None = None,
+) -> None:
+    """Fail closed unless all machine-owned review fields match the exact source."""
+
+    expected = prepare_translation_review(
+        result_path,
+        target_language=review.header.target_language,
+        revision_path=revision_path,
+        style=review.header.style,
+        generated_at=review.header.generated_at,
+    )
+    if review.header != expected.header:
+        raise ValueError("translation review metadata does not match the exact source")
+    actual_machine_fields = tuple(
+        unit.model_dump(exclude={"target_text"}) for unit in review.units
+    )
+    expected_machine_fields = tuple(
+        unit.model_dump(exclude={"target_text"}) for unit in expected.units
+    )
+    if actual_machine_fields != expected_machine_fields:
+        raise ValueError("translation review units do not match the exact source")
+
+
 def prepare_translation_review(
     result_path: Path,
     *,

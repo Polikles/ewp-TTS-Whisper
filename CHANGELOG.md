@@ -40,6 +40,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added pure manual-translation preview construction. Reviews with any blank target fail;
   complete reviews become unpublished immutable snapshots with normalized target text,
   exact source mappings, manual provenance, direction/style, and verified statistics.
+- Added locked, non-destructive translation review publication and atomic language-qualified
+  immutable translation numbering. Apply-time source validation reconstructs canonical or
+  revised units and rejects changes to metadata, speakers, timing, hashes, or token ownership.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
