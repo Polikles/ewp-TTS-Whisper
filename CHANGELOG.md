@@ -28,6 +28,9 @@ All notable changes to EWP-transcripts are documented here.
 - Structured correction responses are now bound to the active synchronous request locally
   instead of trusting the model to echo an opaque operation hash exactly. Resume identity,
   text reconstruction, speaker blocks, and all safety gates remain strict.
+- Invalid structured-response errors now include only content-free provider finish reason
+  and response character count, allowing truncation to be distinguished from malformed
+  stopped output without logging transcript or model-response text.
 
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,

@@ -218,7 +218,32 @@ def test_adapter_rejects_malformed_content_without_exposing_it() -> None:
     with pytest.raises(InvalidCorrectionResponseError) as raised:
         provider.correct(_request(), timeout_seconds=2)
     assert "schema_errors=" in str(raised.value)
+    assert "finish_reason=unavailable" in str(raised.value)
+    assert "content_chars=28" in str(raised.value)
     assert secret not in str(raised.value)
+
+
+def test_schema_error_reports_only_safe_finish_metadata() -> None:
+    private_text = "private transcript response"
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {
+            "choices": [
+                {
+                    "finish_reason": "length",
+                    "message": {"content": private_text},
+                }
+            ]
+        },
+    )
+
+    with pytest.raises(InvalidCorrectionResponseError) as raised:
+        provider.correct(_request(), timeout_seconds=2)
+
+    message = str(raised.value)
+    assert "finish_reason=length" in message
+    assert f"content_chars={len(private_text)}" in message
+    assert private_text not in message
 
 
 def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:

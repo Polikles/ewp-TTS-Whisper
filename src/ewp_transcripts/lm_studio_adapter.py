@@ -287,7 +287,8 @@ def _parse_chat_response(
             for item in error.errors(include_url=False, include_input=False)[:8]
         )
         raise InvalidCorrectionResponseError(
-            f"{provider_label} returned an invalid correction response (schema_errors={details})"
+            f"{provider_label} returned an invalid correction response "
+            f"(schema_errors={details},{_safe_response_diagnostic(document)})"
         ) from error
     except ValueError as error:
         raise InvalidCorrectionResponseError(
@@ -298,6 +299,20 @@ def _parse_chat_response(
             f"{provider_label} returned an invalid correction response"
         ) from error
     return response
+
+
+def _safe_response_diagnostic(document: JsonObject) -> str:
+    """Return content-free response metadata useful for provider debugging."""
+
+    try:
+        choice = document["choices"][0]
+        finish_reason = choice.get("finish_reason")
+        content = choice["message"]["content"]
+    except (IndexError, KeyError, TypeError):
+        return "finish_reason=unavailable,content_chars=unavailable"
+    safe_reason = finish_reason if isinstance(finish_reason, str) else "unavailable"
+    safe_chars = len(content) if isinstance(content, str) else "unavailable"
+    return f"finish_reason={safe_reason},content_chars={safe_chars}"
 
 
 def _speaker_blocks(request: CorrectionRequest) -> list[tuple[str, int, int, str]]:
