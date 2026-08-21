@@ -113,6 +113,12 @@ All notable changes to EWP-transcripts are documented here.
   operator instructions as a non-final review candidate. Manual acceptance must verify
   wording, speakers, punctuation, quotation marks, and sentence boundaries before final
   publication or benchmark-gold use.
+- Added planned unattended local benchmark orchestration through supported model
+  load/readiness/unload APIs, with exact model/quant/backend/prompt/chunk/sampling/hardware
+  matrix identity and no automatic paid-cloud authorization.
+- Recorded the Qwen 32B 400/500/60 preview timing: 33 minutes 19 seconds across the same
+  three cases, only 9.1% faster than 120/160/30. Quality remains pending publication and
+  manual audit because the medium case lost one token.
 
 ### Documentation
 
