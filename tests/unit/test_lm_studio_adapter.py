@@ -255,6 +255,22 @@ def test_adapter_rejects_changed_speaker_block_identity() -> None:
         provider.correct(_request(), timeout_seconds=2)
 
 
+def test_structured_response_is_bound_locally_despite_mutated_operation_id() -> None:
+    content = {
+        "operation_id": "model-mutated-opaque-id",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "OpenAI"}],
+    }
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {"choices": [{"message": {"content": json.dumps(content)}}]},
+    )
+
+    response = provider.correct(_request(), timeout_seconds=2)
+
+    assert response.operation_id == "operation-1"
+    assert response.corrected_text == "OpenAI"
+
+
 def test_adapter_derives_changes_independently_inside_speaker_blocks() -> None:
     request = _request().model_copy(
         update={

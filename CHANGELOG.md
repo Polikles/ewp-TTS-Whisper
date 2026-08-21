@@ -25,6 +25,9 @@ All notable changes to EWP-transcripts are documented here.
   constraints. Repeated or ambiguous text can no longer be mapped across speakers after a
   provider has returned the required immutable speaker blocks; manual review retains its
   explicit speaker-reassignment capability.
+- Structured correction responses are now bound to the active synchronous request locally
+  instead of trusting the model to echo an opaque operation hash exactly. Resume identity,
+  text reconstruction, speaker blocks, and all safety gates remain strict.
 
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,

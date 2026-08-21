@@ -269,10 +269,6 @@ def _parse_chat_response(
             )
         else:
             wire_response = _LmStudioResponse.model_validate_json(content)
-            if wire_response.operation_id != request.operation_id:
-                raise InvalidCorrectionResponseError(
-                    f"{provider_label} response operation ID does not match"
-                )
         usage = document.get("usage")
         correction_usage = None
         if isinstance(usage, dict):
