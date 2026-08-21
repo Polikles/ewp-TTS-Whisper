@@ -30,6 +30,10 @@ All notable changes to EWP-transcripts are documented here.
 - Added deterministic translation source-unit planning that covers effective transcript
   tokens exactly once, treats speaker changes as hard boundaries, inherits integer
   timing, and reuses established abbreviation/domain non-ending rules.
+- Added exact-lineage manual translation review preparation. It resolves raw or compatible
+  revised text, records whether the source is raw, automated, or manually verified, and
+  emits immutable source context with blank target-language fields as the only intended
+  editor input.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
