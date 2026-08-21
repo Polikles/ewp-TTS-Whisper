@@ -191,6 +191,9 @@ support explicitly approved equivalent aliases for correction and scoring, for e
 the Latinized `Csikszentmihalyi` and diacritic `Csíkszentmihályi`. Equivalence must not be
 implemented through global accent folding because Polish diacritics are lexically
 meaningful.
+The course name `AIDEAS` and its ASR/model variants such as `Ideas` or `IDEAS` are another
+initial project-specific candidate: a merely plausible capitalization repair is not a
+substitute for the approved canonical name.
 
 The correction benchmark must test two dictionary hypotheses explicitly:
 

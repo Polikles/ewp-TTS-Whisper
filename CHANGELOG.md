@@ -142,6 +142,11 @@ All notable changes to EWP-transcripts are documented here.
   than `rodzin`). `S0E10` exposed a valid Latinized/diacritic proper-name equivalence that
   exact WER cannot represent. Project-dictionary alias equivalence is now planned without
   unsafe global diacritic folding.
+- Recorded a six-item pending private-gold errata table after high-improvement sample
+  review found three further missed manual corrections in `S2E4v2_part2`. The sampled
+  Gemini output was predominantly useful but retained near-corrections such as `Oba`
+  instead of `obaj` and `IDEAS` instead of the project name `AIDEAS`; automatic
+  finalization remains rejected.
 - Recorded about 25m21s operator wall time for the complete run including retries. Validated
   resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
   about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.
