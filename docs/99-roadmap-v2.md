@@ -19,9 +19,9 @@ items belong to one monolithic "Version 2" release.
 4. **v0.4 manual and automated translation**, with a structured translation artifact,
    corrected transcript as the normal source, an explicit raw/dirty source option, and
    optional manual revision of automated output.
-5. **v0.4 synchronized HTML transcript/export**, including the mock player, seeking,
-   highlighting, accessibility, security, and raw/revised/translated-source tests in
-   section 12.
+5. **v0.4 platform transcript exports**, including a YouTube-oriented TTML 1.0 subset
+   and an embeddable synchronized HTML transcript fragment, with the compatibility,
+   accessibility, security, and raw/revised/translated-source tests in sections 11-12.
 6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence;
    later public-corpus work may also propose a separate optional general Polish resource,
    but neither kind is inherited or enabled silently.
@@ -431,12 +431,47 @@ critical path.
 
 ## 11. Subtitles
 
-- speaker colors;
+- add a deterministic `.ttml` export using a deliberately small TTML 1.0-compatible
+  profile optimized for maximum YouTube upload/rendering compatibility rather than
+  general or strictly exhaustive TTML conformance;
+- use UTF-8 XML, the `http://www.w3.org/ns/ttml` TTML namespace and
+  `http://www.w3.org/ns/ttml#styling` styling namespace, with root `xml:lang` matching
+  the output language and clock times formatted as `HH:MM:SS.mmm`;
+- map exactly one already-planned canonical subtitle cue to one `<p>`; TTML rendering
+  must not introduce another cue segmentation pass;
+- give every spoken cue a speaker-specific style whose XML ID is derived deterministically
+  and collision-safely from the stable speaker ID as `speaker-<normalized-id>`;
+- print the visible speaker name only on the first cue of a continuous speaker turn while
+  retaining that speaker's style on every continuation cue;
+- keep speaker colors in renderer configuration, never transcript data. The initial
+  ordered fallback palette uses the normal/default foreground for the first stable
+  speaker, blue for the second, yellow for the third, then distinct green, magenta, and
+  cyan entries for additional speakers. Exact color values and palette exhaustion rules
+  require an unlisted YouTube smoke test and remain configurable;
+- allow a separate italic style for structured non-speech cues, but do not infer
+  non-speech semantics or italics from transcript punctuation or text;
+- omit absolute positioning, regions, font family, font size, background, outline,
+  TTML extensions, and SMPTE namespaces from the initial YouTube profile unless later
+  compatibility evidence explicitly justifies them;
+- serialize with a real XML serializer, escape text and attributes, reject invalid XML
+  instead of emitting it, and test parsing, namespaces, language, cue cardinality,
+  timing, style references, XML-ID collisions, escaping, and deterministic bytes;
+- manually validate upload acceptance, Polish diacritics, timing, labels, and speaker
+  colors on YouTube before treating the profile as qualified;
 - styled WebVTT;
 - ASS/SSA;
 - burned-in subtitles;
 - platform presets;
 - visual preview.
+
+Before non-speech-aware TTML or HTML rendering is implemented, design and version an
+additive canonical JSON schema update that records the semantic `kind` of a timed event.
+The initial vocabulary must at least accommodate `speech`, `music`, `laugh`, `cough`,
+and `note`, while defining whether the field belongs on segments/cues or a distinct event
+structure and how older results default to speech. This is semantic transcript data;
+presentation choices such as colors, labels, brackets, and italics remain renderer
+configuration. Schema documentation, migration/compatibility behavior, fixtures, and
+raw/revised export tests are required before enabling the field in production output.
 
 ## 12. Platform transcript delivery and HTML — planned for v0.4
 
@@ -448,17 +483,36 @@ critical path.
   or suitable derived timed data, with sentence-level seeking, current-sentence
   highlighting, and keyboard controls;
 - add HTML as an explicit generated export (`transcriber export --format html`), with a
-  standalone document and an embeddable fragment that require no transcription rerun;
-- apply speaker colors in custom HTML/CSS with textual labels as the portable and
-  accessible fallback;
+  UTF-8 embeddable fragment—not a standalone document—that requires no transcription
+  rerun. Its root is `<section class="ewp-transcript">` with a valid BCP 47 `lang`;
+- represent speaker turns explicitly. Every cue retains integer `data-start-ms` and
+  `data-end-ms` values, and stable machine-readable speaker identity uses `speaker_id`,
+  never the display name;
+- keep visible speaker names as escaped presentation text shown once per turn, retain
+  logical reading order, and make the fragment useful with CSS and JavaScript disabled;
+- emit transcript text as escaped plain text: no trusted transcript markup, inline style,
+  embedded CSS, inline JavaScript, or event-handler attributes;
+- apply light/dark mode, accessible contrast, branding, active-cue state, and speaker
+  colors only in consuming-site CSS. Seeking, highlighting, and auto-scroll belong to
+  consuming JavaScript rather than the generated fragment;
 - define export presets for conservative platform interchange and web-native playback;
 - design translated/bilingual HTML after the translation artifact contract exists.
 
-Acceptance includes a self-contained mock/placeholder site with a real HTML audio player
-and time-linked transcript. Playback highlights or follows the active cue, and activating
-a transcript sentence seeks the player to that sentence's start time. Tests must cover
-keyboard operation, accessible semantics, escaping/untrusted transcript text, and use
-with both raw and revised transcript sources.
+Acceptance includes a separate self-contained mock/placeholder site that embeds the
+generated fragment alongside a real HTML audio player and supplies its own CSS/JavaScript.
+Playback highlights or follows the active cue, and activating a transcript sentence seeks
+the player to that sentence's start time. Renderer tests must cover the exact root and
+language contract, explicit turn grouping, stable speaker IDs, integer timestamps,
+escaping/untrusted text, absence of CSS/JavaScript/inline styles, deterministic output,
+and raw/revised/translated sources. Mock-site tests additionally cover keyboard operation,
+accessible seeking, light/dark presentation, and behavior with enhancement disabled.
+
+The reviewed `ewp_transcripts_agent_pack` contracts are compatible with this direction
+after these scope decisions: implementation is scheduled for v0.4, HTML output is
+fragment-only, TTML is specifically a conservative YouTube profile, and RSS transcript
+material is publishing policy rather than a required exporter. Its examples are design
+inputs, not accepted golden files; repository terminology, current cue generation, schema
+versioning, and exporter architecture remain authoritative during implementation.
 
 ## 13. GUI
 

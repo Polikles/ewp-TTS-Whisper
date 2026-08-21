@@ -4,6 +4,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Changed
+
+- Refined the v0.4 platform-export roadmap with a conservative YouTube-oriented TTML
+  1.0-compatible profile, stable speaker styles and configurable ordered color defaults;
+  made synchronized HTML explicitly a CSS/JavaScript-free embeddable fragment; and added
+  a versioned canonical timed-event `kind` design task for speech and non-speech events.
+  The reviewed agent-pack RSS material remains publishing policy rather than current
+  exporter scope.
+
 ### Added
 
 - Added an explicit OpenRouter cloud-correction adapter with HTTPS-only uncredentialed
