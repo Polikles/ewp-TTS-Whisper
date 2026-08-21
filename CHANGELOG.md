@@ -64,6 +64,12 @@ All notable changes to EWP-transcripts are documented here.
 - Updated the complete runbook and CLI specification with copyable batch translation
   commands, the distinct `--revision` prepare and `--revisions-dir` validation roles,
   retry guidance, exact per-result selection, and current audit/export limitations.
+- Added deterministic model-free TXT rendering from immutable translation snapshots.
+  Multi-speaker output uses stable speaker IDs because display names remain presentation
+  data; publication is locked, collision-safe, and idempotently skips identical output.
+- Added `transcriber translate export` as the first translated-output command. It accepts
+  one immutable translation JSON, normalizes Windows/WSL paths at the application boundary,
+  writes deterministic UTF-8 TXT, and reports written versus identical skipped output.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

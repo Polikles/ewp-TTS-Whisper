@@ -28,6 +28,7 @@ from ewp_transcripts.application import (
     dry_run,
     export_batch,
     export_result,
+    export_translation,
     inspect_input,
     prepare_review_batch,
     prepare_review_file,
@@ -585,6 +586,37 @@ def translate_apply_command(
             f"SUMMARY translation_number={outcome.translation.translation_number} "
             f"units={outcome.translation.statistics.unit_count}"
         )
+
+
+@translate_app.command("export")
+def translate_export_command(
+    translation_path: Annotated[
+        Path,
+        typer.Argument(help="Immutable translation JSON to export.", metavar="TRANSLATION_JSON"),
+    ],
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write translated TXT output here."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+) -> None:
+    """Render deterministic UTF-8 TXT from one immutable translation."""
+
+    try:
+        outcome = export_translation(
+            translation_path,
+            config=load_config(explicit_path=config_path),
+            output_directory=_optional_user_path(output_directory),
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    for path in outcome.written:
+        typer.echo(f"WROTE {path}")
+    for path in outcome.skipped:
+        typer.echo(f"SKIPPED {path}")
 
 
 @revise_app.command("prepare")

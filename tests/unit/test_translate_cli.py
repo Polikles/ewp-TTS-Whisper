@@ -54,6 +54,7 @@ def test_translate_help_exposes_manual_workflow() -> None:
     assert "prepare" in result.stdout
     assert "preview" in result.stdout
     assert "apply" in result.stdout
+    assert "export" in result.stdout
 
 
 def test_prepare_preview_and_apply_translation(tmp_path: Path) -> None:
@@ -174,3 +175,22 @@ def test_translation_directory_prepare_preview_and_apply(tmp_path: Path) -> None
     assert applied.exit_code == 0, applied.stdout
     assert "SUMMARY prepared=0 previewed=0 applied=1" in applied.stdout
     assert (translations / "S01E01_pl_translation_001.json").is_file()
+
+
+def test_translate_export_writes_txt(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+
+    result = runner.invoke(
+        app,
+        [
+            "translate",
+            "export",
+            str(ROOT / "examples/translation.example.json"),
+            "--output-dir",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "WROTE" in result.stdout
+    assert (output / "S01E01_pl_translation_001.txt").is_file()

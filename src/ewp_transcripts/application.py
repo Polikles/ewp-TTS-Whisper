@@ -99,6 +99,10 @@ from ewp_transcripts.translation_discovery import (
     latest_compatible_revision_path,
     resolve_translation_review_sources,
 )
+from ewp_transcripts.translation_export import (
+    TranslationExportOutcome,
+    export_translation_text,
+)
 from ewp_transcripts.translation_review_format import load_translation_review
 from ewp_transcripts.translation_review_service import (
     prepare_translation_review,
@@ -137,6 +141,7 @@ __all__ = [
     "apply_translation_review_file",
     "prepare_translation_review_batch",
     "process_translation_review_batch",
+    "export_translation",
     "audit_revision_file",
     "preview_mock_correction",
     "apply_mock_correction",
@@ -1034,6 +1039,21 @@ def process_translation_review_batch(
                 stopped_early = True
                 break
     return BatchTranslationOutcome(tuple(jobs), stopped_early=stopped_early)
+
+
+def export_translation(
+    translation_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    output_directory: Path | None = None,
+) -> TranslationExportOutcome:
+    """Export deterministic translation text through the application boundary."""
+
+    return export_translation_text(
+        normalize_input_path(translation_path),
+        output_directory=output_directory,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
 
 
 def prepare_review_batch(
