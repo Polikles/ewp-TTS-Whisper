@@ -33,6 +33,17 @@ uv run --locked transcriber --version
 uv run --locked transcriber --help
 ```
 
+After cloning, a fresh Ubuntu 24.04 checkout can install the base packages, uv/Python,
+locked environment, and run diagnostics through the reviewable script:
+
+```bash
+./scripts/install-fresh-ubuntu.sh --install
+```
+
+It asks before system changes, does not update Git, and never downloads gated models.
+Use `./scripts/install-fresh-ubuntu.sh --verify-only` for a read-only recheck. Model setup
+remains the separate explicit step in `WSL config/MODEL_SETUP.md`.
+
 The top-level help lists commands. Every command has its own options:
 
 ```bash

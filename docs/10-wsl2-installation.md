@@ -74,6 +74,13 @@ The installer or developer bootstrap should:
 - explain that gated-model terms must be accepted;
 - never download gated models without an explicit operation.
 
+The v0.3 source checkout implements this boundary in
+`scripts/install-fresh-ubuntu.sh`. Its default `--verify-only` mode is read-only.
+`--install` explicitly confirms before running Ubuntu package updates, installing base
+packages and uv/Python, and synchronizing the committed lockfile. It never clones, pulls,
+or downloads gated models, so existing-checkout updates and model preparation remain
+separate operator decisions.
+
 ## 7. Offline mode
 
 Offline mode means:

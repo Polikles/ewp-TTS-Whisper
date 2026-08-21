@@ -36,6 +36,51 @@
 See [`Instructions/README.md`](Instructions/README.md) for the current manual installation
 workflow and its approximate download sizes.
 
+## How to install
+
+Create Ubuntu 24.04 under WSL2, install `git`, clone the public repository into the Linux
+filesystem, then use the reviewable installer from the checkout:
+
+```bash
+sudo apt update
+sudo apt install git
+mkdir -p "$HOME/transkrypcje"
+git clone https://github.com/Polikles/ewp-transcripts.git \
+  "$HOME/transkrypcje/ewp-transcripts"
+cd "$HOME/transkrypcje/ewp-transcripts"
+./scripts/install-fresh-ubuntu.sh --install
+```
+
+The script explicitly confirms system changes, installs the locked application
+environment, and verifies diagnostics. It does not update an existing checkout or
+download gated models. Complete model preparation separately using
+[`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only verification
+again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
+
+## How to use
+
+Transcribe one file or a directory after `doctor` reports model readiness:
+
+```bash
+uv run --locked transcriber transcribe "/path/to/input" \
+  --output-dir "/path/to/results"
+```
+
+The recommended correction workflow stages editable reviews before publishing immutable
+revisions:
+
+```bash
+uv run --locked transcriber revise prepare "/path/to/results" \
+  --output-dir "/path/to/reviews"
+uv run --locked transcriber revise preview "/path/to/reviews" \
+  --results-dir "/path/to/results"
+uv run --locked transcriber revise apply "/path/to/reviews" \
+  --results-dir "/path/to/results" --output-dir "/path/to/revisions" --audit
+```
+
+See [`Instructions/README.md`](Instructions/README.md) for every command, batch operation,
+export mode, recovery path, and automated-correction privacy warning.
+
 ## Primary outputs
 
 Every successfully completed job creates a canonical file:

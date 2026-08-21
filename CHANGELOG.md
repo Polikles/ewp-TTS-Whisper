@@ -110,6 +110,10 @@ All notable changes to EWP-transcripts are documented here.
   chunk boundaries, gap-free ownership, and bounded read-only overlap. Updated acceptance
   status for the already-tested exact-scope consent matrix without closing the remaining
   revision-child or comprehensive artifact-scan work.
+- Added an explicit fresh-Ubuntu installer/verifier. Read-only verification is the default;
+  `--install` confirms before Ubuntu package changes and locked-environment setup. The
+  script never clones/pulls Git, installs an NVIDIA display driver, or downloads gated
+  models. Root README onboarding now has concise installation and usage examples.
 - Added an explicit LM Studio `json-text` compatibility mode for model/chat-template
   combinations that fail grammar-constrained structured output. JSON Schema remains the
   default; the fallback omits only `response_format`, retains strict whole-response schema
