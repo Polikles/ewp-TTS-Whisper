@@ -114,6 +114,9 @@ All notable changes to EWP-transcripts are documented here.
   audited edits. It is the leading pilot but remains a non-final review candidate.
 - Stopped the preliminary OpenRouter Qwen 2.5 72B run after its short case deleted a spoken
   token. The rejected larger-chunk smoke cost `$0.004423`; no longer paid cases were run.
+- Stopped the Gemini 2.5 Flash 1,024-token reasoning branch after its short case delivered
+  the same lexical repairs as reasoning-disabled Gemini while taking 2.34 times longer and
+  costing 1.84 times more. Disabled reasoning remains the cloud baseline.
 
 - The three-case private Bielik 3.0 11B Q8_0 pilot passed the explicit plain-JSON adapter
   contract with no speaker changes. It remained deliberately conservative but scored
