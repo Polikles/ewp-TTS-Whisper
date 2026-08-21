@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.canonical import CanonicalWord, load_canonical_result
 from ewp_transcripts.domain.errors import InvalidReviewError
 from ewp_transcripts.domain.review import ReviewSpeakerBlock
 from ewp_transcripts.review_service import prepare_review
-from ewp_transcripts.revision_service import build_revision
+from ewp_transcripts.revision_service import _align, _Corrected, build_revision
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULT = ROOT / "examples/results.example.json"
@@ -155,6 +155,42 @@ def test_review_speaker_directive_changes_mapped_attribution() -> None:
 
     assert revision.statistics.speaker_changes == 4
     assert {token.speaker_id for token in revision.transcript.tokens[:4]} == {"speaker_002"}
+
+
+def test_automated_alignment_never_maps_across_speaker_boundaries() -> None:
+    source = tuple(
+        CanonicalWord(
+            word_id=f"word_{index + 1:06d}",
+            text=text,
+            start_ms=index,
+            end_ms=index + 1,
+            timestamp_source="aligned",
+            speaker_id="speaker_001" if index < 2 else "speaker_002",
+        )
+        for index, text in enumerate(("a", "a", "a", "b"))
+    )
+    corrected = tuple(
+        _Corrected(
+            text=text,
+            speaker_id="speaker_001" if index < 2 else "speaker_002",
+        )
+        for index, text in enumerate(("a", "b", "a", "a"))
+    )
+
+    path, _ambiguous = _align(
+        source,
+        corrected,
+        preserve_speaker_attribution=True,
+    )
+
+    source_at = corrected_at = 0
+    for step in path:
+        mapped = source[source_at : source_at + step.source_count]
+        revised = corrected[corrected_at : corrected_at + step.corrected_count]
+        if mapped and revised:
+            assert {item.speaker_id for item in mapped} == {item.speaker_id for item in revised}
+        source_at += step.source_count
+        corrected_at += step.corrected_count
 
 
 def test_apply_rejects_base_bytes_that_do_not_match_review(tmp_path: Path) -> None:

@@ -46,7 +46,10 @@ def _lexical(text: str) -> str:
 
 
 def _align(
-    source: tuple[CanonicalWord, ...], corrected: tuple[_Corrected, ...]
+    source: tuple[CanonicalWord, ...],
+    corrected: tuple[_Corrected, ...],
+    *,
+    preserve_speaker_attribution: bool = False,
 ) -> tuple[tuple[_Step, ...], bool]:
     """Return one stable minimum-cost path and whether another optimum exists."""
 
@@ -74,6 +77,15 @@ def _align(
                 next_left, next_right = left + source_count, right + corrected_count
                 if next_left > len(source) or next_right > len(corrected):
                     continue
+                if preserve_speaker_attribution and source_count and corrected_count:
+                    source_speakers = {item.speaker_id for item in source[left:next_left]}
+                    corrected_speakers = {item.speaker_id for item in corrected[right:next_right]}
+                    if (
+                        len(source_speakers) != 1
+                        or len(corrected_speakers) != 1
+                        or source_speakers != corrected_speakers
+                    ):
+                        continue
                 if source_count == 0 or corrected_count == 0:
                     step_cost = 2 * max(source_count, corrected_count)
                 else:
@@ -114,6 +126,7 @@ def build_revision(
     parent_revision: TranscriptRevision | None = None,
     parent_path: Path | None = None,
     provenance: RevisionProvenance | None = None,
+    preserve_speaker_attribution: bool = False,
 ) -> TranscriptRevision:
     """Validate and align one review into a complete unpublished revision snapshot."""
 
@@ -171,7 +184,11 @@ def build_revision(
             for block in anchor.speaker_blocks
             for text in block.text.split()
         )
-        path, ambiguous = _align(source, corrected)
+        path, ambiguous = _align(
+            source,
+            corrected,
+            preserve_speaker_attribution=preserve_speaker_attribution,
+        )
         if ambiguous:
             warnings.append(
                 RevisionWarning(

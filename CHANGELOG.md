@@ -19,6 +19,13 @@ All notable changes to EWP-transcripts are documented here.
   model thinking. The setting affects request/resume identity and provenance so default,
   disabled, and enabled reasoning runs cannot be silently conflated.
 
+### Fixed
+
+- Automated correction alignment now treats canonical speaker boundaries as hard mapping
+  constraints. Repeated or ambiguous text can no longer be mapped across speakers after a
+  provider has returned the required immutable speaker blocks; manual review retains its
+  explicit speaker-reassignment capability.
+
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,
   locally derived change validation, scoped API consent, retry/resume/batch behavior, immutable

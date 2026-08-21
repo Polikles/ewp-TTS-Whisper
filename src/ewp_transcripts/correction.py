@@ -425,6 +425,7 @@ def build_correction_revision(
                 parameters=getattr(provider, "provenance_parameters", None),
             ),
         ),
+        preserve_speaker_attribution=True,
     )
     if revision.statistics.speaker_changes:
         raise InvalidCorrectionResponseError(
