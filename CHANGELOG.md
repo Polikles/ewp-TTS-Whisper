@@ -106,6 +106,10 @@ All notable changes to EWP-transcripts are documented here.
 - Added a provider-independent numeric-literal safety gate: automated correction must
   preserve recognized digit-based values exactly, preventing factual mutations such as
   `5.2` to `4.0` while allowing punctuation changes around the same value.
+- Added a short/long fixture matrix covering repeated words, punctuation, speaker changes,
+  chunk boundaries, gap-free ownership, and bounded read-only overlap. Updated acceptance
+  status for the already-tested exact-scope consent matrix without closing the remaining
+  revision-child or comprehensive artifact-scan work.
 - Added an explicit LM Studio `json-text` compatibility mode for model/chat-template
   combinations that fail grammar-constrained structured output. JSON Schema remains the
   default; the fallback omits only `response_format`, retains strict whole-response schema
@@ -147,6 +151,8 @@ All notable changes to EWP-transcripts are documented here.
   Gemini output was predominantly useful but retained near-corrections such as `Oba`
   instead of `obaj` and `IDEAS` instead of the project name `AIDEAS`; automatic
   finalization remains rejected.
+- Deferred the corrected-gold Gemini rerun on the roadmap; the current 24-case report is
+  the settled provisional baseline for near-term implementation work.
 - Recorded about 25m21s operator wall time for the complete run including retries. Validated
   resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
   about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.

@@ -77,6 +77,43 @@ def test_chunk_plan_is_deterministic_and_hashes_context() -> None:
     assert plan_correction_chunks(changed, config)[0].content_sha256 != first[0].content_sha256
 
 
+@pytest.mark.parametrize("count", [1, 23, 1200])
+def test_chunk_fixture_matrix_preserves_single_ownership_and_read_only_overlap(
+    count: int,
+) -> None:
+    transcript = _transcript(count, speaker_change=max(1, count // 2))
+    decorated = replace(
+        transcript,
+        tokens=tuple(
+            replace(
+                token,
+                text=(
+                    "powtórzenie"
+                    if index % 11 in {1, 2}
+                    else "koniec?"
+                    if index % 17 == 0
+                    else token.text
+                ),
+            )
+            for index, token in enumerate(transcript.tokens)
+        ),
+    )
+    chunks = plan_correction_chunks(
+        decorated,
+        CorrectionChunkConfig(target_tokens=37, max_tokens=43, context_tokens=5),
+    )
+
+    owned = [index for chunk in chunks for index in range(chunk.editable_start, chunk.editable_end)]
+    assert owned == list(range(count))
+    assert all(chunk.editable_end - chunk.editable_start <= 43 for chunk in chunks)
+    assert all(chunk.context_start <= chunk.editable_start for chunk in chunks)
+    assert all(chunk.editable_end <= chunk.context_end for chunk in chunks)
+    for previous, current in zip(chunks, chunks[1:], strict=False):
+        assert previous.editable_end == current.editable_start
+        assert current.context_start <= current.editable_start
+        assert current.context_start >= max(0, current.editable_start - 5)
+
+
 def test_request_separates_context_and_mock_changes_only_editable_text() -> None:
     transcript = _transcript(18)
     chunks = plan_correction_chunks(

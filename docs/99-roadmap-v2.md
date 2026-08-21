@@ -216,6 +216,12 @@ dictionary-extraction partitions must be disjoint from held-out evaluation parti
 the same examples cannot both teach the dictionary and inflate its reported WER result.
 The no-dictionary baseline remains mandatory.
 
+The next private correction benchmark is deliberately deferred rather than part of the
+immediate v0.3 acceptance path. It must first publish later immutable manual-gold revisions
+for the errata recorded in `22-v0.3-automated-correction.md`, rebuild the exact-hash
+manifest, and rerun the established Gemini baseline. The current full-corpus run remains
+the baseline for implementation decisions until that scheduled revalidation.
+
 ## 4. Manual translation pipeline — planned for v0.4
 
 Translation is a separate pipeline, not a branch inside transcript correction, although
