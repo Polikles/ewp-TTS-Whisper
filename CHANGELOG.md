@@ -15,6 +15,16 @@ All notable changes to EWP-transcripts are documented here.
   Raw ASR and automated-correction sources remain explicit comparison branches, while
   local translation models receive their own no-dictionary benchmark instead of
   inheriting correction-model rankings.
+- Added Qwen 2.5 32B Q4, Bielik 11B Q8, Llama 3.3 8B Q8, MADLAD-400, and NLLB-200 as
+  unvalidated local translation benchmark candidates. Polish-to-English and
+  English-to-Polish will use separate gold sets, reports, and rankings, with `pl -> en`
+  as the primary production gate.
+
+### Added
+
+- Added the v0.4 manual-first translation contract: exact source lineage, deterministic
+  speaker-safe sentence units, immutable complete artifacts, staged batch review and
+  export, and a shared validation boundary for future instruction and specialist models.
 
 ## 0.3.0 - 2026-08-21
 

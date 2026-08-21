@@ -319,6 +319,27 @@ terminology/name handling, sentence-lineage preservation, latency, resource use,
 volume, and cost where applicable. Dictionary-assisted translation is a later separate
 branch rather than part of the initial no-dictionary baseline.
 
+Initial reference local-model candidates are:
+
+- Qwen 2.5 32B Instruct Q4;
+- Bielik 11B Q8;
+- Llama 3.3 8B Q8;
+- MADLAD-400;
+- NLLB-200.
+
+These are benchmark candidates, not validated compatibility, quality, licensing, memory,
+or packaging claims. Exact model artifact, revision, quantization, backend, prompt, and
+hardware must be recorded. General instruction models and translation-specialized models
+may require different provider adapters and request contracts while producing the same
+validated translation artifact.
+
+Polish-to-English and English-to-Polish are separate benchmark suites. They use separate
+manually approved gold translations, aggregate metrics, qualitative review, failure
+analysis, and rankings; results must not be averaged into one bidirectional score that
+hides direction-specific weaknesses. The primary production acceptance gate is `pl -> en`.
+The reverse `en -> pl` suite independently qualifies the same pipeline for English source
+materials.
+
 ## 6. Content-aware directory discovery
 
 - Replace the directory extension allowlist with a bounded ffprobe-based candidate
