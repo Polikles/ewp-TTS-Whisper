@@ -50,6 +50,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added a Draft 2020-12 translation JSON Schema and a validated English-to-Polish example
   snapshot. Schema validation and strict domain-model validation jointly cover portable
   structure plus cross-field source, direction, ownership, timing, and statistics rules.
+- Documented the shipped single-file manual translation workflow in the complete operator
+  runbook and CLI contract, including preferred verified input, exact source replay,
+  protected review fields, style controls, immutable naming, and explicit pending slices.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

@@ -329,6 +329,28 @@ Audit data is diagnostic and is not needed to export the revision.
 `--results-dir` locates the exact base, `--output-dir` selects publication, `--no-write`
 keeps the operation non-mutating, and `--json-output` prints the reconstructed document.
 
+## 7b. `translate`
+
+```text
+transcriber translate prepare RESULT_JSON --target-language pl|en [OPTIONS]
+transcriber translate preview REVIEW --results RESULT_JSON [OPTIONS]
+transcriber translate apply REVIEW --results RESULT_JSON [OPTIONS]
+```
+
+The initial model-free single-file workflow prepares the strict `EWP-TRANSLATION 1`
+format, validates completed target lines against the exact canonical and optional
+`--revision` source, and atomically publishes a complete language-qualified immutable
+translation snapshot. `prepare` accepts `--register preserve|formal|informal` and
+`--discourse preserve|academic|general`; both default to `preserve` and remain
+source-faithful.
+
+Only target lines are editable. Metadata, source lines, unit and token IDs, speakers,
+timing, hashes, direction, and style are reconstructed at preview/apply and fail closed
+on drift. All target units must be non-empty. A manually verified transcript revision is
+the preferred source; omitting `--revision` explicitly records raw source verification.
+Batch processing, translation audit, automated providers, and translated exports are
+later v0.4 slices.
+
 ## 8. `clean`
 
 ```text

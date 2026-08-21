@@ -359,7 +359,53 @@ For example, add `--reasoning-max-tokens 0` to disable Gemini 2.5 thinking for t
 baseline. Enabled-reasoning runs are separate experiments because reasoning tokens affect
 latency and billing.
 
-## 10. Export corrected transcripts
+## 10. Translate manually (v0.4 development)
+
+The current translation slice is single-file and model-free. It supports `pl -> en` and
+`en -> pl`; use the latest manually verified revision as the preferred source. Raw ASR
+and LLM-corrected revisions are allowed only when deliberately selected and remain marked
+as raw or automated candidates in the translation artifact.
+
+Prepare a protected bilingual review:
+
+```bash
+uv run --locked transcriber translate prepare "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" \
+  --target-language en \
+  --output-dir "/path/to/translation-reviews"
+```
+
+Omit `--revision` only to translate raw canonical text. Optional `--register` accepts
+`preserve`, `formal`, or `informal`; `--discourse` accepts `preserve`, `academic`, or
+`general`. Both default to faithful `preserve`. They never authorize summaries, added
+facts, omissions, or changed speaker identity.
+
+Open the resulting `*.translation.review.txt` in VS Code. Preserve `EWP-TRANSLATION`,
+the `# metadata` line, every `@@` directive, and every `< ` source line. Enter one
+translation after each corresponding `> ` marker. Every target must be completed.
+
+Validate without writing, then publish:
+
+```bash
+uv run --locked transcriber translate preview \
+  "/path/to/translation-reviews/episode_en.translation.review.txt" \
+  --results "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json"
+
+uv run --locked transcriber translate apply \
+  "/path/to/translation-reviews/episode_en.translation.review.txt" \
+  --results "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" \
+  --output-dir "/path/to/translations"
+```
+
+Preview and apply require the same exact canonical and optional revision files used by
+prepare. Source hashes, units, speakers, timing, and token ownership are reconstructed;
+any machine-owned edit fails. Apply publishes a complete immutable
+`*_LANG_translation_NNN.json` snapshot. Batch translation, translation audit, and
+TXT/subtitle export are not implemented yet.
+
+## 11. Export corrected transcripts
 
 Latest compatible revision per result:
 
@@ -375,7 +421,7 @@ For one result, use `--revision latest` or an explicit revision JSON. Use
 selects the highest revision whose exact base-result hash matches each result. Duplicate
 replay skips safely without `--force`.
 
-## 11. Recover from failures
+## 12. Recover from failures
 
 - Exit 3: run `doctor`; install the missing dependency/model explicitly.
 - Exit 4: inspect the input, streams, grouping, and supported extension.
@@ -388,7 +434,7 @@ Failed/interrupted transcription restarts from the beginning. Successful items a
 immutable results remain safe. See
 [`../WSL config/TROUBLESHOOTING.md`](../WSL%20config/TROUBLESHOOTING.md).
 
-## 12. Clean retained workspaces: `clean`
+## 13. Clean retained workspaces: `clean`
 
 Preview first:
 
@@ -405,7 +451,7 @@ uv run --locked transcriber clean all-workdirs --yes --older-than 7
 Cleanup never removes source audio, final results/exports, unknown directories, model
 caches, configuration, or tokens.
 
-## 13. Privacy and evidence
+## 14. Privacy and evidence
 
 Normal transcription and manual revision are local-first. Keep `HF_TOKEN`, source
 recordings, canonical paths, transcripts, revisions, audits, correction resume state,

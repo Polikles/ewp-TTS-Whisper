@@ -13,9 +13,7 @@ EXAMPLE_PATH = ROOT / "examples/translation.example.json"
 
 
 def test_translation_schema_is_valid_draft_2020_12() -> None:
-    Draft202012Validator.check_schema(
-        json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    )
+    Draft202012Validator.check_schema(json.loads(SCHEMA_PATH.read_text(encoding="utf-8")))
 
 
 def test_translation_example_matches_schema_and_domain_model() -> None:
