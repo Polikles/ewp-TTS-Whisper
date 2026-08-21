@@ -94,6 +94,11 @@ from ewp_transcripts.storage import (
     plan_job_outputs,
     resolve_output_directory,
 )
+from ewp_transcripts.translation_discovery import (
+    discover_translation_reviews,
+    latest_compatible_revision_path,
+    resolve_translation_review_sources,
+)
 from ewp_transcripts.translation_review_format import load_translation_review
 from ewp_transcripts.translation_review_service import (
     prepare_translation_review,
@@ -130,6 +135,8 @@ __all__ = [
     "prepare_translation_review_file",
     "preview_translation_review_file",
     "apply_translation_review_file",
+    "prepare_translation_review_batch",
+    "process_translation_review_batch",
     "audit_revision_file",
     "preview_mock_correction",
     "apply_mock_correction",
@@ -283,6 +290,30 @@ class TranslationApplyOutcome:
     result_path: Path
     translation: TranscriptTranslation
     translation_path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class BatchTranslationJobOutcome:
+    """One isolated manual translation batch operation."""
+
+    input_path: Path
+    status: Literal["prepared", "previewed", "applied", "failed"]
+    review_path: Path | None = None
+    translation: TranscriptTranslation | None = None
+    translation_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchTranslationOutcome:
+    """Deterministically ordered translation batch summary."""
+
+    jobs: tuple[BatchTranslationJobOutcome, ...]
+    stopped_early: bool = False
+
+    def count(self, status: str) -> int:
+        return sum(job.status == status for job in self.jobs)
 
 
 @dataclass(frozen=True, slots=True)
@@ -872,6 +903,137 @@ def apply_translation_review_file(
         translation,
         path,
     )
+
+
+def prepare_translation_review_batch(
+    input_path: str | Path,
+    *,
+    target_language: Language,
+    config: ApplicationConfig,
+    revision: str | Path | None = None,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    style: TranslationStyle | None = None,
+) -> BatchTranslationOutcome:
+    """Prepare translation reviews sequentially with per-result failure isolation."""
+
+    results = discover_review_results(input_path, recursive=recursive)
+    normalized_input = normalize_input_path(input_path)
+    destination = output_directory or (
+        normalized_input.parent
+        if normalized_input.is_file()
+        else normalized_input / "translation-reviews"
+    )
+    revision_selection = normalize_input_path(revision) if revision is not None else None
+    jobs: list[BatchTranslationJobOutcome] = []
+    stopped_early = False
+    for result_path in results:
+        try:
+            selected_revision = revision_selection
+            if revision_selection is not None and revision_selection.is_dir():
+                selected_revision = latest_compatible_revision_path(
+                    revision_selection,
+                    result_path=result_path,
+                    result=load_canonical_result(result_path),
+                )
+            prepared = prepare_translation_review_file(
+                result_path,
+                target_language=target_language,
+                config=config,
+                revision_path=selected_revision,
+                output_directory=destination,
+                style=style,
+            )
+            jobs.append(
+                BatchTranslationJobOutcome(
+                    input_path=result_path,
+                    status="prepared",
+                    review_path=prepared.path,
+                )
+            )
+        except Exception as error:
+            jobs.append(
+                BatchTranslationJobOutcome(
+                    input_path=result_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchTranslationOutcome(tuple(jobs), stopped_early=stopped_early)
+
+
+def process_translation_review_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    results_directory: Path,
+    revisions_directory: Path | None = None,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    apply: bool = True,
+) -> BatchTranslationOutcome:
+    """Preview or apply translation reviews with exact-source resolution and isolation."""
+
+    reviews = discover_translation_reviews(input_path, recursive=recursive)
+    jobs: list[BatchTranslationJobOutcome] = []
+    stopped_early = False
+    for review_path in reviews:
+        try:
+            review = load_translation_review(review_path)
+            result_path, revision_path = resolve_translation_review_sources(
+                review,
+                results_directory=results_directory,
+                revisions_directory=revisions_directory,
+            )
+            if apply:
+                outcome = apply_translation_review_file(
+                    review_path,
+                    result_path=result_path,
+                    revision_path=revision_path,
+                    config=config,
+                    output_directory=output_directory,
+                )
+                jobs.append(
+                    BatchTranslationJobOutcome(
+                        input_path=review_path,
+                        status="applied",
+                        review_path=review_path,
+                        translation=outcome.translation,
+                        translation_path=outcome.translation_path,
+                    )
+                )
+            else:
+                outcome_preview = preview_translation_review_file(
+                    review_path,
+                    result_path=result_path,
+                    revision_path=revision_path,
+                )
+                jobs.append(
+                    BatchTranslationJobOutcome(
+                        input_path=review_path,
+                        status="previewed",
+                        review_path=review_path,
+                        translation=outcome_preview.translation,
+                    )
+                )
+        except Exception as error:
+            jobs.append(
+                BatchTranslationJobOutcome(
+                    input_path=review_path,
+                    status="failed",
+                    review_path=review_path,
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchTranslationOutcome(tuple(jobs), stopped_early=stopped_early)
 
 
 def prepare_review_batch(

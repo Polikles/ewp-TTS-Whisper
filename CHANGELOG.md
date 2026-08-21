@@ -57,6 +57,10 @@ All notable changes to EWP-transcripts are documented here.
   Revision-directory selection uses the highest compatible revision validated against the
   canonical SHA-256; applying prepared reviews resolves their recorded filenames, hashes,
   IDs, numbers, and methods rather than guessing from timestamps.
+- Extended manual translation prepare, preview, and apply to deterministic directories
+  with per-item failure isolation and exit-code-5 partial failure semantics. A revision
+  directory selects each result's latest exact compatible revision; prepared reviews
+  later resolve their recorded canonical and revision identities independently.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

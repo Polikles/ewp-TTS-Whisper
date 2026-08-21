@@ -116,3 +116,61 @@ def test_preview_rejects_blank_target(tmp_path: Path) -> None:
 
     assert preview.exit_code == 4
     assert "untranslated unit" in preview.stderr
+
+
+def test_translation_directory_prepare_preview_and_apply(tmp_path: Path) -> None:
+    results = tmp_path / "results"
+    reviews = tmp_path / "reviews"
+    translations = tmp_path / "translations"
+    results.mkdir()
+    result_path = results / "episode_results.json"
+    result_path.write_bytes(EXAMPLE.read_bytes())
+
+    prepared = runner.invoke(
+        app,
+        [
+            "translate",
+            "prepare",
+            str(results),
+            "--target-language",
+            "pl",
+            "--output-dir",
+            str(reviews),
+        ],
+    )
+    assert prepared.exit_code == 0, prepared.stdout
+    assert "SUMMARY prepared=1" in prepared.stdout
+    review_path = reviews / "S01E01_pl.translation.review.txt"
+    review = load_translation_review(review_path)
+    completed = review.model_copy(
+        update={
+            "units": tuple(
+                unit.model_copy(update={"target_text": f"Cel {index}."})
+                for index, unit in enumerate(review.units, start=1)
+            )
+        }
+    )
+    review_path.write_text(render_translation_review(completed), encoding="utf-8")
+
+    previewed = runner.invoke(
+        app,
+        ["translate", "preview", str(reviews), "--results", str(results)],
+    )
+    applied = runner.invoke(
+        app,
+        [
+            "translate",
+            "apply",
+            str(reviews),
+            "--results",
+            str(results),
+            "--output-dir",
+            str(translations),
+        ],
+    )
+
+    assert previewed.exit_code == 0, previewed.stdout
+    assert "SUMMARY prepared=0 previewed=1" in previewed.stdout
+    assert applied.exit_code == 0, applied.stdout
+    assert "SUMMARY prepared=0 previewed=0 applied=1" in applied.stdout
+    assert (translations / "S01E01_pl_translation_001.json").is_file()

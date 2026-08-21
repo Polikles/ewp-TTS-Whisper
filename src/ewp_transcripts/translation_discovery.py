@@ -21,9 +21,7 @@ from ewp_transcripts.domain.revision import (
 )
 from ewp_transcripts.domain.translation_review import TranslationReview
 
-_TRANSLATION_REVIEW_NAME = re.compile(
-    r"^.+_(?:pl|en)\.translation\.review(?:_v[0-9]{3,})?\.txt$"
-)
+_TRANSLATION_REVIEW_NAME = re.compile(r"^.+_(?:pl|en)\.translation\.review(?:_v[0-9]{3,})?\.txt$")
 
 
 def discover_translation_reviews(

@@ -15,6 +15,7 @@ from ewp_transcripts.application import (
     BatchReviewPreparationOutcome,
     BatchRevisionOutcome,
     BatchTranscriptionOutcome,
+    BatchTranslationOutcome,
     ExportFormat,
     TranscriptionOutcome,
     application_version,
@@ -30,11 +31,13 @@ from ewp_transcripts.application import (
     inspect_input,
     prepare_review_batch,
     prepare_review_file,
+    prepare_translation_review_batch,
     prepare_translation_review_file,
     preview_correction,
     preview_review_file,
     preview_translation_review_file,
     process_review_batch,
+    process_translation_review_batch,
     transcribe_batch,
     transcribe_one,
 )
@@ -346,6 +349,23 @@ def _print_translation_preview(translation: TranscriptTranslation) -> None:
     )
 
 
+def _print_translation_batch(outcome: BatchTranslationOutcome) -> None:
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.input_path}")
+        if job.review_path is not None and job.status == "prepared":
+            typer.echo(f"  REVIEW {job.review_path}")
+        if job.translation_path is not None:
+            typer.echo(f"  TRANSLATION {job.translation_path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY prepared={outcome.count('prepared')} "
+        f"previewed={outcome.count('previewed')} applied={outcome.count('applied')} "
+        f"failed={outcome.count('failed')} "
+        f"stopped_early={str(outcome.stopped_early).lower()}"
+    )
+
+
 @translate_app.command("prepare")
 def translate_prepare_command(
     result_path: Annotated[
@@ -360,6 +380,10 @@ def translate_prepare_command(
         Path | None,
         typer.Option("--revision", help="Exact compatible source transcript revision."),
     ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include canonical results in subdirectories."),
+    ] = False,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Write EWP-TRANSLATION review files here."),
@@ -381,24 +405,42 @@ def translate_prepare_command(
 
     try:
         config = load_config(explicit_path=config_path)
-        outcome = prepare_translation_review_file(
-            result_path,
-            target_language=target_language.value,
-            config=config,
-            revision_path=revision_path,
-            output_directory=_optional_user_path(output_directory),
-            style=TranslationStyle(
-                register=register.value,
-                discourse=discourse.value,
-            ),
+        normalized_result = normalize_input_path(result_path)
+        translation_style = TranslationStyle(
+            register=register.value,
+            discourse=discourse.value,
         )
+        if normalized_result.is_dir():
+            batch = prepare_translation_review_batch(
+                normalized_result,
+                target_language=target_language.value,
+                config=config,
+                revision=revision_path,
+                output_directory=_optional_user_path(output_directory),
+                recursive=recursive,
+                style=translation_style,
+            )
+        else:
+            outcome = prepare_translation_review_file(
+                normalized_result,
+                target_language=target_language.value,
+                config=config,
+                revision_path=revision_path,
+                output_directory=_optional_user_path(output_directory),
+                style=translation_style,
+            )
     except (ApplicationError, ValueError) as error:
         if isinstance(error, ApplicationError):
             _expected_error(error)
         typer.echo(f"Error: {error}", err=True)
         raise typer.Exit(code=4) from error
-    typer.echo(f"PREPARED {outcome.path}")
-    typer.echo(f"SUMMARY units={len(outcome.review.units)}")
+    if normalized_result.is_dir():
+        _print_translation_batch(batch)
+        if batch.count("failed"):
+            raise typer.Exit(code=5)
+    else:
+        typer.echo(f"PREPARED {outcome.path}")
+        typer.echo(f"SUMMARY units={len(outcome.review.units)}")
 
 
 @translate_app.command("preview")
@@ -415,6 +457,17 @@ def translate_preview_command(
         Path | None,
         typer.Option("--revision", help="Exact source transcript revision, when used."),
     ] = None,
+    revisions_directory: Annotated[
+        Path | None,
+        typer.Option(
+            "--revisions-dir",
+            help="Directory containing exact source revisions for a review batch.",
+        ),
+    ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include translation reviews in subdirectories."),
+    ] = False,
     json_output: Annotated[
         bool,
         typer.Option("--json-output", help="Write the unpublished translation as JSON."),
@@ -423,14 +476,29 @@ def translate_preview_command(
     """Validate a completed review and exact source without writing an artifact."""
 
     try:
-        outcome = preview_translation_review_file(
-            review_path,
-            result_path=result_path,
-            revision_path=revision_path,
-        )
+        normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir():
+            batch = process_translation_review_batch(
+                normalized_review,
+                config=load_config(),
+                results_directory=normalize_input_path(result_path),
+                revisions_directory=_optional_user_path(revisions_directory),
+                recursive=recursive,
+                apply=False,
+            )
+        else:
+            outcome = preview_translation_review_file(
+                normalized_review,
+                result_path=result_path,
+                revision_path=revision_path,
+            )
     except ApplicationError as error:
         _expected_error(error)
-    if json_output:
+    if normalized_review.is_dir():
+        _print_translation_batch(batch)
+        if batch.count("failed"):
+            raise typer.Exit(code=5)
+    elif json_output:
         typer.echo(_translation_json(outcome.translation))
     else:
         _print_translation_preview(outcome.translation)
@@ -450,6 +518,17 @@ def translate_apply_command(
         Path | None,
         typer.Option("--revision", help="Exact source transcript revision, when used."),
     ] = None,
+    revisions_directory: Annotated[
+        Path | None,
+        typer.Option(
+            "--revisions-dir",
+            help="Directory containing exact source revisions for a review batch.",
+        ),
+    ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include translation reviews in subdirectories."),
+    ] = False,
     output_directory: Annotated[
         Path | None,
         typer.Option("--output-dir", help="Write the immutable translation here."),
@@ -467,16 +546,32 @@ def translate_apply_command(
 
     try:
         config = load_config(explicit_path=config_path)
-        outcome = apply_translation_review_file(
-            review_path,
-            result_path=result_path,
-            config=config,
-            revision_path=revision_path,
-            output_directory=_optional_user_path(output_directory),
-        )
+        normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir():
+            batch = process_translation_review_batch(
+                normalized_review,
+                config=config,
+                results_directory=normalize_input_path(result_path),
+                revisions_directory=_optional_user_path(revisions_directory),
+                output_directory=_optional_user_path(output_directory),
+                recursive=recursive,
+                apply=True,
+            )
+        else:
+            outcome = apply_translation_review_file(
+                normalized_review,
+                result_path=result_path,
+                config=config,
+                revision_path=revision_path,
+                output_directory=_optional_user_path(output_directory),
+            )
     except ApplicationError as error:
         _expected_error(error)
-    if json_output:
+    if normalized_review.is_dir():
+        _print_translation_batch(batch)
+        if batch.count("failed"):
+            raise typer.Exit(code=5)
+    elif json_output:
         typer.echo(
             _translation_json(
                 outcome.translation,
