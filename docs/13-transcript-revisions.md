@@ -461,6 +461,13 @@ Translation mapping is sentence-level rather than word-level. A future immutable
 translation artifact will preserve source identity, sentence mapping, and inherited time
 spans so translated TXT/SRT/VTT/HTML can be regenerated from one structured artifact.
 
+The first translation contract supports `pl -> en` and `en -> pl` through the same
+pipeline. It defaults to preserving the source's style and records optional independent
+register (`preserve`, `formal`, `informal`) and discourse (`preserve`, `academic`,
+`general`) guidance in provenance. Guidance affects translation choices only; it cannot
+authorize changed facts, omissions, summaries, speaker reassignment, or broken source
+sentence lineage.
+
 Manual translation precedes automated translation for benchmark purposes.
 
 ## 27. Acceptance criteria

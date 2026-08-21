@@ -4,6 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Changed
+
+- Defined the initial v0.4 translation scope as one bidirectional Polish-English
+  pipeline, led by Polish-to-English podcast translation. Source-faithful style is the
+  default; optional provenance-recorded register (`preserve`/`formal`/`informal`) and
+  discourse (`preserve`/`academic`/`general`) guidance cannot alter facts, intent,
+  speaker identity, or sentence lineage.
+
 ## 0.3.0 - 2026-08-21
 
 ### Changed

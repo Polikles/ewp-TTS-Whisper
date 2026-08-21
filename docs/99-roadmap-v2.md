@@ -241,6 +241,10 @@ Corrected text is the normal intended production source.
 
 Translation requirements:
 
+- the initial supported language pair is Polish and English in both directions. The
+  primary production path is Polish podcast audio/transcript to English; the same
+  pipeline also translates English materials to Polish rather than maintaining a second
+  direction-specific implementation;
 - source units are sentence-level after sentenceization of the selected transcript;
 - translation mapping is sentence-to-sentence, not word-to-word;
 - source sentence timing is retained for target subtitle planning;
@@ -251,6 +255,27 @@ Translation requirements:
   VTT, and future HTML exports;
 - the artifact records exactly which raw result or transcript revision was translated;
 - exact translation JSON Schema is deferred until this pipeline is designed.
+
+Translation is source-faithful by default: preserve meaning, intent, tone, level of
+formality, technical specificity, repetitions, hedges, emphasis, and speaker character as
+far as idiomatic target-language expression permits. Do not summarize, add facts,
+silently omit difficult content, censor, or turn spoken language into polished prose.
+Literal word order is not required where it would sound unnatural or change meaning.
+
+Style guidance is explicit, optional, and recorded in artifact/provider provenance. The
+initial contract uses two independent controls rather than conflating register with
+subject matter:
+
+- `register = "preserve" | "formal" | "informal"`;
+- `discourse = "preserve" | "academic" | "general"`.
+
+Both default to `preserve`. `formal` and `informal` guide address forms, contractions,
+and equivalent register choices; `academic` and `general` guide terminology and expected
+reader background. These controls must not authorize factual changes, paraphrased
+arguments, invented definitions, deletion of spoken uncertainty, or altered speaker
+attribution. Unsupported combinations or language directions fail before provider use.
+Benchmarks keep each exact style configuration separate and compare the preserve/preserve
+baseline first.
 
 ## 5. Automated translation — planned for v0.4
 
@@ -275,6 +300,7 @@ Useful benchmark paths include:
 raw PL -> automated translation -> compare with EN gold
 manual corrected PL -> automated translation -> compare with EN gold
 raw PL -> automated correction -> automated translation -> compare with EN gold
+manual corrected EN -> automated translation -> compare with PL gold
 ```
 
 ## 6. Content-aware directory discovery
