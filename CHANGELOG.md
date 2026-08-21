@@ -114,6 +114,11 @@ All notable changes to EWP-transcripts are documented here.
   `--install` confirms before Ubuntu package changes and locked-environment setup. The
   script never clones/pulls Git, installs an NVIDIA display driver, or downloads gated
   models. Root README onboarding now has concise installation and usage examples.
+- Added a network-isolated full-path cloud privacy test covering consent persistence,
+  private resume state, immutable revision, reconstructable audit, exact-hash benchmark,
+  and content-free report. The bearer credential must appear only in the captured request
+  header, never in any persisted artifact; consent, manifest, and report also reject
+  transcript payload exposure.
 - Added an explicit LM Studio `json-text` compatibility mode for model/chat-template
   combinations that fail grammar-constrained structured output. JSON Schema remains the
   default; the fallback omits only `response_format`, retains strict whole-response schema
