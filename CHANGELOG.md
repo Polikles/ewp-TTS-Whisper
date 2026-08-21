@@ -37,6 +37,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added deterministic `EWP-TRANSLATION 1` rendering and strict parsing. Compact metadata,
   unit identity, speaker, timing, source hashes, and token ownership are machine-owned;
   only `> ` target lines are editable, and changed source text fails hash validation.
+- Added pure manual-translation preview construction. Reviews with any blank target fail;
+  complete reviews become unpublished immutable snapshots with normalized target text,
+  exact source mappings, manual provenance, direction/style, and verified statistics.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
