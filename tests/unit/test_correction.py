@@ -10,6 +10,7 @@ from ewp_transcripts.correction import (
     DeterministicMockCorrectionProvider,
     _corrected_speakers,
     _require_conservative_token_drift,
+    _require_numeric_literals_unchanged,
     build_correction_request,
     build_mock_correction_revision,
     derive_correction_response,
@@ -286,6 +287,57 @@ def test_response_rejects_excessive_token_drift_after_resume_validation() -> Non
 
     with pytest.raises(InvalidCorrectionResponseError, match="conservative safety limit"):
         _require_conservative_token_drift(request, response)
+
+
+def test_response_rejects_changed_numeric_literal() -> None:
+    transcript = replace(
+        _transcript(3),
+        tokens=(
+            replace(_transcript(3).tokens[0], text="wersja"),
+            replace(_transcript(3).tokens[1], text="5.2,"),
+            replace(_transcript(3).tokens[2], text="działa."),
+        ),
+    )
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = derive_correction_response(request, corrected_text="wersja 4.0, działa.")
+
+    with pytest.raises(InvalidCorrectionResponseError, match="numeric literal"):
+        _require_numeric_literals_unchanged(request, response)
+
+
+def test_response_allows_punctuation_change_around_unchanged_numeric_literal() -> None:
+    transcript = replace(
+        _transcript(3),
+        tokens=(
+            replace(_transcript(3).tokens[0], text="wersja"),
+            replace(_transcript(3).tokens[1], text="5.2,"),
+            replace(_transcript(3).tokens[2], text="działa."),
+        ),
+    )
+    request = build_correction_request(
+        transcript,
+        plan_correction_chunks(transcript)[0],
+        prompt_id="faithful-pl-v1",
+        provider_id="test",
+        model_id="test-v1",
+    )
+    response = derive_correction_response(request, corrected_text="wersja 5.2. działa.")
+
+    _require_numeric_literals_unchanged(request, response)
+
+
+def test_automated_revision_applies_numeric_literal_gate_before_publication() -> None:
+    result = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    provider = DeterministicMockCorrectionProvider({"transcription.": ("4.0", "asr_lexical")})
+
+    with pytest.raises(InvalidCorrectionResponseError, match="numeric literal"):
+        build_mock_correction_revision(result, provider)
 
 
 def test_response_rejects_lexical_edit_labeled_as_punctuation() -> None:

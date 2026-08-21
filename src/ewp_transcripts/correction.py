@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import unicodedata
 from dataclasses import dataclass
 from difflib import SequenceMatcher
@@ -36,6 +37,7 @@ from ewp_transcripts.revision_service import build_revision
 
 _TOKEN_DRIFT_RATIO = 0.10
 _TOKEN_DRIFT_FLOOR = 4
+_NUMERIC_LITERAL = re.compile(r"\d+(?:[.,]\d+)*")
 
 
 @dataclass(frozen=True, slots=True)
@@ -397,6 +399,7 @@ def build_correction_revision(
                 execution_policy=execution_policy,
             ).response
         corrected = validate_correction_response(request, response)
+        _require_numeric_literals_unchanged(request, response)
         _require_conservative_token_drift(request, response)
         speakers = _corrected_speakers(request, response)
         anchors.append(
@@ -450,6 +453,20 @@ def _require_conservative_token_drift(
     if abs(corrected_count - source_count) > allowed_drift:
         raise InvalidCorrectionResponseError(
             "Automated correction changed editable token count beyond the conservative safety limit"
+        )
+
+
+def _require_numeric_literals_unchanged(
+    request: CorrectionRequest, response: CorrectionResponse
+) -> None:
+    """Prevent automated correction from silently changing recognized numeric values."""
+
+    source_text = " ".join(token.text for token in request.editable_tokens)
+    source_numbers = tuple(_NUMERIC_LITERAL.findall(source_text))
+    corrected_numbers = tuple(_NUMERIC_LITERAL.findall(response.corrected_text))
+    if corrected_numbers != source_numbers:
+        raise InvalidCorrectionResponseError(
+            "Automated correction changed a recognized numeric literal"
         )
 
 

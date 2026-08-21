@@ -103,6 +103,9 @@ All notable changes to EWP-transcripts are documented here.
   worse than raw ASR against manual gold. Copying is now the default; grammar repair,
   stylistic rewriting, ambiguous edits, and dictionary-free terminology normalization
   are explicitly forbidden.
+- Added a provider-independent numeric-literal safety gate: automated correction must
+  preserve recognized digit-based values exactly, preventing factual mutations such as
+  `5.2` to `4.0` while allowing punctuation changes around the same value.
 - Added an explicit LM Studio `json-text` compatibility mode for model/chat-template
   combinations that fail grammar-constrained structured output. JSON Schema remains the
   default; the fallback omits only `response_format`, retains strict whole-response schema
@@ -129,6 +132,12 @@ All notable changes to EWP-transcripts are documented here.
   warnings. Report v3 measured 146 net lexical errors removed across 21 improved, 2
   unchanged, and 1 regressed episode. The 395 audited operations remain review candidates
   rather than final edits.
+- Targeted review of the nominally regressed `S2E1` case found two genuine corrections
+  (`postanowiamy` to `postanawiamy` and `króciczkami` to `króliczkami`) that exposed errors
+  remaining in manual gold, plus one newly wrong numeric change. The hashed report remains
+  reproducible but its quality interpretation is provisional until a later corrected gold
+  revision is benchmarked. Recurring `na biało` and spoken-email forms were recorded as
+  project-dictionary candidates.
 - Recorded about 25m21s operator wall time for the complete run including retries. Validated
   resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
   about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.

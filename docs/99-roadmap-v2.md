@@ -183,6 +183,10 @@ audits for frequent and consistent corrections, including proper names and canon
 forms such as `OpenAI` versus `Open AI`. Automatically discovered items are candidates
 only: a user must approve them before they affect correction or translation. Benchmarks
 must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
+Initial private-corpus candidates include phrase-aware normalization of recurring
+`nabiało`/`nabiał` ASR forms to spoken `na biało`, plus the project email's spoken and
+written forms (for example `małpaetyka` and `kontakt@etykawpetli.pl`). These examples must
+remain project-scoped; they are not safe global replacements.
 
 The correction benchmark must test two dictionary hypotheses explicitly:
 
