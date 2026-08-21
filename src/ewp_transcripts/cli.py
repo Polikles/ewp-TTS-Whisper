@@ -193,6 +193,7 @@ def correction_benchmark_report_command(
     typer.echo(f"REPORT {normalized_output}")
     aggregate = cast(dict[str, dict[str, object]], report["aggregate"])
     correction = aggregate["lexical_correction"]
+    activity = aggregate["revision_activity"]
     typer.echo(
         "SUMMARY "
         f"cases={report['case_count']} "
@@ -202,7 +203,10 @@ def correction_benchmark_report_command(
         f"errors_removed={correction['word_error_reduction']} "
         f"improved={correction['improved_cases']} "
         f"unchanged={correction['unchanged_cases']} "
-        f"regressed={correction['regressed_cases']}"
+        f"regressed={correction['regressed_cases']} "
+        f"changes={activity['total_changes']} "
+        f"warnings={activity['warning_count']} "
+        f"speaker_changes={activity['speaker_changes']}"
     )
 
 

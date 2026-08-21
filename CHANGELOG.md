@@ -168,6 +168,10 @@ All notable changes to EWP-transcripts are documented here.
 - Correction benchmark report v3 now records net and relative lexical error reduction,
   candidate edit distance, net correction efficiency, and improved/unchanged/regressed
   case counts without exposing transcript content.
+- Correction benchmark report v4 adds content-free per-case and aggregate immutable
+  revision statistics, total change activity, warning/alignment-warning counts, and
+  speaker changes. Gold-relative edit-quality and provider runtime/usage aggregates remain
+  explicitly open rather than being inferred from WER.
 
 - Completed the authorized three-case OpenRouter pilot under prompt v11 and 120/160/30
   chunks. DeepSeek V3 0324 reduced 76 raw word errors to 67 (`0.00659124` WER) in about

@@ -73,7 +73,7 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
 
     report = evaluate_correction_benchmark(manifest)
 
-    assert report["report_version"] == "ewp-correction-benchmark-v3"
+    assert report["report_version"] == "ewp-correction-benchmark-v4"
     assert report["case_count"] == 1
     case = report["cases"][0]
     assert case["source_kind"] == source_kind
@@ -82,6 +82,8 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
     assert case["word_error_reduction"] == 1
     assert case["excess_word_errors"] == 0
     assert case["lexical_outcome"] == "improved"
+    assert case["candidate_revision_statistics"]["substitutions"] == 1
+    assert case["candidate_warning_count"] == 0
     assert report["aggregate"]["baseline"]["word_errors"] == 1
     assert report["aggregate"]["source_to_candidate"]["word_errors"] == 1
     assert report["aggregate"]["candidate"]["word_errors"] == 0
@@ -93,6 +95,21 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
         "improved_cases": 1,
         "unchanged_cases": 0,
         "regressed_cases": 0,
+    }
+    assert report["aggregate"]["revision_activity"] == {
+        "source_tokens": 8,
+        "revision_tokens": 8,
+        "unchanged": 7,
+        "substitutions": 1,
+        "merges": 0,
+        "splits": 0,
+        "insertions": 0,
+        "deletions": 0,
+        "punctuation_only_changes": 0,
+        "speaker_changes": 0,
+        "alignment_warnings": 0,
+        "total_changes": 1,
+        "warning_count": 0,
     }
 
 

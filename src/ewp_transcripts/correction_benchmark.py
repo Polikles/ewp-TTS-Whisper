@@ -247,6 +247,8 @@ def evaluate_correction_benchmark(
                 "baseline": baseline,
                 "candidate": result,
                 "source_to_candidate": source_to_candidate,
+                "candidate_revision_statistics": candidate.statistics.model_dump(),
+                "candidate_warning_count": len(candidate.warnings),
                 "word_error_reduction": word_error_reduction,
                 "excess_word_errors": max(0, candidate_errors - baseline_errors),
                 "lexical_outcome": (
@@ -259,7 +261,7 @@ def evaluate_correction_benchmark(
             }
         )
     return {
-        "report_version": "ewp-correction-benchmark-v3",
+        "report_version": "ewp-correction-benchmark-v4",
         "manifest_sha256": _sha256(manifest.path),
         "normalization": CORRECTION_NORMALIZATION_VERSION,
         "case_count": len(reports),
@@ -307,6 +309,42 @@ def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
         "improved_cases": sum(report["lexical_outcome"] == "improved" for report in reports),
         "unchanged_cases": sum(report["lexical_outcome"] == "unchanged" for report in reports),
         "regressed_cases": sum(report["lexical_outcome"] == "regressed" for report in reports),
+    }
+    statistic_names = (
+        "source_tokens",
+        "revision_tokens",
+        "unchanged",
+        "substitutions",
+        "merges",
+        "splits",
+        "insertions",
+        "deletions",
+        "punctuation_only_changes",
+        "speaker_changes",
+        "alignment_warnings",
+    )
+    statistics = {
+        name: sum(
+            cast(dict[str, int], report["candidate_revision_statistics"])[name]
+            for report in reports
+        )
+        for name in statistic_names
+    }
+    aggregate["revision_activity"] = {
+        **statistics,
+        "total_changes": sum(
+            statistics[name]
+            for name in (
+                "substitutions",
+                "merges",
+                "splits",
+                "insertions",
+                "deletions",
+                "punctuation_only_changes",
+                "speaker_changes",
+            )
+        ),
+        "warning_count": sum(cast(int, report["candidate_warning_count"]) for report in reports),
     }
     return aggregate
 
