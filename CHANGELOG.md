@@ -27,6 +27,9 @@ All notable changes to EWP-transcripts are documented here.
   manual/LLM provenance, speaker-safe timed units, statistics, warnings, and immutable
   complete snapshots. Contradictory verification, duplicate source ownership, invalid
   timing, and inconsistent statistics fail validation.
+- Added deterministic translation source-unit planning that covers effective transcript
+  tokens exactly once, treats speaker changes as hard boundaries, inherits integer
+  timing, and reuses established abbreviation/domain non-ending rules.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

@@ -42,7 +42,7 @@ def split_sentences(text: str) -> tuple[str, ...]:
     pending = pieces[0]
     for piece in pieces[1:]:
         final_token = pending.rsplit(maxsplit=1)[-1].casefold()
-        if _is_non_breaking_token(final_token):
+        if is_non_breaking_sentence_token(final_token):
             pending = f"{pending} {piece}"
         else:
             sentences.append(pending)
@@ -92,7 +92,9 @@ def _looks_like_initial(token: str) -> bool:
     return len(token) == 2 and token[0].isalpha() and token[1] == "."
 
 
-def _is_non_breaking_token(token: str) -> bool:
+def is_non_breaking_sentence_token(token: str) -> bool:
+    """Return whether terminal punctuation belongs to an abbreviation or address token."""
+
     return (
         token in _NON_BREAKING_ABBREVIATIONS
         or token.endswith(_NON_BREAKING_TOKEN_SUFFIXES)
