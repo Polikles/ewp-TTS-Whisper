@@ -20,6 +20,7 @@ from ewp_transcripts.application import (
     application_version,
     apply_correction,
     apply_review_file,
+    apply_translation_review_file,
     audit_revision_file,
     clean_all_workdirs,
     doctor,
@@ -29,8 +30,10 @@ from ewp_transcripts.application import (
     inspect_input,
     prepare_review_batch,
     prepare_review_file,
+    prepare_translation_review_file,
     preview_correction,
     preview_review_file,
+    preview_translation_review_file,
     process_review_batch,
     transcribe_batch,
     transcribe_one,
@@ -62,6 +65,7 @@ from ewp_transcripts.domain.errors import (
     OutputLockUnavailableError,
     OutputReservationError,
 )
+from ewp_transcripts.domain.translation import TranscriptTranslation, TranslationStyle
 from ewp_transcripts.lm_studio_adapter import is_loopback_endpoint
 from ewp_transcripts.revision_editor import open_review_in_editor, require_review_change
 
@@ -91,7 +95,16 @@ correction_benchmark_app = typer.Typer(
     help="Benchmark automated transcript corrections against manual gold revisions.",
     no_args_is_help=True,
 )
+translate_app = typer.Typer(
+    name="translate",
+    help=(
+        "Prepare, validate, and publish source-faithful Polish-English translations. "
+        "Run 'transcriber translate COMMAND --help' for command-specific options."
+    ),
+    no_args_is_help=True,
+)
 app.add_typer(revise_app, name="revise")
+app.add_typer(translate_app, name="translate")
 app.add_typer(benchmark_app, name="benchmark")
 benchmark_app.add_typer(correction_benchmark_app, name="correction")
 
@@ -110,6 +123,23 @@ class RequestedSpeakerLabels(StrEnum):
     ON_CHANGE = "on-change"
     ALWAYS = "always"
     NEVER = "never"
+
+
+class RequestedTranslationLanguage(StrEnum):
+    POLISH = "pl"
+    ENGLISH = "en"
+
+
+class RequestedTranslationRegister(StrEnum):
+    PRESERVE = "preserve"
+    FORMAL = "formal"
+    INFORMAL = "informal"
+
+
+class RequestedTranslationDiscourse(StrEnum):
+    PRESERVE = "preserve"
+    ACADEMIC = "academic"
+    GENERAL = "general"
 
 
 class RequestedSubtitlePreset(StrEnum):
@@ -296,6 +326,170 @@ def _review_batch_json(outcome: BatchReviewPreparationOutcome) -> str:
         ensure_ascii=False,
         indent=2,
     )
+
+
+def _translation_json(
+    translation: TranscriptTranslation, *, translation_path: Path | None = None
+) -> str:
+    payload = translation.model_dump(mode="json", by_alias=True)
+    payload["translation_path"] = str(translation_path) if translation_path else None
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+def _print_translation_preview(translation: TranscriptTranslation) -> None:
+    typer.echo(f"PREVIEW {translation.job_id} {translation.direction.target_language}")
+    typer.echo(
+        f"SUMMARY units={translation.statistics.unit_count} "
+        f"source_tokens={translation.statistics.source_tokens} "
+        f"target_tokens={translation.statistics.target_tokens} "
+        f"warnings={len(translation.warnings)}"
+    )
+
+
+@translate_app.command("prepare")
+def translate_prepare_command(
+    result_path: Annotated[
+        Path,
+        typer.Argument(help="Exact canonical result to translate.", metavar="RESULT_JSON"),
+    ],
+    target_language: Annotated[
+        RequestedTranslationLanguage,
+        typer.Option("--target-language", help="Target language: pl or en."),
+    ],
+    revision_path: Annotated[
+        Path | None,
+        typer.Option("--revision", help="Exact compatible source transcript revision."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write EWP-TRANSLATION review files here."),
+    ] = None,
+    register: Annotated[
+        RequestedTranslationRegister,
+        typer.Option("--register", help="Preserve, formalize, or informalize register."),
+    ] = RequestedTranslationRegister.PRESERVE,
+    discourse: Annotated[
+        RequestedTranslationDiscourse,
+        typer.Option("--discourse", help="Preserve, academic, or general discourse."),
+    ] = RequestedTranslationDiscourse.PRESERVE,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+) -> None:
+    """Publish an editable review whose target lines begin blank."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = prepare_translation_review_file(
+            result_path,
+            target_language=target_language.value,
+            config=config,
+            revision_path=revision_path,
+            output_directory=_optional_user_path(output_directory),
+            style=TranslationStyle(
+                register=register.value,
+                discourse=discourse.value,
+            ),
+        )
+    except (ApplicationError, ValueError) as error:
+        if isinstance(error, ApplicationError):
+            _expected_error(error)
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=4) from error
+    typer.echo(f"PREPARED {outcome.path}")
+    typer.echo(f"SUMMARY units={len(outcome.review.units)}")
+
+
+@translate_app.command("preview")
+def translate_preview_command(
+    review_path: Annotated[
+        Path,
+        typer.Argument(help="Completed EWP-TRANSLATION review.", metavar="REVIEW"),
+    ],
+    result_path: Annotated[
+        Path,
+        typer.Option("--results", help="Exact canonical result used to prepare the review."),
+    ],
+    revision_path: Annotated[
+        Path | None,
+        typer.Option("--revision", help="Exact source transcript revision, when used."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the unpublished translation as JSON."),
+    ] = False,
+) -> None:
+    """Validate a completed review and exact source without writing an artifact."""
+
+    try:
+        outcome = preview_translation_review_file(
+            review_path,
+            result_path=result_path,
+            revision_path=revision_path,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(_translation_json(outcome.translation))
+    else:
+        _print_translation_preview(outcome.translation)
+
+
+@translate_app.command("apply")
+def translate_apply_command(
+    review_path: Annotated[
+        Path,
+        typer.Argument(help="Completed EWP-TRANSLATION review.", metavar="REVIEW"),
+    ],
+    result_path: Annotated[
+        Path,
+        typer.Option("--results", help="Exact canonical result used to prepare the review."),
+    ],
+    revision_path: Annotated[
+        Path | None,
+        typer.Option("--revision", help="Exact source transcript revision, when used."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the immutable translation here."),
+    ] = None,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Write the translation outcome as JSON."),
+    ] = False,
+) -> None:
+    """Validate and publish a complete immutable manual translation."""
+
+    try:
+        config = load_config(explicit_path=config_path)
+        outcome = apply_translation_review_file(
+            review_path,
+            result_path=result_path,
+            config=config,
+            revision_path=revision_path,
+            output_directory=_optional_user_path(output_directory),
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(
+            _translation_json(
+                outcome.translation,
+                translation_path=outcome.translation_path,
+            )
+        )
+    else:
+        typer.echo(f"APPLIED {outcome.review_path}")
+        typer.echo(f"  TRANSLATION {outcome.translation_path}")
+        typer.echo(
+            f"SUMMARY translation_number={outcome.translation.translation_number} "
+            f"units={outcome.translation.statistics.unit_count}"
+        )
 
 
 @revise_app.command("prepare")

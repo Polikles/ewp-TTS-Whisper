@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from ewp_transcripts.domain.errors import InvalidTranslationError
 from ewp_transcripts.translation_review_service import (
     prepare_translation_review,
     validate_translation_review_source,
@@ -35,8 +36,7 @@ def test_validate_review_source_accepts_only_target_edits() -> None:
     edited = review.model_copy(
         update={
             "units": tuple(
-                unit.model_copy(update={"target_text": "Przetłumaczone."})
-                for unit in review.units
+                unit.model_copy(update={"target_text": "Przetłumaczone."}) for unit in review.units
             )
         }
     )
@@ -49,7 +49,5 @@ def test_validate_review_source_rejects_machine_owned_changes() -> None:
     changed = review.units[0].model_copy(update={"speaker_id": "speaker_999"})
     units = (changed, *review.units[1:])
 
-    with pytest.raises(ValueError, match="units do not match"):
-        validate_translation_review_source(
-            review.model_copy(update={"units": units}), RESULT
-        )
+    with pytest.raises(InvalidTranslationError, match="units do not match"):
+        validate_translation_review_source(review.model_copy(update={"units": units}), RESULT)

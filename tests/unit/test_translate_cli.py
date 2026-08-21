@@ -1,0 +1,118 @@
+"""Tests for the manual translation CLI vertical slice."""
+
+import json
+from pathlib import Path
+
+from typer.testing import CliRunner
+
+from ewp_transcripts.cli import app
+from ewp_transcripts.translation_review_format import (
+    load_translation_review,
+    render_translation_review,
+)
+
+ROOT = Path(__file__).resolve().parents[2]
+EXAMPLE = ROOT / "examples/results.example.json"
+runner = CliRunner()
+
+
+def _prepare_completed_review(tmp_path: Path) -> tuple[Path, Path]:
+    results = tmp_path / "results.example.json"
+    results.write_bytes(EXAMPLE.read_bytes())
+    reviews = tmp_path / "reviews"
+    prepared = runner.invoke(
+        app,
+        [
+            "translate",
+            "prepare",
+            str(results),
+            "--target-language",
+            "pl",
+            "--output-dir",
+            str(reviews),
+        ],
+    )
+    assert prepared.exit_code == 0, prepared.stdout
+    review_path = reviews / "S01E01_pl.translation.review.txt"
+    review = load_translation_review(review_path)
+    completed = review.model_copy(
+        update={
+            "units": tuple(
+                unit.model_copy(update={"target_text": f"Tłumaczenie {index}."})
+                for index, unit in enumerate(review.units, start=1)
+            )
+        }
+    )
+    review_path.write_text(render_translation_review(completed), encoding="utf-8")
+    return results, review_path
+
+
+def test_translate_help_exposes_manual_workflow() -> None:
+    result = runner.invoke(app, ["translate", "--help"])
+
+    assert result.exit_code == 0
+    assert "prepare" in result.stdout
+    assert "preview" in result.stdout
+    assert "apply" in result.stdout
+
+
+def test_prepare_preview_and_apply_translation(tmp_path: Path) -> None:
+    results, review = _prepare_completed_review(tmp_path)
+    preview = runner.invoke(
+        app,
+        ["translate", "preview", str(review), "--results", str(results)],
+    )
+    translations = tmp_path / "translations"
+    applied = runner.invoke(
+        app,
+        [
+            "translate",
+            "apply",
+            str(review),
+            "--results",
+            str(results),
+            "--output-dir",
+            str(translations),
+            "--json-output",
+        ],
+    )
+
+    assert preview.exit_code == 0, preview.stdout
+    assert "SUMMARY units=" in preview.stdout
+    assert applied.exit_code == 0, applied.stdout
+    payload = json.loads(applied.stdout)
+    assert payload["translation_number"] == 1
+    assert Path(payload["translation_path"]).name == "S01E01_pl_translation_001.json"
+
+
+def test_preview_rejects_blank_target(tmp_path: Path) -> None:
+    results = tmp_path / "results.example.json"
+    results.write_bytes(EXAMPLE.read_bytes())
+    reviews = tmp_path / "reviews"
+    prepared = runner.invoke(
+        app,
+        [
+            "translate",
+            "prepare",
+            str(results),
+            "--target-language",
+            "pl",
+            "--output-dir",
+            str(reviews),
+        ],
+    )
+    assert prepared.exit_code == 0
+
+    preview = runner.invoke(
+        app,
+        [
+            "translate",
+            "preview",
+            str(reviews / "S01E01_pl.translation.review.txt"),
+            "--results",
+            str(results),
+        ],
+    )
+
+    assert preview.exit_code == 4
+    assert "untranslated unit" in preview.stderr

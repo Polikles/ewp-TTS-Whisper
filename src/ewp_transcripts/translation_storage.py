@@ -30,9 +30,7 @@ def translation_review_filename(*, job_id: str, target_language: Language, versi
     return f"{safe_job_id}_{target_language}.translation.review{suffix}.txt"
 
 
-def translation_filename(
-    *, job_id: str, target_language: Language, translation_number: int
-) -> str:
+def translation_filename(*, job_id: str, target_language: Language, translation_number: int) -> str:
     safe_job_id = _safe_component(job_id, label="Job ID")
     _safe_component(target_language, label="Target language")
     if translation_number < 1:

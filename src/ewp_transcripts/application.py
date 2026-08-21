@@ -60,6 +60,8 @@ from ewp_transcripts.domain.errors import (
     UnsupportedPipelineScopeError,
 )
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
+from ewp_transcripts.domain.translation import Language, TranscriptTranslation, TranslationStyle
+from ewp_transcripts.domain.translation_review import TranslationReview
 from ewp_transcripts.engines import AlignmentEngine, AsrEngine, DiarizationEngine
 from ewp_transcripts.engines.pyannote import PyannoteDiarizationEngine
 from ewp_transcripts.engines.whisperx import WhisperXAlignmentEngine, WhisperXAsrEngine
@@ -92,6 +94,16 @@ from ewp_transcripts.storage import (
     plan_job_outputs,
     resolve_output_directory,
 )
+from ewp_transcripts.translation_review_format import load_translation_review
+from ewp_transcripts.translation_review_service import (
+    prepare_translation_review,
+    validate_translation_review_source,
+)
+from ewp_transcripts.translation_service import build_manual_translation
+from ewp_transcripts.translation_storage import (
+    publish_next_translation,
+    publish_translation_review,
+)
 from ewp_transcripts.workdirs import (
     allocate_work_directory,
     cleanup_work_directory,
@@ -115,6 +127,9 @@ __all__ = [
     "preview_review_file",
     "apply_review_file",
     "process_review_batch",
+    "prepare_translation_review_file",
+    "preview_translation_review_file",
+    "apply_translation_review_file",
     "audit_revision_file",
     "preview_mock_correction",
     "apply_mock_correction",
@@ -241,6 +256,33 @@ class RevisionApplyOutcome:
     base_result_path: Path
     revision: TranscriptRevision
     revision_path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class TranslationReviewPreparationOutcome:
+    """One safely published human-editable translation review."""
+
+    review: TranslationReview
+    path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class TranslationPreviewOutcome:
+    """One validated unpublished complete translation snapshot."""
+
+    review_path: Path
+    result_path: Path
+    translation: TranscriptTranslation
+
+
+@dataclass(frozen=True, slots=True)
+class TranslationApplyOutcome:
+    """One atomically published complete translation snapshot."""
+
+    review_path: Path
+    result_path: Path
+    translation: TranscriptTranslation
+    translation_path: Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -754,6 +796,82 @@ def prepare_review_file(
         lock_timeout_seconds=lock_timeout_seconds,
     )
     return ReviewPreparationOutcome(review=review, path=path)
+
+
+def prepare_translation_review_file(
+    result_path: str | Path,
+    *,
+    target_language: Language,
+    config: ApplicationConfig,
+    revision_path: str | Path | None = None,
+    output_directory: Path | None = None,
+    style: TranslationStyle | None = None,
+) -> TranslationReviewPreparationOutcome:
+    """Prepare and non-destructively publish one exact-lineage translation review."""
+
+    normalized_result = normalize_input_path(result_path)
+    normalized_revision = normalize_input_path(revision_path) if revision_path is not None else None
+    review = prepare_translation_review(
+        normalized_result,
+        target_language=target_language,
+        revision_path=normalized_revision,
+        style=style,
+    )
+    path = publish_translation_review(
+        review,
+        output_directory=output_directory or normalized_result.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return TranslationReviewPreparationOutcome(review=review, path=path)
+
+
+def preview_translation_review_file(
+    review_path: str | Path,
+    *,
+    result_path: str | Path,
+    revision_path: str | Path | None = None,
+) -> TranslationPreviewOutcome:
+    """Validate exact source lineage and build a complete translation without writes."""
+
+    normalized_review = normalize_input_path(review_path)
+    normalized_result = normalize_input_path(result_path)
+    normalized_revision = normalize_input_path(revision_path) if revision_path is not None else None
+    review = load_translation_review(normalized_review)
+    validate_translation_review_source(
+        review,
+        normalized_result,
+        revision_path=normalized_revision,
+    )
+    translation = build_manual_translation(review)
+    return TranslationPreviewOutcome(normalized_review, normalized_result, translation)
+
+
+def apply_translation_review_file(
+    review_path: str | Path,
+    *,
+    result_path: str | Path,
+    config: ApplicationConfig,
+    revision_path: str | Path | None = None,
+    output_directory: Path | None = None,
+) -> TranslationApplyOutcome:
+    """Validate through preview and atomically publish one translation snapshot."""
+
+    preview = preview_translation_review_file(
+        review_path,
+        result_path=result_path,
+        revision_path=revision_path,
+    )
+    translation, path = publish_next_translation(
+        preview.translation,
+        output_directory=output_directory or preview.result_path.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return TranslationApplyOutcome(
+        preview.review_path,
+        preview.result_path,
+        translation,
+        path,
+    )
 
 
 def prepare_review_batch(

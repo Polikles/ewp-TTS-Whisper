@@ -8,6 +8,7 @@ from typing import cast
 
 from ewp_transcripts import __version__
 from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.errors import InvalidTranslationError
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.domain.translation import (
     Language,
@@ -41,15 +42,13 @@ def validate_translation_review_source(
         generated_at=review.header.generated_at,
     )
     if review.header != expected.header:
-        raise ValueError("translation review metadata does not match the exact source")
-    actual_machine_fields = tuple(
-        unit.model_dump(exclude={"target_text"}) for unit in review.units
-    )
+        raise InvalidTranslationError("Translation review metadata does not match the exact source")
+    actual_machine_fields = tuple(unit.model_dump(exclude={"target_text"}) for unit in review.units)
     expected_machine_fields = tuple(
         unit.model_dump(exclude={"target_text"}) for unit in expected.units
     )
     if actual_machine_fields != expected_machine_fields:
-        raise ValueError("translation review units do not match the exact source")
+        raise InvalidTranslationError("Translation review units do not match the exact source")
 
 
 def prepare_translation_review(

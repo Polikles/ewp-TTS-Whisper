@@ -43,6 +43,10 @@ All notable changes to EWP-transcripts are documented here.
 - Added locked, non-destructive translation review publication and atomic language-qualified
   immutable translation numbering. Apply-time source validation reconstructs canonical or
   revised units and rejects changes to metadata, speakers, timing, hashes, or token ownership.
+- Added the first model-free `translate prepare`, `translate preview`, and `translate apply`
+  CLI workflow for one Polish-English file. It exposes explicit target language and optional
+  style guidance, requires the exact canonical/revision source at validation, and publishes
+  only complete manual translations; batch operation and translated exports remain pending.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
