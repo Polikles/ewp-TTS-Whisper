@@ -422,8 +422,33 @@ uv run --locked transcriber translate apply "/path/to/translation-reviews" \
 ```
 
 Batch failures are isolated and return exit code 5. Repair and retry only failed review
-files to avoid creating unintended later translation numbers. Translation audit and
-TXT/subtitle export are not implemented yet.
+files to avoid creating unintended later translation numbers.
+
+Export one snapshot or a directory without audio or models:
+
+```bash
+uv run --locked transcriber translate export "/path/to/translations" \
+  --format txt --format srt --format vtt \
+  --output-dir "/path/to/translated-exports"
+```
+
+TXT uses stable speaker IDs because display names are presentation data. SRT/VTT inherit
+sentence-unit timing. If translated text needs multiple cues for line capacity, timing is
+distributed within that unit; target-word alignment is not claimed. Identical files skip
+safely, conflicting files fail before any requested format is written.
+
+Reconstruct a reviewable source/target audit from the exact inputs:
+
+```bash
+uv run --locked transcriber translate audit \
+  "/path/to/translations/episode_en_translation_001.json" \
+  --results-dir "/path/to/results" --revisions-dir "/path/to/revisions" \
+  --output-dir "/path/to/translation-audits"
+```
+
+Omit `--revisions-dir` for a raw-source translation. `--no-write --json-output`
+validates and prints the report without publication. The audit reopens the hashed source,
+reconstructs every machine-owned mapping, and pairs source and target text by unit.
 
 ## 11. Export corrected transcripts
 

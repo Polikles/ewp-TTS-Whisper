@@ -83,6 +83,9 @@ All notable changes to EWP-transcripts are documented here.
   publication. Audits reopen the canonical and optional revision source, validate every
   unit's IDs, speaker, timing, token ownership, and hash, then pair reconstructed source
   text with target text for human inspection.
+- Updated the complete runbook and CLI contract with translated batch export and exact
+  source/revision audit commands, output semantics, non-mutating audit mode, and the
+  sentence-timing precision boundary.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

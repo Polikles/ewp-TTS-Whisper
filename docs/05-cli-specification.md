@@ -335,6 +335,8 @@ keeps the operation non-mutating, and `--json-output` prints the reconstructed d
 transcriber translate prepare RESULT_JSON --target-language pl|en [OPTIONS]
 transcriber translate preview REVIEW --results RESULT_JSON [OPTIONS]
 transcriber translate apply REVIEW --results RESULT_JSON [OPTIONS]
+transcriber translate export TRANSLATION_OR_DIRECTORY [OPTIONS]
+transcriber translate audit TRANSLATION --results-dir DIRECTORY [OPTIONS]
 ```
 
 The initial model-free workflow prepares the strict `EWP-TRANSLATION 1`
@@ -352,7 +354,16 @@ Directory prepare/preview/apply is deterministic and isolates failures per file.
 revision directory selects the latest exact compatible revision for each canonical
 result; validation later resolves the exact canonical and revision filenames, hashes,
 IDs, numbers, and method stored in each review. Batch partial failure returns exit code 5.
-Translation audit, automated providers, and translated exports are later v0.4 slices.
+`translate export` derives repeatable `--format txt|srt|vtt` output from one immutable
+snapshot or a deterministic directory. TXT presents stable speaker IDs. Subtitle text
+uses inherited unit timing and may split only inside that interval to meet configured line
+limits; it does not claim target-word alignment. Multi-format collision checks run before
+publication, identical output skips, and batch failures are isolated.
+
+`translate audit` requires the directory containing the exact canonical result and, for
+revision-backed sources, the exact revision directory. It reconstructs and verifies every
+source unit before pairing source/target text in a deterministic JSON report. `--no-write`
+keeps the operation non-mutating. Automated providers are a later v0.4 slice.
 
 ## 8. `clean`
 
