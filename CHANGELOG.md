@@ -53,6 +53,10 @@ All notable changes to EWP-transcripts are documented here.
 - Documented the shipped single-file manual translation workflow in the complete operator
   runbook and CLI contract, including preferred verified input, exact source replay,
   protected review fields, style controls, immutable naming, and explicit pending slices.
+- Added deterministic translation-review discovery plus exact batch source resolution.
+  Revision-directory selection uses the highest compatible revision validated against the
+  canonical SHA-256; applying prepared reviews resolves their recorded filenames, hashes,
+  IDs, numbers, and methods rather than guessing from timestamps.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
