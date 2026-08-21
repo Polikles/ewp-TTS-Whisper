@@ -106,6 +106,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Validation
 
+- Completed the authorized three-case OpenRouter pilot under prompt v11 and 120/160/30
+  chunks. DeepSeek V3 0324 reduced 76 raw word errors to 67 (`0.00659124` WER) in about
+  19m31s for `$0.088462`; manual review retained deletion/context caveats.
+- Gemini 2.5 Flash with reasoning explicitly disabled reduced 76 raw errors to 63
+  (`0.00619774` WER) in about 3m01s for `$0.155583`. Gold-context review accepted all
+  audited edits. It is the leading pilot but remains a non-final review candidate.
+- Stopped the preliminary OpenRouter Qwen 2.5 72B run after its short case deleted a spoken
+  token. The rejected larger-chunk smoke cost `$0.004423`; no longer paid cases were run.
+
 - The three-case private Bielik 3.0 11B Q8_0 pilot passed the explicit plain-JSON adapter
   contract with no speaker changes. It remained deliberately conservative but scored
   `0.00767339` WER against manual gold versus `0.00747664` for raw ASR, so it does not yet
