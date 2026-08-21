@@ -1,6 +1,6 @@
 [project]
 name = "ewp-transcripts"
-version = "0.2.0"
+version = "0.3.0"
 description = "Local-first transcription for edited podcast and training recordings"
 readme = "README.md"
 license = "AGPL-3.0-or-later"

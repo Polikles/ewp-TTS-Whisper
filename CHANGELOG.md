@@ -4,7 +4,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.3.0 - 2026-08-21
+
 ### Changed
+
+- Promoted the provider-neutral local/cloud automated-correction, benchmarking, and
+  fresh-install onboarding work to internal beta version 0.3.0. Automated output remains
+  a non-final candidate requiring manual review.
 
 - Accepted the fresh v0.2.1-era benchmark instance as sufficient current installation
   evidence and deferred redundant installation-only testing. Full clean-machine testing

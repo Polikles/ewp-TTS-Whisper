@@ -12,7 +12,7 @@ items belong to one monolithic "Version 2" release.
    [`21-v0.2.0-transcript-revision-plan.md`](21-v0.2.0-transcript-revision-plan.md).
 2. Retain the completed 24-episode corrected corpus privately, outside this repository,
    until every included episode is public and redistribution is appropriate.
-3. **v0.3 automated transcript correction** using local/cloud API models, configurable
+3. **v0.3 automated transcript correction — implemented** using local/cloud API models, configurable
    chunking, read-only overlap, the same revision engine, benchmarking against the
    private corpus, and manual revision of model output. v0.3 also includes the scoped
    fresh-install/verification script and README onboarding work in section 14.
@@ -83,7 +83,7 @@ The following is no longer an unscheduled roadmap idea. It is the implemented v0
 
 Detailed design belongs in docs 13/21 rather than this roadmap.
 
-## 2. Automated transcript correction — in progress for v0.3
+## 2. Automated transcript correction — implemented in v0.3.0
 
 Automated correction follows manual correction so model performance can be measured
 against manually verified ground truth.
