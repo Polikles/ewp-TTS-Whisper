@@ -123,6 +123,9 @@ All notable changes to EWP-transcripts are documented here.
   ASR WER, made 11 rather than nine changes, deleted a source token, repeated an incorrect
   proper-name edit, and introduced unsupported grammatical-form changes for only a 9.1%
   runtime reduction.
+- Rejected the Bielik 11B F16 control: at 21.7 GB VRAM it took about 56 minutes 29 seconds,
+  exactly matched the earlier Q8 lexical scores and harmful substantive edits, and added
+  only unscored capitalization changes. It demonstrated no quality benefit over Q8.
 
 ### Documentation
 
