@@ -126,7 +126,9 @@ All notable changes to EWP-transcripts are documented here.
   77,607-word private corpus. All 24 revisions and audits were produced; WER against manual
   gold improved from `0.01077914` to `0.00889891` (17.44% relative reduction), with
   canonical-to-candidate WER `0.00338242`, zero speaker changes, and 19 retained alignment
-  warnings. The 395 audited operations remain review candidates rather than final edits.
+  warnings. Report v3 measured 146 net lexical errors removed across 21 improved, 2
+  unchanged, and 1 regressed episode. The 395 audited operations remain review candidates
+  rather than final edits.
 - Recorded about 25m21s operator wall time for the complete run including retries. Validated
   resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
   about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.
