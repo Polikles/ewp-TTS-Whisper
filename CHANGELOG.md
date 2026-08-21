@@ -47,6 +47,9 @@ All notable changes to EWP-transcripts are documented here.
   CLI workflow for one Polish-English file. It exposes explicit target language and optional
   style guidance, requires the exact canonical/revision source at validation, and publishes
   only complete manual translations; batch operation and translated exports remain pending.
+- Added a Draft 2020-12 translation JSON Schema and a validated English-to-Polish example
+  snapshot. Schema validation and strict domain-model validation jointly cover portable
+  structure plus cross-field source, direction, ownership, timing, and statistics rules.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

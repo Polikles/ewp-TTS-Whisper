@@ -1,0 +1,531 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Polikles/ewp-transcripts/blob/main/schemas/translation.schema.json",
+  "$defs": {
+    "TranslationCanonicalSource": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        },
+        "result_version": {
+          "minimum": 1,
+          "title": "Result Version",
+          "type": "integer"
+        },
+        "schema_version": {
+          "minLength": 1,
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "filename": {
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "result_version",
+        "schema_version",
+        "sha256",
+        "filename"
+      ],
+      "title": "TranslationCanonicalSource",
+      "type": "object"
+    },
+    "TranslationDirection": {
+      "additionalProperties": false,
+      "properties": {
+        "source_language": {
+          "enum": [
+            "pl",
+            "en"
+          ],
+          "title": "Source Language",
+          "type": "string"
+        },
+        "target_language": {
+          "enum": [
+            "pl",
+            "en"
+          ],
+          "title": "Target Language",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_language",
+        "target_language"
+      ],
+      "title": "TranslationDirection",
+      "type": "object"
+    },
+    "TranslationLlmProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "endpoint_kind": {
+          "enum": [
+            "local",
+            "cloud",
+            "mock"
+          ],
+          "title": "Endpoint Kind",
+          "type": "string"
+        },
+        "prompt_id": {
+          "minLength": 1,
+          "title": "Prompt Id",
+          "type": "string"
+        },
+        "prompt_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Prompt Sha256",
+          "type": "string"
+        },
+        "parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "endpoint_kind",
+        "prompt_id",
+        "prompt_sha256"
+      ],
+      "title": "TranslationLlmProvenance",
+      "type": "object"
+    },
+    "TranslationParent": {
+      "additionalProperties": false,
+      "properties": {
+        "translation_id": {
+          "format": "uuid",
+          "title": "Translation Id",
+          "type": "string"
+        },
+        "translation_number": {
+          "minimum": 1,
+          "title": "Translation Number",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "filename": {
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        }
+      },
+      "required": [
+        "translation_id",
+        "translation_number",
+        "sha256",
+        "filename"
+      ],
+      "title": "TranslationParent",
+      "type": "object"
+    },
+    "TranslationProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "enum": [
+            "manual",
+            "llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "interface": {
+          "enum": [
+            "cli",
+            "gui",
+            "api"
+          ],
+          "title": "Interface",
+          "type": "string"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TranslationLlmProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "method",
+        "interface"
+      ],
+      "title": "TranslationProvenance",
+      "type": "object"
+    },
+    "TranslationRevisionSource": {
+      "additionalProperties": false,
+      "properties": {
+        "revision_id": {
+          "format": "uuid",
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "revision_number": {
+          "minimum": 1,
+          "title": "Revision Number",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "filename": {
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "manual",
+            "llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision_id",
+        "revision_number",
+        "sha256",
+        "filename",
+        "method"
+      ],
+      "title": "TranslationRevisionSource",
+      "type": "object"
+    },
+    "TranslationSource": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_result": {
+          "$ref": "#/$defs/TranslationCanonicalSource"
+        },
+        "transcript_revision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TranslationRevisionSource"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "verification": {
+          "enum": [
+            "raw",
+            "automated_candidate",
+            "manually_verified"
+          ],
+          "title": "Verification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonical_result",
+        "verification"
+      ],
+      "title": "TranslationSource",
+      "type": "object"
+    },
+    "TranslationStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "unit_count": {
+          "minimum": 1,
+          "title": "Unit Count",
+          "type": "integer"
+        },
+        "source_tokens": {
+          "minimum": 1,
+          "title": "Source Tokens",
+          "type": "integer"
+        },
+        "target_tokens": {
+          "minimum": 1,
+          "title": "Target Tokens",
+          "type": "integer"
+        },
+        "warning_count": {
+          "minimum": 0,
+          "title": "Warning Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "unit_count",
+        "source_tokens",
+        "target_tokens",
+        "warning_count"
+      ],
+      "title": "TranslationStatistics",
+      "type": "object"
+    },
+    "TranslationStyle": {
+      "additionalProperties": false,
+      "properties": {
+        "register": {
+          "default": "preserve",
+          "enum": [
+            "preserve",
+            "formal",
+            "informal"
+          ],
+          "title": "Register",
+          "type": "string"
+        },
+        "discourse": {
+          "default": "preserve",
+          "enum": [
+            "preserve",
+            "academic",
+            "general"
+          ],
+          "title": "Discourse",
+          "type": "string"
+        }
+      },
+      "title": "TranslationStyle",
+      "type": "object"
+    },
+    "TranslationUnit": {
+      "additionalProperties": false,
+      "properties": {
+        "unit_id": {
+          "pattern": "^tu_[0-9]{6,}$",
+          "title": "Unit Id",
+          "type": "string"
+        },
+        "speaker_id": {
+          "pattern": "^speaker_[0-9]{3,}$",
+          "title": "Speaker Id",
+          "type": "string"
+        },
+        "source_token_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Token Ids",
+          "type": "array"
+        },
+        "source_text_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Text Sha256",
+          "type": "string"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "end_ms": {
+          "minimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "target_text": {
+          "minLength": 1,
+          "pattern": ".*\\S.*",
+          "title": "Target Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit_id",
+        "speaker_id",
+        "source_token_ids",
+        "source_text_sha256",
+        "start_ms",
+        "end_ms",
+        "target_text"
+      ],
+      "title": "TranslationUnit",
+      "type": "object"
+    },
+    "TranslationWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "pattern": "^[A-Z][A-Z0-9_]+$",
+          "title": "Code",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "TranslationWarning",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "application_version": {
+      "minLength": 1,
+      "title": "Application Version",
+      "type": "string"
+    },
+    "translation_id": {
+      "format": "uuid",
+      "title": "Translation Id",
+      "type": "string"
+    },
+    "translation_number": {
+      "minimum": 1,
+      "title": "Translation Number",
+      "type": "integer"
+    },
+    "job_id": {
+      "minLength": 1,
+      "title": "Job Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "direction": {
+      "$ref": "#/$defs/TranslationDirection"
+    },
+    "style": {
+      "$ref": "#/$defs/TranslationStyle"
+    },
+    "source": {
+      "$ref": "#/$defs/TranslationSource"
+    },
+    "parent_translation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TranslationParent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "provenance": {
+      "$ref": "#/$defs/TranslationProvenance"
+    },
+    "units": {
+      "items": {
+        "$ref": "#/$defs/TranslationUnit"
+      },
+      "minItems": 1,
+      "title": "Units",
+      "type": "array"
+    },
+    "statistics": {
+      "$ref": "#/$defs/TranslationStatistics"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TranslationWarning"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "application_version",
+    "translation_id",
+    "translation_number",
+    "job_id",
+    "created_at",
+    "direction",
+    "style",
+    "source",
+    "provenance",
+    "units",
+    "statistics"
+  ],
+  "title": "TranscriptTranslation",
+  "type": "object"
+}

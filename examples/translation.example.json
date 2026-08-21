@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "application_version": "0.3.0",
+  "translation_id": "12345678-1234-5678-9234-567812345678",
+  "translation_number": 1,
+  "job_id": "S01E01",
+  "created_at": "2026-08-21T12:05:00Z",
+  "direction": {
+    "source_language": "en",
+    "target_language": "pl"
+  },
+  "style": {
+    "register": "preserve",
+    "discourse": "preserve"
+  },
+  "source": {
+    "canonical_result": {
+      "job_id": "S01E01",
+      "result_version": 1,
+      "schema_version": "1.0",
+      "sha256": "6ab17f931db9037d9ca982f7a111336ae931c1ee6368f2a6bcfb0ba575323b0c",
+      "filename": "results.example.json"
+    },
+    "transcript_revision": null,
+    "verification": "raw"
+  },
+  "parent_translation": null,
+  "provenance": {
+    "method": "manual",
+    "interface": "cli",
+    "llm": null
+  },
+  "units": [
+    {
+      "unit_id": "tu_000001",
+      "speaker_id": "speaker_001",
+      "source_token_ids": [
+        "word_000001",
+        "word_000002",
+        "word_000003",
+        "word_000004"
+      ],
+      "source_text_sha256": "cf2dc5bae8d9e68a6163a74579869cafeae52aa9be112257a6809d2cb63c9ed1",
+      "start_ms": 1240,
+      "end_ms": 3900,
+      "target_text": "Witamy w kolejnym odcinku."
+    },
+    {
+      "unit_id": "tu_000002",
+      "speaker_id": "speaker_002",
+      "source_token_ids": [
+        "word_000005",
+        "word_000006",
+        "word_000007",
+        "word_000008"
+      ],
+      "source_text_sha256": "6d600de8ad114593dacb6d3ac0b8922a9f2de0d515a81f739f32937fe6afa696",
+      "start_ms": 4320,
+      "end_ms": 6320,
+      "target_text": "Dzisiaj rozmawiamy o transkrypcji."
+    }
+  ],
+  "statistics": {
+    "unit_count": 2,
+    "source_tokens": 8,
+    "target_tokens": 8,
+    "warning_count": 0
+  },
+  "warnings": []
+}
