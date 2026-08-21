@@ -31,6 +31,9 @@ All notable changes to EWP-transcripts are documented here.
 - Invalid structured-response errors now include only content-free provider finish reason
   and response character count, allowing truncation to be distinguished from malformed
   stopped output without logging transcript or model-response text.
+- Provider responses with `finish_reason=error` are now classified as sanitized retryable
+  generation failures and use the existing bounded retry policy. Malformed content that
+  finishes with `stop` or `length` remains a hard validation failure.
 
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,

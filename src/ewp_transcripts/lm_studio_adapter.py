@@ -258,6 +258,10 @@ def _parse_chat_response(
 ) -> CorrectionResponse:
     try:
         choices = document["choices"]
+        if choices[0].get("finish_reason") == "error":
+            raise RetryableCorrectionProviderError(
+                f"{provider_label} reported a generation failure"
+            )
         content = choices[0]["message"]["content"]
         if not isinstance(content, str):
             raise TypeError

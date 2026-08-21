@@ -7,7 +7,10 @@ from typing import Any
 import pytest
 
 from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionToken
-from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
+from ewp_transcripts.domain.errors import (
+    InvalidCorrectionResponseError,
+    RetryableCorrectionProviderError,
+)
 from ewp_transcripts.lm_studio_adapter import (
     FAITHFUL_CORRECTION_SYSTEM_PROMPT,
     JSON_TEXT_OUTPUT_INSTRUCTION,
@@ -244,6 +247,27 @@ def test_schema_error_reports_only_safe_finish_metadata() -> None:
     assert "finish_reason=length" in message
     assert f"content_chars={len(private_text)}" in message
     assert private_text not in message
+
+
+def test_provider_generation_error_is_retryable_without_exposing_content() -> None:
+    private_text = "private transcript response"
+    provider = LmStudioCorrectionProvider(
+        LmStudioAdapterConfig(model_id="model"),
+        transport=lambda *args: {
+            "choices": [
+                {
+                    "finish_reason": "error",
+                    "message": {"content": private_text},
+                }
+            ]
+        },
+    )
+
+    with pytest.raises(RetryableCorrectionProviderError) as raised:
+        provider.correct(_request(), timeout_seconds=2)
+
+    assert "generation failure" in str(raised.value)
+    assert private_text not in str(raised.value)
 
 
 def test_adapter_schema_diagnostic_excludes_private_field_values() -> None:
