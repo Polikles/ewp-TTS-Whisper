@@ -11,6 +11,10 @@ All notable changes to EWP-transcripts are documented here.
   default; optional provenance-recorded register (`preserve`/`formal`/`informal`) and
   discourse (`preserve`/`academic`/`general`) guidance cannot alter facts, intent,
   speaker identity, or sentence lineage.
+- Made the latest manually verified transcript revision the preferred translation source.
+  Raw ASR and automated-correction sources remain explicit comparison branches, while
+  local translation models receive their own no-dictionary benchmark instead of
+  inheriting correction-model rankings.
 
 ## 0.3.0 - 2026-08-21
 

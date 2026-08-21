@@ -468,6 +468,12 @@ register (`preserve`, `formal`, `informal`) and discourse (`preserve`, `academic
 authorize changed facts, omissions, summaries, speaker reassignment, or broken source
 sentence lineage.
 
+The preferred translation source is the latest manually verified compatible transcript
+revision. Selecting raw ASR or an automated-correction candidate must be explicit and is
+primarily retained for controlled comparisons. Local translation models are benchmarked
+independently from local correction models because their relative quality is not assumed
+to transfer between tasks.
+
 Manual translation precedes automated translation for benchmark purposes.
 
 ## 27. Acceptance criteria

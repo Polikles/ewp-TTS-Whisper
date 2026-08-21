@@ -237,7 +237,10 @@ The future translation source can be:
 ```
 
 for an intentionally dirty/raw canonical translation, or a selected corrected revision.
-Corrected text is the normal intended production source.
+The latest manually verified compatible revision is the ideal and normal production
+source. Raw canonical text and non-final automated-correction revisions remain explicit
+experimental/comparison inputs; the pipeline must never silently present either as
+manually verified.
 
 Translation requirements:
 
@@ -282,6 +285,10 @@ baseline first.
 After manual translation establishes ground truth:
 
 - add local/cloud API translation providers;
+- benchmark local instruction models as first-class translation candidates rather than
+  assuming correction-pipeline rankings transfer to translation. Translation quality may
+  differ materially because a verified source removes many ASR/proper-name ambiguities
+  that harmed dictionary-free correction;
 - retain provider/model/prompt/config provenance;
 - use configurable chunks/context appropriate to the model;
 - preserve sentence-level source mapping and source time spans;
@@ -300,8 +307,17 @@ Useful benchmark paths include:
 raw PL -> automated translation -> compare with EN gold
 manual corrected PL -> automated translation -> compare with EN gold
 raw PL -> automated correction -> automated translation -> compare with EN gold
+latest manually verified PL -> local-model translation -> compare with EN gold
+latest manually verified PL -> cloud-model translation -> compare with EN gold
 manual corrected EN -> automated translation -> compare with PL gold
 ```
+
+The principal model comparison holds source, sentenceization, style guidance, prompt,
+and scoring constant and varies only provider/model configuration. Reports distinguish
+local from cloud execution and include translation quality, unsupported meaning changes,
+terminology/name handling, sentence-lineage preservation, latency, resource use, request
+volume, and cost where applicable. Dictionary-assisted translation is a later separate
+branch rather than part of the initial no-dictionary baseline.
 
 ## 6. Content-aware directory discovery
 
