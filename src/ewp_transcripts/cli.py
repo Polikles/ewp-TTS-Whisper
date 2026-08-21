@@ -18,6 +18,7 @@ from ewp_transcripts.application import (
     BatchTranslationOutcome,
     ExportFormat,
     TranscriptionOutcome,
+    TranslationExportFormat,
     application_version,
     apply_correction,
     apply_review_file,
@@ -598,6 +599,10 @@ def translate_export_command(
         Path | None,
         typer.Option("--output-dir", help="Write translated TXT output here."),
     ] = None,
+    formats: Annotated[
+        list[TranslationExportFormat] | None,
+        typer.Option("--format", help="Translated export format; may be repeated."),
+    ] = None,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -609,6 +614,7 @@ def translate_export_command(
         outcome = export_translation(
             translation_path,
             config=load_config(explicit_path=config_path),
+            formats=tuple(formats or (TranslationExportFormat.TXT,)),
             output_directory=_optional_user_path(output_directory),
         )
     except ApplicationError as error:
