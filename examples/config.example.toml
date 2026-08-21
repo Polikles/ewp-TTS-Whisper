@@ -98,6 +98,7 @@ model = ""                          # exact model identifier reported by LM Stud
 endpoint = "http://127.0.0.1:1234/v1"
 openrouter_endpoint = "https://openrouter.ai/api/v1"
 openrouter_api_key_env = "OPENROUTER_API_KEY"
+# openrouter_reasoning_max_tokens = 0
 allow_remote_endpoint = false          # explicit opt-in for LAN/VPN/Tailscale-like hosts
 output_mode = "json-schema"             # json-schema | explicit json-text fallback
 prompt_id = "faithful-correction-v11"

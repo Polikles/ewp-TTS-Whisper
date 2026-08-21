@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import urllib.error
@@ -35,6 +36,7 @@ class OpenRouterAdapterConfig:
     api_key_env: str = "OPENROUTER_API_KEY"
     output_mode: Literal["json-schema", "json-text"] = "json-schema"
     temperature: float = 0.0
+    reasoning_max_tokens: int | None = None
 
     def __post_init__(self) -> None:
         if not self.model_id.strip():
@@ -49,6 +51,8 @@ class OpenRouterAdapterConfig:
             or self.api_key_env[0].isdigit()
         ):
             raise ValueError("OpenRouter api_key_env must be an environment-variable name")
+        if self.reasoning_max_tokens is not None and self.reasoning_max_tokens < 0:
+            raise ValueError("OpenRouter reasoning_max_tokens must not be negative")
         _normalized_endpoint(self.endpoint)
 
 
@@ -91,6 +95,7 @@ class OpenRouterCorrectionProvider:
             "request_contract": _REQUEST_CONTRACT,
             "require_parameters": True,
             "allow_fallbacks": False,
+            "reasoning_max_tokens": self._config.reasoning_max_tokens,
         }
 
     def prompt_sha256(self, prompt_id: str) -> str:
@@ -107,7 +112,12 @@ class OpenRouterCorrectionProvider:
                 temperature=self._config.temperature,
             )
         )
-        return local.prompt_sha256(prompt_id)
+        identity = {
+            "base_prompt_sha256": local.prompt_sha256(prompt_id),
+            "provider_parameters": self.provenance_parameters,
+        }
+        material = json.dumps(identity, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(material.encode()).hexdigest()
 
     def correct(
         self,
@@ -127,6 +137,10 @@ class OpenRouterCorrectionProvider:
             "require_parameters": True,
             "allow_fallbacks": False,
         }
+        if self._config.reasoning_max_tokens is not None:
+            payload_document["reasoning"] = {
+                "max_tokens": self._config.reasoning_max_tokens,
+            }
         document = self._transport(
             f"{self._endpoint}/chat/completions",
             {

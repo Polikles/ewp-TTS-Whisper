@@ -148,6 +148,7 @@ model = "" # exact identifier reported by the selected provider
 endpoint = "http://127.0.0.1:1234/v1"
 openrouter_endpoint = "https://openrouter.ai/api/v1"
 openrouter_api_key_env = "OPENROUTER_API_KEY"
+# openrouter_reasoning_max_tokens = 0
 allow_remote_endpoint = false
 output_mode = "json-schema"
 prompt_id = "faithful-correction-v11"
@@ -192,3 +193,7 @@ resume state, or logs. A cloud command additionally requires `--allow-cloud` and
 reject/once/persist consent. The adapter disables provider fallback and requires support
 for requested structured-output parameters. Pin the exact model slug reported by the
 provider; never silently substitute a similarly named model.
+`openrouter_reasoning_max_tokens` is optional and provider-specific. Set it to `0` to
+disable thinking on supported models such as Gemini 2.5, or use a positive explicit budget
+for a separately identified benchmark run. The value participates in prompt/resume identity
+and non-secret provenance; omitting it preserves the provider/model default.

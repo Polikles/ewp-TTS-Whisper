@@ -116,3 +116,33 @@ def test_secret_does_not_affect_prompt_identity_or_provenance() -> None:
     assert "one" not in repr(first)
     assert "two" not in repr(second)
     assert "api_key" not in json.dumps(first.provenance_parameters)
+
+
+def test_reasoning_budget_is_explicit_and_changes_resume_identity() -> None:
+    captured: dict[str, Any] = {}
+    content = {
+        "operation_id": "operation-1",
+        "speaker_blocks": [{"speaker_id": "speaker_001", "corrected_text": "postrzymać."}],
+    }
+
+    def transport(
+        url: str, headers: Mapping[str, str], payload: bytes, timeout: float
+    ) -> dict[str, Any]:
+        captured.update(payload=json.loads(payload))
+        return {"choices": [{"message": {"content": json.dumps(content)}}]}
+
+    disabled = OpenRouterCorrectionProvider(
+        OpenRouterAdapterConfig(model_id="gemini", reasoning_max_tokens=0),
+        transport=transport,
+        environment={"OPENROUTER_API_KEY": "secret"},
+    )
+    default = OpenRouterCorrectionProvider(
+        OpenRouterAdapterConfig(model_id="gemini"),
+        environment={"OPENROUTER_API_KEY": "secret"},
+    )
+
+    disabled.correct(_request(), timeout_seconds=2)
+
+    assert captured["payload"]["reasoning"] == {"max_tokens": 0}
+    assert disabled.provenance_parameters["reasoning_max_tokens"] == 0
+    assert disabled.prompt_sha256("prompt") != default.prompt_sha256("prompt")

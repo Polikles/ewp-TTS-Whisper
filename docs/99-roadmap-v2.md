@@ -141,6 +141,9 @@ an operator gate requiring an environment-only key, exact live model-slug confir
 explicit `--allow-cloud`, scoped consent, and separate authorization. Planned candidates
 remain Qwen 2.5 72B Instruct and the exact currently available DeepSeek V3-family slug;
 neither may be silently replaced when the catalog changes.
+Gemini 2.5 Flash (`google/gemini-2.5-flash` when confirmed by the live catalog) is also a
+cloud candidate. Its reasoning budget must be explicit and reported; the first comparable
+baseline disables thinking, while enabled reasoning is a separate cost/quality experiment.
 
 ### Configurable chunking
 

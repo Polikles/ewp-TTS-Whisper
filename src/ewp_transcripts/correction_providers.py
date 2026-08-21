@@ -37,6 +37,7 @@ def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
                 model_id=correction.model,
                 endpoint=correction.openrouter_endpoint,
                 api_key_env=correction.openrouter_api_key_env,
+                reasoning_max_tokens=correction.openrouter_reasoning_max_tokens,
                 output_mode=correction.output_mode,
                 temperature=correction.temperature,
             )

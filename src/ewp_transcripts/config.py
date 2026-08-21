@@ -216,6 +216,7 @@ class CorrectionConfig(StrictConfigModel):
     endpoint: str = "http://127.0.0.1:1234/v1"
     openrouter_endpoint: str = "https://openrouter.ai/api/v1"
     openrouter_api_key_env: str = "OPENROUTER_API_KEY"
+    openrouter_reasoning_max_tokens: int | None = Field(default=None, ge=0)
     allow_remote_endpoint: bool = False
     output_mode: Literal["json-schema", "json-text"] = "json-schema"
     prompt_id: str = "faithful-correction-v11"

@@ -22,6 +22,7 @@ def test_correct_help_exposes_provider_safety_controls() -> None:
     assert "--allow-remote-endpoi" in result.stdout
     assert "--allow-cloud" in result.stdout
     assert "--api-key-env" in result.stdout
+    assert "--reasoning-max-tokens" in result.stdout
     assert "--output-mode" in result.stdout
     assert "--consent" in result.stdout
     assert "--resume-dir" in result.stdout

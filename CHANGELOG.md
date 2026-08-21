@@ -15,6 +15,9 @@ All notable changes to EWP-transcripts are documented here.
   before key lookup or request creation; cloud output remains a non-final candidate.
 - LLM revision provenance now records effective non-secret adapter parameters while
   excluding credentials.
+- Added explicit OpenRouter reasoning-token budgets, including `0` to disable supported
+  model thinking. The setting affects request/resume identity and provenance so default,
+  disabled, and enabled reasoning runs cannot be silently conflated.
 
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,

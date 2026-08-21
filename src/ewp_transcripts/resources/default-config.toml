@@ -100,6 +100,7 @@ model = ""
 endpoint = "http://127.0.0.1:1234/v1"
 openrouter_endpoint = "https://openrouter.ai/api/v1"
 openrouter_api_key_env = "OPENROUTER_API_KEY"
+# openrouter_reasoning_max_tokens = 0
 allow_remote_endpoint = false
 output_mode = "json-schema"
 prompt_id = "faithful-correction-v11"

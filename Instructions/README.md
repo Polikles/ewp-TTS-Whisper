@@ -327,6 +327,10 @@ making a request. `--consent reject` also guarantees no request. `persist` remem
 the exact non-secret provider/endpoint scope. Preview calls may incur charges. The adapter
 requests no fallback routing and records non-secret parameters, token counts, and reported
 cost when supplied. Cloud output requires the same manual review as local output.
+Reasoning-capable cloud models must use an explicit, recorded setting for comparable runs.
+For example, add `--reasoning-max-tokens 0` to disable Gemini 2.5 thinking for the initial
+baseline. Enabled-reasoning runs are separate experiments because reasoning tokens affect
+latency and billing.
 
 ## 10. Export corrected transcripts
 

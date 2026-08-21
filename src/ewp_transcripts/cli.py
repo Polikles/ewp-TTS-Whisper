@@ -632,6 +632,14 @@ def revise_correct_command(
             help="Environment-variable name containing the OpenRouter API key.",
         ),
     ] = None,
+    reasoning_max_tokens: Annotated[
+        int | None,
+        typer.Option(
+            "--reasoning-max-tokens",
+            min=0,
+            help="OpenRouter reasoning-token budget; 0 disables supported model thinking.",
+        ),
+    ] = None,
     output_mode: Annotated[
         str | None,
         typer.Option(
@@ -682,6 +690,8 @@ def revise_correct_command(
             overrides["output_mode"] = output_mode
         if api_key_env is not None:
             overrides["openrouter_api_key_env"] = api_key_env
+        if reasoning_max_tokens is not None:
+            overrides["openrouter_reasoning_max_tokens"] = reasoning_max_tokens
         general_overrides: dict[str, object] = {}
         if allow_cloud:
             general_overrides["offline"] = False
