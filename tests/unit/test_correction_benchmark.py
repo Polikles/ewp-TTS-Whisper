@@ -73,7 +73,7 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
 
     report = evaluate_correction_benchmark(manifest)
 
-    assert report["report_version"] == "ewp-correction-benchmark-v4"
+    assert report["report_version"] == "ewp-correction-benchmark-v5"
     assert report["case_count"] == 1
     case = report["cases"][0]
     assert case["source_kind"] == source_kind
@@ -84,6 +84,14 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
     assert case["lexical_outcome"] == "improved"
     assert case["candidate_revision_statistics"]["substitutions"] == 1
     assert case["candidate_warning_count"] == 0
+    assert case["gold_relative_edit_quality"] == {
+        "true_positive_edits": 1,
+        "unsupported_edits": 0,
+        "missed_gold_edits": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+    }
     assert report["aggregate"]["baseline"]["word_errors"] == 1
     assert report["aggregate"]["source_to_candidate"]["word_errors"] == 1
     assert report["aggregate"]["candidate"]["word_errors"] == 0
@@ -110,6 +118,15 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
         "alignment_warnings": 0,
         "total_changes": 1,
         "warning_count": 0,
+    }
+    assert report["aggregate"]["gold_relative_edit_quality"] == {
+        "true_positive_edits": 1,
+        "unsupported_edits": 0,
+        "missed_gold_edits": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "interpretation": "exact normalized edit agreement; manual style review still required",
     }
 
 

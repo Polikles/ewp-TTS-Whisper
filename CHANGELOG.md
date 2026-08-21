@@ -22,6 +22,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Correction benchmark report v5 now derives exact normalized source-relative edit sets
+  for candidate and manual gold, reporting per-case and aggregate true-positive,
+  unsupported, and missed edits with precision, recall, and F1. Unsupported means absent
+  from the exact hashed gold and still requires manual style/harm review.
 - Added `transcriber revise correct --revision PATH` so automated correction can start
   from an exact compatible immutable revision. The result is a complete standalone child
   snapshot that retains prior edits and records the parent's ID, number, filename, and

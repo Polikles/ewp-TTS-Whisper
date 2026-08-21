@@ -9,6 +9,7 @@ import re
 import shutil
 import tomllib
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal, cast
 
@@ -18,7 +19,7 @@ from ewp_transcripts.domain.revision import (
     load_transcript_revision,
     validate_revision_base,
 )
-from ewp_transcripts.quality import score
+from ewp_transcripts.quality import normalize_transcript, score
 
 SourceKind = Literal["canonical", "revision"]
 CORRECTION_NORMALIZATION_VERSION = "ewp-correction-lexical-v2"
@@ -233,6 +234,7 @@ def evaluate_correction_benchmark(
         baseline_errors = cast(dict[str, int], baseline["word_errors"])["errors"]
         candidate_errors = cast(dict[str, int], result["word_errors"])["errors"]
         word_error_reduction = baseline_errors - candidate_errors
+        edit_quality = _gold_relative_edit_quality(source_text, candidate_text, gold_text)
         reports.append(
             {
                 "case_id": case.case_id,
@@ -258,10 +260,11 @@ def evaluate_correction_benchmark(
                     if word_error_reduction < 0
                     else "unchanged"
                 ),
+                "gold_relative_edit_quality": edit_quality,
             }
         )
     return {
-        "report_version": "ewp-correction-benchmark-v4",
+        "report_version": "ewp-correction-benchmark-v5",
         "manifest_sha256": _sha256(manifest.path),
         "normalization": CORRECTION_NORMALIZATION_VERSION,
         "case_count": len(reports),
@@ -346,7 +349,66 @@ def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
         ),
         "warning_count": sum(cast(int, report["candidate_warning_count"]) for report in reports),
     }
+    edit_totals = {
+        name: sum(
+            cast(
+                int,
+                cast(dict[str, int | float | None], report["gold_relative_edit_quality"])[name],
+            )
+            for report in reports
+        )
+        for name in ("true_positive_edits", "unsupported_edits", "missed_gold_edits")
+    }
+    true_positive = int(edit_totals["true_positive_edits"])
+    unsupported = int(edit_totals["unsupported_edits"])
+    missed = int(edit_totals["missed_gold_edits"])
+    aggregate["gold_relative_edit_quality"] = {
+        **edit_totals,
+        "precision": _ratio(true_positive, true_positive + unsupported),
+        "recall": _ratio(true_positive, true_positive + missed),
+        "f1": _f1(true_positive, unsupported, missed),
+        "interpretation": "exact normalized edit agreement; manual style review still required",
+    }
     return aggregate
+
+
+def _gold_relative_edit_quality(
+    source_text: str, candidate_text: str, gold_text: str
+) -> dict[str, int | float | None]:
+    candidate_edits = _normalized_edits(source_text, candidate_text)
+    gold_edits = _normalized_edits(source_text, gold_text)
+    true_positive = len(candidate_edits & gold_edits)
+    unsupported = len(candidate_edits - gold_edits)
+    missed = len(gold_edits - candidate_edits)
+    return {
+        "true_positive_edits": true_positive,
+        "unsupported_edits": unsupported,
+        "missed_gold_edits": missed,
+        "precision": _ratio(true_positive, true_positive + unsupported),
+        "recall": _ratio(true_positive, true_positive + missed),
+        "f1": _f1(true_positive, unsupported, missed),
+    }
+
+
+def _normalized_edits(source_text: str, target_text: str) -> set[tuple[int, int, tuple[str, ...]]]:
+    source = normalize_transcript(_without_annotations(source_text)).split()
+    target = normalize_transcript(_without_annotations(target_text)).split()
+    return {
+        (source_start, source_end, tuple(target[target_start:target_end]))
+        for tag, source_start, source_end, target_start, target_end in SequenceMatcher(
+            a=source, b=target, autojunk=False
+        ).get_opcodes()
+        if tag != "equal"
+    }
+
+
+def _ratio(numerator: int, denominator: int) -> float | None:
+    return round(numerator / denominator, 8) if denominator else None
+
+
+def _f1(true_positive: int, unsupported: int, missed: int) -> float | None:
+    denominator = 2 * true_positive + unsupported + missed
+    return round(2 * true_positive / denominator, 8) if denominator else None
 
 
 def _correction_score(reference_text: str, hypothesis_text: str) -> dict[str, object]:

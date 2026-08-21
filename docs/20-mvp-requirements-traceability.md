@@ -100,5 +100,5 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 | FR-K13 | implemented | LLM revisions record provider/model/endpoint kind and prompt ID/content hash; operation and resume identity include the actual prompt/schema hash. |
 | FR-K14, FR-K15 | implemented | Adapter timeout budgets, bounded explicit retries, validated resume entries, deterministic batches, failure isolation, and stop policy tests. |
 | FR-K16 | implemented | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
-| FR-K17, FR-K18 | partial | Exact-lineage canonical/revision cases, lexical outcomes, revision activity, warnings, alignment warnings, and speaker-preservation aggregates are implemented. Gold-relative edit quality and provider operational aggregates remain. |
+| FR-K17, FR-K18 | partial | Exact-lineage canonical/revision cases, lexical outcomes, exact normalized gold-relative edit precision/recall, revision activity, warnings, alignment warnings, and speaker-preservation aggregates are implemented. Manual style classification and provider operational aggregates remain. |
 | FR-K19 | implemented | CLI and operator documentation label automated output as a non-final candidate and require manual wording/speaker/punctuation/quotation review before final or gold use. |
