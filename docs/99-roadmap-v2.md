@@ -118,11 +118,14 @@ is reported separately only where annotations exist. A reviewer must be able to
 prepare, manually correct, apply, audit, and export an LLM-produced revision through the
 same workflow used for manual revisions.
 
-Later benchmark automation should use supported backend APIs to load and unload models,
+Later benchmark automation should use supported backend APIs to load and, where available,
+unload models,
 wait for exact model readiness, run an explicit model x quantization x prompt x chunking
 matrix, collect timing/resource/failure evidence, and unload cleanly without continuous
-operator supervision. LM Studio exposes native model load/unload and status endpoints in
-addition to its OpenAI-compatible inference API; other backends require separate adapters.
+operator supervision. The observed LM Studio 0.4.21 server advertises native model
+listing/loading and download-status endpoints in addition to its OpenAI-compatible
+inference API; an unload mechanism must be verified against the selected backend/version
+before automation relies on it. Other backends require separate adapters.
 Every run identity and report must distinguish exact model identifier, quantization,
 backend/version, prompt ID and content hash, output mode, chunk settings, context window,
 sampling parameters, and hardware. Automation must retain bounded retries, private resume
