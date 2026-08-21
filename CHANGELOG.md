@@ -138,6 +138,10 @@ All notable changes to EWP-transcripts are documented here.
   reproducible but its quality interpretation is provisional until a later corrected gold
   revision is benchmarked. Recurring `na biało` and spoken-email forms were recorded as
   project-dictionary candidates.
+- Review of nominally unchanged `S0E08` found another manual-gold error (`urodzin` rather
+  than `rodzin`). `S0E10` exposed a valid Latinized/diacritic proper-name equivalence that
+  exact WER cannot represent. Project-dictionary alias equivalence is now planned without
+  unsafe global diacritic folding.
 - Recorded about 25m21s operator wall time for the complete run including retries. Validated
   resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
   about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.

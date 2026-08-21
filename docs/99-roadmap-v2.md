@@ -186,7 +186,11 @@ must compare no-dictionary and selected-dictionary runs and detect harmful repla
 Initial private-corpus candidates include phrase-aware normalization of recurring
 `nabiało`/`nabiał` ASR forms to spoken `na biało`, plus the project email's spoken and
 written forms (for example `małpaetyka` and `kontakt@etykawpetli.pl`). These examples must
-remain project-scoped; they are not safe global replacements.
+remain project-scoped; they are not safe global replacements. Dictionaries should also
+support explicitly approved equivalent aliases for correction and scoring, for example
+the Latinized `Csikszentmihalyi` and diacritic `Csíkszentmihályi`. Equivalence must not be
+implemented through global accent folding because Polish diacritics are lexically
+meaningful.
 
 The correction benchmark must test two dictionary hypotheses explicitly:
 
