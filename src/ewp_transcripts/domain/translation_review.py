@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime
 from typing import Self
 
@@ -59,6 +60,8 @@ class TranslationReviewUnit(TranslationReviewModel):
     def validate_timing(self) -> Self:
         if self.end_ms < self.start_ms:
             raise ValueError("translation review unit end must not precede start")
+        if hashlib.sha256(self.source_text.encode("utf-8")).hexdigest() != self.source_text_sha256:
+            raise ValueError("translation review source text SHA-256 does not match")
         return self
 
 
