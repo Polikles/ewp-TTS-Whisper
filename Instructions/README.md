@@ -302,6 +302,22 @@ uv run --locked transcriber revise correct "/path/to/episode_results.json" \
   --resume-dir "/private/path/lm-studio-model-name/resume"
 ```
 
+To run automated correction on text that already has an immutable revision, keep the
+canonical result as the first argument and select the exact parent explicitly:
+
+```bash
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" \
+  --model "EXACT_MODEL_ID_FROM_LM_STUDIO" \
+  --consent once \
+  --output-dir "/private/path/model/revisions"
+```
+
+The output is a complete child revision rather than a patch. It retains the parent's
+accepted text, records the parent's exact identity/hash/number, and can be exported even
+if the parent file is later archived. An incompatible parent fails before transcript text
+is sent to the provider.
+
 Use `--consent persist` only to remember the exact LM Studio provider and endpoint scope;
 model and prompt identity still participate in operation/resume hashes. `--consent reject`
 guarantees no API request. Even a loopback server is a separate process that may log or

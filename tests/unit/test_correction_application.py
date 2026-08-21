@@ -8,6 +8,7 @@ from typing import Literal
 import pytest
 
 from ewp_transcripts.application import (
+    apply_correction,
     apply_mock_correction,
     preview_correction,
     preview_mock_correction,
@@ -63,6 +64,35 @@ def test_mock_apply_publishes_without_modifying_base(tmp_path: Path) -> None:
     assert outcome.revision_path.name == "S01E01_revision_001.json"
     assert outcome.revision_path.is_file()
     assert base.read_bytes() == before
+
+
+def test_correction_can_publish_complete_child_of_selected_revision(tmp_path: Path) -> None:
+    base = tmp_path / EXAMPLE.name
+    base.write_bytes(EXAMPLE.read_bytes())
+    output = tmp_path / "revisions"
+    first = apply_correction(
+        base,
+        config=_config(tmp_path),
+        provider=DeterministicMockCorrectionProvider(
+            {"transcription.": ("podcast.", "asr_lexical")}
+        ),
+        output_directory=output,
+    )
+
+    child = apply_correction(
+        base,
+        config=_config(tmp_path),
+        provider=DeterministicMockCorrectionProvider({"Welcome": ("Hello", "asr_lexical")}),
+        source_revision_path=first.revision_path,
+        output_directory=output,
+    )
+
+    assert child.revision.parent_revision is not None
+    assert child.revision.parent_revision.revision_id == first.revision.revision_id
+    assert child.revision.parent_revision.revision_number == 1
+    assert child.revision.revision_number == 2
+    text = " ".join(token.text for token in child.revision.transcript.tokens)
+    assert text == "Hello to another episode. Today we discuss podcast."
 
 
 def _result(path: Path, job_id: str) -> None:

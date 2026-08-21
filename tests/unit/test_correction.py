@@ -77,6 +77,27 @@ def test_chunk_plan_is_deterministic_and_hashes_context() -> None:
     assert plan_correction_chunks(changed, config)[0].content_sha256 != first[0].content_sha256
 
 
+def test_chunk_plan_does_not_split_revision_tokens_sharing_one_canonical_word() -> None:
+    transcript = _transcript(8)
+    tokens = list(transcript.tokens)
+    tokens[3] = replace(tokens[3], source_word_ids=("word_000003",))
+    tokens.insert(
+        4,
+        replace(
+            tokens[3],
+            token_id="rt_000004",
+            text="continuation",
+        ),
+    )
+
+    chunks = plan_correction_chunks(
+        replace(transcript, tokens=tuple(tokens)),
+        CorrectionChunkConfig(target_tokens=4, max_tokens=4, context_tokens=0),
+    )
+
+    assert all(chunk.editable_end != 4 for chunk in chunks)
+
+
 @pytest.mark.parametrize("count", [1, 23, 1200])
 def test_chunk_fixture_matrix_preserves_single_ownership_and_read_only_overlap(
     count: int,

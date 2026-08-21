@@ -10,7 +10,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal
 
-from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.correction import (
     CorrectionCategory,
     CorrectionChange,
@@ -26,6 +26,8 @@ from ewp_transcripts.domain.revision import (
     RevisionLlmProvenance,
     RevisionProvenance,
     TranscriptRevision,
+    load_transcript_revision,
+    sha256_file,
 )
 from ewp_transcripts.effective_transcript import (
     EffectiveToken,
@@ -79,6 +81,7 @@ def plan_correction_chunks(
     start = 0
     while start < len(tokens):
         end = _choose_editable_end(tokens, start, config)
+        end = _mapping_safe_end(tokens, start, end)
         context_start = max(0, start - config.context_tokens)
         context_end = min(len(tokens), end + config.context_tokens)
         digest = hashlib.sha256()
@@ -101,6 +104,32 @@ def plan_correction_chunks(
         )
         start = end
     return tuple(chunks)
+
+
+def _mapping_safe_end(tokens: tuple[EffectiveToken, ...], start: int, end: int) -> int:
+    """Keep tokens sharing one canonical mapping inside one editable chunk."""
+
+    if end >= len(tokens):
+        return end
+
+    def safe(boundary: int) -> bool:
+        left = tokens[boundary - 1].source_word_ids
+        right = tokens[boundary].source_word_ids
+        return bool(left and right and set(left).isdisjoint(right))
+
+    if safe(end):
+        return end
+    candidate = end - 1
+    while candidate > start:
+        if safe(candidate):
+            return candidate
+        candidate -= 1
+    candidate = end + 1
+    while candidate < len(tokens):
+        if safe(candidate):
+            return candidate
+        candidate += 1
+    return len(tokens)
 
 
 def build_correction_request(
@@ -354,6 +383,7 @@ def build_correction_revision(
     result_path: Path,
     provider: CorrectionProvider,
     *,
+    source_revision_path: Path | None = None,
     config: CorrectionChunkConfig | None = None,
     prompt_id: str = "faithful-correction-v1",
     resume_directory: Path | None = None,
@@ -367,9 +397,12 @@ def build_correction_revision(
         raise TypeError("execution_policy must be CorrectionExecutionPolicy")
 
     base = load_canonical_result(result_path)
-    effective = resolve_effective_transcript(base)
+    parent = (
+        load_transcript_revision(source_revision_path) if source_revision_path is not None else None
+    )
+    effective = resolve_effective_transcript(base, parent, base_path=result_path)
     chunks = plan_correction_chunks(effective, config)
-    anchors: list[ReviewAnchor] = []
+    corrected_blocks: list[tuple[ReviewSpeakerBlock, ...]] = []
     for chunk in chunks:
         request = build_correction_request(
             effective,
@@ -402,15 +435,20 @@ def build_correction_revision(
         _require_numeric_literals_unchanged(request, response)
         _require_conservative_token_drift(request, response)
         speakers = _corrected_speakers(request, response)
-        anchors.append(
-            ReviewAnchor(
-                first_word_id=effective.tokens[chunk.editable_start].source_word_ids[0],
-                last_word_id=effective.tokens[chunk.editable_end - 1].source_word_ids[-1],
-                speaker_blocks=_group_corrected_blocks(corrected, speakers),
-            )
-        )
+        corrected_blocks.append(_group_corrected_blocks(corrected, speakers))
     prepared = prepare_review(result_path)
-    review = prepared.model_copy(update={"anchors": tuple(anchors)})
+    anchors = _correction_review_anchors(base, effective, chunks, corrected_blocks)
+    header = prepared.header
+    if parent is not None:
+        assert source_revision_path is not None
+        header = header.model_copy(
+            update={
+                "source_revision_id": parent.revision_id,
+                "source_revision_sha256": sha256_file(source_revision_path),
+                "source_revision_number": parent.revision_number,
+            }
+        )
+    review = prepared.model_copy(update={"header": header, "anchors": anchors})
     prompt_sha256 = provider.prompt_sha256(prompt_id)
     revision = build_revision(
         review,
@@ -428,6 +466,8 @@ def build_correction_revision(
                 parameters=getattr(provider, "provenance_parameters", None),
             ),
         ),
+        parent_revision=parent,
+        parent_path=source_revision_path,
         preserve_speaker_attribution=True,
     )
     if revision.statistics.speaker_changes:
@@ -435,6 +475,47 @@ def build_correction_revision(
             "Automated correction changed speaker attribution during revision alignment"
         )
     return revision
+
+
+def _mapped_edge_word_id(tokens: tuple[EffectiveToken, ...], *, first: bool) -> str:
+    ordered = tokens if first else tuple(reversed(tokens))
+    for token in ordered:
+        if token.source_word_ids:
+            return token.source_word_ids[0 if first else -1]
+    raise InvalidCorrectionResponseError(
+        "Automated correction chunk contains no canonical word mapping"
+    )
+
+
+def _correction_review_anchors(
+    base: CanonicalResult,
+    effective: EffectiveTranscript,
+    chunks: tuple[CorrectionChunk, ...],
+    blocks: list[tuple[ReviewSpeakerBlock, ...]],
+) -> tuple[ReviewAnchor, ...]:
+    canonical_words = tuple(word for segment in base.transcript.segments for word in segment.words)
+    positions = {word.word_id: index for index, word in enumerate(canonical_words)}
+    starts = [0]
+    for chunk in chunks[1:]:
+        word_id = _mapped_edge_word_id(
+            effective.tokens[chunk.editable_start : chunk.editable_end], first=True
+        )
+        starts.append(positions[word_id])
+    if any(right <= left for left, right in zip(starts, starts[1:], strict=False)):
+        raise InvalidCorrectionResponseError(
+            "Automated correction chunks cannot be mapped to disjoint canonical anchors"
+        )
+    anchors: list[ReviewAnchor] = []
+    for index, (start, speaker_blocks) in enumerate(zip(starts, blocks, strict=True)):
+        end = starts[index + 1] - 1 if index + 1 < len(starts) else len(canonical_words) - 1
+        anchors.append(
+            ReviewAnchor(
+                first_word_id=canonical_words[start].word_id,
+                last_word_id=canonical_words[end].word_id,
+                speaker_blocks=speaker_blocks,
+            )
+        )
+    return tuple(anchors)
 
 
 # Compatibility alias while the first network-free slice remains referenced by tests.

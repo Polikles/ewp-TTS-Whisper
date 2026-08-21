@@ -450,6 +450,7 @@ def preview_correction(
     *,
     config: ApplicationConfig,
     provider: CorrectionProvider,
+    source_revision_path: str | Path | None = None,
     consent_choice: ConsentChoice | None = None,
     prompt_id: str | None = None,
     resume_directory: Path | None = None,
@@ -459,9 +460,13 @@ def preview_correction(
     _authorize_correction_provider(config, provider, consent_choice)
 
     normalized = normalize_input_path(result_path)
+    normalized_revision = (
+        normalize_input_path(source_revision_path) if source_revision_path is not None else None
+    )
     revision = build_correction_revision(
         normalized,
         provider,
+        source_revision_path=normalized_revision,
         config=CorrectionChunkConfig(
             target_tokens=config.correction.target_tokens,
             max_tokens=config.correction.max_tokens,
@@ -531,6 +536,7 @@ def apply_correction(
     *,
     config: ApplicationConfig,
     provider: CorrectionProvider,
+    source_revision_path: str | Path | None = None,
     consent_choice: ConsentChoice | None = None,
     output_directory: Path | None = None,
     prompt_id: str | None = None,
@@ -542,6 +548,7 @@ def apply_correction(
         result_path,
         config=config,
         provider=provider,
+        source_revision_path=source_revision_path,
         consent_choice=consent_choice,
         prompt_id=prompt_id,
         resume_directory=resume_directory,

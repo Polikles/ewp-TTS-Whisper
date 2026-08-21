@@ -217,10 +217,12 @@ the same examples cannot both teach the dictionary and inflate its reported WER 
 The no-dictionary baseline remains mandatory.
 
 The next private correction benchmark is deliberately deferred rather than part of the
-immediate v0.3 acceptance path. It must first publish later immutable manual-gold revisions
-for the errata recorded in `22-v0.3-automated-correction.md`, rebuild the exact-hash
-manifest, and rerun the established Gemini baseline. The current full-corpus run remains
-the baseline for implementation decisions until that scheduled revalidation.
+immediate v0.3 acceptance path. Manual-gold errata recorded in
+`22-v0.3-automated-correction.md` will be published as later immutable revisions when the
+translation pipeline is tested. At that point the private benchmark also expands with
+manually approved translation examples, its exact-hash manifests are rebuilt, and both
+correction and translation baselines are rerun. The current full-corpus correction run
+remains the baseline for implementation decisions until that scheduled expansion.
 
 ## 4. Manual translation pipeline — planned for v0.4
 
@@ -560,6 +562,14 @@ subprocess or maintain a second revision/translation model.
 - GUI installer;
 - Ubuntu 26.04 LTS qualification;
 - optional native Windows support as Tier 2.
+
+The fresh instance used for the v0.3 correction benchmarks was installed from the
+v0.2.1-era repository and supplies sufficient installation evidence for the current
+development gate. A redundant manual installation-only rerun is not required for v0.3.
+Full clean-machine validation from installation through transcription, review, export,
+translation, and other eventual functional requirements is postponed until most or all
+of those workflows exist. The first complete run is manual; automation is designed only
+after the manual procedure and expected evidence have stabilized.
 
 ## 15. Operations
 

@@ -6,6 +6,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Changed
 
+- Accepted the fresh v0.2.1-era benchmark instance as sufficient current installation
+  evidence and deferred redundant installation-only testing. Full clean-machine testing
+  from installation through all functional workflows will run manually once those
+  workflows exist, then become automated.
+- Deferred private manual-gold errata publication until translation-pipeline testing,
+  when the private benchmark will also gain manually approved translation examples and
+  correction/translation manifests will be rebuilt together.
 - Refined the v0.4 platform-export roadmap with a conservative YouTube-oriented TTML
   1.0-compatible profile, stable speaker styles and configurable ordered color defaults;
   made synchronized HTML explicitly a CSS/JavaScript-free embeddable fragment; and added
@@ -15,6 +22,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added `transcriber revise correct --revision PATH` so automated correction can start
+  from an exact compatible immutable revision. The result is a complete standalone child
+  snapshot that retains prior edits and records the parent's ID, number, filename, and
+  SHA-256; incompatible lineage is rejected before provider execution.
 - Added an explicit OpenRouter cloud-correction adapter with HTTPS-only uncredentialed
   endpoints, environment-only lazy bearer-key loading, structured-output capability
   requirements, disabled route fallback, sanitized retry handling, reported token and

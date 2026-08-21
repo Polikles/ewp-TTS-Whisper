@@ -220,14 +220,19 @@ transcriber revise correct RESULTS_JSON [OPTIONS]
 `prepare` accepts a completed `results.json` or a directory containing completed results.
 `apply` and `preview` accept an `EWP-REVIEW 1` file or a directory of review files.
 
-`correct` currently accepts one completed canonical result and an explicitly configured
-LM Studio provider. Loopback is the default; remote use requires a separate opt-in.
+`correct` accepts one completed canonical result and optionally one exact compatible
+parent revision. Without `--revision`, it creates a base-relative revision. With an
+explicit revision JSON, correction starts from that effective text and publishes a
+complete standalone child snapshot with exact parent ID, number, and SHA-256. It supports
+explicitly configured LM Studio and OpenRouter providers. Loopback is the local default;
+remote or cloud use requires the corresponding separate opt-in.
 
 ```text
 --model EXACT_MODEL_ID
 --endpoint HTTP_OR_HTTPS_V1_URL
 --allow-remote-endpoint
 --output-mode json-schema|json-text
+--revision PATH
 --output-dir PATH
 --resume-dir PATH
 --preview

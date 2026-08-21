@@ -27,6 +27,7 @@ def test_correct_help_exposes_provider_safety_controls() -> None:
     assert "--consent" in result.stdout
     assert "--resume-dir" in result.stdout
     assert "--preview" in result.stdout
+    assert "--revision" in result.stdout
 
 
 def test_rejected_local_consent_makes_no_state_or_revision(tmp_path: Path) -> None:

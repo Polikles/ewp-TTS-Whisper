@@ -608,6 +608,13 @@ def revise_correct_command(
         Path,
         typer.Argument(help="Completed canonical result to correct.", metavar="RESULTS_JSON"),
     ],
+    source_revision: Annotated[
+        Path | None,
+        typer.Option(
+            "--revision",
+            help="Correct this compatible revision and record it as the exact parent.",
+        ),
+    ] = None,
     provider_name: Annotated[
         RequestedCorrectionProvider,
         typer.Option("--provider", help="Correction API provider: lm-studio or openrouter."),
@@ -725,6 +732,7 @@ def revise_correct_command(
                 normalized_result,
                 config=config,
                 provider=provider,
+                source_revision_path=_optional_user_path(source_revision),
                 consent_choice=choice,
                 resume_directory=state_directory,
             )
@@ -739,6 +747,7 @@ def revise_correct_command(
             normalized_result,
             config=config,
             provider=provider,
+            source_revision_path=_optional_user_path(source_revision),
             consent_choice=choice,
             output_directory=_optional_user_path(output_directory),
             resume_directory=state_directory,
