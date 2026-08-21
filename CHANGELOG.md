@@ -119,6 +119,10 @@ All notable changes to EWP-transcripts are documented here.
 - Recorded the Qwen 32B 400/500/60 preview timing: 33 minutes 19 seconds across the same
   three cases, only 9.1% faster than 120/160/30. Quality remains pending publication and
   manual audit because the medium case lost one token.
+- Rejected the Qwen 32B 400/500/60 optimization after publication and audit: it matched raw
+  ASR WER, made 11 rather than nine changes, deleted a source token, repeated an incorrect
+  proper-name edit, and introduced unsupported grammatical-form changes for only a 9.1%
+  runtime reduction.
 
 ### Documentation
 
