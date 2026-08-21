@@ -73,6 +73,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added conservative SRT/VTT planning from translated sentence units. Target text is
   wrapped and, only when required, split inside its inherited unit interval; no target-word
   alignment is claimed. Overlapping source intervals remain explicit and render safely.
+- Extended translated TXT/SRT/VTT export to directories with deterministic snapshot-only
+  discovery, per-file failure isolation, recursive opt-in, idempotent skips, and exit-code-5
+  partial failure reporting.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.

@@ -96,6 +96,7 @@ from ewp_transcripts.storage import (
 )
 from ewp_transcripts.translation_discovery import (
     discover_translation_reviews,
+    discover_translations,
     latest_compatible_revision_path,
     resolve_translation_review_sources,
 )
@@ -145,6 +146,7 @@ __all__ = [
     "prepare_translation_review_batch",
     "process_translation_review_batch",
     "export_translation",
+    "export_translation_batch",
     "TranslationExportFormat",
     "audit_revision_file",
     "preview_mock_correction",
@@ -323,6 +325,29 @@ class BatchTranslationOutcome:
 
     def count(self, status: str) -> int:
         return sum(job.status == status for job in self.jobs)
+
+
+@dataclass(frozen=True, slots=True)
+class BatchTranslationExportJobOutcome:
+    translation_path: Path
+    status: Literal["exported", "failed"]
+    outcome: TranslationExportOutcome | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchTranslationExportOutcome:
+    jobs: tuple[BatchTranslationExportJobOutcome, ...]
+    stopped_early: bool = False
+
+    @property
+    def exported(self) -> int:
+        return sum(job.status == "exported" for job in self.jobs)
+
+    @property
+    def failed(self) -> int:
+        return sum(job.status == "failed" for job in self.jobs)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1061,6 +1086,53 @@ def export_translation(
         lock_timeout_seconds=config.runtime.lock_timeout_seconds,
         subtitles_config=config.subtitles,
     )
+
+
+def export_translation_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    formats: tuple[TranslationExportFormat, ...],
+    output_directory: Path | None = None,
+    recursive: bool = False,
+) -> BatchTranslationExportOutcome:
+    """Export discovered translations deterministically with per-file isolation."""
+
+    translations = discover_translations(input_path, recursive=recursive)
+    normalized_input = normalize_input_path(input_path)
+    destination = output_directory or (
+        normalized_input.parent if normalized_input.is_file() else normalized_input / "exports"
+    )
+    jobs: list[BatchTranslationExportJobOutcome] = []
+    stopped_early = False
+    for translation_path in translations:
+        try:
+            outcome = export_translation(
+                translation_path,
+                config=config,
+                formats=formats,
+                output_directory=destination,
+            )
+            jobs.append(
+                BatchTranslationExportJobOutcome(
+                    translation_path=translation_path,
+                    status="exported",
+                    outcome=outcome,
+                )
+            )
+        except Exception as error:
+            jobs.append(
+                BatchTranslationExportJobOutcome(
+                    translation_path=translation_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchTranslationExportOutcome(tuple(jobs), stopped_early=stopped_early)
 
 
 def prepare_review_batch(

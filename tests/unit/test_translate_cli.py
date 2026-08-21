@@ -202,3 +202,21 @@ def test_translate_export_writes_txt(tmp_path: Path) -> None:
     assert (output / "S01E01_pl_translation_001.txt").is_file()
     assert (output / "S01E01_pl_translation_001.srt").is_file()
     assert (output / "S01E01_pl_translation_001.vtt").is_file()
+
+
+def test_translate_export_directory_reports_batch(tmp_path: Path) -> None:
+    translations = tmp_path / "translations"
+    output = tmp_path / "output"
+    translations.mkdir()
+    (translations / "S01E01_pl_translation_001.json").write_bytes(
+        (ROOT / "examples/translation.example.json").read_bytes()
+    )
+
+    result = runner.invoke(
+        app,
+        ["translate", "export", str(translations), "--output-dir", str(output)],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "SUMMARY exported=1 failed=0" in result.stdout
+    assert (output / "S01E01_pl_translation_001.txt").is_file()

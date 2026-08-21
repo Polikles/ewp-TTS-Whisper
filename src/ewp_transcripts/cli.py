@@ -15,6 +15,7 @@ from ewp_transcripts.application import (
     BatchReviewPreparationOutcome,
     BatchRevisionOutcome,
     BatchTranscriptionOutcome,
+    BatchTranslationExportOutcome,
     BatchTranslationOutcome,
     ExportFormat,
     TranscriptionOutcome,
@@ -30,6 +31,7 @@ from ewp_transcripts.application import (
     export_batch,
     export_result,
     export_translation,
+    export_translation_batch,
     inspect_input,
     prepare_review_batch,
     prepare_review_file,
@@ -368,6 +370,22 @@ def _print_translation_batch(outcome: BatchTranslationOutcome) -> None:
     )
 
 
+def _print_translation_export_batch(outcome: BatchTranslationExportOutcome) -> None:
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.translation_path}")
+        if job.outcome is not None:
+            for path in job.outcome.written:
+                typer.echo(f"  WROTE {path}")
+            for path in job.outcome.skipped:
+                typer.echo(f"  SKIPPED {path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY exported={outcome.exported} failed={outcome.failed} "
+        f"stopped_early={str(outcome.stopped_early).lower()}"
+    )
+
+
 @translate_app.command("prepare")
 def translate_prepare_command(
     result_path: Annotated[
@@ -603,6 +621,10 @@ def translate_export_command(
         list[TranslationExportFormat] | None,
         typer.Option("--format", help="Translated export format; may be repeated."),
     ] = None,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive", help="Include translation JSON in subdirectories."),
+    ] = False,
     config_path: Annotated[
         Path | None,
         typer.Option("--config", help="Read an explicit TOML configuration file."),
@@ -611,18 +633,35 @@ def translate_export_command(
     """Render deterministic UTF-8 TXT from one immutable translation."""
 
     try:
-        outcome = export_translation(
-            translation_path,
-            config=load_config(explicit_path=config_path),
-            formats=tuple(formats or (TranslationExportFormat.TXT,)),
-            output_directory=_optional_user_path(output_directory),
-        )
+        config = load_config(explicit_path=config_path)
+        normalized_translation = normalize_input_path(translation_path)
+        selected_formats = tuple(formats or (TranslationExportFormat.TXT,))
+        if normalized_translation.is_dir():
+            batch = export_translation_batch(
+                normalized_translation,
+                config=config,
+                formats=selected_formats,
+                output_directory=_optional_user_path(output_directory),
+                recursive=recursive,
+            )
+        else:
+            outcome = export_translation(
+                normalized_translation,
+                config=config,
+                formats=selected_formats,
+                output_directory=_optional_user_path(output_directory),
+            )
     except ApplicationError as error:
         _expected_error(error)
-    for path in outcome.written:
-        typer.echo(f"WROTE {path}")
-    for path in outcome.skipped:
-        typer.echo(f"SKIPPED {path}")
+    if normalized_translation.is_dir():
+        _print_translation_export_batch(batch)
+        if batch.failed:
+            raise typer.Exit(code=5)
+    else:
+        for path in outcome.written:
+            typer.echo(f"WROTE {path}")
+        for path in outcome.skipped:
+            typer.echo(f"SKIPPED {path}")
 
 
 @revise_app.command("prepare")

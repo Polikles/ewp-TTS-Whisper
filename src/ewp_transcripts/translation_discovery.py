@@ -22,6 +22,7 @@ from ewp_transcripts.domain.revision import (
 from ewp_transcripts.domain.translation_review import TranslationReview
 
 _TRANSLATION_REVIEW_NAME = re.compile(r"^.+_(?:pl|en)\.translation\.review(?:_v[0-9]{3,})?\.txt$")
+_TRANSLATION_NAME = re.compile(r"^.+_(?:pl|en)_translation_[0-9]{3,}\.json$")
 
 
 def discover_translation_reviews(
@@ -45,6 +46,32 @@ def discover_translation_reviews(
         if candidate.is_file()
         and not candidate.is_symlink()
         and _TRANSLATION_REVIEW_NAME.fullmatch(candidate.name) is not None
+    ]
+    candidates.sort(key=lambda candidate: (natural_path_key(candidate), candidate.as_posix()))
+    return tuple(candidates)
+
+
+def discover_translations(input_path: str | Path, *, recursive: bool = False) -> tuple[Path, ...]:
+    """Select immutable translation JSON files without matching audits or unrelated JSON."""
+
+    path = normalize_input_path(input_path)
+    if path.is_symlink():
+        raise SymlinkInputError(f"Translation input must not be a symbolic link: {path}")
+    if not path.exists():
+        raise InputNotFoundError(f"Translation input does not exist: {path}")
+    if path.is_file():
+        return (path,)
+    if not path.is_dir():
+        raise UnsupportedInputError(
+            f"Translation input must be a regular file or directory: {path}"
+        )
+    entries = path.rglob("*") if recursive else path.iterdir()
+    candidates = [
+        candidate.absolute()
+        for candidate in entries
+        if candidate.is_file()
+        and not candidate.is_symlink()
+        and _TRANSLATION_NAME.fullmatch(candidate.name) is not None
     ]
     candidates.sort(key=lambda candidate: (natural_path_key(candidate), candidate.as_posix()))
     return tuple(candidates)
