@@ -94,6 +94,10 @@ from ewp_transcripts.storage import (
     plan_job_outputs,
     resolve_output_directory,
 )
+from ewp_transcripts.translation_audit import (
+    build_translation_audit,
+    publish_translation_audit,
+)
 from ewp_transcripts.translation_discovery import (
     discover_translation_reviews,
     discover_translations,
@@ -148,6 +152,7 @@ __all__ = [
     "export_translation",
     "export_translation_batch",
     "TranslationExportFormat",
+    "audit_translation_file",
     "audit_revision_file",
     "preview_mock_correction",
     "apply_mock_correction",
@@ -348,6 +353,14 @@ class BatchTranslationExportOutcome:
     @property
     def failed(self) -> int:
         return sum(job.status == "failed" for job in self.jobs)
+
+
+@dataclass(frozen=True, slots=True)
+class TranslationAuditOutcome:
+    translation_path: Path
+    audit: dict[str, object]
+    audit_path: Path | None = None
+    written: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -1133,6 +1146,34 @@ def export_translation_batch(
                 stopped_early = True
                 break
     return BatchTranslationExportOutcome(tuple(jobs), stopped_early=stopped_early)
+
+
+def audit_translation_file(
+    translation_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    results_directory: Path,
+    revisions_directory: Path | None = None,
+    output_directory: Path | None = None,
+    publish: bool = True,
+) -> TranslationAuditOutcome:
+    """Reconstruct and optionally publish one exact-source translation audit."""
+
+    normalized = normalize_input_path(translation_path)
+    audit = build_translation_audit(
+        normalized,
+        results_directory=results_directory,
+        revisions_directory=revisions_directory,
+    )
+    audit_path = None
+    written = False
+    if publish:
+        audit_path, written = publish_translation_audit(
+            audit,
+            output_directory=output_directory or normalized.parent,
+            lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+        )
+    return TranslationAuditOutcome(normalized, audit, audit_path, written)
 
 
 def prepare_review_batch(

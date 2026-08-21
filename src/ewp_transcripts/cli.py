@@ -25,6 +25,7 @@ from ewp_transcripts.application import (
     apply_review_file,
     apply_translation_review_file,
     audit_revision_file,
+    audit_translation_file,
     clean_all_workdirs,
     doctor,
     dry_run,
@@ -662,6 +663,61 @@ def translate_export_command(
             typer.echo(f"WROTE {path}")
         for path in outcome.skipped:
             typer.echo(f"SKIPPED {path}")
+
+
+@translate_app.command("audit")
+def translate_audit_command(
+    translation_path: Annotated[
+        Path,
+        typer.Argument(help="Immutable translation JSON to audit.", metavar="TRANSLATION_JSON"),
+    ],
+    results_directory: Annotated[
+        Path,
+        typer.Option("--results-dir", help="Directory containing the exact canonical result."),
+    ],
+    revisions_directory: Annotated[
+        Path | None,
+        typer.Option("--revisions-dir", help="Directory containing the exact source revision."),
+    ] = None,
+    output_directory: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Write the reconstructed audit here."),
+    ] = None,
+    no_write: Annotated[
+        bool,
+        typer.Option("--no-write", help="Validate and print summary without publication."),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json-output", help="Print the complete reconstructed audit JSON."),
+    ] = False,
+    config_path: Annotated[
+        Path | None,
+        typer.Option("--config", help="Read an explicit TOML configuration file."),
+    ] = None,
+) -> None:
+    """Reconstruct source/target unit evidence and optionally publish it."""
+
+    try:
+        outcome = audit_translation_file(
+            translation_path,
+            config=load_config(explicit_path=config_path),
+            results_directory=normalize_input_path(results_directory),
+            revisions_directory=_optional_user_path(revisions_directory),
+            output_directory=_optional_user_path(output_directory),
+            publish=not no_write,
+        )
+    except ApplicationError as error:
+        _expected_error(error)
+    if json_output:
+        typer.echo(json.dumps(outcome.audit, ensure_ascii=False, indent=2))
+        return
+    typer.echo(f"AUDIT {outcome.translation_path}")
+    if outcome.audit_path is not None:
+        typer.echo(f"  {'WROTE' if outcome.written else 'SKIPPED'} {outcome.audit_path}")
+    units = outcome.audit["units"]
+    assert isinstance(units, list)
+    typer.echo(f"SUMMARY units={len(units)} written={int(outcome.written)}")
 
 
 @revise_app.command("prepare")

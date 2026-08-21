@@ -143,3 +143,22 @@ def publish_next_translation(
         payload = (json.dumps(artifact, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
         _publish_exclusive(path, payload)
         return allocated, path
+
+
+def publish_translation_bytes(
+    path: Path,
+    payload: bytes,
+    *,
+    lock_timeout_seconds: float = 0,
+) -> bool:
+    """Publish deterministic derived translation data or skip identical bytes."""
+
+    with output_directory_lock(path.parent, timeout_seconds=lock_timeout_seconds):
+        if path.is_file():
+            if path.read_bytes() == payload:
+                return False
+            raise OutputReservationError(
+                f"Translation-derived output already exists with other content: {path}"
+            )
+        _publish_exclusive(path, payload)
+        return True

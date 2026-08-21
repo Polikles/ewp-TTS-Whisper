@@ -76,6 +76,13 @@ All notable changes to EWP-transcripts are documented here.
 - Extended translated TXT/SRT/VTT export to directories with deterministic snapshot-only
   discovery, per-file failure isolation, recursive opt-in, idempotent skips, and exit-code-5
   partial failure reporting.
+- Documented translated TXT/SRT/VTT single and batch export, including stable-ID speaker
+  presentation, inherited sentence timing, the absence of target-word alignment claims,
+  collision preflight, idempotent replay, and the remaining audit/provider scope.
+- Added exact-source translation audit reconstruction and locked idempotent audit
+  publication. Audits reopen the canonical and optional revision source, validate every
+  unit's IDs, speaker, timing, token ownership, and hash, then pair reconstructed source
+  text with target text for human inspection.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
