@@ -172,6 +172,10 @@ class DeterministicMockCorrectionProvider:
     def endpoint_identity(self) -> str:
         return "in-process"
 
+    @property
+    def provenance_parameters(self) -> dict[str, str | int | float | bool | None]:
+        return {"request_contract": "deterministic-replacements-v1"}
+
     def prompt_sha256(self, prompt_id: str) -> str:
         return hashlib.sha256(f"ewp-mock-v1\0{prompt_id}".encode()).hexdigest()
 
@@ -418,7 +422,7 @@ def build_correction_revision(
                 endpoint_kind=provider.endpoint_kind,
                 prompt_id=prompt_id,
                 prompt_sha256=prompt_sha256,
-                parameters=None,
+                parameters=getattr(provider, "provenance_parameters", None),
             ),
         ),
     )

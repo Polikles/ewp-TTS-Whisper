@@ -207,6 +207,11 @@ class RequestedCorrectionConsent(StrEnum):
     PERSIST = "persist"
 
 
+class RequestedCorrectionProvider(StrEnum):
+    LM_STUDIO = "lm-studio"
+    OPENROUTER = "openrouter"
+
+
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(application_version())
@@ -594,13 +599,17 @@ def revise_correct_command(
         Path,
         typer.Argument(help="Completed canonical result to correct.", metavar="RESULTS_JSON"),
     ],
+    provider_name: Annotated[
+        RequestedCorrectionProvider,
+        typer.Option("--provider", help="Correction API provider: lm-studio or openrouter."),
+    ] = RequestedCorrectionProvider.LM_STUDIO,
     model: Annotated[
         str | None,
-        typer.Option("--model", help="Exact model identifier exposed by LM Studio."),
+        typer.Option("--model", help="Exact model identifier exposed by the selected provider."),
     ] = None,
     endpoint: Annotated[
         str | None,
-        typer.Option("--endpoint", help="LM Studio HTTP(S) /v1 endpoint."),
+        typer.Option("--endpoint", help="Explicit endpoint for the selected provider."),
     ] = None,
     allow_remote_endpoint: Annotated[
         bool,
@@ -609,11 +618,25 @@ def revise_correct_command(
             help="Explicitly allow a non-loopback LM Studio HTTP(S) endpoint.",
         ),
     ] = False,
+    allow_cloud: Annotated[
+        bool,
+        typer.Option(
+            "--allow-cloud",
+            help="Disable strict-offline mode for this explicit cloud correction command.",
+        ),
+    ] = False,
+    api_key_env: Annotated[
+        str | None,
+        typer.Option(
+            "--api-key-env",
+            help="Environment-variable name containing the OpenRouter API key.",
+        ),
+    ] = None,
     output_mode: Annotated[
         str | None,
         typer.Option(
             "--output-mode",
-            help="LM Studio response mode: json-schema (default) or explicit json-text fallback.",
+            help="Provider response mode: json-schema (default) or explicit json-text fallback.",
         ),
     ] = None,
     output_directory: Annotated[
@@ -640,21 +663,31 @@ def revise_correct_command(
         typer.Option("--config", help="Read an explicit TOML configuration file."),
     ] = None,
 ) -> None:
-    """Generate a non-final review candidate through an explicit LM Studio API."""
+    """Generate a non-final review candidate through an explicitly consented API."""
 
     try:
-        overrides: dict[str, object] = {"provider": "lm-studio"}
+        overrides: dict[str, object] = {"provider": provider_name.value}
         if model is not None:
             overrides["model"] = model
         if endpoint is not None:
-            overrides["endpoint"] = endpoint
+            endpoint_key = (
+                "openrouter_endpoint"
+                if provider_name is RequestedCorrectionProvider.OPENROUTER
+                else "endpoint"
+            )
+            overrides[endpoint_key] = endpoint
         if allow_remote_endpoint:
             overrides["allow_remote_endpoint"] = True
         if output_mode is not None:
             overrides["output_mode"] = output_mode
+        if api_key_env is not None:
+            overrides["openrouter_api_key_env"] = api_key_env
+        general_overrides: dict[str, object] = {}
+        if allow_cloud:
+            general_overrides["offline"] = False
         config = load_config(
             explicit_path=config_path,
-            cli_overrides={"correction": overrides},
+            cli_overrides={"correction": overrides, "general": general_overrides},
         )
         provider = create_correction_provider(config)
         choice = _correction_consent_choice(config, provider, consent)

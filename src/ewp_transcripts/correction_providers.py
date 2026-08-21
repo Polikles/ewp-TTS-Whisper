@@ -9,6 +9,10 @@ from ewp_transcripts.lm_studio_adapter import (
     LmStudioAdapterConfig,
     LmStudioCorrectionProvider,
 )
+from ewp_transcripts.openrouter_adapter import (
+    OpenRouterAdapterConfig,
+    OpenRouterCorrectionProvider,
+)
 
 
 def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
@@ -27,6 +31,20 @@ def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
         except ValueError as error:
             raise InvalidConfigurationError("Invalid LM Studio correction configuration") from error
         return LmStudioCorrectionProvider(adapter_config)
+    if correction.provider == "openrouter":
+        try:
+            openrouter_config = OpenRouterAdapterConfig(
+                model_id=correction.model,
+                endpoint=correction.openrouter_endpoint,
+                api_key_env=correction.openrouter_api_key_env,
+                output_mode=correction.output_mode,
+                temperature=correction.temperature,
+            )
+        except ValueError as error:
+            raise InvalidConfigurationError(
+                "Invalid OpenRouter correction configuration"
+            ) from error
+        return OpenRouterCorrectionProvider(openrouter_config)
     raise InvalidConfigurationError(
         "No correction provider is configured; set correction.provider and correction.model"
     )

@@ -143,9 +143,11 @@ The first v0.3 correction slice defines:
 
 ```toml
 [correction]
-provider = "" # disabled; set to "lm-studio" explicitly
-model = "" # exact identifier reported by the loaded LM Studio model
+provider = "" # disabled; set explicitly to "lm-studio" or "openrouter"
+model = "" # exact identifier reported by the selected provider
 endpoint = "http://127.0.0.1:1234/v1"
+openrouter_endpoint = "https://openrouter.ai/api/v1"
+openrouter_api_key_env = "OPENROUTER_API_KEY"
 allow_remote_endpoint = false
 output_mode = "json-schema"
 prompt_id = "faithful-correction-v11"
@@ -182,3 +184,11 @@ JSON are rejected. The selected mode is included in the prompt hash, so resume s
 one mode cannot be reused by the other.
 The consent store contains only non-secret exact scopes and is created with private
 permissions; API keys never belong in this configuration.
+
+`openrouter` is an explicit cloud provider. Its endpoint must be an uncredentialed HTTPS
+URL ending in `/api/v1`. The secret is read lazily from the environment variable named by
+`openrouter_api_key_env`; its value is never accepted in TOML, CLI arguments, provenance,
+resume state, or logs. A cloud command additionally requires `--allow-cloud` and scoped
+reject/once/persist consent. The adapter disables provider fallback and requires support
+for requested structured-output parameters. Pin the exact model slug reported by the
+provider; never silently substitute a similarly named model.

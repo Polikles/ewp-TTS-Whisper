@@ -211,9 +211,11 @@ class RevisionConfig(StrictConfigModel):
 
 
 class CorrectionConfig(StrictConfigModel):
-    provider: Literal["", "lm-studio"] = ""
+    provider: Literal["", "lm-studio", "openrouter"] = ""
     model: str = ""
     endpoint: str = "http://127.0.0.1:1234/v1"
+    openrouter_endpoint: str = "https://openrouter.ai/api/v1"
+    openrouter_api_key_env: str = "OPENROUTER_API_KEY"
     allow_remote_endpoint: bool = False
     output_mode: Literal["json-schema", "json-text"] = "json-schema"
     prompt_id: str = "faithful-correction-v11"
@@ -238,6 +240,13 @@ class CorrectionConfig(StrictConfigModel):
     @classmethod
     def expand_consent_store(cls, value: Path) -> Path:
         return value.expanduser()
+
+    @field_validator("openrouter_api_key_env")
+    @classmethod
+    def validate_openrouter_api_key_env(cls, value: str) -> str:
+        if not value or not value.replace("_", "A").isalnum() or value[0].isdigit():
+            raise ValueError("openrouter_api_key_env must be an environment-variable name")
+        return value
 
 
 class RuntimeConfig(StrictConfigModel):

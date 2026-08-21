@@ -54,3 +54,18 @@ def test_explicit_remote_lm_studio_endpoint_is_constructed() -> None:
     )
 
     assert provider.endpoint_identity == "http://100.99.201.120:1234/v1"
+
+
+def test_openrouter_provider_is_cloud_and_does_not_require_key_at_construction() -> None:
+    provider = create_correction_provider(
+        ApplicationConfig(
+            correction=CorrectionConfig(
+                provider="openrouter",
+                model="qwen/qwen-2.5-72b-instruct",
+            )
+        )
+    )
+
+    assert provider.provider_id == "openrouter"
+    assert provider.endpoint_kind == "cloud"
+    assert provider.endpoint_identity == "https://openrouter.ai/api/v1"

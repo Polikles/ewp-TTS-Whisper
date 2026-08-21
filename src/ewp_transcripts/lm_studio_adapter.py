@@ -147,6 +147,14 @@ class LmStudioCorrectionProvider:
     def endpoint_identity(self) -> str:
         return self._endpoint
 
+    @property
+    def provenance_parameters(self) -> dict[str, str | int | float | bool | None]:
+        return {
+            "output_mode": self._config.output_mode,
+            "temperature": self._config.temperature,
+            "request_contract": _REQUEST_CONTRACT,
+        }
+
     def prompt_sha256(self, prompt_id: str) -> str:
         identity: JsonObject = {
             "prompt_id": prompt_id,
@@ -246,6 +254,7 @@ def _parse_chat_response(
     request: CorrectionRequest,
     *,
     output_mode: Literal["json-schema", "json-text"],
+    provider_label: str = "LM Studio",
 ) -> CorrectionResponse:
     try:
         choices = document["choices"]
@@ -262,7 +271,7 @@ def _parse_chat_response(
             wire_response = _LmStudioResponse.model_validate_json(content)
             if wire_response.operation_id != request.operation_id:
                 raise InvalidCorrectionResponseError(
-                    "LM Studio response operation ID does not match"
+                    f"{provider_label} response operation ID does not match"
                 )
         usage = document.get("usage")
         correction_usage = None
@@ -282,15 +291,15 @@ def _parse_chat_response(
             for item in error.errors(include_url=False, include_input=False)[:8]
         )
         raise InvalidCorrectionResponseError(
-            f"LM Studio returned an invalid correction response (schema_errors={details})"
+            f"{provider_label} returned an invalid correction response (schema_errors={details})"
         ) from error
     except ValueError as error:
         raise InvalidCorrectionResponseError(
-            f"LM Studio returned an invalid correction response ({error})"
+            f"{provider_label} returned an invalid correction response ({error})"
         ) from error
     except (IndexError, KeyError, TypeError) as error:
         raise InvalidCorrectionResponseError(
-            "LM Studio returned an invalid correction response"
+            f"{provider_label} returned an invalid correction response"
         ) from error
     return response
 

@@ -248,7 +248,7 @@ Use `--no-write --json-output` to inspect reconstructed diagnostics without publ
 The detailed revision guide is
 [`../WSL config/REVISE_TRANSCRIPTS.md`](../WSL%20config/REVISE_TRANSCRIPTS.md).
 
-### Automated local correction with LM Studio (v0.3 development)
+### Automated correction with LM Studio or OpenRouter (v0.3 development)
 
 This command is implemented for controlled local benchmarking but has not yet completed
 the three-model acceptance run. In LM Studio, load exactly the intended model and start
@@ -307,6 +307,27 @@ uv run --locked transcriber revise correct "/path/to/episode_results.json" \
   --allow-remote-endpoint --consent once --preview
 ```
 
+OpenRouter is a separate paid cloud path. Transcript text leaves the machine; audio is not
+uploaded. Export the key in the shell, pin the exact current model slug, and use both the
+cloud opt-in and consent flags. Never paste a key into TOML, CLI arguments, logs, or
+benchmark manifests:
+
+```bash
+export OPENROUTER_API_KEY="YOUR_KEY"
+
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --provider openrouter \
+  --model "qwen/qwen-2.5-72b-instruct" \
+  --allow-cloud --consent once --preview \
+  --resume-dir "/private/path/openrouter-qwen72b/resume"
+```
+
+Without `--allow-cloud`, strict-offline mode rejects the command before reading the key or
+making a request. `--consent reject` also guarantees no request. `persist` remembers only
+the exact non-secret provider/endpoint scope. Preview calls may incur charges. The adapter
+requests no fallback routing and records non-secret parameters, token counts, and reported
+cost when supplied. Cloud output requires the same manual review as local output.
+
 ## 10. Export corrected transcripts
 
 Latest compatible revision per result:
@@ -359,7 +380,9 @@ Normal transcription and manual revision are local-first. Keep `HF_TOKEN`, sourc
 recordings, canonical paths, transcripts, revisions, audits, correction resume state,
 and private benchmark material out of Git and shared logs. LM Studio correction is an
 explicit local API boundary and is not equivalent to in-process offline execution.
-Cloud/API correction is not implemented; cloud correction remains blocked from inference.
+Cloud correction is implemented but remains strict-offline by default and requires an
+explicit command opt-in, scoped consent, an environment-only key, and separate paid-run
+authorization during project benchmarking.
 
 For later benchmark feedback, use
 [`../WSL config/FEEDBACK_FOR_V2.md`](../WSL%20config/FEEDBACK_FOR_V2.md).

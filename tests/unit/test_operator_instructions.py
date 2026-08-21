@@ -46,7 +46,7 @@ def test_operator_runbook_covers_every_shipped_command_and_safety_boundary() -> 
         "selects the highest revision whose exact base-result hash matches",
         "retry only failed items",
         "Cleanup never removes source audio",
-        "Cloud/API correction is not implemented",
+        "Cloud correction is implemented but remains strict-offline by default",
     ):
         assert contract in document
 

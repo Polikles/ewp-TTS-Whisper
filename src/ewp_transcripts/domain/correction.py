@@ -88,6 +88,9 @@ class CorrectionProvider(Protocol):
     @property
     def endpoint_identity(self) -> str: ...
 
+    @property
+    def provenance_parameters(self) -> dict[str, str | int | float | bool | None]: ...
+
     def prompt_sha256(self, prompt_id: str) -> str: ...
 
     def correct(

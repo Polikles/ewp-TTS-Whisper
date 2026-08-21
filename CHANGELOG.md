@@ -6,6 +6,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added an explicit OpenRouter cloud-correction adapter with HTTPS-only uncredentialed
+  endpoints, environment-only lazy bearer-key loading, structured-output capability
+  requirements, disabled route fallback, sanitized retry handling, reported token and
+  micro-USD cost capture, and network-isolated tests.
+- Extended `transcriber revise correct` with explicit provider selection, `--allow-cloud`,
+  and configurable API-key environment naming. Strict offline and reject consent stop
+  before key lookup or request creation; cloud output remains a non-final candidate.
+- LLM revision provenance now records effective non-secret adapter parameters while
+  excluding credentials.
+
 - Added the normative v0.3 automated-correction contract: provider-neutral adapters,
   faithful-repair policy, deterministic single-owner chunks with read-only overlap,
   locally derived change validation, scoped API consent, retry/resume/batch behavior, immutable

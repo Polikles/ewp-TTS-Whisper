@@ -83,7 +83,7 @@ The following is no longer an unscheduled roadmap idea. It is the implemented v0
 
 Detailed design belongs in docs 13/21 rather than this roadmap.
 
-## 2. Automated transcript correction — planned for v0.3
+## 2. Automated transcript correction — in progress for v0.3
 
 Automated correction follows manual correction so model performance can be measured
 against manually verified ground truth.
@@ -135,6 +135,12 @@ cloud runs or broaden API consent without separate explicit authorization.
 Provider integration also requires deterministic mocked tests, secret-safe
 configuration, timeout/rate-limit/retry handling, resumable failure-isolated batches,
 and the consent/privacy contract in `11-security-and-privacy.md`.
+
+The OpenRouter adapter and offline safety tests are implemented. A paid cloud pilot remains
+an operator gate requiring an environment-only key, exact live model-slug confirmation,
+explicit `--allow-cloud`, scoped consent, and separate authorization. Planned candidates
+remain Qwen 2.5 72B Instruct and the exact currently available DeepSeek V3-family slug;
+neither may be silently replaced when the catalog changes.
 
 ### Configurable chunking
 
