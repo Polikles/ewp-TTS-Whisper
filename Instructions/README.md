@@ -361,7 +361,7 @@ latency and billing.
 
 ## 10. Translate manually (v0.4 development)
 
-The current translation slice is single-file and model-free. It supports `pl -> en` and
+The current translation slice is manual and model-free. It supports `pl -> en` and
 `en -> pl`; use the latest manually verified revision as the preferred source. Raw ASR
 and LLM-corrected revisions are allowed only when deliberately selected and remain marked
 as raw or automated candidates in the translation artifact.
@@ -402,7 +402,27 @@ uv run --locked transcriber translate apply \
 Preview and apply require the same exact canonical and optional revision files used by
 prepare. Source hashes, units, speakers, timing, and token ownership are reconstructed;
 any machine-owned edit fails. Apply publishes a complete immutable
-`*_LANG_translation_NNN.json` snapshot. Batch translation, translation audit, and
+`*_LANG_translation_NNN.json` snapshot.
+
+For a directory, prepare selects canonical results deterministically. Supplying a
+revision directory selects the highest compatible exact-hash revision separately for
+each result:
+
+```bash
+uv run --locked transcriber translate prepare "/path/to/results" \
+  --revision "/path/to/revisions" --target-language en \
+  --output-dir "/path/to/translation-reviews"
+
+uv run --locked transcriber translate preview "/path/to/translation-reviews" \
+  --results "/path/to/results" --revisions-dir "/path/to/revisions"
+
+uv run --locked transcriber translate apply "/path/to/translation-reviews" \
+  --results "/path/to/results" --revisions-dir "/path/to/revisions" \
+  --output-dir "/path/to/translations"
+```
+
+Batch failures are isolated and return exit code 5. Repair and retry only failed review
+files to avoid creating unintended later translation numbers. Translation audit and
 TXT/subtitle export are not implemented yet.
 
 ## 11. Export corrected transcripts

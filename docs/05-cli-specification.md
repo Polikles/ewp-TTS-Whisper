@@ -337,7 +337,7 @@ transcriber translate preview REVIEW --results RESULT_JSON [OPTIONS]
 transcriber translate apply REVIEW --results RESULT_JSON [OPTIONS]
 ```
 
-The initial model-free single-file workflow prepares the strict `EWP-TRANSLATION 1`
+The initial model-free workflow prepares the strict `EWP-TRANSLATION 1`
 format, validates completed target lines against the exact canonical and optional
 `--revision` source, and atomically publishes a complete language-qualified immutable
 translation snapshot. `prepare` accepts `--register preserve|formal|informal` and
@@ -348,8 +348,11 @@ Only target lines are editable. Metadata, source lines, unit and token IDs, spea
 timing, hashes, direction, and style are reconstructed at preview/apply and fail closed
 on drift. All target units must be non-empty. A manually verified transcript revision is
 the preferred source; omitting `--revision` explicitly records raw source verification.
-Batch processing, translation audit, automated providers, and translated exports are
-later v0.4 slices.
+Directory prepare/preview/apply is deterministic and isolates failures per file. A
+revision directory selects the latest exact compatible revision for each canonical
+result; validation later resolves the exact canonical and revision filenames, hashes,
+IDs, numbers, and method stored in each review. Batch partial failure returns exit code 5.
+Translation audit, automated providers, and translated exports are later v0.4 slices.
 
 ## 8. `clean`
 

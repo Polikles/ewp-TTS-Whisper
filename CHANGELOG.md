@@ -61,6 +61,9 @@ All notable changes to EWP-transcripts are documented here.
   with per-item failure isolation and exit-code-5 partial failure semantics. A revision
   directory selects each result's latest exact compatible revision; prepared reviews
   later resolve their recorded canonical and revision identities independently.
+- Updated the complete runbook and CLI specification with copyable batch translation
+  commands, the distinct `--revision` prepare and `--revisions-dir` validation roles,
+  retry guidance, exact per-result selection, and current audit/export limitations.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
