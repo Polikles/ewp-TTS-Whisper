@@ -35,6 +35,7 @@ class CorrectionResumeEntry(BaseModel):
     prompt_id: str = Field(min_length=1)
     prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     response: CorrectionResponse
+    execution_metrics: dict[str, int | None] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,6 +85,15 @@ def call_correction_resumable(
         prompt_id=request.prompt_id,
         prompt_sha256=request.prompt_sha256,
         response=response,
+        execution_metrics={
+            "attempts": execution.metrics.attempts,
+            "retries": execution.metrics.retries,
+            "elapsed_ms": execution.metrics.elapsed_ms,
+            "request_count": execution.metrics.request_count,
+            "input_tokens": execution.metrics.input_tokens,
+            "output_tokens": execution.metrics.output_tokens,
+            "cost_usd_micros": execution.metrics.cost_usd_micros,
+        },
     )
     payload = (entry.model_dump_json(indent=2) + "\n").encode()
     temporary_path: Path | None = None
@@ -117,6 +127,50 @@ def call_correction_resumable(
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
     return CorrectionCallOutcome(response, False, state_path, execution.metrics)
+
+
+def summarize_correction_resume_state(state_directory: Path) -> dict[str, int]:
+    """Aggregate content-free provider evidence from validated resume entries."""
+
+    totals = {
+        "chunks": 0,
+        "attempts": 0,
+        "retries": 0,
+        "elapsed_ms": 0,
+        "request_count": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cost_usd_micros": 0,
+        "entries_without_execution_metrics": 0,
+    }
+    for path in sorted(state_directory.glob("*.json")):
+        try:
+            entry = CorrectionResumeEntry.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError) as error:
+            raise InvalidCorrectionResponseError(
+                f"Cannot read valid correction resume state: {path}"
+            ) from error
+        totals["chunks"] += 1
+        metrics = entry.execution_metrics
+        if metrics is None:
+            totals["entries_without_execution_metrics"] += 1
+            usage = entry.response.usage
+            if usage is not None:
+                totals["input_tokens"] += usage.input_tokens or 0
+                totals["output_tokens"] += usage.output_tokens or 0
+                totals["cost_usd_micros"] += usage.cost_usd_micros or 0
+            continue
+        for name in (
+            "attempts",
+            "retries",
+            "elapsed_ms",
+            "request_count",
+            "input_tokens",
+            "output_tokens",
+            "cost_usd_micros",
+        ):
+            totals[name] += metrics.get(name) or 0
+    return totals
 
 
 def _load_entry(

@@ -11,7 +11,10 @@ from ewp_transcripts.correction import (
     build_correction_request,
     plan_correction_chunks,
 )
-from ewp_transcripts.correction_state import call_correction_resumable
+from ewp_transcripts.correction_state import (
+    call_correction_resumable,
+    summarize_correction_resume_state,
+)
 from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionResponse
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
@@ -91,6 +94,17 @@ def test_validated_response_is_resumed_without_second_provider_call(tmp_path: Pa
     assert first.metrics.attempts == 1
     assert second.metrics.attempts == 0
     assert first.state_path.stat().st_mode & 0o777 == 0o600
+    assert summarize_correction_resume_state(tmp_path / "state") == {
+        "chunks": 1,
+        "attempts": 1,
+        "retries": 0,
+        "elapsed_ms": first.metrics.elapsed_ms,
+        "request_count": 1,
+        "input_tokens": 1,
+        "output_tokens": 1,
+        "cost_usd_micros": 0,
+        "entries_without_execution_metrics": 0,
+    }
 
 
 def test_corrupt_resume_state_is_rejected_without_provider_call(tmp_path: Path) -> None:

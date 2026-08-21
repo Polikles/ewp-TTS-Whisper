@@ -26,6 +26,9 @@ All notable changes to EWP-transcripts are documented here.
   for candidate and manual gold, reporting per-case and aggregate true-positive,
   unsupported, and missed edits with precision, recall, and F1. Unsupported means absent
   from the exact hashed gold and still requires manual style/harm review.
+- Added `benchmark correction operations` and persisted sanitized per-chunk execution
+  metrics so private resume state can report attempts, retries, provider elapsed time,
+  request/token volume, provider-reported cost, and legacy entries lacking those fields.
 - Added `transcriber revise correct --revision PATH` so automated correction can start
   from an exact compatible immutable revision. The result is a complete standalone child
   snapshot that retains prior edits and records the parent's ID, number, filename, and

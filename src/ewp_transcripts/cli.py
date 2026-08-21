@@ -49,6 +49,7 @@ from ewp_transcripts.correction_consent import (
     load_correction_consents,
 )
 from ewp_transcripts.correction_providers import create_correction_provider
+from ewp_transcripts.correction_state import summarize_correction_resume_state
 from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain import JobOutputPlan, TranscriptRevision
 from ewp_transcripts.domain.correction import CorrectionProvider
@@ -207,6 +208,38 @@ def correction_benchmark_report_command(
         f"changes={activity['total_changes']} "
         f"warnings={activity['warning_count']} "
         f"speaker_changes={activity['speaker_changes']}"
+    )
+
+
+@correction_benchmark_app.command("operations")
+def correction_benchmark_operations_command(
+    resume_directory: Annotated[
+        Path,
+        typer.Argument(help="Private correction resume-state directory."),
+    ],
+    output_path: Annotated[
+        Path | None,
+        typer.Option("--output", help="Write the content-free operational JSON report."),
+    ] = None,
+) -> None:
+    """Aggregate requests, retries, latency, tokens, and provider-reported cost."""
+
+    try:
+        report = summarize_correction_resume_state(normalize_input_path(resume_directory))
+        serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        normalized_output = _optional_user_path(output_path)
+        if normalized_output is not None:
+            normalized_output.parent.mkdir(parents=True, exist_ok=True)
+            normalized_output.write_text(serialized, encoding="utf-8")
+            typer.echo(f"REPORT {normalized_output}")
+    except (OSError, ValueError, ApplicationError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    typer.echo(
+        f"SUMMARY chunks={report['chunks']} requests={report['request_count']} "
+        f"retries={report['retries']} elapsed_ms={report['elapsed_ms']} "
+        f"input_tokens={report['input_tokens']} output_tokens={report['output_tokens']} "
+        f"cost_usd_micros={report['cost_usd_micros']}"
     )
 
 

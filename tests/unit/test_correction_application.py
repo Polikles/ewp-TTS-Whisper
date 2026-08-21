@@ -22,7 +22,7 @@ from ewp_transcripts.config import (
 )
 from ewp_transcripts.correction import DeterministicMockCorrectionProvider
 from ewp_transcripts.domain.correction import CorrectionRequest, CorrectionResponse
-from ewp_transcripts.domain.errors import CorrectionConsentError
+from ewp_transcripts.domain.errors import CorrectionConsentError, InvalidRevisionError
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
@@ -93,6 +93,32 @@ def test_correction_can_publish_complete_child_of_selected_revision(tmp_path: Pa
     assert child.revision.revision_number == 2
     text = " ".join(token.text for token in child.revision.transcript.tokens)
     assert text == "Hello to another episode. Today we discuss podcast."
+
+
+def test_incompatible_parent_is_rejected_before_provider_call(tmp_path: Path) -> None:
+    base = tmp_path / EXAMPLE.name
+    base.write_bytes(EXAMPLE.read_bytes())
+    first = apply_correction(
+        base,
+        config=_config(tmp_path),
+        provider=DeterministicMockCorrectionProvider(),
+        output_directory=tmp_path / "revisions",
+    )
+    document = json.loads(first.revision_path.read_text(encoding="utf-8"))
+    document["base_result"]["sha256"] = "0" * 64
+    incompatible = tmp_path / "incompatible_revision.json"
+    incompatible.write_text(json.dumps(document), encoding="utf-8")
+    provider = _CountingProvider()
+
+    with pytest.raises(InvalidRevisionError, match="base-result SHA-256"):
+        preview_correction(
+            base,
+            config=_config(tmp_path),
+            provider=provider,
+            source_revision_path=incompatible,
+        )
+
+    assert provider.calls == 0
 
 
 def _result(path: Path, job_id: str) -> None:
