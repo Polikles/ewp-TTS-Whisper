@@ -232,6 +232,7 @@ def evaluate_correction_benchmark(
         source_to_candidate = _correction_score(source_text, candidate_text)
         baseline_errors = cast(dict[str, int], baseline["word_errors"])["errors"]
         candidate_errors = cast(dict[str, int], result["word_errors"])["errors"]
+        word_error_reduction = baseline_errors - candidate_errors
         reports.append(
             {
                 "case_id": case.case_id,
@@ -246,12 +247,19 @@ def evaluate_correction_benchmark(
                 "baseline": baseline,
                 "candidate": result,
                 "source_to_candidate": source_to_candidate,
-                "word_error_reduction": baseline_errors - candidate_errors,
+                "word_error_reduction": word_error_reduction,
                 "excess_word_errors": max(0, candidate_errors - baseline_errors),
+                "lexical_outcome": (
+                    "improved"
+                    if word_error_reduction > 0
+                    else "regressed"
+                    if word_error_reduction < 0
+                    else "unchanged"
+                ),
             }
         )
     return {
-        "report_version": "ewp-correction-benchmark-v2",
+        "report_version": "ewp-correction-benchmark-v3",
         "manifest_sha256": _sha256(manifest.path),
         "normalization": CORRECTION_NORMALIZATION_VERSION,
         "case_count": len(reports),
@@ -273,7 +281,7 @@ def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
             counts = cast(dict[str, int], metric["word_errors"])
             totals[name]["errors"] += counts["errors"]
             totals[name]["reference_units"] += counts["reference_units"]
-    return {
+    aggregate: dict[str, object] = {
         name: {
             "wer": round(total["errors"] / total["reference_units"], 8),
             "word_errors": total["errors"],
@@ -281,6 +289,26 @@ def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
         }
         for name, total in totals.items()
     }
+    baseline_errors = totals["baseline"]["errors"]
+    candidate_errors = totals["candidate"]["errors"]
+    candidate_word_changes = totals["source_to_candidate"]["errors"]
+    word_error_reduction = baseline_errors - candidate_errors
+    aggregate["lexical_correction"] = {
+        "word_error_reduction": word_error_reduction,
+        "relative_word_error_reduction": (
+            round(word_error_reduction / baseline_errors, 8) if baseline_errors else None
+        ),
+        "candidate_word_changes": candidate_word_changes,
+        "net_correction_efficiency": (
+            round(word_error_reduction / candidate_word_changes, 8)
+            if candidate_word_changes
+            else None
+        ),
+        "improved_cases": sum(report["lexical_outcome"] == "improved" for report in reports),
+        "unchanged_cases": sum(report["lexical_outcome"] == "unchanged" for report in reports),
+        "regressed_cases": sum(report["lexical_outcome"] == "regressed" for report in reports),
+    }
+    return aggregate
 
 
 def _correction_score(reference_text: str, hypothesis_text: str) -> dict[str, object]:

@@ -122,6 +122,18 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Validation
 
+- Completed the reasoning-disabled Gemini 2.5 Flash baseline on the full 24-episode,
+  77,607-word private corpus. All 24 revisions and audits were produced; WER against manual
+  gold improved from `0.01077914` to `0.00889891` (17.44% relative reduction), with
+  canonical-to-candidate WER `0.00338242`, zero speaker changes, and 19 retained alignment
+  warnings. The 395 audited operations remain review candidates rather than final edits.
+- Recorded about 25m21s operator wall time for the complete run including retries. Validated
+  resume state accounted for 651 requests and `$1.218604`; the provider dashboard showed
+  about `$1.34`, correctly remaining authoritative for billed malformed/rejected responses.
+- Correction benchmark report v3 now records net and relative lexical error reduction,
+  candidate edit distance, net correction efficiency, and improved/unchanged/regressed
+  case counts without exposing transcript content.
+
 - Completed the authorized three-case OpenRouter pilot under prompt v11 and 120/160/30
   chunks. DeepSeek V3 0324 reduced 76 raw word errors to 67 (`0.00659124` WER) in about
   19m31s for `$0.088462`; manual review retained deletion/context caveats.

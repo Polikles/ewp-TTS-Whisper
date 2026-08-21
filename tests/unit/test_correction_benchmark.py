@@ -73,7 +73,7 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
 
     report = evaluate_correction_benchmark(manifest)
 
-    assert report["report_version"] == "ewp-correction-benchmark-v2"
+    assert report["report_version"] == "ewp-correction-benchmark-v3"
     assert report["case_count"] == 1
     case = report["cases"][0]
     assert case["source_kind"] == source_kind
@@ -81,9 +81,19 @@ def test_benchmark_validates_both_lineage_tasks(tmp_path: Path, source_kind: str
     assert case["source_to_candidate"]["word_errors"]["errors"] == 1
     assert case["word_error_reduction"] == 1
     assert case["excess_word_errors"] == 0
+    assert case["lexical_outcome"] == "improved"
     assert report["aggregate"]["baseline"]["word_errors"] == 1
     assert report["aggregate"]["source_to_candidate"]["word_errors"] == 1
     assert report["aggregate"]["candidate"]["word_errors"] == 0
+    assert report["aggregate"]["lexical_correction"] == {
+        "word_error_reduction": 1,
+        "relative_word_error_reduction": 1.0,
+        "candidate_word_changes": 1,
+        "net_correction_efficiency": 1.0,
+        "improved_cases": 1,
+        "unchanged_cases": 0,
+        "regressed_cases": 0,
+    }
 
 
 def test_benchmark_rejects_changed_candidate(tmp_path: Path) -> None:

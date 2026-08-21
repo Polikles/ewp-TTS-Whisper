@@ -192,12 +192,17 @@ def correction_benchmark_report_command(
         return
     typer.echo(f"REPORT {normalized_output}")
     aggregate = cast(dict[str, dict[str, object]], report["aggregate"])
+    correction = aggregate["lexical_correction"]
     typer.echo(
         "SUMMARY "
         f"cases={report['case_count']} "
         f"canonical_gold_wer={cast(float, aggregate['baseline']['wer']):.8f} "
         f"canonical_llm_wer={cast(float, aggregate['source_to_candidate']['wer']):.8f} "
-        f"gold_llm_wer={cast(float, aggregate['candidate']['wer']):.8f}"
+        f"gold_llm_wer={cast(float, aggregate['candidate']['wer']):.8f} "
+        f"errors_removed={correction['word_error_reduction']} "
+        f"improved={correction['improved_cases']} "
+        f"unchanged={correction['unchanged_cases']} "
+        f"regressed={correction['regressed_cases']}"
     )
 
 
