@@ -126,6 +126,12 @@ All notable changes to EWP-transcripts are documented here.
 - Rejected the Bielik 11B F16 control: at 21.7 GB VRAM it took about 56 minutes 29 seconds,
   exactly matched the earlier Q8 lexical scores and harmful substantive edits, and added
   only unscored capitalization changes. It demonstrated no quality benefit over Q8.
+- Completed the fair current-contract Bielik Q8 control at about 20.9 GB VRAM: 12 minutes
+  15 seconds, roughly 4.6 times faster than F16, but one correct lexical repair was offset
+  by a harmful two-word deletion and the result remained 1.3% worse than raw ASR.
+- Added the consolidated local three-case comparison with exact prompt/contract identity,
+  WER, runtime, manual audit outcome, and observed provider/runtime failures. No local
+  candidate currently justifies an unattended full-corpus correction run.
 
 ### Documentation
 
