@@ -40,6 +40,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added `dictionary correction propose` to derive repeated, consistent Polish correction
+  candidates from exact canonical/manual-revision pairs, and `dictionary correction approve`
+  to publish only a fully reviewed, project-scoped dictionary. Proposals retain corpus hashes
+  and case scope; approved dictionaries retain proposal hash and never activate implicitly.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

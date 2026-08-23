@@ -64,6 +64,11 @@ from ewp_transcripts.correction_consent import (
     correction_api_warning,
     load_correction_consents,
 )
+from ewp_transcripts.correction_dictionary import (
+    approve_correction_dictionary,
+    propose_correction_dictionary,
+    write_correction_dictionary_proposal,
+)
 from ewp_transcripts.correction_providers import create_correction_provider
 from ewp_transcripts.correction_state import summarize_correction_resume_state
 from ewp_transcripts.discovery import normalize_input_path
@@ -133,11 +138,77 @@ translate_app = typer.Typer(
     ),
     no_args_is_help=True,
 )
+dictionary_app = typer.Typer(
+    name="dictionary", help="Propose and approve project-scoped dictionaries.", no_args_is_help=True
+)
+correction_dictionary_app = typer.Typer(
+    name="correction", help="Build Polish correction dictionary proposals.", no_args_is_help=True
+)
 app.add_typer(revise_app, name="revise")
 app.add_typer(translate_app, name="translate")
 app.add_typer(benchmark_app, name="benchmark")
+app.add_typer(dictionary_app, name="dictionary")
+dictionary_app.add_typer(correction_dictionary_app, name="correction")
 benchmark_app.add_typer(correction_benchmark_app, name="correction")
 benchmark_app.add_typer(translation_benchmark_app, name="translation")
+
+
+@correction_dictionary_app.command("propose")
+def correction_dictionary_propose_command(
+    canonical_directory: Annotated[
+        Path, typer.Option("--canonical-dir", help="Exact canonical project results directory.")
+    ],
+    revision_directory: Annotated[
+        Path, typer.Option("--revision-dir", help="Accepted manual revision directory.")
+    ],
+    project_id: Annotated[str, typer.Option("--project-id", help="Explicit project identity.")],
+    output_path: Annotated[
+        Path, typer.Option("--output", help="Private editable proposal JSON path.")
+    ],
+    minimum_occurrences: Annotated[
+        int,
+        typer.Option("--min-occurrences", min=1, help="Minimum consistent mapping count."),
+    ] = 2,
+) -> None:
+    """Propose pending correction terms; never activate them automatically."""
+
+    try:
+        proposal = propose_correction_dictionary(
+            canonical_directory=normalize_input_path(canonical_directory),
+            revision_directory=normalize_input_path(revision_directory),
+            project_id=project_id,
+            minimum_occurrences=minimum_occurrences,
+        )
+        normalized_output = output_path.expanduser().absolute()
+        write_correction_dictionary_proposal(proposal, normalized_output)
+    except (ApplicationError, ValueError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=4) from error
+    typer.echo(f"PROPOSAL {normalized_output}")
+    typer.echo(
+        f"SUMMARY cases={proposal.case_count} candidates={len(proposal.candidates)} approved=0"
+    )
+
+
+@correction_dictionary_app.command("approve")
+def correction_dictionary_approve_command(
+    proposal_path: Annotated[Path, typer.Argument(help="Manually reviewed proposal JSON.")],
+    dictionary_id: Annotated[str, typer.Option("--dictionary-id", help="Versioned dictionary ID.")],
+    output_path: Annotated[Path, typer.Option("--output", help="Approved dictionary JSON path.")],
+) -> None:
+    """Publish only explicitly approved entries after every proposal item is reviewed."""
+
+    try:
+        dictionary = approve_correction_dictionary(
+            proposal_path=normalize_input_path(proposal_path),
+            dictionary_id=dictionary_id,
+            output_path=output_path.expanduser().absolute(),
+        )
+    except (OSError, ValueError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=4) from error
+    typer.echo(f"DICTIONARY {output_path.expanduser().absolute()}")
+    typer.echo(f"SUMMARY entries={len(dictionary.entries)} project={dictionary.project_id}")
 
 
 class RequestedChannelMode(StrEnum):

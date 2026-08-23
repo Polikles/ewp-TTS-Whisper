@@ -500,6 +500,33 @@ The dictionary is source-directed context rather than post-processing: a Polish-
 search/replaced. Truly ambiguous identical source forms still require model context and
 manual review.
 
+Polish correction dictionaries use a separate artifact. Generate an editable proposal only
+from exact canonical results and accepted manual revisions, always writing disposable pilot
+material under `/tmp`:
+
+```bash
+pilot_root=$(mktemp -d /tmp/ewp-correction-dictionary.XXXXXX)
+uv run --locked transcriber dictionary correction propose \
+  --canonical-dir "/path/to/project/canonical" \
+  --revision-dir "/path/to/project/manual-revisions" \
+  --project-id "my-project" \
+  --output "$pilot_root/proposal.json"
+```
+
+Review every candidate and change its `status` from `pending` to either `approved` or
+`rejected`. Publication fails while any item is pending and never enables the result globally:
+
+```bash
+uv run --locked transcriber dictionary correction approve \
+  "$pilot_root/proposal.json" \
+  --dictionary-id "my-project-pl-v1" \
+  --output "$pilot_root/correction-dictionary.json"
+```
+
+The default proposal threshold is two consistent occurrences. This is candidate discovery,
+not automatic correction: grammar/style edits and ambiguous mappings still require human
+judgment. Correction and translation dictionaries are separately selected and versioned.
+
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
 After recording the required content-free evidence, remove it with
