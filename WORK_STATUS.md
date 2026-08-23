@@ -24,6 +24,19 @@ The first v0.4 vertical slice—manual Polish/English translation—is implement
   legal case names such as `Battle v. Microsoft`;
 - a complete operator playbook in `WSL config/TRANSLATE_TRANSCRIPTS.md`.
 
+The first automated-translation and benchmark slices are also implemented in the current
+working tree: provider-neutral single-owner unit requests, bounded read-only context, a
+deterministic mock provider, retry/resume execution, immutable non-final candidates,
+content-free operations reporting, exact-scope consent, and the first network-isolated LM
+Studio adapter are present. Failure-isolated directory execution and explicit manual
+acceptance as a new exact-parent manual translation are also implemented. In addition,
+exact-hash automated candidates and compatible
+manual references can be staged into
+private per-unit assessments, and completed reviews produce content-free,
+direction-specific semantic reports. Meaning fidelity is explicitly independent of
+lexical overlap; names, project conventions, and selected-dictionary adherence are a
+separate dimension. A real LM Studio model run and actual benchmark runs remain pending.
+
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
@@ -34,19 +47,25 @@ all **544 tests**. Canonical results and accepted revisions remain immutable. Pr
 corpus content, API keys, provider payloads, and runtime resume/lock files remain outside
 Git.
 
+The current automated-translation and semantic-benchmark working tree passes the same
+complete gate with **562 tests**.
+
 ## Next session: ordered v0.4 work
 
 Start with item 1 and complete one vertical slice at a time. These are the complete
 remaining v0.4 workstreams; details and acceptance criteria live in
 `docs/23-v0.4-translation-contract.md` and `docs/99-roadmap-v2.md`.
 
-1. **Automated translation.** Reuse the explicit local/cloud API consent boundary, but
-   produce non-final translation candidates rather than transcript revisions. Preserve
-   exact source/unit lineage, provider and prompt provenance, resumable failure-isolated
-   batches, auditability, and later manual acceptance. Begin with verified Polish input,
-   `pl -> en`, `preserve/preserve`, and no dictionary. Keep `en -> pl` separate.
-2. **Translation pipeline benchmark.** Validate preparation, provider execution, manual
-   correction, apply, audit, and export. Compare local candidates Qwen 2.5 32B Q4,
+1. **Automated translation.** The provider-neutral request/response, mock, LM Studio,
+   exact-scope consent, retry/resume, immutable candidate, and single-file CLI slice is
+   implemented. Next run a real verified-Polish `pl -> en`, `preserve/preserve`,
+   no-dictionary LM Studio pilot and inspect its operational evidence. Keep `en -> pl`
+   separate. Cloud translation remains a later adapter after the local pilot establishes
+   the request/prompt baseline.
+2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
+   content-free reporting boundary is implemented. Next define and approve the narrower
+   reference, then validate preparation, provider execution, manual correction, apply,
+   audit, and export. Compare local candidates Qwen 2.5 32B Q4,
    Bielik 11B Q8, Llama 3.3 8B Q8, MADLAD-400, and NLLB-200 separately from cloud models.
    Record model artifact, backend, prompt, chunking, latency, resource use, request/token
    volume, cost, retries, and reviewer effort. Do not claim translation accuracy from the

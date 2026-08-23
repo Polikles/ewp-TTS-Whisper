@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from ewp_transcripts.domain.translation import (
     Language,
+    TranslationParent,
     TranslationSource,
     TranslationStyle,
 )
@@ -27,6 +28,7 @@ class TranslationReviewHeader(TranslationReviewModel):
     style: TranslationStyle
     generated_at: datetime
     application_version: str = Field(min_length=1)
+    parent_translation: TranslationParent | None = None
 
     @model_validator(mode="after")
     def validate_header(self) -> Self:

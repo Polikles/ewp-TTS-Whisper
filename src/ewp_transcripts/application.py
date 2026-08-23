@@ -13,6 +13,7 @@ from typing import Literal
 from uuid import UUID, uuid4
 
 from ewp_transcripts import __version__
+from ewp_transcripts.automated_translation import build_automated_translation
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
@@ -47,6 +48,7 @@ from ewp_transcripts.domain import (
     TranscriptReview,
     TranscriptRevision,
 )
+from ewp_transcripts.domain.automated_translation import AutomatedTranslationProvider
 from ewp_transcripts.domain.canonical import (
     CanonicalEnvironment,
     CanonicalResult,
@@ -98,6 +100,12 @@ from ewp_transcripts.translation_audit import (
     build_translation_audit,
     publish_translation_audit,
 )
+from ewp_transcripts.translation_consent import (
+    TranslationConsentScope,
+    authorize_translation_api,
+    load_translation_consents,
+    persist_translation_consent,
+)
 from ewp_transcripts.translation_discovery import (
     discover_translation_reviews,
     discover_translations,
@@ -147,6 +155,9 @@ __all__ = [
     "prepare_translation_review_file",
     "preview_translation_review_file",
     "apply_translation_review_file",
+    "preview_automated_translation",
+    "apply_automated_translation",
+    "process_automated_translation_batch",
     "prepare_translation_review_batch",
     "process_translation_review_batch",
     "export_translation",
@@ -306,6 +317,34 @@ class TranslationApplyOutcome:
     result_path: Path
     translation: TranscriptTranslation
     translation_path: Path
+
+
+@dataclass(frozen=True, slots=True)
+class AutomatedTranslationOutcome:
+    """One unpublished or atomically published automated translation candidate."""
+
+    result_path: Path
+    translation: TranscriptTranslation
+    translation_path: Path | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchAutomatedTranslationJobOutcome:
+    result_path: Path
+    status: Literal["previewed", "published", "failed"]
+    translation: TranscriptTranslation | None = None
+    translation_path: Path | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchAutomatedTranslationOutcome:
+    jobs: tuple[BatchAutomatedTranslationJobOutcome, ...]
+    stopped_early: bool
+
+    def count(self, status: str) -> int:
+        return sum(job.status == status for job in self.jobs)
 
 
 @dataclass(frozen=True, slots=True)
@@ -882,6 +921,7 @@ def prepare_translation_review_file(
     target_language: Language,
     config: ApplicationConfig,
     revision_path: str | Path | None = None,
+    parent_translation_path: str | Path | None = None,
     output_directory: Path | None = None,
     style: TranslationStyle | None = None,
 ) -> TranslationReviewPreparationOutcome:
@@ -889,10 +929,16 @@ def prepare_translation_review_file(
 
     normalized_result = normalize_input_path(result_path)
     normalized_revision = normalize_input_path(revision_path) if revision_path is not None else None
+    normalized_parent = (
+        normalize_input_path(parent_translation_path)
+        if parent_translation_path is not None
+        else None
+    )
     review = prepare_translation_review(
         normalized_result,
         target_language=target_language,
         revision_path=normalized_revision,
+        parent_translation_path=normalized_parent,
         style=style,
     )
     path = publish_translation_review(
@@ -908,17 +954,24 @@ def preview_translation_review_file(
     *,
     result_path: str | Path,
     revision_path: str | Path | None = None,
+    parent_translation_path: str | Path | None = None,
 ) -> TranslationPreviewOutcome:
     """Validate exact source lineage and build a complete translation without writes."""
 
     normalized_review = normalize_input_path(review_path)
     normalized_result = normalize_input_path(result_path)
     normalized_revision = normalize_input_path(revision_path) if revision_path is not None else None
+    normalized_parent = (
+        normalize_input_path(parent_translation_path)
+        if parent_translation_path is not None
+        else None
+    )
     review = load_translation_review(normalized_review)
     validate_translation_review_source(
         review,
         normalized_result,
         revision_path=normalized_revision,
+        parent_translation_path=normalized_parent,
     )
     translation = build_manual_translation(review)
     return TranslationPreviewOutcome(normalized_review, normalized_result, translation)
@@ -930,6 +983,7 @@ def apply_translation_review_file(
     result_path: str | Path,
     config: ApplicationConfig,
     revision_path: str | Path | None = None,
+    parent_translation_path: str | Path | None = None,
     output_directory: Path | None = None,
 ) -> TranslationApplyOutcome:
     """Validate through preview and atomically publish one translation snapshot."""
@@ -938,6 +992,7 @@ def apply_translation_review_file(
         review_path,
         result_path=result_path,
         revision_path=revision_path,
+        parent_translation_path=parent_translation_path,
     )
     translation, path = publish_next_translation(
         preview.translation,
@@ -950,6 +1005,165 @@ def apply_translation_review_file(
         translation,
         path,
     )
+
+
+def preview_automated_translation(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: AutomatedTranslationProvider,
+    target_language: Language,
+    revision_path: str | Path | None = None,
+    style: TranslationStyle | None = None,
+    resume_directory: Path | None = None,
+    consent_choice: ConsentChoice | None = None,
+) -> AutomatedTranslationOutcome:
+    """Build a validated non-final provider candidate without publishing it."""
+
+    normalized_result = normalize_input_path(result_path)
+    normalized_revision = normalize_input_path(revision_path) if revision_path else None
+    _authorize_translation_provider(config, provider, consent_choice)
+    translation = build_automated_translation(
+        normalized_result,
+        provider,
+        target_language=target_language,
+        revision_path=normalized_revision,
+        style=style,
+        resume_directory=resume_directory,
+    )
+    return AutomatedTranslationOutcome(normalized_result, translation)
+
+
+def apply_automated_translation(
+    result_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: AutomatedTranslationProvider,
+    target_language: Language,
+    revision_path: str | Path | None = None,
+    style: TranslationStyle | None = None,
+    resume_directory: Path | None = None,
+    output_directory: Path | None = None,
+    consent_choice: ConsentChoice | None = None,
+) -> AutomatedTranslationOutcome:
+    """Build and atomically publish a non-final automated translation candidate."""
+
+    preview = preview_automated_translation(
+        result_path,
+        config=config,
+        provider=provider,
+        target_language=target_language,
+        revision_path=revision_path,
+        style=style,
+        resume_directory=resume_directory,
+        consent_choice=consent_choice,
+    )
+    translation, path = publish_next_translation(
+        preview.translation,
+        output_directory=output_directory or preview.result_path.parent,
+        lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    return AutomatedTranslationOutcome(preview.result_path, translation, path)
+
+
+def _authorize_translation_provider(
+    config: ApplicationConfig,
+    provider: AutomatedTranslationProvider,
+    choice: ConsentChoice | None,
+) -> None:
+    scope = TranslationConsentScope(
+        provider_id=provider.provider_id,
+        endpoint_kind=provider.endpoint_kind,
+        endpoint_identity=provider.endpoint_identity,
+    )
+    store = config.correction.consent_store.with_name("translation-consent.json")
+    decision = authorize_translation_api(
+        scope,
+        offline=config.general.offline,
+        interactive=config.general.interactive,
+        choice=choice,
+        stored_records=load_translation_consents(store),
+    )
+    if decision.persist_scope is not None:
+        persist_translation_consent(store, decision.persist_scope)
+
+
+def process_automated_translation_batch(
+    input_path: str | Path,
+    *,
+    config: ApplicationConfig,
+    provider: AutomatedTranslationProvider,
+    target_language: Language,
+    revision: str | Path | None = None,
+    style: TranslationStyle | None = None,
+    resume_directory: Path | None = None,
+    output_directory: Path | None = None,
+    recursive: bool = False,
+    preview: bool = False,
+    consent_choice: ConsentChoice | None = None,
+) -> BatchAutomatedTranslationOutcome:
+    """Build automated candidates sequentially with per-result failure isolation."""
+
+    results = discover_review_results(input_path, recursive=recursive)
+    revision_selection = normalize_input_path(revision) if revision is not None else None
+    jobs: list[BatchAutomatedTranslationJobOutcome] = []
+    stopped_early = False
+    for result_path in results:
+        try:
+            selected_revision = revision_selection
+            if revision_selection is not None and revision_selection.is_dir():
+                selected_revision = latest_compatible_revision_path(
+                    revision_selection,
+                    result_path=result_path,
+                    result=load_canonical_result(result_path),
+                )
+            state = resume_directory / result_path.stem if resume_directory is not None else None
+            if preview:
+                outcome = preview_automated_translation(
+                    result_path,
+                    config=config,
+                    provider=provider,
+                    target_language=target_language,
+                    revision_path=selected_revision,
+                    style=style,
+                    resume_directory=state,
+                    consent_choice=consent_choice,
+                )
+                status: Literal["previewed", "published"] = "previewed"
+            else:
+                outcome = apply_automated_translation(
+                    result_path,
+                    config=config,
+                    provider=provider,
+                    target_language=target_language,
+                    revision_path=selected_revision,
+                    style=style,
+                    resume_directory=state,
+                    output_directory=output_directory,
+                    consent_choice=consent_choice,
+                )
+                status = "published"
+            jobs.append(
+                BatchAutomatedTranslationJobOutcome(
+                    result_path=result_path,
+                    status=status,
+                    translation=outcome.translation,
+                    translation_path=outcome.translation_path,
+                )
+            )
+        except Exception as error:
+            jobs.append(
+                BatchAutomatedTranslationJobOutcome(
+                    result_path=result_path,
+                    status="failed",
+                    failure_code=_failure_code(error),
+                    failure_message=_failure_message(error),
+                )
+            )
+            if not config.runtime.continue_batch_after_error:
+                stopped_early = True
+                break
+    return BatchAutomatedTranslationOutcome(tuple(jobs), stopped_early)
 
 
 def prepare_translation_review_batch(

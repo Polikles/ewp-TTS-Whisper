@@ -11,6 +11,7 @@ from typing import Annotated, cast
 import typer
 
 from ewp_transcripts.application import (
+    BatchAutomatedTranslationOutcome,
     BatchExportOutcome,
     BatchReviewPreparationOutcome,
     BatchRevisionOutcome,
@@ -21,6 +22,7 @@ from ewp_transcripts.application import (
     TranscriptionOutcome,
     TranslationExportFormat,
     application_version,
+    apply_automated_translation,
     apply_correction,
     apply_review_file,
     apply_translation_review_file,
@@ -38,14 +40,17 @@ from ewp_transcripts.application import (
     prepare_review_file,
     prepare_translation_review_batch,
     prepare_translation_review_file,
+    preview_automated_translation,
     preview_correction,
     preview_review_file,
     preview_translation_review_file,
+    process_automated_translation_batch,
     process_review_batch,
     process_translation_review_batch,
     transcribe_batch,
     transcribe_one,
 )
+from ewp_transcripts.automated_translation import DeterministicMockTranslationProvider
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction_benchmark import (
     build_correction_benchmark_bundle,
@@ -63,6 +68,7 @@ from ewp_transcripts.correction_providers import create_correction_provider
 from ewp_transcripts.correction_state import summarize_correction_resume_state
 from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain import JobOutputPlan, TranscriptRevision
+from ewp_transcripts.domain.automated_translation import AutomatedTranslationProvider
 from ewp_transcripts.domain.correction import CorrectionProvider
 from ewp_transcripts.domain.enums import ChannelMode, LanguageMode, PlanDecision
 from ewp_transcripts.domain.errors import (
@@ -76,6 +82,16 @@ from ewp_transcripts.domain.errors import (
 from ewp_transcripts.domain.translation import TranscriptTranslation, TranslationStyle
 from ewp_transcripts.lm_studio_adapter import is_loopback_endpoint
 from ewp_transcripts.revision_editor import open_review_in_editor, require_review_change
+from ewp_transcripts.translation_benchmark import (
+    evaluate_translation_benchmark,
+    prepare_translation_benchmark_assessments,
+)
+from ewp_transcripts.translation_consent import TranslationConsentScope, load_translation_consents
+from ewp_transcripts.translation_lm_studio import (
+    LmStudioTranslationConfig,
+    LmStudioTranslationProvider,
+)
+from ewp_transcripts.translation_state import summarize_translation_resume_state
 
 app = typer.Typer(
     name="transcriber",
@@ -103,6 +119,11 @@ correction_benchmark_app = typer.Typer(
     help="Benchmark automated transcript corrections against manual gold revisions.",
     no_args_is_help=True,
 )
+translation_benchmark_app = typer.Typer(
+    name="translation",
+    help="Benchmark translation meaning with exact-lineage human semantic assessments.",
+    no_args_is_help=True,
+)
 translate_app = typer.Typer(
     name="translate",
     help=(
@@ -115,6 +136,7 @@ app.add_typer(revise_app, name="revise")
 app.add_typer(translate_app, name="translate")
 app.add_typer(benchmark_app, name="benchmark")
 benchmark_app.add_typer(correction_benchmark_app, name="correction")
+benchmark_app.add_typer(translation_benchmark_app, name="translation")
 
 
 class RequestedChannelMode(StrEnum):
@@ -172,6 +194,104 @@ class RequestedTranscribeFormat(StrEnum):
 
 class CleanTarget(StrEnum):
     ALL_WORKDIRS = "all-workdirs"
+
+
+@translation_benchmark_app.command("prepare")
+def translation_benchmark_prepare_command(
+    candidate_directory: Annotated[
+        Path, typer.Argument(help="Directory containing one automated candidate per job.")
+    ],
+    gold_directory: Annotated[
+        Path, typer.Option("--gold-dir", help="Directory containing manual gold translations.")
+    ],
+    output_directory: Annotated[
+        Path, typer.Option("--output-dir", help="Private assessment bundle directory.")
+    ],
+) -> None:
+    """Stage exact artifacts and create semantic assessment templates."""
+
+    try:
+        assessments = prepare_translation_benchmark_assessments(
+            candidate_directory=normalize_input_path(candidate_directory),
+            gold_directory=normalize_input_path(gold_directory),
+            output_directory=normalize_input_path(output_directory),
+        )
+    except (OSError, ValueError, ApplicationError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    for assessment in assessments:
+        typer.echo(f"ASSESSMENT {assessment}")
+    typer.echo(f"SUMMARY cases={len(assessments)} pending_review={len(assessments)}")
+
+
+@translation_benchmark_app.command("report")
+def translation_benchmark_report_command(
+    assessment_directory: Annotated[
+        Path, typer.Argument(help="Directory containing completed semantic assessments.")
+    ],
+    output_path: Annotated[
+        Path | None, typer.Option("--output", help="Write the content-free JSON report.")
+    ] = None,
+) -> None:
+    """Aggregate completed semantic assessments without lexical quality scoring."""
+
+    try:
+        directory = normalize_input_path(assessment_directory)
+        assessments = tuple(sorted(directory.glob("*_semantic_assessment.json")))
+        report = evaluate_translation_benchmark(assessments)
+        serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        normalized_output = _optional_user_path(output_path)
+        if normalized_output is not None:
+            normalized_output.parent.mkdir(parents=True, exist_ok=True)
+            normalized_output.write_text(serialized, encoding="utf-8")
+            normalized_output.chmod(0o600)
+    except (OSError, ValueError, ApplicationError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    if normalized_output is None:
+        typer.echo(serialized, nl=False)
+        return
+    aggregate = cast(dict[str, object], report["aggregate"])
+    typer.echo(f"REPORT {normalized_output}")
+    typer.echo(
+        "SUMMARY "
+        f"direction={report['direction']} cases={report['case_count']} "
+        f"units={aggregate['unit_count']} "
+        f"semantic_pass_rate={cast(float, aggregate['semantic_pass_rate']):.8f} "
+        f"convention_violations={aggregate['convention_violations']}"
+    )
+
+
+@translation_benchmark_app.command("operations")
+def translation_benchmark_operations_command(
+    resume_directory: Annotated[
+        Path, typer.Argument(help="Private automated-translation resume directory.")
+    ],
+    output_path: Annotated[
+        Path | None, typer.Option("--output", help="Write the content-free operations report.")
+    ] = None,
+) -> None:
+    """Aggregate requests, retries, latency, tokens, and provider-reported cost."""
+
+    try:
+        report = summarize_translation_resume_state(normalize_input_path(resume_directory))
+        serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        normalized_output = _optional_user_path(output_path)
+        if normalized_output is not None:
+            normalized_output.parent.mkdir(parents=True, exist_ok=True)
+            normalized_output.write_text(serialized, encoding="utf-8")
+            normalized_output.chmod(0o600)
+    except (OSError, ValueError, ApplicationError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    if normalized_output is None:
+        typer.echo(serialized, nl=False)
+    else:
+        typer.echo(f"REPORT {normalized_output}")
+        typer.echo(
+            f"SUMMARY units={report['units']} requests={report['request_count']} "
+            f"retries={report['retries']} elapsed_ms={report['elapsed_ms']}"
+        )
 
 
 @correction_benchmark_app.command("build")
@@ -292,6 +412,11 @@ class RequestedCorrectionProvider(StrEnum):
     OPENROUTER = "openrouter"
 
 
+class RequestedTranslationProvider(StrEnum):
+    MOCK = "mock"
+    LM_STUDIO = "lm-studio"
+
+
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(application_version())
@@ -387,6 +512,174 @@ def _print_translation_export_batch(outcome: BatchTranslationExportOutcome) -> N
     )
 
 
+def _print_automated_translation_batch(outcome: BatchAutomatedTranslationOutcome) -> None:
+    for job in outcome.jobs:
+        typer.echo(f"{job.status.upper()} {job.result_path}")
+        if job.translation_path is not None:
+            typer.echo(f"  CANDIDATE {job.translation_path}")
+        if job.failure_code is not None:
+            typer.echo(f"  ERROR {job.failure_code}: {job.failure_message}")
+    typer.echo(
+        f"SUMMARY previewed={outcome.count('previewed')} "
+        f"published={outcome.count('published')} failed={outcome.count('failed')} "
+        f"stopped_early={str(outcome.stopped_early).lower()} final=false"
+    )
+
+
+@translate_app.command("automate")
+def translate_automate_command(
+    result_path: Annotated[
+        Path, typer.Argument(help="Exact canonical result to translate automatically.")
+    ],
+    target_language: Annotated[
+        RequestedTranslationLanguage,
+        typer.Option("--target-language", help="Target language: pl or en."),
+    ],
+    requested_provider: Annotated[
+        RequestedTranslationProvider,
+        typer.Option("--provider", help="Automated translation provider."),
+    ] = RequestedTranslationProvider.MOCK,
+    model: Annotated[
+        str | None, typer.Option("--model", help="Exact LM Studio model identifier.")
+    ] = None,
+    endpoint: Annotated[
+        str,
+        typer.Option("--endpoint", help="Exact LM Studio OpenAI-compatible API root."),
+    ] = "http://127.0.0.1:1234/v1",
+    allow_remote_endpoint: Annotated[
+        bool,
+        typer.Option(
+            "--allow-remote-endpoint",
+            help="Explicitly allow a non-loopback LM Studio HTTP(S) endpoint.",
+        ),
+    ] = False,
+    consent: Annotated[
+        RequestedCorrectionConsent | None,
+        typer.Option("--consent", help="API consent: reject, once, or persist."),
+    ] = None,
+    revision_path: Annotated[
+        Path | None, typer.Option("--revision", help="Exact compatible source revision.")
+    ] = None,
+    output_directory: Annotated[
+        Path | None, typer.Option("--output-dir", help="Write the non-final candidate here.")
+    ] = None,
+    resume_directory: Annotated[
+        Path | None, typer.Option("--resume-dir", help="Private validated per-unit state.")
+    ] = None,
+    preview: Annotated[
+        bool, typer.Option("--preview", help="Build the candidate without publishing it.")
+    ] = False,
+    recursive: Annotated[
+        bool, typer.Option("--recursive", help="Include canonical results in subdirectories.")
+    ] = False,
+    register: Annotated[
+        RequestedTranslationRegister,
+        typer.Option("--register", help="Preserve, formalize, or informalize register."),
+    ] = RequestedTranslationRegister.PRESERVE,
+    discourse: Annotated[
+        RequestedTranslationDiscourse,
+        typer.Option("--discourse", help="Preserve, academic, or general discourse."),
+    ] = RequestedTranslationDiscourse.PRESERVE,
+    config_path: Annotated[
+        Path | None, typer.Option("--config", help="Read an explicit TOML configuration file.")
+    ] = None,
+    json_output: Annotated[
+        bool, typer.Option("--json-output", help="Print the candidate as JSON.")
+    ] = False,
+) -> None:
+    """Build a non-final candidate with the mock or LM Studio provider."""
+
+    typer.echo(
+        "WARNING: Automated translation is a non-final review candidate. "
+        "Manually verify meaning, omissions, additions, uncertainty, names, and style "
+        "before acceptance.",
+        err=True,
+    )
+    try:
+        config = load_config(explicit_path=config_path)
+        normalized_result = normalize_input_path(result_path)
+        if normalized_result.is_dir() and json_output:
+            raise ValueError("--json-output is available only for one result")
+        state_directory = _optional_user_path(resume_directory) or (
+            normalized_result.parent / "translation-state-ewp-transcripts"
+        )
+        style = TranslationStyle(register=register.value, discourse=discourse.value)
+        provider: AutomatedTranslationProvider
+        if requested_provider is RequestedTranslationProvider.MOCK:
+            provider = DeterministicMockTranslationProvider()
+        else:
+            if model is None:
+                raise ValueError("LM Studio automated translation requires --model")
+            provider = LmStudioTranslationProvider(
+                LmStudioTranslationConfig(
+                    model_id=model,
+                    endpoint=endpoint,
+                    allow_remote_endpoint=allow_remote_endpoint,
+                )
+            )
+        consent_choice = _translation_consent_choice(config, provider, consent)
+        if normalized_result.is_dir():
+            batch = process_automated_translation_batch(
+                normalized_result,
+                config=config,
+                provider=provider,
+                target_language=target_language.value,
+                revision=revision_path,
+                style=style,
+                resume_directory=state_directory,
+                output_directory=_optional_user_path(output_directory),
+                recursive=recursive,
+                preview=preview,
+                consent_choice=consent_choice,
+            )
+        elif preview:
+            outcome = preview_automated_translation(
+                normalized_result,
+                config=config,
+                provider=provider,
+                target_language=target_language.value,
+                revision_path=revision_path,
+                style=style,
+                resume_directory=state_directory,
+                consent_choice=consent_choice,
+            )
+        else:
+            outcome = apply_automated_translation(
+                normalized_result,
+                config=config,
+                provider=provider,
+                target_language=target_language.value,
+                revision_path=revision_path,
+                style=style,
+                resume_directory=state_directory,
+                output_directory=_optional_user_path(output_directory),
+                consent_choice=consent_choice,
+            )
+    except (ApplicationError, ValueError) as error:
+        if isinstance(error, ApplicationError):
+            _expected_error(error)
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=4) from error
+    if normalized_result.is_dir():
+        _print_automated_translation_batch(batch)
+        if batch.count("failed"):
+            raise typer.Exit(code=5)
+    elif json_output:
+        typer.echo(
+            _translation_json(outcome.translation, translation_path=outcome.translation_path)
+        )
+    elif preview:
+        _print_translation_preview(outcome.translation)
+    else:
+        llm = outcome.translation.provenance.llm
+        assert llm is not None
+        typer.echo(f"CANDIDATE {outcome.translation_path}")
+        typer.echo(
+            f"SUMMARY final=false units={outcome.translation.statistics.unit_count} "
+            f"provider={llm.provider}"
+        )
+
+
 @translate_app.command("prepare")
 def translate_prepare_command(
     result_path: Annotated[
@@ -400,6 +693,13 @@ def translate_prepare_command(
     revision_path: Annotated[
         Path | None,
         typer.Option("--revision", help="Exact compatible source transcript revision."),
+    ] = None,
+    parent_translation: Annotated[
+        Path | None,
+        typer.Option(
+            "--parent-translation",
+            help="Exact automated candidate to prefill for manual acceptance.",
+        ),
     ] = None,
     recursive: Annotated[
         bool,
@@ -427,6 +727,8 @@ def translate_prepare_command(
     try:
         config = load_config(explicit_path=config_path)
         normalized_result = normalize_input_path(result_path)
+        if normalized_result.is_dir() and parent_translation is not None:
+            raise ValueError("--parent-translation currently requires one canonical result")
         translation_style = TranslationStyle(
             register=register.value,
             discourse=discourse.value,
@@ -447,6 +749,7 @@ def translate_prepare_command(
                 target_language=target_language.value,
                 config=config,
                 revision_path=revision_path,
+                parent_translation_path=parent_translation,
                 output_directory=_optional_user_path(output_directory),
                 style=translation_style,
             )
@@ -478,6 +781,10 @@ def translate_preview_command(
         Path | None,
         typer.Option("--revision", help="Exact source transcript revision, when used."),
     ] = None,
+    parent_translation: Annotated[
+        Path | None,
+        typer.Option("--parent-translation", help="Exact parent candidate used at prepare."),
+    ] = None,
     revisions_directory: Annotated[
         Path | None,
         typer.Option(
@@ -498,6 +805,8 @@ def translate_preview_command(
 
     try:
         normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir() and parent_translation is not None:
+            raise ValueError("--parent-translation currently requires one review")
         if normalized_review.is_dir():
             batch = process_translation_review_batch(
                 normalized_review,
@@ -512,6 +821,7 @@ def translate_preview_command(
                 normalized_review,
                 result_path=result_path,
                 revision_path=revision_path,
+                parent_translation_path=parent_translation,
             )
     except ApplicationError as error:
         _expected_error(error)
@@ -538,6 +848,10 @@ def translate_apply_command(
     revision_path: Annotated[
         Path | None,
         typer.Option("--revision", help="Exact source transcript revision, when used."),
+    ] = None,
+    parent_translation: Annotated[
+        Path | None,
+        typer.Option("--parent-translation", help="Exact parent candidate used at prepare."),
     ] = None,
     revisions_directory: Annotated[
         Path | None,
@@ -568,6 +882,8 @@ def translate_apply_command(
     try:
         config = load_config(explicit_path=config_path)
         normalized_review = normalize_input_path(review_path)
+        if normalized_review.is_dir() and parent_translation is not None:
+            raise ValueError("--parent-translation currently requires one review")
         if normalized_review.is_dir():
             batch = process_translation_review_batch(
                 normalized_review,
@@ -584,6 +900,7 @@ def translate_apply_command(
                 result_path=result_path,
                 config=config,
                 revision_path=revision_path,
+                parent_translation_path=parent_translation,
                 output_directory=_optional_user_path(output_directory),
             )
     except ApplicationError as error:
@@ -1238,6 +1555,40 @@ def _correction_consent_choice(
         typer.echo(f"WARNING: {REMOTE_LOCAL_API_WARNING}", err=True)
     records = load_correction_consents(config.correction.consent_store)
     if any(record.scope == scope for record in records):
+        return None
+    if requested is not None:
+        return _consent_value(requested)
+    if not config.general.interactive:
+        return None
+    answer = typer.prompt("Consent [reject/once/persist]", default="reject").strip().casefold()
+    try:
+        selected = RequestedCorrectionConsent(answer)
+    except ValueError as error:
+        raise typer.BadParameter("consent must be reject, once, or persist") from error
+    return _consent_value(selected)
+
+
+def _translation_consent_choice(
+    config: ApplicationConfig,
+    provider: AutomatedTranslationProvider,
+    requested: RequestedCorrectionConsent | None,
+) -> ConsentChoice | None:
+    """Display the API warning and resolve explicit translation consent."""
+
+    scope = TranslationConsentScope(
+        provider_id=provider.provider_id,
+        endpoint_kind=provider.endpoint_kind,
+        endpoint_identity=provider.endpoint_identity,
+    )
+    if scope.endpoint_kind == "mock":
+        return None
+    warning = correction_api_warning(scope.endpoint_kind)
+    if warning is not None:
+        typer.echo(f"WARNING: {warning}", err=True)
+    if scope.endpoint_kind == "local" and not is_loopback_endpoint(scope.endpoint_identity):
+        typer.echo(f"WARNING: {REMOTE_LOCAL_API_WARNING}", err=True)
+    store = config.correction.consent_store.with_name("translation-consent.json")
+    if any(record.scope == scope for record in load_translation_consents(store)):
         return None
     if requested is not None:
         return _consent_value(requested)

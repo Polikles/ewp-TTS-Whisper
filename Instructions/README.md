@@ -454,6 +454,101 @@ Omit `--revisions-dir` for a raw-source translation. `--no-write --json-output`
 validates and prints the report without publication. The audit reopens the hashed source,
 reconstructs every machine-owned mapping, and pairs source and target text by unit.
 
+### Translate automatically with LM Studio
+
+Automated translation always creates a non-final candidate. Load the exact model in LM
+Studio, start its local server, and run from a verified revision where possible:
+
+```bash
+export EWP_TRANSLATION_PILOT="$(mktemp -d /tmp/ewp-translation-pilot.XXXXXX)"
+
+uv run --locked transcriber translate automate "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" \
+  --target-language en --provider lm-studio \
+  --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
+  --resume-dir "$EWP_TRANSLATION_PILOT/state" \
+  --output-dir "$EWP_TRANSLATION_PILOT/candidates"
+```
+
+All pilot-generated state, candidates, exports, and reports belong under this temporary
+directory—not in the private corpus, repository, or another long-lived project directory.
+After recording the required content-free evidence, remove it with
+`rm -rf -- "$EWP_TRANSLATION_PILOT"` only after confirming the variable starts with
+`/tmp/ewp-translation-pilot.`.
+
+Use `--preview` to build and validate without publishing; provider calls still occur and
+resume state is still written. `--consent persist` stores only the exact non-secret
+provider/endpoint scope in `translation-consent.json` beside the configured correction
+consent store. A non-loopback endpoint is rejected unless `--allow-remote-endpoint` is
+explicitly supplied, and then receives an additional network warning.
+
+Each request owns exactly one sentence unit. Adjacent units are read-only context and
+cannot be returned, merged, reordered, or assigned to another speaker. Interrupted runs
+reuse only exact-operation-matched validated state. Inspect content-free operational
+evidence with:
+
+```bash
+uv run --locked transcriber benchmark translation operations \
+  "$EWP_TRANSLATION_PILOT/state" \
+  --output "$EWP_TRANSLATION_PILOT/translation-operations.json"
+```
+
+For offline contract checks, `--provider mock` requires no consent or model. Its output is
+synthetic and must never be used as translation-quality evidence. Whether mock or LM
+Studio, manually review meaning, omissions, additions, contradictions, uncertainty,
+names, terminology, and style before treating any candidate as accepted text.
+
+Directories use the same command. Pass a revision directory to select each result's latest
+exact compatible revision; failures are isolated and return exit code 5:
+
+```bash
+uv run --locked transcriber translate automate "/path/to/results" \
+  --revision "/path/to/revisions" --target-language en \
+  --provider lm-studio --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
+  --resume-dir "$EWP_TRANSLATION_PILOT/state" \
+  --output-dir "$EWP_TRANSLATION_PILOT/candidates"
+```
+
+To accept or correct one automated candidate, create a protected review prefilled from the
+exact immutable candidate, edit only `> ` lines, then preview/apply with the same parent:
+
+```bash
+uv run --locked transcriber translate prepare "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" --target-language en \
+  --parent-translation "/path/to/episode_en_translation_001.json" \
+  --output-dir "/path/to/acceptance-reviews"
+
+uv run --locked transcriber translate apply \
+  "/path/to/acceptance-reviews/episode_en.translation.review.txt" \
+  --results "/path/to/episode_results.json" \
+  --revision "/path/to/episode_revision_001.json" \
+  --parent-translation "/path/to/episode_en_translation_001.json" \
+  --output-dir "/path/to/translations"
+```
+
+The accepted artifact is a new manual child. The LLM candidate remains unchanged and the
+child records its exact ID, number, filename, and SHA-256.
+
+### Benchmark translation meaning
+
+When automated candidates and a narrower approved manual reference exist, prepare an
+exact-hash private semantic-review bundle and then report completed assessments:
+
+```bash
+uv run --locked transcriber benchmark translation prepare "/path/to/candidates" \
+  --gold-dir "/path/to/manual-gold" --output-dir "/path/to/assessment"
+
+uv run --locked transcriber benchmark translation report "/path/to/assessment" \
+  --output "/path/to/semantic-report.json"
+```
+
+The reviewer scores preserved meaning per unit as faithful or a minor, major, or critical
+semantic error and categorizes errors such as omission, addition, contradiction, or
+changed uncertainty. Different idiomatic wording is not an error. Names, approved
+terminology, and explicit dictionary conventions are assessed separately. Reports never
+combine Polish-to-English with English-to-Polish and contain no transcript text. See the
+translation playbook for the assessment fields and restrictions.
+
 ## 11. Export corrected transcripts
 
 Latest compatible revision per result:

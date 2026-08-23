@@ -172,6 +172,95 @@ allows substantial artistic freedom. For now validate the pipeline:
 - no `[cite: N]` or other unspoken annotations remain;
 - repeated application/export behaves according to immutable numbering and safe skip rules.
 
-Record structural failures and manual corrections separately. Translation-quality metrics
-can be designed later around narrower reference criteria; do not report BLEU, COMET, WER,
-or a single accuracy score for the current artistically edited English corpus.
+Record structural failures and manual corrections separately. The semantic benchmark
+machinery now exists, but this corpus still lacks the narrower approved reference needed
+to use it for accuracy claims. Do not report BLEU, COMET, WER, or a single accuracy score
+for the current artistically edited English corpus.
+
+## 8. Semantic benchmark workflow
+
+Once automated `*_translation_NNN.json` candidates and narrower manually approved gold
+translations exist, create a private assessment bundle:
+
+```bash
+uv run --locked transcriber benchmark translation prepare \
+  "/path/to/automated candidates" \
+  --gold-dir "/path/to/manual gold" \
+  --output-dir "/path/to/private semantic assessment"
+```
+
+For every unit in each `*_semantic_assessment.json`, replace `pending` with `faithful`,
+`minor_error`, `major_error`, or `critical_error`. Error units require at least one issue
+whose category describes the semantic failure: mistranslation, omission, addition,
+contradiction, changed uncertainty, or changed tone/register. Judge whether the meaning is
+correct; do not require the candidate to use the reference's particular wording.
+
+Assess names and approved terminology separately with `convention_status`. Use
+`not_applicable` when no convention is being tested, `pass` when applicable conventions are
+followed, or `fail` plus a positive `convention_violations` count. Dictionary-assisted
+assessments must record the exact dictionary ID and SHA-256; keep them separate from the
+no-dictionary baseline.
+
+After every unit is reviewed, create the content-free report:
+
+```bash
+uv run --locked transcriber benchmark translation report \
+  "/path/to/private semantic assessment" \
+  --output "/path/to/private semantic report.json"
+```
+
+Polish-to-English and English-to-Polish must use separate bundle directories and reports.
+The command rejects changed candidate/gold files, mismatched source or unit lineage,
+incomplete assessments, and mixed directions.
+
+## 9. Automated candidate workflow
+
+The implemented local adapter uses LM Studio and creates an immutable non-final candidate.
+Load the exact intended model and start the local OpenAI-compatible server, then run:
+
+```bash
+export EWP_TRANSLATION_PILOT="$(mktemp -d /tmp/ewp-translation-pilot.XXXXXX)"
+
+uv run --locked transcriber translate automate "$EWP_PL_RESULTS/EPISODE_results.json" \
+  --revision "$EWP_PL_REVISIONS/EPISODE_revision_NNN.json" \
+  --target-language en --provider lm-studio \
+  --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
+  --resume-dir "$EWP_TRANSLATION_PILOT/state" \
+  --output-dir "$EWP_TRANSLATION_PILOT/candidates"
+```
+
+Use this temporary root for every generated pilot file: resume state, candidates, exports,
+assessments, and operational reports. Never write disposable pilot artifacts into the
+private corpus or repository. Preserve only reviewed content-free evidence in project
+documentation, then delete the temporary root after verifying it matches
+`/tmp/ewp-translation-pilot.*`.
+
+The initial comparable path is verified Polish source, `preserve/preserve`, and no
+dictionary. Record the exact model artifact/quantization and hardware outside the artifact
+until the benchmark manifest incorporates those run-level fields. Do not mix different
+models, prompts, style settings, or translation directions in one ranking.
+
+Each provider request translates one owned sentence unit with adjacent read-only context.
+Validated per-unit resume files avoid repeated calls after interruption. They contain
+private source and target text, must remain outside Git, and should be stored on a private
+filesystem. Use `benchmark translation operations` for a content-free summary of calls,
+retries, latency, tokens, and provider-reported cost.
+
+For a complete directory, pass the result and revision directories to the same command.
+Each result receives its own resume subdirectory, and one failure does not discard other
+published candidates.
+
+After reviewing one candidate, prepare a manually editable child without changing the LLM
+artifact:
+
+```bash
+uv run --locked transcriber translate prepare "$EWP_PL_RESULTS/EPISODE_results.json" \
+  --revision "$EWP_PL_REVISIONS/EPISODE_revision_NNN.json" \
+  --target-language en \
+  --parent-translation "$EWP_TRANSLATION_PILOT/candidates/EPISODE_en_translation_001.json" \
+  --output-dir "/absolute/private/path/acceptance-reviews"
+```
+
+The `> ` lines are prefilled from the exact candidate. Correct them by semantic meaning,
+then preview and apply while passing the same `--parent-translation`. The resulting manual
+snapshot records exact parent lineage and receives the next immutable translation number.

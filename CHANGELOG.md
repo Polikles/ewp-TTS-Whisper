@@ -6,6 +6,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Changed
 
+- Required disposable test and model-pilot outputs to use a dedicated `mktemp -d`
+  directory under `/tmp`. Private corpora and repositories retain only reviewed,
+  content-free evidence rather than resume state, candidates, exports, or intermediate
+  benchmark bundles.
+
 - Replaced the stale mid-v0.3 work status with a concise 2026-08-23 checkpoint: completed
   v0.1-v0.3 work, structurally accepted manual translation, the exact ordered remaining
   v0.4 workstreams, and explicitly deferred later work now have repository-resident resume
@@ -26,6 +31,28 @@ All notable changes to EWP-transcripts are documented here.
   as the primary production gate.
 
 ### Added
+
+- Added provider-neutral automated translation requests and responses with one exact owned
+  sentence unit, bounded read-only context, deterministic operation identity, strict local
+  response binding, and a network-free deterministic mock provider.
+- Added bounded automated-translation execution, sanitized retry/permanent failure
+  handling, private exact-operation resume entries, content-free operational summaries,
+  and immutable LLM-provenance candidate construction without changing source artifacts.
+- Added `translate automate` preview/publication for mock and LM Studio providers. The LM
+  Studio adapter uses strict structured output, loopback-only endpoints by default, exact
+  model/prompt provenance, usage capture, and separate exact-scope translation consent.
+  Every CLI outcome warns that automated translation is non-final.
+- Extended automated translation to deterministic failure-isolated directories with
+  per-result resume state and latest-compatible source-revision selection. Added explicit
+  manual acceptance through `translate prepare --parent-translation`: the protected review
+  is prefilled only after exact candidate/source/style/unit validation, and apply publishes
+  a new manual child with immutable parent ID, filename, number, and SHA-256 lineage.
+- Added the first exact-lineage translation benchmark workflow. It stages automated
+  candidates with compatible manual references, creates private per-unit human semantic
+  assessments, and emits content-free direction-specific reports. Meaning fidelity is
+  scored independently of lexical wording; names, explicit dictionary terminology, and
+  project conventions use a separate compliance dimension. Pending review, artifact hash
+  changes, source/style/unit mismatch, and mixed directions fail closed.
 
 - Added the first strict v0.4 translation domain models for language direction, style,
   exact canonical/revision source identity, source verification status, parent lineage,

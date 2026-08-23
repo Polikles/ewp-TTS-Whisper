@@ -54,6 +54,7 @@ def build_manual_translation(
         ),
         style=review.header.style,
         source=review.header.source,
+        parent_translation=review.header.parent_translation,
         provenance=TranslationProvenance(method="manual", interface="cli"),
         units=units,
         statistics=TranslationStatistics(

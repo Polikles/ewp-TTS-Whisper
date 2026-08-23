@@ -13,9 +13,11 @@ from ewp_transcripts.domain.revision import load_transcript_revision, sha256_fil
 from ewp_transcripts.domain.translation import (
     Language,
     TranslationCanonicalSource,
+    TranslationParent,
     TranslationRevisionSource,
     TranslationSource,
     TranslationStyle,
+    load_transcript_translation,
 )
 from ewp_transcripts.domain.translation_review import (
     TranslationReview,
@@ -31,6 +33,7 @@ def validate_translation_review_source(
     result_path: Path,
     *,
     revision_path: Path | None = None,
+    parent_translation_path: Path | None = None,
 ) -> None:
     """Fail closed unless all machine-owned review fields match the exact source."""
 
@@ -38,6 +41,7 @@ def validate_translation_review_source(
         result_path,
         target_language=review.header.target_language,
         revision_path=revision_path,
+        parent_translation_path=parent_translation_path,
         style=review.header.style,
         generated_at=review.header.generated_at,
     )
@@ -56,6 +60,7 @@ def prepare_translation_review(
     *,
     target_language: Language,
     revision_path: Path | None = None,
+    parent_translation_path: Path | None = None,
     style: TranslationStyle | None = None,
     generated_at: datetime | None = None,
 ) -> TranslationReview:
@@ -96,6 +101,56 @@ def prepare_translation_review(
             ),
         )
     units = plan_translation_units(effective)
+    parent = (
+        load_transcript_translation(parent_translation_path)
+        if parent_translation_path is not None
+        else None
+    )
+    parent_identity = None
+    parent_targets: dict[str, str] = {}
+    if parent is not None:
+        assert parent_translation_path is not None
+        if (
+            parent.job_id != base.job_id
+            or parent.direction.source_language != effective.language
+            or parent.direction.target_language != target_language
+            or parent.style != (style or TranslationStyle())
+            or parent.source != source
+        ):
+            raise InvalidTranslationError(
+                "Parent translation does not match the exact source, direction, or style"
+            )
+        planned_identity = tuple(
+            (
+                unit.unit_id,
+                unit.speaker_id,
+                unit.source_token_ids,
+                unit.source_text_sha256,
+                unit.start_ms,
+                unit.end_ms,
+            )
+            for unit in units
+        )
+        parent_unit_identity = tuple(
+            (
+                unit.unit_id,
+                unit.speaker_id,
+                unit.source_token_ids,
+                unit.source_text_sha256,
+                unit.start_ms,
+                unit.end_ms,
+            )
+            for unit in parent.units
+        )
+        if planned_identity != parent_unit_identity:
+            raise InvalidTranslationError("Parent translation units do not match the exact source")
+        parent_identity = TranslationParent(
+            translation_id=parent.translation_id,
+            translation_number=parent.translation_number,
+            sha256=sha256_file(parent_translation_path),
+            filename=parent_translation_path.name,
+        )
+        parent_targets = {unit.unit_id: unit.target_text for unit in parent.units}
     return TranslationReview(
         header=TranslationReviewHeader(
             job_id=base.job_id,
@@ -105,6 +160,7 @@ def prepare_translation_review(
             style=style or TranslationStyle(),
             generated_at=generated_at or datetime.now(UTC),
             application_version=__version__,
+            parent_translation=parent_identity,
         ),
         units=tuple(
             TranslationReviewUnit(
@@ -115,6 +171,7 @@ def prepare_translation_review(
                 source_text_sha256=unit.source_text_sha256,
                 start_ms=unit.start_ms,
                 end_ms=unit.end_ms,
+                target_text=parent_targets.get(unit.unit_id, ""),
             )
             for unit in units
         ),

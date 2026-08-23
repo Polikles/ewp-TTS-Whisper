@@ -160,6 +160,13 @@ make test-integration
 
 Changes touching WhisperX, alignment, pyannote, CUDA, model loading, or performance must run the relevant GPU/E2E suite against the external test dataset.
 
+All disposable pilot outputs, provider resume state, generated candidates, temporary
+exports, and intermediate benchmark bundles MUST be written under a dedicated `mktemp -d`
+directory. Do not place pilot runtime artifacts inside the private corpus, repository, or
+long-lived project directories. Persist only the reviewed, content-free test evidence that
+the relevant contract or acceptance document explicitly requires, then remove the temporary
+directory when the pilot is complete.
+
 ## 9. Definition of done
 
 A change is complete only when:

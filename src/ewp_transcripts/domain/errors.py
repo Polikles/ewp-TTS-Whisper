@@ -89,6 +89,22 @@ class InvalidTranslationError(ApplicationError):
     """Raised when a translation artifact is invalid or incompatible with its source."""
 
 
+class InvalidTranslationResponseError(InvalidTranslationError):
+    """Raised when an automated-translation response violates its request contract."""
+
+
+class TranslationProviderError(ApplicationError):
+    """Base class for sanitized automated-translation provider failures."""
+
+
+class RetryableTranslationProviderError(TranslationProviderError):
+    """Raised for an explicitly retryable translation-provider failure."""
+
+
+class PermanentTranslationProviderError(TranslationProviderError):
+    """Raised for a translation-provider failure that must not be retried."""
+
+
 class InvalidCorrectionResponseError(ApplicationError):
     """Raised when provider output cannot be trusted as a correction proposal."""
 
