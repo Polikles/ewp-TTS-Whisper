@@ -80,14 +80,14 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
-| FR-J00, FR-J03, FR-J15, FR-J18 | planned | Revision domain/storage, ADR-0020, immutable full snapshots, atomic allocator tests. |
-| FR-J01, FR-J02 | planned | `EWP-REVIEW 1`, prepare/apply application services, directory discovery and batch tests. |
-| FR-J04, FR-J05, FR-J06, FR-J07, FR-J11, FR-J12 | planned | Anchored token aligner and correction case matrix. |
-| FR-J08 | planned | `EffectiveTranscript` timing inheritance; no canonical timestamp mutation. |
-| FR-J09, FR-J10 | planned | CLI/application preview path and external-editor lifecycle tests. |
-| FR-J13, FR-J14 | planned | Revision provenance/statistics and optional/reconstructable audit. |
-| FR-J16, FR-J17 | planned | Revision resolver and exporter refactor to `EffectiveTranscript`. |
-| NFR-013, NFR-014 | planned | Determinism fixtures and shared CLI/future-LLM/GUI application boundary. |
+| FR-J00, FR-J03, FR-J15, FR-J18 | verified | Revision domain/storage, ADR-0020, immutable full snapshots, and atomic allocator tests. |
+| FR-J01, FR-J02 | verified | `EWP-REVIEW 1`, prepare/apply services, deterministic discovery, failure-isolated batch tests, and the accepted private-corpus workflow. |
+| FR-J04, FR-J05, FR-J06, FR-J07, FR-J11, FR-J12 | verified | Anchored alignment tests cover supported edits, repetition preservation, anchor integrity, and ambiguity warnings. |
+| FR-J08 | verified | `EffectiveTranscript` inherits canonical timing without canonical timestamp mutation. |
+| FR-J09, FR-J10 | verified | Preview equivalence and external-editor lifecycle tests; staged VS Code editing is the preferred operator path. |
+| FR-J13, FR-J14 | verified | Revision provenance/statistics and reconstructable or published detailed audit. |
+| FR-J16, FR-J17 | verified | Revision resolution and TXT/SRT/VTT/segments export use one `EffectiveTranscript` without audio or models. |
+| NFR-013, NFR-014 | verified | Determinism fixtures and shared CLI/correction/translation application boundaries; the future GUI must reuse them. |
 
 ## v0.3 automated-correction requirements
 

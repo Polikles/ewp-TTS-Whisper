@@ -6,6 +6,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Changed
 
+- Replaced the stale mid-v0.3 work status with a concise 2026-08-23 checkpoint: completed
+  v0.1-v0.3 work, structurally accepted manual translation, the exact ordered remaining
+  v0.4 workstreams, and explicitly deferred later work now have repository-resident resume
+  instructions. Reconciled the completed v0.2 revision requirements from `planned` to
+  `verified` and the manual translation roadmap from planned to implemented.
 - Defined the initial v0.4 translation scope as one bidirectional Polish-English
   pipeline, led by Polish-to-English podcast translation. Source-faithful style is the
   default; optional provenance-recorded register (`preserve`/`formal`/`informal`) and

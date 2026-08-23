@@ -224,11 +224,13 @@ manually approved translation examples, its exact-hash manifests are rebuilt, an
 correction and translation baselines are rerun. The current full-corpus correction run
 remains the baseline for implementation decisions until that scheduled expansion.
 
-## 4. Manual translation pipeline — planned for v0.4
+## 4. Manual translation pipeline — implemented v0.4 slice
 
 Translation is a separate pipeline, not a branch inside transcript correction, although
 it reuses common versioning, batch, editor, provenance, audit, and future GUI
-infrastructure.
+infrastructure. The manual-first prepare/preview/apply/audit/export slice is implemented
+and structurally validated on the private 24-file English corpus. That evidence does not
+measure translation accuracy because the approved English text permits artistic freedom.
 
 The future translation source can be:
 
@@ -257,7 +259,8 @@ Translation requirements:
 - one structured immutable translation artifact becomes the source for target TXT, SRT,
   VTT, and future HTML exports;
 - the artifact records exactly which raw result or transcript revision was translated;
-- exact translation JSON Schema is deferred until this pipeline is designed.
+- the implemented translation JSON Schema validates complete immutable snapshots and
+  exact source lineage.
 
 Translation is source-faithful by default: preserve meaning, intent, tone, level of
 formality, technical specificity, repetitions, hedges, emphasis, and speaker character as
