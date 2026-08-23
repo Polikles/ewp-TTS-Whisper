@@ -26,6 +26,7 @@ from ewp_transcripts.domain.translation import (
     TranslationStatistics,
     TranslationStyle,
     TranslationUnit,
+    TranslationWarning,
 )
 from ewp_transcripts.domain.translation_review import TranslationReview, TranslationReviewUnit
 from ewp_transcripts.translation_review_service import prepare_translation_review
@@ -192,6 +193,7 @@ def build_automated_translation(
         style=style,
     )
     translated_units: list[TranslationUnit] = []
+    translation_warnings: list[TranslationWarning] = []
     for index, source_unit in enumerate(review.units):
         request = build_automated_translation_request(
             review,
@@ -214,6 +216,17 @@ def build_automated_translation(
                 execution_policy=execution_policy,
             ).response
         target_text = validate_automated_translation_response(request, response)
+        translation_warnings.extend(
+            TranslationWarning(
+                code=code,
+                severity="warning",
+                message=(
+                    f"Provider compatibility output was discarded for {source_unit.unit_id}; "
+                    "manually review the translated unit."
+                ),
+            )
+            for code in response.warning_codes
+        )
         translated_units.append(
             TranslationUnit(
                 unit_id=source_unit.unit_id,
@@ -256,6 +269,7 @@ def build_automated_translation(
             unit_count=len(units),
             source_tokens=sum(len(unit.source_token_ids) for unit in units),
             target_tokens=sum(len(unit.target_text.split()) for unit in units),
-            warning_count=0,
+            warning_count=len(translation_warnings),
         ),
+        warnings=tuple(translation_warnings),
     )

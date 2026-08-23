@@ -220,8 +220,9 @@ def _parse_chat_response(
         content = choice["message"]["content"]
         if not isinstance(content, str):
             raise TypeError
+        warning_codes: tuple[str, ...] = ()
         if output_mode == "plain-text":
-            target_text = _plain_text_target(content)
+            target_text, warning_codes = _plain_text_target(content)
             if (
                 not target_text
                 or "\x00" in content
@@ -243,6 +244,7 @@ def _parse_chat_response(
             unit_id=request.unit.unit_id,
             target_text=target_text,
             usage=usage,
+            warning_codes=warning_codes,
         )
     except ValidationError as error:
         raise InvalidTranslationResponseError(
@@ -262,23 +264,30 @@ def _optional_nonnegative_int(value: object) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def _plain_text_target(content: str) -> str:
+def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
     """Accept raw prose or one strict Bielik compatibility envelope."""
 
     stripped = content.strip()
+    warning_codes: tuple[str, ...] = ()
     if stripped.startswith("{") or stripped.endswith("}"):
         document = json.loads(stripped)
         if (
             not isinstance(document, dict)
-            or len(document) != 1
-            or next(iter(document)) not in {"target_text", "translated_text"}
+            or not 1 <= len(document) <= 2
+            or not set(document).issubset({"target_text", "translated_text", "translator_notes"})
+            or len(set(document) & {"target_text", "translated_text"}) != 1
         ):
             raise ValueError("invalid plain-text translation envelope")
-        value = next(iter(document.values()))
+        target_field = next(iter(set(document) & {"target_text", "translated_text"}))
+        value = document[target_field]
         if not isinstance(value, str):
             raise ValueError("invalid plain-text translation envelope")
+        if "translator_notes" in document:
+            if not isinstance(document["translator_notes"], str):
+                raise ValueError("invalid plain-text translation envelope")
+            warning_codes = ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)
         stripped = value
-    return " ".join(stripped.split())
+    return " ".join(stripped.split()), warning_codes
 
 
 def _normalized_endpoint(endpoint: str, *, allow_remote: bool) -> str:

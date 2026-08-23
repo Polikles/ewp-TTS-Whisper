@@ -44,6 +44,7 @@ class AutomatedTranslationResponse(AutomatedTranslationModel):
     unit_id: str = Field(pattern=r"^tu_[0-9]{6,}$")
     target_text: str = Field(min_length=1, pattern=r".*\S.*")
     usage: AutomatedTranslationUsage | None = None
+    warning_codes: tuple[str, ...] = ()
 
 
 class AutomatedTranslationProvider(Protocol):

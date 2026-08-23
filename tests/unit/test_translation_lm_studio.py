@@ -135,6 +135,34 @@ def test_plain_text_mode_rejects_extra_json_fields() -> None:
         provider.translate(request, timeout_seconds=1)
 
 
+def test_plain_text_mode_discards_known_translator_notes_with_warning() -> None:
+    def transport(_url, _headers, _payload, _timeout):  # type: ignore[no-untyped-def]
+        return {
+            "choices": [
+                {
+                    "message": {
+                        "content": (
+                            '{"translated_text":"My name is Damian.",'
+                            '"translator_notes":"Unsolicited explanation."}'
+                        )
+                    }
+                }
+            ]
+        }
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    response = provider.translate(request, timeout_seconds=1)
+
+    assert response.target_text == "My name is Damian."
+    assert response.warning_codes == ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)
+
+
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
     secret = "private transcript phrase"
 

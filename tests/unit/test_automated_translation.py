@@ -76,3 +76,20 @@ def test_builds_non_final_llm_candidate_with_exact_unit_lineage(tmp_path: Path) 
         unit.source_token_ids for unit in translation.units
     ]
     assert len(tuple((tmp_path / "state").glob("*.json"))) == 2
+
+
+def test_provider_warning_is_preserved_without_note_content() -> None:
+    class NotesProvider(DeterministicMockTranslationProvider):
+        def translate(self, request, *, timeout_seconds=None):  # type: ignore[no-untyped-def]
+            response = super().translate(request, timeout_seconds=timeout_seconds)
+            return response.model_copy(
+                update={"warning_codes": ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)}
+            )
+
+    translation = build_automated_translation(EXAMPLE, NotesProvider(), target_language="pl")
+
+    assert translation.statistics.warning_count == len(translation.units)
+    assert all(
+        warning.code == "PROVIDER_TRANSLATOR_NOTES_DISCARDED" for warning in translation.warnings
+    )
+    assert "Unsolicited" not in translation.model_dump_json()

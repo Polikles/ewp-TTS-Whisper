@@ -493,6 +493,10 @@ identity.
 Some Bielik templates emit a valid one-field JSON envelope even in plain-text mode. The
 adapter accepts and unwraps only `target_text` or `translated_text` with one string value;
 malformed JSON, additional fields, and non-string values are rejected.
+The one observed exception is an optional string `translator_notes` field. It is never
+copied into transcript text; the adapter discards it and records
+`PROVIDER_TRANSLATOR_NOTES_DISCARDED` on that unit so manual review can treat the output as
+higher risk. Any other field remains invalid.
 `--context-units` controls how many adjacent source units are sent on each side as
 read-only context. The initial Bielik baseline uses `0`: the first context-one pilot copied
 adjacent meaning into owned units and omitted owned text. Context-assisted runs are
