@@ -467,6 +467,7 @@ uv run --locked transcriber translate automate "/path/to/episode_results.json" \
   --target-language en --provider lm-studio \
   --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
   --output-mode plain-text \
+  --context-units 0 \
   --resume-dir "$EWP_TRANSLATION_PILOT/state" \
   --output-dir "$EWP_TRANSLATION_PILOT/candidates"
 ```
@@ -489,6 +490,10 @@ each operation owns exactly one unit, the whole assistant content can safely be 
 that unit's candidate after non-empty/control-character/fence validation. All modes retain
 exact local operation/unit binding. Output mode is part of prompt provenance and resume
 identity.
+`--context-units` controls how many adjacent source units are sent on each side as
+read-only context. The initial Bielik baseline uses `0`: the first context-one pilot copied
+adjacent meaning into owned units and omitted owned text. Context-assisted runs are
+separate experiments and must never be merged with the zero-context baseline.
 
 Each request owns exactly one sentence unit. Adjacent units are read-only context and
 cannot be returned, merged, reordered, or assigned to another speaker. Interrupted runs

@@ -226,6 +226,7 @@ uv run --locked transcriber translate automate "$EWP_PL_RESULTS/EPISODE_results.
   --target-language en --provider lm-studio \
   --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
   --output-mode plain-text \
+  --context-units 0 \
   --resume-dir "$EWP_TRANSLATION_PILOT/state" \
   --output-dir "$EWP_TRANSLATION_PILOT/candidates"
 ```
@@ -243,6 +244,11 @@ owns one unit, so the complete assistant content becomes that unit's candidate a
 non-empty, control-character, and Markdown-fence checks. It does not permit labels, notes,
 explanations, or context output. Changing output mode changes prompt provenance and resume
 identity, so use a fresh temporary pilot root.
+
+The initial Bielik rerun uses `--context-units 0`. A context-one pilot completed all 80
+requests but repeatedly translated neighboring content instead of the owned unit. Any later
+context-assisted experiment is a separate benchmark configuration and must demonstrate no
+adjacent-unit repetition or owned-unit omission before acceptance.
 
 The initial comparable path is verified Polish source, `preserve/preserve`, and no
 dictionary. Record the exact model artifact/quantization and hardware outside the artifact

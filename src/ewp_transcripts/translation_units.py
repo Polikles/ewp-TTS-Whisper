@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
@@ -27,12 +28,15 @@ def plan_translation_units(transcript: EffectiveTranscript) -> tuple[Translation
         return ()
     groups: list[list[EffectiveToken]] = []
     current: list[EffectiveToken] = []
-    for token in transcript.tokens:
+    for index, token in enumerate(transcript.tokens):
         if current and token.speaker_id != current[-1].speaker_id:
             groups.append(current)
             current = []
         current.append(token)
-        if _ends_sentence(token.text):
+        following_text = (
+            transcript.tokens[index + 1].text if index + 1 < len(transcript.tokens) else None
+        )
+        if _ends_sentence(token.text, following_text=following_text):
             groups.append(current)
             current = []
     if current:
@@ -40,9 +44,15 @@ def plan_translation_units(transcript: EffectiveTranscript) -> tuple[Translation
     return tuple(_unit(index, tokens) for index, tokens in enumerate(groups, start=1))
 
 
-def _ends_sentence(text: str) -> bool:
+def _ends_sentence(text: str, *, following_text: str | None) -> bool:
     token = text.strip().casefold()
     terminal = token.rstrip('"”’»')
+    if (
+        following_text is not None
+        and re.fullmatch(r"\d+\.", terminal)
+        and following_text[:1].islower()
+    ):
+        return False
     return terminal.endswith((".", "!", "?")) and not is_non_breaking_sentence_token(terminal)
 
 

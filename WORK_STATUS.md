@@ -35,7 +35,13 @@ manual references can be staged into
 private per-unit assessments, and completed reviews produce content-free,
 direction-specific semantic reports. Meaning fidelity is explicitly independent of
 lexical overlap; names, project conventions, and selected-dictionary adherence are a
-separate dimension. A real LM Studio model run and actual benchmark runs remain pending.
+separate dimension. A corrected LM Studio pilot and actual benchmark runs remain pending.
+
+The first real Bielik 11B v3 Q8 `s0e00` pilot completed operationally: 80 requests, zero
+retries, 49,605 ms provider time, and complete resume reuse on publication. Its candidate
+was rejected after review found JSON wrappers in 75/80 units, adjacent-context repetition,
+an owned-unit omission, and a false numeric sentence split. Fixes are implemented for a
+fresh zero-context rerun; no translation-quality claim is accepted from the failed pilot.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,

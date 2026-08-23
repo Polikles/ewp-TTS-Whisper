@@ -202,6 +202,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode
+  and now reject JSON-object wrappers instead of publishing them as translated prose.
+- Added explicit `--context-units` control and fixed Polish unit planning so a numeric
+  period followed by a lowercase continuation, such as `6. rano`, does not create a false
+  sentence boundary. This supports a zero-context rerun after the Bielik pilot showed
+  adjacent-unit repetition and omission caused by context leakage.
+
 - Automated correction alignment now treats canonical speaker boundaries as hard mapping
   constraints. Repeated or ambiguous text can no longer be mapped across speakers after a
   provider has returned the required immutable speaker blocks; manual review retains its

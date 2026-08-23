@@ -71,6 +71,25 @@ def test_units_do_not_split_legal_case_name_after_v_abbreviation() -> None:
     assert [unit.source_text for unit in units] == ["Battle v. Microsoft continues."]
 
 
+def test_units_do_not_split_numeric_period_before_lowercase_continuation() -> None:
+    transcript = EffectiveTranscript(
+        language="pl",
+        tokens=(
+            _token(1, "Nowe"),
+            _token(2, "odcinki"),
+            _token(3, "o"),
+            _token(4, "6."),
+            _token(5, "rano"),
+            _token(6, "na"),
+            _token(7, "Spotify."),
+        ),
+    )
+
+    units = plan_translation_units(transcript)
+
+    assert [unit.source_text for unit in units] == ["Nowe odcinki o 6. rano na Spotify."]
+
+
 def test_speaker_change_is_a_hard_unit_boundary() -> None:
     transcript = EffectiveTranscript(
         language="en",

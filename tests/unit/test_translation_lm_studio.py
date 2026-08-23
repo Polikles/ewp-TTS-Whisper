@@ -99,6 +99,21 @@ def test_plain_text_mode_preserves_dialogue_quotes_without_json_serialization() 
     assert provider.provenance_parameters["output_mode"] == "plain-text"
 
 
+def test_plain_text_mode_rejects_json_wrappers() -> None:
+    def transport(_url, _headers, _payload, _timeout):  # type: ignore[no-untyped-def]
+        return {"choices": [{"message": {"content": '{"target_text":"Wrapped translation."}'}}]}
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    with pytest.raises(InvalidTranslationResponseError):
+        provider.translate(request, timeout_seconds=1)
+
+
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
     secret = "private transcript phrase"
 

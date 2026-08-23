@@ -566,6 +566,14 @@ def translate_automate_command(
             help="LM Studio output mode: json-schema, json-text, or plain-text.",
         ),
     ] = RequestedTranslationOutputMode.JSON_SCHEMA,
+    context_units: Annotated[
+        int,
+        typer.Option(
+            "--context-units",
+            min=0,
+            help="Read-only sentence units on each side of the owned unit.",
+        ),
+    ] = 1,
     consent: Annotated[
         RequestedCorrectionConsent | None,
         typer.Option("--consent", help="API consent: reject, once, or persist."),
@@ -645,6 +653,7 @@ def translate_automate_command(
                 recursive=recursive,
                 preview=preview,
                 consent_choice=consent_choice,
+                context_units=context_units,
             )
         elif preview:
             outcome = preview_automated_translation(
@@ -656,6 +665,7 @@ def translate_automate_command(
                 style=style,
                 resume_directory=state_directory,
                 consent_choice=consent_choice,
+                context_units=context_units,
             )
         else:
             outcome = apply_automated_translation(
@@ -668,6 +678,7 @@ def translate_automate_command(
                 resume_directory=state_directory,
                 output_directory=_optional_user_path(output_directory),
                 consent_choice=consent_choice,
+                context_units=context_units,
             )
     except (ApplicationError, ValueError) as error:
         if isinstance(error, ApplicationError):

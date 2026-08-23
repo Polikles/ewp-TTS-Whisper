@@ -1017,6 +1017,7 @@ def preview_automated_translation(
     style: TranslationStyle | None = None,
     resume_directory: Path | None = None,
     consent_choice: ConsentChoice | None = None,
+    context_units: int = 1,
 ) -> AutomatedTranslationOutcome:
     """Build a validated non-final provider candidate without publishing it."""
 
@@ -1030,6 +1031,7 @@ def preview_automated_translation(
         revision_path=normalized_revision,
         style=style,
         resume_directory=resume_directory,
+        context_units=context_units,
     )
     return AutomatedTranslationOutcome(normalized_result, translation)
 
@@ -1045,6 +1047,7 @@ def apply_automated_translation(
     resume_directory: Path | None = None,
     output_directory: Path | None = None,
     consent_choice: ConsentChoice | None = None,
+    context_units: int = 1,
 ) -> AutomatedTranslationOutcome:
     """Build and atomically publish a non-final automated translation candidate."""
 
@@ -1057,6 +1060,7 @@ def apply_automated_translation(
         style=style,
         resume_directory=resume_directory,
         consent_choice=consent_choice,
+        context_units=context_units,
     )
     translation, path = publish_next_translation(
         preview.translation,
@@ -1101,6 +1105,7 @@ def process_automated_translation_batch(
     recursive: bool = False,
     preview: bool = False,
     consent_choice: ConsentChoice | None = None,
+    context_units: int = 1,
 ) -> BatchAutomatedTranslationOutcome:
     """Build automated candidates sequentially with per-result failure isolation."""
 
@@ -1128,6 +1133,7 @@ def process_automated_translation_batch(
                     style=style,
                     resume_directory=state,
                     consent_choice=consent_choice,
+                    context_units=context_units,
                 )
                 status: Literal["previewed", "published"] = "previewed"
             else:
@@ -1141,6 +1147,7 @@ def process_automated_translation_batch(
                     resume_directory=state,
                     output_directory=output_directory,
                     consent_choice=consent_choice,
+                    context_units=context_units,
                 )
                 status = "published"
             jobs.append(

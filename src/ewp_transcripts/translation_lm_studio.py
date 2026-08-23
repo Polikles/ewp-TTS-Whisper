@@ -32,8 +32,11 @@ the requested target language. Preserve meaning, facts, intent, uncertainty, emp
 tone, register, names, numbers, and speaker character. Use natural idiomatic target-language
 wording; matching a reference word-for-word is not required. Do not summarize, omit, add,
 explain, censor, correct the speaker's argument, or add citations or notes. Adjacent units
-are read-only context and must not be included in the answer. Return only the requested
-JSON object containing target_text for the owned unit."""
+are read-only context and must not be included in the answer. Follow the selected output
+mode exactly."""
+
+JSON_SCHEMA_TRANSLATION_INSTRUCTION = """JSON-SCHEMA MODE:
+Return only the requested JSON object containing target_text for the owned unit."""
 
 JSON_TEXT_TRANSLATION_INSTRUCTION = """PLAIN-JSON COMPATIBILITY MODE:
 Return exactly one raw JSON object with the sole key target_text. Do not use Markdown code
@@ -126,6 +129,11 @@ class LmStudioTranslationProvider:
                     if self._config.output_mode == "plain-text"
                     else None
                 ),
+                "json_schema_instruction": (
+                    JSON_SCHEMA_TRANSLATION_INSTRUCTION
+                    if self._config.output_mode == "json-schema"
+                    else None
+                ),
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -175,6 +183,8 @@ def _chat_request(
         )
     elif config.output_mode == "plain-text":
         system_prompt = f"{system_prompt}\n{PLAIN_TEXT_TRANSLATION_INSTRUCTION}"
+    else:
+        system_prompt = f"{system_prompt}\n{JSON_SCHEMA_TRANSLATION_INSTRUCTION}"
     payload: JsonObject = {
         "model": config.model_id,
         "temperature": config.temperature,
@@ -217,6 +227,7 @@ def _parse_chat_response(
                 or "\x00" in content
                 or target_text.startswith("```")
                 or target_text.endswith("```")
+                or (target_text.startswith("{") and target_text.endswith("}"))
             ):
                 raise ValueError("invalid plain-text translation")
         else:
