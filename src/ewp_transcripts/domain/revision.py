@@ -35,6 +35,14 @@ class RevisionParent(RevisionModel):
     filename: str | None = Field(default=None, min_length=1)
 
 
+class RevisionDictionaryProvenance(RevisionModel):
+    version: str = Field(min_length=1)
+    dictionary_id: str = Field(min_length=1)
+    project_id: str = Field(min_length=1)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 class RevisionLlmProvenance(RevisionModel):
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)
@@ -42,6 +50,7 @@ class RevisionLlmProvenance(RevisionModel):
     prompt_id: str | None = Field(default=None, min_length=1)
     prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     parameters: dict[str, str | int | float | bool | None] | None = None
+    dictionary: RevisionDictionaryProvenance | None = None
 
 
 class RevisionProvenance(RevisionModel):

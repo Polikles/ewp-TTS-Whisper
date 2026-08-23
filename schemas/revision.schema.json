@@ -232,7 +232,25 @@
               "null"
             ]
           }
+        },
+        "dictionary": {
+          "anyOf": [
+            { "$ref": "#/$defs/dictionaryProvenance" },
+            { "type": "null" }
+          ]
         }
+      }
+    },
+    "dictionaryProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "dictionary_id", "project_id", "sha256", "proposal_sha256"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "dictionary_id": { "type": "string", "minLength": 1 },
+        "project_id": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "proposal_sha256": { "$ref": "#/$defs/sha256" }
       }
     },
     "revisionTranscript": {

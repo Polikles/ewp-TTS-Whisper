@@ -106,6 +106,12 @@ def build_revision_audit(
             "revision_id": str(revision.revision_id),
             "revision_number": revision.revision_number,
         },
+        "dictionary": (
+            revision.provenance.llm.dictionary.model_dump(mode="json")
+            if revision.provenance.llm is not None
+            and revision.provenance.llm.dictionary is not None
+            else None
+        ),
         "statistics": revision.statistics.model_dump(mode="json"),
         "changes": changes,
     }

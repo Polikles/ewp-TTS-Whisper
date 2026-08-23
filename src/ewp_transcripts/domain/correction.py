@@ -46,15 +46,32 @@ class CorrectionChange(CorrectionModel):
         return self
 
 
+class CorrectionDictionaryTerm(CorrectionModel):
+    source: str = Field(min_length=1)
+    target: str = Field(min_length=1)
+
+
 class CorrectionRequest(CorrectionModel):
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(min_length=1)
     prompt_id: str = Field(min_length=1)
     prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     language: Literal["pl", "en"]
+    dictionary_id: str | None = Field(default=None, min_length=1)
+    dictionary_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    dictionary_terms: tuple[CorrectionDictionaryTerm, ...] = ()
     preceding_context: tuple[CorrectionToken, ...] = ()
     editable_tokens: tuple[CorrectionToken, ...] = Field(min_length=1)
     following_context: tuple[CorrectionToken, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_dictionary(self) -> Self:
+        selected = self.dictionary_id is not None or self.dictionary_sha256 is not None
+        if selected != (self.dictionary_id is not None and self.dictionary_sha256 is not None):
+            raise ValueError("correction dictionary identity must be complete")
+        if self.dictionary_terms and not selected:
+            raise ValueError("correction dictionary terms require dictionary identity")
+        return self
 
 
 class CorrectionUsage(CorrectionModel):

@@ -211,6 +211,17 @@ def _chat_request(config: LmStudioAdapterConfig, request: CorrectionRequest) -> 
             for speaker_id, _start, _end, text in editable_blocks
         ],
         "following_read_only_context": [token.model_dump() for token in request.following_context],
+        "approved_project_dictionary": {
+            "dictionary_id": request.dictionary_id,
+            "sha256": request.dictionary_sha256,
+            "instruction": (
+                "Use only when the source form refers to this project term; preserve other "
+                "people or entities with similar names and do not add absent terms."
+            ),
+            "terms": [term.model_dump() for term in request.dictionary_terms],
+        }
+        if request.dictionary_id is not None
+        else None,
     }
     system_prompt = FAITHFUL_CORRECTION_SYSTEM_PROMPT
     user_content = json.dumps(transcript, ensure_ascii=False)

@@ -17,6 +17,10 @@ from ewp_transcripts.correction import (
     plan_correction_chunks,
     validate_correction_response,
 )
+from ewp_transcripts.correction_dictionary import (
+    CorrectionDictionaryEntry,
+    ProjectCorrectionDictionary,
+)
 from ewp_transcripts.domain.correction import CorrectionChange, CorrectionResponse
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.effective_transcript import EffectiveToken, EffectiveTranscript
@@ -559,6 +563,31 @@ def test_mock_provider_builds_llm_revision_through_existing_aligner() -> None:
     assert revision.statistics.substitutions == 1
     assert revision.transcript.tokens[-1].text == "OpenAI."
     assert revision.transcript.tokens[-1].source_word_ids == ("word_000008",)
+
+
+def test_correction_dictionary_is_chunk_scoped_and_audited_in_revision() -> None:
+    result = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    dictionary = ProjectCorrectionDictionary(
+        dictionary_id="example-pl-v1",
+        project_id="example",
+        job_ids=("S01E01",),
+        proposal_sha256="a" * 64,
+        entries=(CorrectionDictionaryEntry(source="transcription.", target="OpenAI."),),
+    )
+    digest = "b" * 64
+    provider = DeterministicMockCorrectionProvider({})
+
+    revision = build_mock_correction_revision(
+        result,
+        provider,
+        dictionary=dictionary,
+        dictionary_sha256=digest,
+    )
+
+    assert revision.provenance.llm is not None
+    assert revision.provenance.llm.dictionary is not None
+    assert revision.provenance.llm.dictionary.dictionary_id == "example-pl-v1"
+    assert revision.provenance.llm.dictionary.sha256 == digest
 
 
 def test_automated_revision_rejects_speaker_reassignment(monkeypatch: pytest.MonkeyPatch) -> None:

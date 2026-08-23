@@ -8,6 +8,7 @@ import pytest
 from ewp_transcripts.correction_dictionary import (
     approve_correction_dictionary,
     propose_correction_dictionary,
+    select_correction_dictionary_terms,
     write_correction_dictionary_proposal,
 )
 from ewp_transcripts.domain.canonical import load_canonical_result
@@ -74,3 +75,6 @@ def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> 
 
     assert dictionary.project_id == "example"
     assert [(item.source, item.target) for item in dictionary.entries] == [("Welcome", "Greetings")]
+    selected = select_correction_dictionary_terms(dictionary, "Welcome everyone")
+    assert [(item.source, item.target) for item in selected] == [("Welcome", "Greetings")]
+    assert select_correction_dictionary_terms(dictionary, "A welcoming message") == ()

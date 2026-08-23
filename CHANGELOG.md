@@ -44,6 +44,10 @@ All notable changes to EWP-transcripts are documented here.
   candidates from exact canonical/manual-revision pairs, and `dictionary correction approve`
   to publish only a fully reviewed, project-scoped dictionary. Proposals retain corpus hashes
   and case scope; approved dictionaries retain proposal hash and never activate implicitly.
+- Added explicit `revise correct --dictionary` integration for LM Studio and OpenRouter.
+  Only source-present entries reach each editable chunk; dictionary ID/hash alter operation
+  and resume identity, while immutable LLM revision provenance and audits record the selected
+  project dictionary or `null`.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

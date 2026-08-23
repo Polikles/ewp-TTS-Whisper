@@ -10,6 +10,10 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal
 
+from ewp_transcripts.correction_dictionary import (
+    ProjectCorrectionDictionary,
+    select_correction_dictionary_terms,
+)
 from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.correction import (
     CorrectionCategory,
@@ -23,6 +27,7 @@ from ewp_transcripts.domain.correction import (
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
 from ewp_transcripts.domain.revision import (
+    RevisionDictionaryProvenance,
     RevisionLlmProvenance,
     RevisionProvenance,
     TranscriptRevision,
@@ -140,6 +145,8 @@ def build_correction_request(
     provider_id: str,
     model_id: str,
     prompt_sha256: str | None = None,
+    dictionary: ProjectCorrectionDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> CorrectionRequest:
     """Build a provider request with editable ownership explicit in its structure."""
 
@@ -153,12 +160,22 @@ def build_correction_request(
         )
 
     resolved_prompt_sha256 = prompt_sha256 or hashlib.sha256(prompt_id.encode()).hexdigest()
+    editable_text = " ".join(
+        transcript.tokens[index].text for index in range(chunk.editable_start, chunk.editable_end)
+    )
+    dictionary_terms = (
+        select_correction_dictionary_terms(dictionary, editable_text) if dictionary else ()
+    )
+    dictionary_identity = (
+        f"{dictionary.dictionary_id}\0{dictionary_sha256}" if dictionary is not None else "none"
+    )
     operation_id = hashlib.sha256(
         (
             f"{provider_id}\0{model_id}\0{prompt_id}\0{resolved_prompt_sha256}\0"
             f"{transcript.language}\0"
             f"{chunk.chunk_index}\0{chunk.editable_start}:{chunk.editable_end}\0"
-            f"{chunk.context_start}:{chunk.context_end}\0{chunk.content_sha256}"
+            f"{chunk.context_start}:{chunk.context_end}\0{chunk.content_sha256}\0"
+            f"{dictionary_identity}"
         ).encode()
     ).hexdigest()
     return CorrectionRequest(
@@ -166,6 +183,9 @@ def build_correction_request(
         prompt_id=prompt_id,
         prompt_sha256=resolved_prompt_sha256,
         language=_supported_language(transcript.language),
+        dictionary_id=dictionary.dictionary_id if dictionary is not None else None,
+        dictionary_sha256=dictionary_sha256,
+        dictionary_terms=dictionary_terms,
         preceding_context=tuple(
             convert(index) for index in range(chunk.context_start, chunk.editable_start)
         ),
@@ -388,6 +408,8 @@ def build_correction_revision(
     prompt_id: str = "faithful-correction-v1",
     resume_directory: Path | None = None,
     execution_policy: object | None = None,
+    dictionary: ProjectCorrectionDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> TranscriptRevision:
     """Build one provider-backed revision without publishing it."""
 
@@ -401,6 +423,11 @@ def build_correction_revision(
         load_transcript_revision(source_revision_path) if source_revision_path is not None else None
     )
     effective = resolve_effective_transcript(base, parent, base_path=result_path)
+    if dictionary is not None:
+        if dictionary_sha256 is None:
+            raise InvalidCorrectionResponseError("Correction dictionary SHA-256 is required")
+        if base.job_id not in dictionary.job_ids:
+            raise InvalidCorrectionResponseError("Correction dictionary does not include this job")
     chunks = plan_correction_chunks(effective, config)
     corrected_blocks: list[tuple[ReviewSpeakerBlock, ...]] = []
     for chunk in chunks:
@@ -411,6 +438,8 @@ def build_correction_revision(
             provider_id=provider.provider_id,
             model_id=provider.model_id,
             prompt_sha256=provider.prompt_sha256(prompt_id),
+            dictionary=dictionary,
+            dictionary_sha256=dictionary_sha256,
         )
         if resume_directory is None:
             from ewp_transcripts.correction_execution import execute_correction_call
@@ -464,6 +493,17 @@ def build_correction_revision(
                 prompt_id=prompt_id,
                 prompt_sha256=prompt_sha256,
                 parameters=getattr(provider, "provenance_parameters", None),
+                dictionary=(
+                    RevisionDictionaryProvenance(
+                        version=dictionary.dictionary_version,
+                        dictionary_id=dictionary.dictionary_id,
+                        project_id=dictionary.project_id,
+                        sha256=dictionary_sha256,
+                        proposal_sha256=dictionary.proposal_sha256,
+                    )
+                    if dictionary is not None and dictionary_sha256 is not None
+                    else None
+                ),
             ),
         ),
         parent_revision=parent,

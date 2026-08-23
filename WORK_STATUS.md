@@ -137,8 +137,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    manual revisions yield pending repeated/consistent mappings, every item must be manually
    approved or rejected, and the published project dictionary retains proposal and corpus
    lineage. A private `/tmp` pilot found 46 pending candidates across 22 compatible cases at
-   the default two-occurrence threshold. Explicit Gemini request/provenance integration and
-   the four-branch correction benchmark remain next.
+   the default two-occurrence threshold. Explicit Gemini/OpenRouter dictionary selection,
+   per-chunk source matching, resume identity, revision provenance, and audit reporting are
+   implemented. Manual proposal review and the four-branch correction benchmark remain next.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

@@ -26,6 +26,7 @@ from ewp_transcripts.correction_consent import (
     load_correction_consents,
     persist_correction_consent,
 )
+from ewp_transcripts.correction_dictionary import ProjectCorrectionDictionary
 from ewp_transcripts.correction_execution import (
     CorrectionExecutionPolicy,
 )
@@ -614,6 +615,8 @@ def preview_correction(
     consent_choice: ConsentChoice | None = None,
     prompt_id: str | None = None,
     resume_directory: Path | None = None,
+    dictionary: ProjectCorrectionDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> CorrectionPreviewOutcome:
     """Authorize and build one correction revision without publishing it."""
 
@@ -639,6 +642,8 @@ def preview_correction(
             max_attempts=config.correction.max_attempts,
             retry_delay_seconds=config.correction.retry_delay_seconds,
         ),
+        dictionary=dictionary,
+        dictionary_sha256=dictionary_sha256,
     )
     return CorrectionPreviewOutcome(normalized, revision)
 
@@ -701,6 +706,8 @@ def apply_correction(
     output_directory: Path | None = None,
     prompt_id: str | None = None,
     resume_directory: Path | None = None,
+    dictionary: ProjectCorrectionDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> CorrectionApplyOutcome:
     """Authorize, validate, and atomically publish one correction revision."""
 
@@ -712,6 +719,8 @@ def apply_correction(
         consent_choice=consent_choice,
         prompt_id=prompt_id,
         resume_directory=resume_directory,
+        dictionary=dictionary,
+        dictionary_sha256=dictionary_sha256,
     )
     revision, path = publish_next_revision(
         preview.revision,

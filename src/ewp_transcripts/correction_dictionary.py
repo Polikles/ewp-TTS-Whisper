@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Literal, cast
@@ -10,6 +11,8 @@ from typing import Literal, cast
 from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.correction import CorrectionDictionaryTerm
+from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
 from ewp_transcripts.domain.revision import (
     load_transcript_revision,
     sha256_file,
@@ -162,6 +165,30 @@ def approve_correction_dictionary(
     output_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     output_path.write_text(dictionary.model_dump_json(indent=2) + "\n", encoding="utf-8")
     return dictionary
+
+
+def load_project_correction_dictionary(path: Path) -> tuple[ProjectCorrectionDictionary, str]:
+    try:
+        payload = path.read_bytes()
+        dictionary = ProjectCorrectionDictionary.model_validate_json(payload)
+    except (OSError, UnicodeError, ValueError) as error:
+        raise InvalidCorrectionResponseError(
+            f"Cannot read valid project correction dictionary: {path}"
+        ) from error
+    return dictionary, hashlib.sha256(payload).hexdigest()
+
+
+def select_correction_dictionary_terms(
+    dictionary: ProjectCorrectionDictionary, editable_text: str
+) -> tuple[CorrectionDictionaryTerm, ...]:
+    """Select source-present terms as model context; never rewrite text directly."""
+
+    selected = []
+    for entry in dictionary.entries:
+        pattern = rf"(?<!\w){re.escape(entry.source)}(?!\w)"
+        if re.search(pattern, editable_text, flags=re.IGNORECASE):
+            selected.append(CorrectionDictionaryTerm(source=entry.source, target=entry.target))
+    return tuple(selected)
 
 
 def _directory_hash(paths) -> str:  # type: ignore[no-untyped-def]

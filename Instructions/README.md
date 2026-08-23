@@ -527,6 +527,26 @@ The default proposal threshold is two consistent occurrences. This is candidate 
 not automatic correction: grammar/style edits and ambiguous mappings still require human
 judgment. Correction and translation dictionaries are separately selected and versioned.
 
+Select an approved dictionary explicitly for Gemini 2.5 Flash through the existing
+OpenRouter correction command:
+
+```bash
+uv run --locked transcriber revise correct "/path/to/episode_results.json" \
+  --provider openrouter \
+  --model "google/gemini-2.5-flash" \
+  --dictionary "$pilot_root/correction-dictionary.json" \
+  --allow-cloud --consent once \
+  --resume-dir "$pilot_root/state" \
+  --output-dir "$pilot_root/candidates" \
+  --preview
+```
+
+The API key remains in the configured environment variable and is never copied into an
+artifact. A dictionary/job mismatch fails before provider calls. Only entries whose source
+form occurs in the editable chunk are included as context; no deterministic replacement is
+performed. Dictionary ID, version, project, exact SHA-256, and proposal lineage are retained
+by the resulting revision and its audit. Changing dictionaries invalidates resume reuse.
+
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
 After recording the required content-free evidence, remove it with
