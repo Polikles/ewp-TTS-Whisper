@@ -26,6 +26,7 @@ from ewp_transcripts.domain.errors import (
 
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
+_PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v2"
 
 FAITHFUL_TRANSLATION_SYSTEM_PROMPT = """Translate exactly one owned transcript unit into
 the requested target language. Preserve meaning, facts, intent, uncertainty, emphasis,
@@ -110,6 +111,7 @@ class LmStudioTranslationProvider:
             "temperature": self._config.temperature,
             "request_contract": "single-owner-unit-v1",
             "output_mode": self._config.output_mode,
+            "compatibility_envelope": _PLAIN_TEXT_ENVELOPE_VERSION,
         }
 
     def prompt_sha256(self, prompt_id: str) -> str:
@@ -118,6 +120,7 @@ class LmStudioTranslationProvider:
                 "prompt_id": prompt_id,
                 "system": FAITHFUL_TRANSLATION_SYSTEM_PROMPT,
                 "output_mode": self._config.output_mode,
+                "compatibility_envelope": _PLAIN_TEXT_ENVELOPE_VERSION,
                 "response_schema": _WireResponse.model_json_schema(),
                 "json_text_instruction": (
                     JSON_TEXT_TRANSLATION_INSTRUCTION
@@ -274,7 +277,14 @@ def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
         if (
             not isinstance(document, dict)
             or not 1 <= len(document) <= 2
-            or not set(document).issubset({"target_text", "translated_text", "translator_notes"})
+            or not set(document).issubset(
+                {
+                    "target_text",
+                    "translated_text",
+                    "translator_notes",
+                    "translation_notes",
+                }
+            )
             or len(set(document) & {"target_text", "translated_text"}) != 1
         ):
             raise ValueError("invalid plain-text translation envelope")
@@ -282,8 +292,10 @@ def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
         value = document[target_field]
         if not isinstance(value, str):
             raise ValueError("invalid plain-text translation envelope")
-        if "translator_notes" in document:
-            if not isinstance(document["translator_notes"], str):
+        note_fields = set(document) & {"translator_notes", "translation_notes"}
+        if note_fields:
+            note_field = next(iter(note_fields))
+            if not isinstance(document[note_field], str):
                 raise ValueError("invalid plain-text translation envelope")
             warning_codes = ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)
         stripped = value

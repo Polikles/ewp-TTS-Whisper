@@ -43,8 +43,9 @@ was rejected after review found JSON wrappers in 75/80 units, adjacent-context r
 an owned-unit omission, and a false numeric sentence split. Fixes are implemented for a
 fresh zero-context rerun; no translation-quality claim is accepted from the failed pilot.
 The rerun then showed Bielik's chat template adding a valid string `translator_notes`
-field. The adapter now discards only that known field with an explicit per-unit warning;
-unknown provider metadata continues to fail closed.
+and later `translation_notes` field. The adapter now discards only those two observed
+aliases with an explicit per-unit warning; unknown provider metadata continues to fail
+closed. Parser-version changes invalidate resume identity.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,

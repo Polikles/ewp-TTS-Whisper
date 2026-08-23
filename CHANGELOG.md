@@ -205,8 +205,10 @@ All notable changes to EWP-transcripts are documented here.
 - Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode.
   Raw prose is accepted directly; Bielik's valid one-field `target_text` or
   `translated_text` compatibility envelope is strictly parsed and unwrapped locally.
-  Its observed optional string `translator_notes` field is discarded with a content-free
-  per-unit artifact warning; malformed JSON, unknown fields, and non-string values fail.
+  Its observed optional string `translator_notes` or `translation_notes` field is discarded
+  with a content-free per-unit artifact warning; malformed JSON, unknown fields, and
+  non-string values fail. The versioned compatibility-envelope contract participates in
+  prompt hashing, provenance, and resume identity.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed

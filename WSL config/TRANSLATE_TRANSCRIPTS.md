@@ -247,10 +247,11 @@ identity, so use a fresh temporary pilot root.
 If Bielik still returns a valid one-field `target_text` or `translated_text` JSON object,
 the adapter unwraps that exact compatibility envelope locally. Extra fields, invalid JSON,
 and non-string values remain hard failures and are never copied into review text.
-The observed optional string `translator_notes` field is the only allowed extra field. It
-is discarded rather than published and produces a content-free
+The observed optional string `translator_notes` and `translation_notes` aliases are the
+only allowed extra fields. Either is discarded rather than published and produces a
+content-free
 `PROVIDER_TRANSLATOR_NOTES_DISCARDED` warning on the affected unit. Unknown fields still
-fail closed.
+fail closed. Compatibility-envelope version changes invalidate resume identity.
 
 The initial Bielik rerun uses `--context-units 0`. A context-one pilot completed all 80
 requests but repeatedly translated neighboring content instead of the owned unit. Any later

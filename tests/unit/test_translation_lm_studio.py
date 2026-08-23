@@ -135,15 +135,20 @@ def test_plain_text_mode_rejects_extra_json_fields() -> None:
         provider.translate(request, timeout_seconds=1)
 
 
-def test_plain_text_mode_discards_known_translator_notes_with_warning() -> None:
+@pytest.mark.parametrize("notes_field", ["translator_notes", "translation_notes"])
+def test_plain_text_mode_discards_known_translator_notes_with_warning(
+    notes_field: str,
+) -> None:
     def transport(_url, _headers, _payload, _timeout):  # type: ignore[no-untyped-def]
         return {
             "choices": [
                 {
                     "message": {
-                        "content": (
-                            '{"translated_text":"My name is Damian.",'
-                            '"translator_notes":"Unsolicited explanation."}'
+                        "content": json.dumps(
+                            {
+                                "translated_text": "My name is Damian.",
+                                notes_field: "Unsolicited explanation.",
+                            }
                         )
                     }
                 }
@@ -161,6 +166,7 @@ def test_plain_text_mode_discards_known_translator_notes_with_warning() -> None:
 
     assert response.target_text == "My name is Damian."
     assert response.warning_codes == ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)
+    assert provider.provenance_parameters["compatibility_envelope"] == "bielik-envelope-v2"
 
 
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
