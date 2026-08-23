@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from ewp_transcripts.domain.translation import load_transcript_translation
+from ewp_transcripts.domain.translation import TranslationDirection, load_transcript_translation
 from ewp_transcripts.translation_export import (
     TranslationExportFormat,
     build_translation_subtitle_cues,
@@ -53,3 +53,25 @@ def test_translation_subtitles_stay_inside_unit_timing_and_render(tmp_path: Path
     assert "00:00:01,240 --> 00:00:03,900" in next(
         path for path in outcome.written if path.suffix == ".srt"
     ).read_text(encoding="utf-8")
+
+
+def test_english_quote_punctuation_is_preserved_in_text_and_subtitles() -> None:
+    translation = load_transcript_translation(EXAMPLE)
+    units = (
+        translation.units[0].model_copy(update={"target_text": 'He said "This works."'}),
+        translation.units[1].model_copy(update={"target_text": "Then he left."}),
+    )
+    changed = translation.model_copy(
+        update={
+            "direction": TranslationDirection(source_language="pl", target_language="en"),
+            "units": units,
+            "statistics": translation.statistics.model_copy(update={"target_tokens": 7}),
+        }
+    )
+    changed = type(translation).model_validate(changed.model_dump())
+
+    text = render_translation_text(changed)
+    cues = build_translation_subtitle_cues(changed)
+
+    assert 'He said "This works."' in text
+    assert 'He said "This works."' in " ".join(cues[0].lines)

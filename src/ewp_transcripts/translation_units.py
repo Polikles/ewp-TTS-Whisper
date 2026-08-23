@@ -42,7 +42,8 @@ def plan_translation_units(transcript: EffectiveTranscript) -> tuple[Translation
 
 def _ends_sentence(text: str) -> bool:
     token = text.strip().casefold()
-    return token.endswith((".", "!", "?")) and not is_non_breaking_sentence_token(token)
+    terminal = token.rstrip('"”’»')
+    return terminal.endswith((".", "!", "?")) and not is_non_breaking_sentence_token(terminal)
 
 
 def _unit(index: int, tokens: list[EffectiveToken]) -> TranslationSourceUnit:

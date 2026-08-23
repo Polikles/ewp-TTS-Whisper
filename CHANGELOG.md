@@ -46,7 +46,7 @@ All notable changes to EWP-transcripts are documented here.
 - Added the first model-free `translate prepare`, `translate preview`, and `translate apply`
   CLI workflow for one Polish-English file. It exposes explicit target language and optional
   style guidance, requires the exact canonical/revision source at validation, and publishes
-  only complete manual translations; batch operation and translated exports remain pending.
+  only complete manual translations; later slices added batch operation and exports.
 - Added a Draft 2020-12 translation JSON Schema and a validated English-to-Polish example
   snapshot. Schema validation and strict domain-model validation jointly cover portable
   structure plus cross-field source, direction, ownership, timing, and statistics rules.
@@ -86,9 +86,24 @@ All notable changes to EWP-transcripts are documented here.
 - Updated the complete runbook and CLI contract with translated batch export and exact
   source/revision audit commands, output semantics, non-mutating audit mode, and the
   sentence-timing precision boundary.
+- Added the dedicated translation playbook covering corrected-Polish source selection,
+  batch prepare/edit/preview/apply/audit/export, VS Code editing, external web-model
+  privacy, `[cite: N]` removal, and fail-closed migration from legacy translated reviews.
+- Reclassified the grammar-edited Polish private corpus as correction/translation source,
+  not ASR ground truth, and the artistically translated English corpus as pipeline-only
+  validation until a narrower translation-quality reference contract exists.
+- Fixed English sentence boundaries ending in closing quotation marks while preserving
+  both English `."` and Polish `”.` punctuation in sentence planning and exports.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
+
+### Validated
+
+- Prepared 24 English translation reviews from the private canonical corpus and each
+  result's latest exact compatible corrected Polish revision: 24 prepared, 0 failed.
+- English sentence boundaries ending in closing quotation marks, Polish punctuation with
+  a period after the closing quote, and preservation through translated TXT/SRT output.
 
 ## 0.3.0 - 2026-08-21
 

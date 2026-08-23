@@ -111,7 +111,21 @@ volume, cost, and retry outcomes remain required before provider acceptance.
 Optional provider-annotation precision/recall is reported only for providers that expose
 annotations; annotations never replace the local change list.
 
-## 6. Later public benchmark matrix
+## 6. Private translation pipeline corpus
+
+The current private Polish corpus has undergone grammar and readability editing beyond
+word-for-word speech correction. It remains a valid accepted target for comparing LLM
+correction candidates and is the preferred source for translation, but it no longer
+supports ASR-accuracy claims against audio.
+
+The English corpus currently contains artistically translated legacy `EWP-REVIEW` files.
+Their copied headers are not valid translation lineage, and the permitted artistic freedom
+makes a single reference-distance score misleading. Until a narrower quality-reference
+contract exists, translation evaluation is structural: exact prepare/apply lineage,
+complete targets, audit reconstruction, TXT/SRT/VTT generation, chronology, syntax,
+quotation preservation, absence of unspoken citations, and manual readability review.
+
+## 7. Later public benchmark matrix
 
 After functional requirements and private-corpus evaluation, qualify public datasets in
 separate, versioned manifests. Initial candidates are BIGOS, Google FLEURS, Mozilla

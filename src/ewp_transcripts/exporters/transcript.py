@@ -6,7 +6,7 @@ import re
 
 from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSegment
 
-_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+")
+_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+|(?<=[.!?][\"”’»])\s+")
 _NON_BREAKING_ABBREVIATIONS = frozenset(
     {
         "dr.",

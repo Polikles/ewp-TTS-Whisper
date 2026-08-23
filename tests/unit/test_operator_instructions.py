@@ -27,6 +27,11 @@ def test_operator_runbook_covers_every_shipped_command_and_safety_boundary() -> 
         "transcriber revise apply",
         "transcriber revise edit",
         "transcriber revise audit",
+        "transcriber translate prepare",
+        "transcriber translate preview",
+        "transcriber translate apply",
+        "transcriber translate audit",
+        "transcriber translate export",
         "transcriber clean",
     ):
         assert command in document
@@ -62,6 +67,7 @@ def test_operator_runbook_links_all_required_detailed_guides() -> None:
         "MODEL_SETUP.md",
         "OFFLINE_MODE.md",
         "REVISE_TRANSCRIPTS.md",
+        "TRANSLATE_TRANSCRIPTS.md",
         "TROUBLESHOOTING.md",
         "FEEDBACK_FOR_V2.md",
     )

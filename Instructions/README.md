@@ -366,6 +366,10 @@ The current translation slice is manual and model-free. It supports `pl -> en` a
 and LLM-corrected revisions are allowed only when deliberately selected and remain marked
 as raw or automated candidates in the translation artifact.
 
+The detailed end-to-end playbook, including migration of earlier translated
+`EWP-REVIEW` copies, is
+[`../WSL config/TRANSLATE_TRANSCRIPTS.md`](../WSL%20config/TRANSLATE_TRANSCRIPTS.md).
+
 Prepare a protected bilingual review:
 
 ```bash

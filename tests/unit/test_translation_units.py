@@ -68,3 +68,24 @@ def test_speaker_change_is_a_hard_unit_boundary() -> None:
 
     assert [unit.speaker_id for unit in units] == ["speaker_001", "speaker_002"]
     assert [unit.source_text for unit in units] == ["unfinished", "reply."]
+
+
+def test_english_closing_quote_is_a_sentence_boundary() -> None:
+    transcript = EffectiveTranscript(
+        language="en",
+        tokens=(
+            _token(1, "He"),
+            _token(2, "said"),
+            _token(3, '"This'),
+            _token(4, 'works."'),
+            _token(5, "Then"),
+            _token(6, "left."),
+        ),
+    )
+
+    units = plan_translation_units(transcript)
+
+    assert [unit.source_text for unit in units] == [
+        'He said "This works."',
+        "Then left.",
+    ]

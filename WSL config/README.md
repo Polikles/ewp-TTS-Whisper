@@ -1,7 +1,7 @@
 # EWP-transcripts operator guide
 
 This directory contains only current instructions for installing and using the internal
-`0.2.0` release candidate and for collecting feedback needed for V2.
+beta and for collecting feedback needed for later versions.
 
 For one complete command-oriented entry point, start with
 [`../Instructions/README.md`](../Instructions/README.md). The files below provide the
@@ -37,8 +37,10 @@ records resume, permission, timing, and hash evidence. It does not authorize clo
 - [`USE_CURRENT_MVP.md`](USE_CURRENT_MVP.md) — inspect, plan, transcribe, export,
   version, and clean jobs safely.
 - [`REVISE_TRANSCRIPTS.md`](REVISE_TRANSCRIPTS.md) — prepare, edit, preview, apply,
-  audit, and export immutable corrected transcript revisions on the v0.2.0 development
-  branch.
+  audit, and export immutable corrected transcript revisions.
+- [`TRANSLATE_TRANSCRIPTS.md`](TRANSLATE_TRANSCRIPTS.md) — migrate legacy English
+  review copies into exact-lineage translation reviews, then preview, apply, audit, and
+  export English TXT/SRT/VTT.
 - [`FEEDBACK_FOR_V2.md`](FEEDBACK_FOR_V2.md) — run the first archive pilot and retain
   correction, performance, subtitle, and workflow evidence without modifying canonical
   results.
