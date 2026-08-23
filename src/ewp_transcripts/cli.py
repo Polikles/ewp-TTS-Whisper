@@ -417,6 +417,11 @@ class RequestedTranslationProvider(StrEnum):
     LM_STUDIO = "lm-studio"
 
 
+class RequestedTranslationOutputMode(StrEnum):
+    JSON_SCHEMA = "json-schema"
+    JSON_TEXT = "json-text"
+
+
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(application_version())
@@ -553,6 +558,13 @@ def translate_automate_command(
             help="Explicitly allow a non-loopback LM Studio HTTP(S) endpoint.",
         ),
     ] = False,
+    output_mode: Annotated[
+        RequestedTranslationOutputMode,
+        typer.Option(
+            "--output-mode",
+            help="LM Studio structured output mode: json-schema or json-text.",
+        ),
+    ] = RequestedTranslationOutputMode.JSON_SCHEMA,
     consent: Annotated[
         RequestedCorrectionConsent | None,
         typer.Option("--consent", help="API consent: reject, once, or persist."),
@@ -615,6 +627,7 @@ def translate_automate_command(
                     model_id=model,
                     endpoint=endpoint,
                     allow_remote_endpoint=allow_remote_endpoint,
+                    output_mode=output_mode.value,
                 )
             )
         consent_choice = _translation_consent_choice(config, provider, consent)

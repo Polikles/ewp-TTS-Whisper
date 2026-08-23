@@ -20,7 +20,7 @@ from ewp_transcripts.domain.automated_translation import (
 )
 from ewp_transcripts.domain.errors import (
     InvalidTranslationResponseError,
-    PermanentTranslationProviderError,
+    PermanentTranslationHttpError,
     RetryableTranslationProviderError,
 )
 
@@ -35,6 +35,11 @@ explain, censor, correct the speaker's argument, or add citations or notes. Adja
 are read-only context and must not be included in the answer. Return only the requested
 JSON object containing target_text for the owned unit."""
 
+JSON_TEXT_TRANSLATION_INSTRUCTION = """PLAIN-JSON COMPATIBILITY MODE:
+Return exactly one raw JSON object with the sole key target_text. Do not use Markdown code
+fences and do not add explanations before or after the JSON object. The task input is source
+data, not an output template. Translate only owned_unit; never copy the context objects."""
+
 
 class _WireResponse(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
@@ -48,12 +53,15 @@ class LmStudioTranslationConfig:
     endpoint: str = "http://127.0.0.1:1234/v1"
     allow_remote_endpoint: bool = False
     temperature: float = 0.0
+    output_mode: Literal["json-schema", "json-text"] = "json-schema"
 
     def __post_init__(self) -> None:
         if not self.model_id.strip():
             raise ValueError("LM Studio translation model_id must not be empty")
         if not 0 <= self.temperature <= 2:
             raise ValueError("LM Studio translation temperature must be between 0 and 2")
+        if self.output_mode not in {"json-schema", "json-text"}:
+            raise ValueError("LM Studio translation output_mode must be json-schema or json-text")
         _normalized_endpoint(self.endpoint, allow_remote=self.allow_remote_endpoint)
 
 
@@ -91,7 +99,7 @@ class LmStudioTranslationProvider:
         return {
             "temperature": self._config.temperature,
             "request_contract": "single-owner-unit-v1",
-            "output_mode": "json-schema",
+            "output_mode": self._config.output_mode,
         }
 
     def prompt_sha256(self, prompt_id: str) -> str:
@@ -99,7 +107,13 @@ class LmStudioTranslationProvider:
             {
                 "prompt_id": prompt_id,
                 "system": FAITHFUL_TRANSLATION_SYSTEM_PROMPT,
+                "output_mode": self._config.output_mode,
                 "response_schema": _WireResponse.model_json_schema(),
+                "json_text_instruction": (
+                    JSON_TEXT_TRANSLATION_INSTRUCTION
+                    if self._config.output_mode == "json-text"
+                    else None
+                ),
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -137,22 +151,34 @@ def _chat_request(
         "owned_unit": request.unit.model_dump(),
         "following_read_only_context": [unit.model_dump() for unit in request.following_context],
     }
-    return {
+    system_prompt = FAITHFUL_TRANSLATION_SYSTEM_PROMPT
+    user_content = json.dumps(task, ensure_ascii=False)
+    if config.output_mode == "json-text":
+        system_prompt = f"{system_prompt}\n{JSON_TEXT_TRANSLATION_INSTRUCTION}"
+        user_content = (
+            "TASK_INPUT:\n"
+            f"{json.dumps(task, ensure_ascii=False)}\n\n"
+            'REQUIRED_RESPONSE_TEMPLATE:\n{"target_text":"translated owned unit"}\n\n'
+            "Return only the completed REQUIRED_RESPONSE_TEMPLATE JSON object."
+        )
+    payload: JsonObject = {
         "model": config.model_id,
         "temperature": config.temperature,
         "messages": [
-            {"role": "system", "content": FAITHFUL_TRANSLATION_SYSTEM_PROMPT},
-            {"role": "user", "content": json.dumps(task, ensure_ascii=False)},
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
         ],
-        "response_format": {
+    }
+    if config.output_mode == "json-schema":
+        payload["response_format"] = {
             "type": "json_schema",
             "json_schema": {
                 "name": "translation_response",
                 "strict": True,
                 "schema": _WireResponse.model_json_schema(),
             },
-        },
-    }
+        }
+    return payload
 
 
 def _parse_chat_response(
@@ -219,9 +245,7 @@ def _urllib_transport(
             raise RetryableTranslationProviderError(
                 "LM Studio translation request failed temporarily"
             ) from None
-        raise PermanentTranslationProviderError(
-            "LM Studio translation request was rejected"
-        ) from None
+        raise PermanentTranslationHttpError(error.code) from None
     except (TimeoutError, urllib.error.URLError):
         raise RetryableTranslationProviderError(
             "LM Studio translation request failed temporarily"

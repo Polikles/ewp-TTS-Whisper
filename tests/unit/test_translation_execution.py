@@ -2,11 +2,17 @@
 
 from pathlib import Path
 
+import pytest
+
 from ewp_transcripts.automated_translation import (
     DeterministicMockTranslationProvider,
     build_automated_translation_request,
 )
-from ewp_transcripts.domain.errors import RetryableTranslationProviderError
+from ewp_transcripts.domain.errors import (
+    PermanentTranslationHttpError,
+    PermanentTranslationProviderError,
+    RetryableTranslationProviderError,
+)
 from ewp_transcripts.translation_execution import (
     TranslationExecutionPolicy,
     execute_translation_call,
@@ -61,3 +67,16 @@ def test_resume_summary_contains_no_text(tmp_path: Path) -> None:
     assert summary["units"] == 2
     assert summary["request_count"] == 2
     assert "text" not in str(summary)
+
+
+def test_execution_reports_only_safe_permanent_http_status() -> None:
+    class RejectedProvider(DeterministicMockTranslationProvider):
+        def translate(self, request, *, timeout_seconds=None):  # type: ignore[no-untyped-def]
+            raise PermanentTranslationHttpError(400)
+
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    provider = RejectedProvider()
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    with pytest.raises(PermanentTranslationProviderError, match="http_status=400"):
+        execute_translation_call(provider, request)

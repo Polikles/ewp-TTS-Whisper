@@ -105,6 +105,14 @@ class PermanentTranslationProviderError(TranslationProviderError):
     """Raised for a translation-provider failure that must not be retried."""
 
 
+class PermanentTranslationHttpError(PermanentTranslationProviderError):
+    """Content-free permanent HTTP rejection with a safe numeric status."""
+
+    def __init__(self, status_code: int) -> None:
+        super().__init__("Translation provider HTTP request was rejected")
+        self.status_code = status_code
+
+
 class InvalidCorrectionResponseError(ApplicationError):
     """Raised when provider output cannot be trusted as a correction proposal."""
 

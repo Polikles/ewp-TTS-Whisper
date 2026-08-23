@@ -225,6 +225,7 @@ uv run --locked transcriber translate automate "$EWP_PL_RESULTS/EPISODE_results.
   --revision "$EWP_PL_REVISIONS/EPISODE_revision_NNN.json" \
   --target-language en --provider lm-studio \
   --model "EXACT-LM-STUDIO-MODEL-ID" --consent once \
+  --output-mode json-text \
   --resume-dir "$EWP_TRANSLATION_PILOT/state" \
   --output-dir "$EWP_TRANSLATION_PILOT/candidates"
 ```
@@ -234,6 +235,12 @@ assessments, and operational reports. Never write disposable pilot artifacts int
 private corpus or repository. Preserve only reviewed content-free evidence in project
 documentation, then delete the temporary root after verifying it matches
 `/tmp/ewp-translation-pilot.*`.
+
+Start Bielik and other LM Studio models with `--output-mode json-text` when the server logs
+an immediate `Channel Error` for JSON Schema structured output. This compatibility mode
+still requires exactly one raw `{"target_text":"..."}` object and validates it locally;
+it does not permit prose, Markdown, extra fields, or context output. Changing output mode
+changes prompt provenance and resume identity, so use a fresh temporary pilot root.
 
 The initial comparable path is verified Polish source, `preserve/preserve`, and no
 dictionary. Record the exact model artifact/quantization and hardware outside the artifact

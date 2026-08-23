@@ -52,6 +52,29 @@ def test_adapter_rejects_remote_endpoint_by_default() -> None:
         LmStudioTranslationConfig(model_id="model", endpoint="http://example.com/v1")
 
 
+def test_json_text_mode_omits_unsupported_response_format() -> None:
+    captured: dict[str, object] = {}
+
+    def transport(_url, _headers, payload, _timeout):  # type: ignore[no-untyped-def]
+        captured["payload"] = payload
+        return {"choices": [{"message": {"content": '{"target_text":"Witamy."}'}}]}
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="json-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    response = provider.translate(request, timeout_seconds=1)
+
+    payload = json.loads(captured["payload"])
+    assert "response_format" not in payload
+    assert "PLAIN-JSON COMPATIBILITY MODE" in payload["messages"][0]["content"]
+    assert response.target_text == "Witamy."
+    assert provider.provenance_parameters["output_mode"] == "json-text"
+
+
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
     secret = "private transcript phrase"
 

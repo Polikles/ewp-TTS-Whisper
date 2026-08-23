@@ -6,6 +6,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Changed
 
+- Added an explicit LM Studio translation `json-text` compatibility mode for models or
+  backends that reject JSON Schema channels. It omits `response_format` while retaining a
+  strict single-object prompt and local schema validation; mode changes prompt provenance
+  and resume identity. Permanent HTTP failures now expose only the safe numeric status.
 - Required disposable test and model-pilot outputs to use a dedicated `mktemp -d`
   directory under `/tmp`. Private corpora and repositories retain only reviewed,
   content-free evidence rather than resume state, candidates, exports, or intermediate

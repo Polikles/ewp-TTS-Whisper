@@ -13,6 +13,7 @@ from ewp_transcripts.domain.automated_translation import (
     AutomatedTranslationResponse,
 )
 from ewp_transcripts.domain.errors import (
+    PermanentTranslationHttpError,
     PermanentTranslationProviderError,
     RetryableTranslationProviderError,
 )
@@ -85,6 +86,10 @@ def execute_translation_call(
                     "Translation provider failed after bounded retries"
                 ) from None
             sleep(policy.retry_delay_seconds)
+        except PermanentTranslationHttpError as error:
+            raise PermanentTranslationProviderError(
+                f"Translation provider rejected the request (http_status={error.status_code})"
+            ) from None
         except PermanentTranslationProviderError:
             raise PermanentTranslationProviderError(
                 "Translation provider reported a permanent failure"
