@@ -99,6 +99,11 @@ def test_builds_non_final_llm_candidate_with_exact_unit_lineage(tmp_path: Path) 
     assert translation.provenance.method == "llm"
     assert translation.provenance.llm is not None
     assert translation.provenance.llm.provider == "ewp-mock-translation"
+    assert translation.provenance.llm.parameters is not None
+    assert (
+        translation.provenance.llm.parameters["dictionary_selection_contract"]
+        == "owned-source-unicode-phrase-v2"
+    )
     assert translation.source.verification == "raw"
     assert [unit.target_text for unit in translation.units] == [
         "Welcome to another episode.",

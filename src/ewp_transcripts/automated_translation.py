@@ -36,6 +36,7 @@ from ewp_transcripts.translation_dictionary import ProjectTranslationDictionary
 from ewp_transcripts.translation_review_service import prepare_translation_review
 
 DEFAULT_TRANSLATION_PROMPT_ID = "faithful-translation-v1"
+DICTIONARY_SELECTION_CONTRACT = "owned-source-unicode-phrase-v2"
 
 
 def build_automated_translation_request(
@@ -84,6 +85,7 @@ def build_automated_translation_request(
             str(context_units),
             dictionary.dictionary_id if dictionary is not None else "",
             dictionary_sha256 or "",
+            DICTIONARY_SELECTION_CONTRACT,
             unit.unit_id,
             unit.source_text_sha256,
             *(
@@ -317,6 +319,7 @@ def build_automated_translation(
                     "dictionary_id": dictionary.dictionary_id if dictionary else None,
                     "dictionary_sha256": dictionary_sha256,
                     "dictionary_project_id": dictionary.project_id if dictionary else None,
+                    "dictionary_selection_contract": DICTIONARY_SELECTION_CONTRACT,
                 },
             ),
         ),

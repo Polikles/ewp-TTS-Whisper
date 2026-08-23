@@ -219,6 +219,8 @@ All notable changes to EWP-transcripts are documented here.
 - Tightened applicable dictionary matching to Unicode word/phrase boundaries. Entries are
   selected from source text only—`Szymon` never rewrites a source `Simon`—and are not
   post-translation substitutions.
+  The versioned selection contract participates in operation/resume identity and candidate
+  provenance so matcher changes cannot silently reuse older provider responses.
 - Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode.
   Raw prose is accepted directly; Bielik's valid one-field `target_text` or
   `translated_text` compatibility envelope is strictly parsed and unwrapped locally.
