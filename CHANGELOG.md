@@ -6,6 +6,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Changed
 
+- Added an explicit LM Studio translation `plain-text` mode for single-unit responses when
+  a model translates successfully but emits malformed JSON around dialogue quotes. The
+  complete response remains exact-operation-bound and is rejected when empty, fenced, or
+  control-character-bearing; mode identity remains part of provenance and resume hashing.
 - Added an explicit LM Studio translation `json-text` compatibility mode for models or
   backends that reject JSON Schema channels. It omits `response_format` while retaining a
   strict single-object prompt and local schema validation; mode changes prompt provenance

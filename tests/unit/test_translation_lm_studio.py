@@ -75,6 +75,30 @@ def test_json_text_mode_omits_unsupported_response_format() -> None:
     assert provider.provenance_parameters["output_mode"] == "json-text"
 
 
+def test_plain_text_mode_preserves_dialogue_quotes_without_json_serialization() -> None:
+    dialogue = 'I immediately say, "Let\'s do it together".'
+    captured: dict[str, object] = {}
+
+    def transport(_url, _headers, payload, _timeout):  # type: ignore[no-untyped-def]
+        captured["payload"] = payload
+        return {"choices": [{"finish_reason": "stop", "message": {"content": dialogue}}]}
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    response = provider.translate(request, timeout_seconds=1)
+
+    payload = json.loads(captured["payload"])
+    assert "response_format" not in payload
+    assert "PLAIN-TEXT COMPATIBILITY MODE" in payload["messages"][0]["content"]
+    assert response.target_text == dialogue
+    assert provider.provenance_parameters["output_mode"] == "plain-text"
+
+
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
     secret = "private transcript phrase"
 

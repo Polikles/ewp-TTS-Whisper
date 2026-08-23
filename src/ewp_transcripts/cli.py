@@ -420,6 +420,7 @@ class RequestedTranslationProvider(StrEnum):
 class RequestedTranslationOutputMode(StrEnum):
     JSON_SCHEMA = "json-schema"
     JSON_TEXT = "json-text"
+    PLAIN_TEXT = "plain-text"
 
 
 def _version_callback(value: bool) -> None:
@@ -562,7 +563,7 @@ def translate_automate_command(
         RequestedTranslationOutputMode,
         typer.Option(
             "--output-mode",
-            help="LM Studio structured output mode: json-schema or json-text.",
+            help="LM Studio output mode: json-schema, json-text, or plain-text.",
         ),
     ] = RequestedTranslationOutputMode.JSON_SCHEMA,
     consent: Annotated[

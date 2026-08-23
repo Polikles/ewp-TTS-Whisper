@@ -40,6 +40,11 @@ Return exactly one raw JSON object with the sole key target_text. Do not use Mar
 fences and do not add explanations before or after the JSON object. The task input is source
 data, not an output template. Translate only owned_unit; never copy the context objects."""
 
+PLAIN_TEXT_TRANSLATION_INSTRUCTION = """PLAIN-TEXT COMPATIBILITY MODE:
+Return only the translated text of owned_unit. Do not return JSON, Markdown fences, labels,
+notes, explanations, or surrounding quotation marks unless those quotation marks belong to
+the translation itself. Adjacent context remains read-only and must not be returned."""
+
 
 class _WireResponse(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
@@ -53,15 +58,17 @@ class LmStudioTranslationConfig:
     endpoint: str = "http://127.0.0.1:1234/v1"
     allow_remote_endpoint: bool = False
     temperature: float = 0.0
-    output_mode: Literal["json-schema", "json-text"] = "json-schema"
+    output_mode: Literal["json-schema", "json-text", "plain-text"] = "json-schema"
 
     def __post_init__(self) -> None:
         if not self.model_id.strip():
             raise ValueError("LM Studio translation model_id must not be empty")
         if not 0 <= self.temperature <= 2:
             raise ValueError("LM Studio translation temperature must be between 0 and 2")
-        if self.output_mode not in {"json-schema", "json-text"}:
-            raise ValueError("LM Studio translation output_mode must be json-schema or json-text")
+        if self.output_mode not in {"json-schema", "json-text", "plain-text"}:
+            raise ValueError(
+                "LM Studio translation output_mode must be json-schema, json-text, or plain-text"
+            )
         _normalized_endpoint(self.endpoint, allow_remote=self.allow_remote_endpoint)
 
 
@@ -114,6 +121,11 @@ class LmStudioTranslationProvider:
                     if self._config.output_mode == "json-text"
                     else None
                 ),
+                "plain_text_instruction": (
+                    PLAIN_TEXT_TRANSLATION_INSTRUCTION
+                    if self._config.output_mode == "plain-text"
+                    else None
+                ),
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -137,7 +149,7 @@ class LmStudioTranslationProvider:
             payload,
             timeout_seconds,
         )
-        return _parse_chat_response(document, request)
+        return _parse_chat_response(document, request, output_mode=self._config.output_mode)
 
 
 def _chat_request(
@@ -161,6 +173,8 @@ def _chat_request(
             'REQUIRED_RESPONSE_TEMPLATE:\n{"target_text":"translated owned unit"}\n\n'
             "Return only the completed REQUIRED_RESPONSE_TEMPLATE JSON object."
         )
+    elif config.output_mode == "plain-text":
+        system_prompt = f"{system_prompt}\n{PLAIN_TEXT_TRANSLATION_INSTRUCTION}"
     payload: JsonObject = {
         "model": config.model_id,
         "temperature": config.temperature,
@@ -182,7 +196,10 @@ def _chat_request(
 
 
 def _parse_chat_response(
-    document: JsonObject, request: AutomatedTranslationRequest
+    document: JsonObject,
+    request: AutomatedTranslationRequest,
+    *,
+    output_mode: Literal["json-schema", "json-text", "plain-text"],
 ) -> AutomatedTranslationResponse:
     try:
         choice = document["choices"][0]
@@ -193,7 +210,17 @@ def _parse_chat_response(
         content = choice["message"]["content"]
         if not isinstance(content, str):
             raise TypeError
-        wire = _WireResponse.model_validate_json(content)
+        if output_mode == "plain-text":
+            target_text = " ".join(content.split())
+            if (
+                not target_text
+                or "\x00" in content
+                or target_text.startswith("```")
+                or target_text.endswith("```")
+            ):
+                raise ValueError("invalid plain-text translation")
+        else:
+            target_text = _WireResponse.model_validate_json(content).target_text
         raw_usage = document.get("usage")
         usage = None
         if isinstance(raw_usage, dict):
@@ -204,10 +231,14 @@ def _parse_chat_response(
         return AutomatedTranslationResponse(
             operation_id=request.operation_id,
             unit_id=request.unit.unit_id,
-            target_text=wire.target_text,
+            target_text=target_text,
             usage=usage,
         )
     except ValidationError as error:
+        raise InvalidTranslationResponseError(
+            "LM Studio returned an invalid translation response"
+        ) from error
+    except ValueError as error:
         raise InvalidTranslationResponseError(
             "LM Studio returned an invalid translation response"
         ) from error
