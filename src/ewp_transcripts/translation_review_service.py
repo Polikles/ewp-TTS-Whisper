@@ -107,6 +107,7 @@ def prepare_translation_review(
         else None
     )
     parent_identity = None
+    dictionary = None
     parent_targets: dict[str, str] = {}
     if parent is not None:
         assert parent_translation_path is not None
@@ -150,6 +151,7 @@ def prepare_translation_review(
             sha256=sha256_file(parent_translation_path),
             filename=parent_translation_path.name,
         )
+        dictionary = parent.dictionary
         parent_targets = {unit.unit_id: unit.target_text for unit in parent.units}
     return TranslationReview(
         header=TranslationReviewHeader(
@@ -161,6 +163,7 @@ def prepare_translation_review(
             generated_at=generated_at or datetime.now(UTC),
             application_version=__version__,
             parent_translation=parent_identity,
+            dictionary=dictionary,
         ),
         units=tuple(
             TranslationReviewUnit(

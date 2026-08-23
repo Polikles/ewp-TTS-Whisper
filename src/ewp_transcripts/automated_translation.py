@@ -21,6 +21,7 @@ from ewp_transcripts.domain.errors import InvalidTranslationResponseError
 from ewp_transcripts.domain.translation import (
     Language,
     TranscriptTranslation,
+    TranslationDictionaryProvenance,
     TranslationDirection,
     TranslationLlmProvenance,
     TranslationProvenance,
@@ -283,6 +284,16 @@ def build_automated_translation(
         ),
         style=review.header.style,
         source=review.header.source,
+        dictionary=(
+            TranslationDictionaryProvenance(
+                dictionary_version=dictionary.dictionary_version,
+                dictionary_id=dictionary.dictionary_id,
+                project_id=dictionary.project_id,
+                sha256=dictionary_sha256,
+            )
+            if dictionary is not None and dictionary_sha256 is not None
+            else None
+        ),
         provenance=TranslationProvenance(
             method="llm",
             interface="api",

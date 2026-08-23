@@ -73,6 +73,11 @@ def build_translation_audit(
         "direction": translation.direction.model_dump(mode="json"),
         "style": translation.style.model_dump(mode="json", by_alias=True),
         "source": translation.source.model_dump(mode="json"),
+        "dictionary": (
+            translation.dictionary.model_dump(mode="json")
+            if translation.dictionary is not None
+            else None
+        ),
         "units": audited_units,
         "statistics": {
             "unit_count": len(audited_units),

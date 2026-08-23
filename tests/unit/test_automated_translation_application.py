@@ -109,6 +109,12 @@ def test_cli_uses_only_explicit_job_scoped_translation_dictionary(tmp_path: Path
     parameters = artifact["provenance"]["llm"]["parameters"]
     assert parameters["dictionary_id"] == "example-pl"
     assert len(parameters["dictionary_sha256"]) == 64
+    assert artifact["dictionary"] == {
+        "dictionary_version": "1.0",
+        "dictionary_id": "example-pl",
+        "project_id": "example",
+        "sha256": parameters["dictionary_sha256"],
+    }
 
 
 def test_automated_batch_isolates_invalid_results(tmp_path: Path) -> None:

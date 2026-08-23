@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from contextlib import suppress
 from dataclasses import dataclass
@@ -10,6 +11,7 @@ from pathlib import Path
 
 from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.domain.errors import InvalidTranslationError, OutputReservationError
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.domain.translation import TranscriptTranslation, load_transcript_translation
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
@@ -202,6 +204,25 @@ def export_translation(
                     f"Cannot render translated {export_format.value} export: {error}"
                 ) from error
         payloads.append((destination / f"{stem}.{export_format.value}", rendered.encode("utf-8")))
+    provenance = {
+        "schema_version": "ewp-translation-export-provenance-v1",
+        "translation": {
+            "filename": normalized.name,
+            "sha256": sha256_file(normalized),
+        },
+        "dictionary": (
+            translation.dictionary.model_dump(mode="json")
+            if translation.dictionary is not None
+            else None
+        ),
+        "exports": [path.name for path, _payload in payloads],
+    }
+    payloads.append(
+        (
+            destination / f"{stem}.provenance.json",
+            (json.dumps(provenance, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+        )
+    )
     written_paths: list[Path] = []
     skipped_paths: list[Path] = []
     with output_directory_lock(destination, timeout_seconds=lock_timeout_seconds):

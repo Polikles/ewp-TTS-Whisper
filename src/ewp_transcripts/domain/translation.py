@@ -89,6 +89,13 @@ class TranslationParent(TranslationModel):
     filename: str = Field(min_length=1)
 
 
+class TranslationDictionaryProvenance(TranslationModel):
+    dictionary_version: str = Field(min_length=1)
+    dictionary_id: str = Field(min_length=1)
+    project_id: str = Field(min_length=1)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class TranslationLlmProvenance(TranslationModel):
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)
@@ -161,6 +168,7 @@ class TranscriptTranslation(TranslationModel):
     style: TranslationStyle
     source: TranslationSource
     parent_translation: TranslationParent | None = None
+    dictionary: TranslationDictionaryProvenance | None = None
     provenance: TranslationProvenance
     units: tuple[TranslationUnit, ...] = Field(min_length=1)
     statistics: TranslationStatistics

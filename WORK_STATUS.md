@@ -117,6 +117,8 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    planning now exposes only entries whose source form occurs in the owned unit. That run is
    rejected; the next pilot must use only durable names/titles/addresses, not episode-specific
    mistranslation fixes.
+   Dictionary provenance is first-class and inherited by exact-parent manual children;
+   audits declare the dictionary object or null, while exports publish a provenance sidecar.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

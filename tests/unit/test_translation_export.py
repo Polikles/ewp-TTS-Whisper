@@ -1,5 +1,6 @@
 """Tests for deterministic translation TXT export."""
 
+import json
 from pathlib import Path
 
 from ewp_transcripts.domain.translation import TranslationDirection, load_transcript_translation
@@ -31,9 +32,11 @@ def test_export_translation_text_writes_then_skips_identical(tmp_path: Path) -> 
     second = export_translation_text(EXAMPLE, output_directory=tmp_path)
 
     expected = tmp_path / "S01E01_pl_translation_001.txt"
-    assert first.written == (expected,)
-    assert second.skipped == (expected,)
+    provenance = tmp_path / "S01E01_pl_translation_001.provenance.json"
+    assert first.written == (expected, provenance)
+    assert second.skipped == (expected, provenance)
     assert expected.read_text(encoding="utf-8").startswith("speaker_001:")
+    assert json.loads(provenance.read_text(encoding="utf-8"))["dictionary"] is None
 
 
 def test_translation_subtitles_stay_inside_unit_timing_and_render(tmp_path: Path) -> None:
@@ -49,7 +52,7 @@ def test_translation_subtitles_stay_inside_unit_timing_and_render(tmp_path: Path
     assert cues[0].start_ms == translation.units[0].start_ms
     assert cues[0].end_ms <= translation.units[0].end_ms
     assert cues[-1].end_ms == translation.units[-1].end_ms
-    assert {path.suffix for path in outcome.written} == {".srt", ".vtt"}
+    assert {path.suffix for path in outcome.written} == {".srt", ".vtt", ".json"}
     assert "00:00:01,240 --> 00:00:03,900" in next(
         path for path in outcome.written if path.suffix == ".srt"
     ).read_text(encoding="utf-8")

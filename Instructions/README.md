@@ -481,6 +481,11 @@ benchmarked separately from no-dictionary results.
 Only entries whose source form occurs in the owned unit are sent to the provider. This local
 relevance boundary prevents an unrelated proper name from being injected into another unit;
 the model is still required to use an applicable term without adding unrelated content.
+Each dictionary belongs to one declared project and explicitly lists approved jobs; create
+separate files for unrelated projects. Translation snapshots and accepted manual children
+carry dictionary version, ID, project, and SHA-256. Audits declare that object or `null`, and
+exports write a deterministic `.provenance.json` sidecar with the same dictionary-or-none
+record without adding metadata to transcript or subtitle text.
 
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
