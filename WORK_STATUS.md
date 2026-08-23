@@ -84,8 +84,8 @@ all **544 tests**. Canonical results and accepted revisions remain immutable. Pr
 corpus content, API keys, provider payloads, and runtime resume/lock files remain outside
 Git.
 
-The current automated-translation and semantic-benchmark tree passes the same complete
-gate with **573 tests**.
+The current automated-translation, semantic-benchmark, and translation-dictionary tree
+passes the same complete gate with **576 tests**.
 
 ## Next session: ordered v0.4 work
 
@@ -95,10 +95,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
 
 1. **Automated translation.** The provider-neutral request/response, mock, LM Studio,
    exact-scope consent, retry/resume, immutable candidate, and single-file CLI slice is
-   implemented. Next run a real verified-Polish `pl -> en`, `preserve/preserve`,
-   no-dictionary LM Studio pilot and inspect its operational evidence. This baseline is
-   complete for Bielik, including exact-parent manual acceptance, audit, and export. Next
-   complete for Bielik, including the semantic assessment/report. Keep `en -> pl` separate.
+   implemented. The verified-Polish `pl -> en`, `preserve/preserve`, no-dictionary Bielik
+   baseline is complete, including exact-parent manual acceptance, audit, export, and the
+   semantic assessment/report. Keep `en -> pl` separate.
    Additional local models and cloud adapters remain separate later benchmark cases.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
    content-free reporting boundary is implemented. The first narrower Bielik reference and
@@ -113,6 +112,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    and dictionary-assisted benchmark evidence. Candidate extraction from accepted audits
    requires human approval. Benchmark raw, LLM-only, dictionary-assisted LLM, and manual
    gold; reject dictionaries that create harmful confident replacements.
+   The first exploratory translation-dictionary run demonstrated such harm: the complete
+   dictionary was sent to every unit and Bielik invented an unrelated speaker label. Request
+   planning now exposes only entries whose source form occurs in the owned unit. That run is
+   rejected; the next pilot must use only durable names/titles/addresses, not episode-specific
+   mistranslation fixes.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

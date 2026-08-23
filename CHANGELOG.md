@@ -208,6 +208,9 @@ All notable changes to EWP-transcripts are documented here.
 
 - Required an exact-parent manual child to receive a translation number greater than its
   parent even when candidates and accepted translations use separate output directories.
+- Restricted dictionary context to entries whose source form occurs in the owned unit. The
+  first exploratory dictionary pilot sent every entry to every request and caused an
+  invented speaker label, so that run is rejected as benchmark evidence.
 - Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode.
   Raw prose is accepted directly; Bielik's valid one-field `target_text` or
   `translated_text` compatibility envelope is strictly parsed and unwrapped locally.

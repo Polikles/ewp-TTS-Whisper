@@ -478,6 +478,9 @@ file declares its ID, project, approved job IDs, direction, and source/target en
 or direction mismatch fails before provider calls. The exact file SHA-256 is included in
 request/resume identity and candidate provenance; dictionary-assisted results must be
 benchmarked separately from no-dictionary results.
+Only entries whose source form occurs in the owned unit are sent to the provider. This local
+relevance boundary prevents an unrelated proper name from being injected into another unit;
+the model is still required to use an applicable term without adding unrelated content.
 
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.

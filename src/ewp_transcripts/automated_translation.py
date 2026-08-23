@@ -62,6 +62,11 @@ def build_automated_translation_request(
 
     prompt_sha256 = provider.prompt_sha256(prompt_id)
     unit = review.units[unit_index]
+    applicable_entries = tuple(
+        entry
+        for entry in (dictionary.entries if dictionary is not None else ())
+        if entry.source.casefold() in unit.source_text.casefold()
+    )
     context_start = max(0, unit_index - context_units)
     context_end = min(len(review.units), unit_index + context_units + 1)
     identity = "\0".join(
@@ -96,7 +101,7 @@ def build_automated_translation_request(
         dictionary_sha256=dictionary_sha256,
         dictionary_terms=tuple(
             TranslationDictionaryTerm(source=entry.source, target=entry.target)
-            for entry in (dictionary.entries if dictionary is not None else ())
+            for entry in applicable_entries
         ),
         preceding_context=tuple(
             context(review.units[index]) for index in range(context_start, unit_index)

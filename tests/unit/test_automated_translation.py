@@ -12,6 +12,10 @@ from ewp_transcripts.automated_translation import (
 )
 from ewp_transcripts.domain.automated_translation import AutomatedTranslationResponse
 from ewp_transcripts.domain.errors import InvalidTranslationResponseError
+from ewp_transcripts.translation_dictionary import (
+    ProjectTranslationDictionary,
+    TranslationDictionaryEntry,
+)
 from ewp_transcripts.translation_review_service import prepare_translation_review
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,6 +32,33 @@ def test_request_owns_one_unit_and_context_is_read_only() -> None:
     assert tuple(unit.unit_id for unit in request.preceding_context) == (review.units[0].unit_id,)
     assert request.following_context == ()
     assert len(request.operation_id) == 64
+
+
+def test_request_includes_only_dictionary_terms_present_in_owned_unit() -> None:
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    dictionary = ProjectTranslationDictionary(
+        dictionary_id="example",
+        project_id="example",
+        job_ids=("S01E01",),
+        source_language="en",
+        target_language="pl",
+        entries=(
+            TranslationDictionaryEntry(source="Welcome", target="Witamy"),
+            TranslationDictionaryEntry(source="Unrelated", target="Niepowiązane"),
+        ),
+    )
+
+    request = build_automated_translation_request(
+        review,
+        0,
+        provider=DeterministicMockTranslationProvider(),
+        dictionary=dictionary,
+        dictionary_sha256="a" * 64,
+    )
+
+    assert [(term.source, term.target) for term in request.dictionary_terms] == [
+        ("Welcome", "Witamy")
+    ]
 
 
 def test_response_must_match_operation_and_owned_unit() -> None:
