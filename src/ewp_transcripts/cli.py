@@ -533,6 +533,16 @@ def _print_automated_translation_batch(outcome: BatchAutomatedTranslationOutcome
     )
 
 
+def _warn_unreviewed_translation_source(verification: str) -> None:
+    if verification == "automated_candidate":
+        typer.echo(
+            "WARNING: Translation source is an unreviewed automated transcript candidate. "
+            "The translation artifact will preserve candidate—not manually verified—source "
+            "lineage. Manually verify both source and translation before acceptance.",
+            err=True,
+        )
+
+
 @translate_app.command("automate")
 def translate_automate_command(
     result_path: Annotated[
@@ -710,12 +720,15 @@ def translate_automate_command(
         if batch.count("failed"):
             raise typer.Exit(code=5)
     elif json_output:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         typer.echo(
             _translation_json(outcome.translation, translation_path=outcome.translation_path)
         )
     elif preview:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         _print_translation_preview(outcome.translation)
     else:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         llm = outcome.translation.provenance.llm
         assert llm is not None
         typer.echo(f"CANDIDATE {outcome.translation_path}")
@@ -808,6 +821,7 @@ def translate_prepare_command(
         if batch.count("failed"):
             raise typer.Exit(code=5)
     else:
+        _warn_unreviewed_translation_source(outcome.review.header.source.verification)
         typer.echo(f"PREPARED {outcome.path}")
         typer.echo(f"SUMMARY units={len(outcome.review.units)}")
 
@@ -875,8 +889,10 @@ def translate_preview_command(
         if batch.count("failed"):
             raise typer.Exit(code=5)
     elif json_output:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         typer.echo(_translation_json(outcome.translation))
     else:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         _print_translation_preview(outcome.translation)
 
 
@@ -955,6 +971,7 @@ def translate_apply_command(
         if batch.count("failed"):
             raise typer.Exit(code=5)
     elif json_output:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         typer.echo(
             _translation_json(
                 outcome.translation,
@@ -962,6 +979,7 @@ def translate_apply_command(
             )
         )
     else:
+        _warn_unreviewed_translation_source(outcome.translation.source.verification)
         typer.echo(f"APPLIED {outcome.review_path}")
         typer.echo(f"  TRANSLATION {outcome.translation_path}")
         typer.echo(

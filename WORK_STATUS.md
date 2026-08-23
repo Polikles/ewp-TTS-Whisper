@@ -85,7 +85,7 @@ corpus content, API keys, provider payloads, and runtime resume/lock files remai
 Git.
 
 The current automated-translation, semantic-benchmark, and translation-dictionary tree
-passes the same complete gate with **577 tests**.
+passes the same complete gate with **579 tests**.
 
 ## Next session: ordered v0.4 work
 
@@ -109,7 +109,8 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    artistically free English corpus; first define a narrower manually approved reference.
 3. **Project-scoped dictionaries.** The first strict, explicit, hashed translation-context
    slice is implemented. Extend the same contract to Polish automated correction, using
-   Gemini 2.5 because evaluated local models did not improve ASR error rate, and add operator examples
+   Gemini 2.5 Flash because evaluated local models did not improve ASR error rate, and add
+   operator examples
    and dictionary-assisted benchmark evidence. Candidate extraction from accepted audits
    requires human approval. Benchmark raw, LLM-only, dictionary-assisted LLM, and manual
    gold; reject dictionaries that create harmful confident replacements.
@@ -127,7 +128,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    occurrences, so dictionaries are context assistance rather than enforcement.
    The intended stage order is `transcript -> Gemini-assisted Polish review candidate ->
    manual Polish review -> export -> translation (manual or LLM-assisted)`. Translation
-   starts from the accepted Polish revision, never the unreviewed candidate. Correction and
+   normally starts from the accepted Polish revision. Explicit translation from an
+   unreviewed candidate remains supported with a prominent warning and exact
+   `automated_candidate` source lineage. Correction and
    translation dictionaries remain separately versioned and hashed even when they share
    approved identifiers.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for

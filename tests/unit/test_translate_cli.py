@@ -5,7 +5,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from ewp_transcripts.cli import app
+from ewp_transcripts.cli import _warn_unreviewed_translation_source, app
 from ewp_transcripts.translation_review_format import (
     load_translation_review,
     render_translation_review,
@@ -14,6 +14,12 @@ from ewp_transcripts.translation_review_format import (
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
 runner = CliRunner()
+
+
+def test_unreviewed_translation_source_warning_is_explicit(capsys) -> None:  # type: ignore[no-untyped-def]
+    _warn_unreviewed_translation_source("automated_candidate")
+
+    assert "unreviewed automated transcript candidate" in capsys.readouterr().err
 
 
 def _prepare_completed_review(tmp_path: Path) -> tuple[Path, Path]:
