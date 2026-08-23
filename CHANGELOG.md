@@ -222,6 +222,9 @@ All notable changes to EWP-transcripts are documented here.
 - Qualified the corrected Bielik candidate through exact-parent manual publication as
   translation 2, a successful 79-unit audit, and deterministic TXT/SRT/VTT export. The
   automated artifact remains non-final and distinct from its accepted manual child.
+- Completed the first human semantic translation report for the no-dictionary Bielik
+  `pl -> en` baseline: 71/79 faithful units, 6 minor errors, 2 major errors, semantic pass
+  rate `0.89873418`, and 6 separately reported convention violations.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed

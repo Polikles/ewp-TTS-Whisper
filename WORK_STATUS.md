@@ -67,6 +67,12 @@ its 79-unit audit published successfully, and deterministic TXT, SRT, and VTT ex
 written successfully. The automated candidate-to-manual-acceptance workflow is therefore
 qualified end to end for this pilot. The next gate is its exact-lineage semantic assessment
 and content-free benchmark report.
+That report is now complete for `pl -> en`: 79 units, 71 faithful, 6 minor errors,
+2 major errors, no critical errors, semantic pass rate `0.89873418`, and 6 separately
+counted convention failures. Issue totals are 1 addition, 5 mistranslations, and 2
+tone/register errors; dictionary provenance is null. The Bielik no-dictionary baseline is
+therefore complete and must not be merged with later dictionary-assisted or reverse-direction
+runs.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,
@@ -92,12 +98,12 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    implemented. Next run a real verified-Polish `pl -> en`, `preserve/preserve`,
    no-dictionary LM Studio pilot and inspect its operational evidence. This baseline is
    complete for Bielik, including exact-parent manual acceptance, audit, and export. Next
-   complete its semantic assessment/report. Keep `en -> pl` separate. Cloud translation
-   remains a later adapter after the local pilot establishes the request/prompt baseline.
+   complete for Bielik, including the semantic assessment/report. Keep `en -> pl` separate.
+   Additional local models and cloud adapters remain separate later benchmark cases.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
-   content-free reporting boundary is implemented. Next define and approve the narrower
-   reference, then validate preparation, provider execution, manual correction, apply,
-   audit, and export. Compare local candidates Qwen 2.5 32B Q4,
+   content-free reporting boundary is implemented. The first narrower Bielik reference and
+   complete candidate/correction/apply/audit/export/report path are qualified. Next compare
+   local candidates Qwen 2.5 32B Q4,
    Bielik 11B Q8, Llama 3.3 8B Q8, MADLAD-400, and NLLB-200 separately from cloud models.
    Record model artifact, backend, prompt, chunking, latency, resource use, request/token
    volume, cost, retries, and reviewer effort. Do not claim translation accuracy from the
