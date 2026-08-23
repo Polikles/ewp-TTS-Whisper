@@ -124,6 +124,12 @@ def prepare_translation_benchmark_assessments(
             gold_sha256=_sha256(gold_staged),
             source_language=candidate.direction.source_language,
             target_language=candidate.direction.target_language,
+            dictionary_id=(
+                candidate.dictionary.dictionary_id if candidate.dictionary is not None else None
+            ),
+            dictionary_sha256=(
+                candidate.dictionary.sha256 if candidate.dictionary is not None else None
+            ),
             units=tuple(
                 TranslationUnitAssessment(unit_id=unit.unit_id) for unit in candidate.units
             ),

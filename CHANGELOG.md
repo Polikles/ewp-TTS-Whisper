@@ -47,6 +47,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added first-class dictionary provenance to translation snapshots and manual children,
   explicit dictionary-or-null declarations in audits, and deterministic export provenance
   sidecars so TXT/SRT/VTT remain clean while their dictionary version/hash stays auditable.
+- Made semantic benchmark preparation inherit dictionary identity/hash directly from the
+  immutable candidate, preventing dictionary-assisted runs from being reported as null.
 - Added provider-neutral automated translation requests and responses with one exact owned
   sentence unit, bounded read-only context, deterministic operation identity, strict local
   response binding, and a network-free deterministic mock provider.

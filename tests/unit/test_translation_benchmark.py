@@ -7,6 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from ewp_transcripts.cli import app
+from ewp_transcripts.domain.translation import TranslationDictionaryProvenance
 from ewp_transcripts.translation_benchmark import (
     SemanticIssue,
     TranslationBenchmarkAssessment,
@@ -99,6 +100,31 @@ def test_semantic_benchmark_requires_human_review_and_does_not_score_word_overla
         "convention_status_counts": {"fail": 1, "not_applicable": 1},
         "convention_violations": 1,
     }
+
+
+def test_benchmark_inherits_candidate_dictionary_provenance(tmp_path: Path) -> None:
+    candidates, golds = _artifacts(tmp_path)
+    candidate_path = next(candidates.glob("*.json"))
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    candidate["dictionary"] = TranslationDictionaryProvenance(
+        dictionary_version="1.0",
+        dictionary_id="project-v1",
+        project_id="project",
+        sha256="d" * 64,
+    ).model_dump(mode="json")
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+
+    assessment_path = prepare_translation_benchmark_assessments(
+        candidate_directory=candidates,
+        gold_directory=golds,
+        output_directory=tmp_path / "bundle",
+    )[0]
+    assessment = TranslationBenchmarkAssessment.model_validate_json(
+        assessment_path.read_text(encoding="utf-8")
+    )
+
+    assert assessment.dictionary_id == "project-v1"
+    assert assessment.dictionary_sha256 == "d" * 64
 
 
 def test_semantic_benchmark_rejects_changed_candidate(tmp_path: Path) -> None:
