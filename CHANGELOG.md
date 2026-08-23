@@ -213,6 +213,10 @@ All notable changes to EWP-transcripts are documented here.
   transport quotation marks cannot become transcript punctuation. Strengthened the
   source-faithful prompt to copy personal names exactly without anglicizing or normalizing
   them; both changes participate in prompt/resume identity.
+- Recorded the corrected 79-unit Bielik baseline: 79 requests, zero retries, 26,833 ms
+  provider time, 1,051 target tokens, no provider warnings, and no remaining transport or
+  ownership defects. Manual review still found semantic errors and three personal-name
+  convention failures, so the candidate remains non-final pending exact-parent correction.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed

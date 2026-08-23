@@ -35,7 +35,8 @@ manual references can be staged into
 private per-unit assessments, and completed reviews produce content-free,
 direction-specific semantic reports. Meaning fidelity is explicitly independent of
 lexical overlap; names, project conventions, and selected-dictionary adherence are a
-separate dimension. A corrected LM Studio pilot and actual benchmark runs remain pending.
+separate dimension. The first corrected LM Studio baseline is complete; manual acceptance
+and the first exact-lineage semantic report remain pending.
 
 The first real Bielik 11B v3 Q8 `s0e00` pilot completed operationally: 80 requests, zero
 retries, 49,605 ms provider time, and complete resume reuse on publication. Its candidate
@@ -49,8 +50,15 @@ closed. Parser-version changes invalidate resume identity.
 The resulting zero-context run completed 79 requests with zero retries in 28,854 ms and
 fixed the numeric split, but manual review found 25 spurious outer-quote wrappers and three
 `Szymon` to `Simon` anglicizations. Valid JSON-string responses are now unwrapped and the
-prompt requires exact personal-name copying. A fresh confirmation run remains pending;
-the reviewed candidate is non-final evidence.
+prompt requires exact personal-name copying.
+The fresh confirmation run completed 79 requests with zero retries in 26,833 ms, produced
+1,051 target tokens, and emitted no provider warnings or spurious outer-quote wrappers.
+Manual review found no omission, repetition, or ownership failure, but identified two clear
+semantic errors and several minor wording/meaning issues. Bielik still anglicized `Szymon`
+in three of four occurrences despite the prompt. The owner confirmed `Ethics in the Loop`
+as the English title, `etykawpetli.pl` as the preferred Polish-domain spelling (both owned
+spellings are valid), and initiator/catalyst as the intended sense of `aktywator`. The
+candidate remains non-final; exact-parent manual correction is the next gate.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,
@@ -62,8 +70,8 @@ all **544 tests**. Canonical results and accepted revisions remain immutable. Pr
 corpus content, API keys, provider payloads, and runtime resume/lock files remain outside
 Git.
 
-The current automated-translation and semantic-benchmark working tree passes the same
-complete gate with **562 tests**.
+The current automated-translation and semantic-benchmark tree passes the same complete
+gate with **573 tests**.
 
 ## Next session: ordered v0.4 work
 
@@ -74,9 +82,10 @@ remaining v0.4 workstreams; details and acceptance criteria live in
 1. **Automated translation.** The provider-neutral request/response, mock, LM Studio,
    exact-scope consent, retry/resume, immutable candidate, and single-file CLI slice is
    implemented. Next run a real verified-Polish `pl -> en`, `preserve/preserve`,
-   no-dictionary LM Studio pilot and inspect its operational evidence. Keep `en -> pl`
-   separate. Cloud translation remains a later adapter after the local pilot establishes
-   the request/prompt baseline.
+   no-dictionary LM Studio pilot and inspect its operational evidence. This baseline is
+   complete for Bielik. Next correct and accept its exact-parent review, then audit/export
+   it. Keep `en -> pl` separate. Cloud translation remains a later adapter after the local
+   pilot establishes the request/prompt baseline.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
    content-free reporting boundary is implemented. Next define and approve the narrower
    reference, then validate preparation, provider execution, manual correction, apply,
