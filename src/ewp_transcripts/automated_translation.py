@@ -15,6 +15,7 @@ from ewp_transcripts.domain.automated_translation import (
     AutomatedTranslationResponse,
     AutomatedTranslationUsage,
     TranslationContextUnit,
+    TranslationDictionaryTerm,
 )
 from ewp_transcripts.domain.errors import InvalidTranslationResponseError
 from ewp_transcripts.domain.translation import (
@@ -29,6 +30,7 @@ from ewp_transcripts.domain.translation import (
     TranslationWarning,
 )
 from ewp_transcripts.domain.translation_review import TranslationReview, TranslationReviewUnit
+from ewp_transcripts.translation_dictionary import ProjectTranslationDictionary
 from ewp_transcripts.translation_review_service import prepare_translation_review
 
 DEFAULT_TRANSLATION_PROMPT_ID = "faithful-translation-v1"
@@ -41,6 +43,8 @@ def build_automated_translation_request(
     provider: AutomatedTranslationProvider,
     prompt_id: str = DEFAULT_TRANSLATION_PROMPT_ID,
     context_units: int = 1,
+    dictionary: ProjectTranslationDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> AutomatedTranslationRequest:
     """Build one single-owner request with bounded read-only context."""
 
@@ -71,6 +75,8 @@ def build_automated_translation_request(
             review.header.style.register_mode,
             review.header.style.discourse,
             str(context_units),
+            dictionary.dictionary_id if dictionary is not None else "",
+            dictionary_sha256 or "",
             unit.unit_id,
             unit.source_text_sha256,
             *(
@@ -86,6 +92,12 @@ def build_automated_translation_request(
         source_language=review.header.source_language,
         target_language=review.header.target_language,
         style=review.header.style,
+        dictionary_id=dictionary.dictionary_id if dictionary is not None else None,
+        dictionary_sha256=dictionary_sha256,
+        dictionary_terms=tuple(
+            TranslationDictionaryTerm(source=entry.source, target=entry.target)
+            for entry in (dictionary.entries if dictionary is not None else ())
+        ),
         preceding_context=tuple(
             context(review.units[index]) for index in range(context_start, unit_index)
         ),
@@ -177,6 +189,8 @@ def build_automated_translation(
     resume_directory: Path | None = None,
     execution_policy: object | None = None,
     created_at: datetime | None = None,
+    dictionary: ProjectTranslationDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> TranscriptTranslation:
     """Build one unpublished non-final provider candidate from exact source units."""
 
@@ -192,6 +206,16 @@ def build_automated_translation(
         revision_path=revision_path,
         style=style,
     )
+    if dictionary is not None:
+        if dictionary_sha256 is None:
+            raise ValueError("translation dictionary SHA-256 is required")
+        if review.header.job_id not in dictionary.job_ids:
+            raise ValueError("translation dictionary is not approved for this job")
+        if (dictionary.source_language, dictionary.target_language) != (
+            review.header.source_language,
+            review.header.target_language,
+        ):
+            raise ValueError("translation dictionary direction does not match the job")
     translated_units: list[TranslationUnit] = []
     translation_warnings: list[TranslationWarning] = []
     for index, source_unit in enumerate(review.units):
@@ -201,6 +225,8 @@ def build_automated_translation(
             provider=provider,
             prompt_id=prompt_id,
             context_units=context_units,
+            dictionary=dictionary,
+            dictionary_sha256=dictionary_sha256,
         )
         if resume_directory is None:
             from ewp_transcripts.translation_execution import execute_translation_call
@@ -261,7 +287,12 @@ def build_automated_translation(
                 endpoint_kind=provider.endpoint_kind,
                 prompt_id=prompt_id,
                 prompt_sha256=provider.prompt_sha256(prompt_id),
-                parameters=provider.provenance_parameters,
+                parameters={
+                    **provider.provenance_parameters,
+                    "dictionary_id": dictionary.dictionary_id if dictionary else None,
+                    "dictionary_sha256": dictionary_sha256,
+                    "dictionary_project_id": dictionary.project_id if dictionary else None,
+                },
             ),
         ),
         units=units,

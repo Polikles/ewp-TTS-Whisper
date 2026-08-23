@@ -1,5 +1,6 @@
 """Application and CLI tests for automated translation candidates."""
 
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -66,6 +67,48 @@ def test_cli_warns_that_mock_candidate_is_non_final(tmp_path: Path) -> None:
     assert "non-final review candidate" in outcome.stderr
     assert "final=false" in outcome.stdout
     assert (tmp_path / "translations/S01E01_pl_translation_001.json").is_file()
+
+
+def test_cli_uses_only_explicit_job_scoped_translation_dictionary(tmp_path: Path) -> None:
+    dictionary = tmp_path / "dictionary.json"
+    dictionary.write_text(
+        json.dumps(
+            {
+                "dictionary_version": "1.0",
+                "dictionary_id": "example-pl",
+                "project_id": "example",
+                "job_ids": ["S01E01"],
+                "source_language": "en",
+                "target_language": "pl",
+                "entries": [{"source": "OpenAI", "target": "OpenAI"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    outcome = CliRunner().invoke(
+        app,
+        [
+            "translate",
+            "automate",
+            str(EXAMPLE),
+            "--target-language",
+            "pl",
+            "--dictionary",
+            str(dictionary),
+            "--output-dir",
+            str(tmp_path / "translations"),
+            "--resume-dir",
+            str(tmp_path / "state"),
+        ],
+    )
+
+    assert outcome.exit_code == 0
+    artifact = json.loads(
+        (tmp_path / "translations/S01E01_pl_translation_001.json").read_text(encoding="utf-8")
+    )
+    parameters = artifact["provenance"]["llm"]["parameters"]
+    assert parameters["dictionary_id"] == "example-pl"
+    assert len(parameters["dictionary_sha256"]) == 64
 
 
 def test_automated_batch_isolates_invalid_results(tmp_path: Path) -> None:

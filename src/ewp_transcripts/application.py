@@ -106,6 +106,7 @@ from ewp_transcripts.translation_consent import (
     load_translation_consents,
     persist_translation_consent,
 )
+from ewp_transcripts.translation_dictionary import ProjectTranslationDictionary
 from ewp_transcripts.translation_discovery import (
     discover_translation_reviews,
     discover_translations,
@@ -1018,6 +1019,8 @@ def preview_automated_translation(
     resume_directory: Path | None = None,
     consent_choice: ConsentChoice | None = None,
     context_units: int = 1,
+    dictionary: ProjectTranslationDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> AutomatedTranslationOutcome:
     """Build a validated non-final provider candidate without publishing it."""
 
@@ -1032,6 +1035,8 @@ def preview_automated_translation(
         style=style,
         resume_directory=resume_directory,
         context_units=context_units,
+        dictionary=dictionary,
+        dictionary_sha256=dictionary_sha256,
     )
     return AutomatedTranslationOutcome(normalized_result, translation)
 
@@ -1048,6 +1053,8 @@ def apply_automated_translation(
     output_directory: Path | None = None,
     consent_choice: ConsentChoice | None = None,
     context_units: int = 1,
+    dictionary: ProjectTranslationDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> AutomatedTranslationOutcome:
     """Build and atomically publish a non-final automated translation candidate."""
 
@@ -1061,6 +1068,8 @@ def apply_automated_translation(
         resume_directory=resume_directory,
         consent_choice=consent_choice,
         context_units=context_units,
+        dictionary=dictionary,
+        dictionary_sha256=dictionary_sha256,
     )
     translation, path = publish_next_translation(
         preview.translation,
@@ -1106,6 +1115,8 @@ def process_automated_translation_batch(
     preview: bool = False,
     consent_choice: ConsentChoice | None = None,
     context_units: int = 1,
+    dictionary: ProjectTranslationDictionary | None = None,
+    dictionary_sha256: str | None = None,
 ) -> BatchAutomatedTranslationOutcome:
     """Build automated candidates sequentially with per-result failure isolation."""
 
@@ -1134,6 +1145,8 @@ def process_automated_translation_batch(
                     resume_directory=state,
                     consent_choice=consent_choice,
                     context_units=context_units,
+                    dictionary=dictionary,
+                    dictionary_sha256=dictionary_sha256,
                 )
                 status: Literal["previewed", "published"] = "previewed"
             else:
@@ -1148,6 +1161,8 @@ def process_automated_translation_batch(
                     output_directory=output_directory,
                     consent_choice=consent_choice,
                     context_units=context_units,
+                    dictionary=dictionary,
+                    dictionary_sha256=dictionary_sha256,
                 )
                 status = "published"
             jobs.append(

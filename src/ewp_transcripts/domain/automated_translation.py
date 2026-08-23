@@ -19,6 +19,11 @@ class TranslationContextUnit(AutomatedTranslationModel):
     source_text: str = Field(min_length=1, pattern=r".*\S.*")
 
 
+class TranslationDictionaryTerm(AutomatedTranslationModel):
+    source: str = Field(min_length=1)
+    target: str = Field(min_length=1)
+
+
 class AutomatedTranslationRequest(AutomatedTranslationModel):
     schema_version: Literal["1.0"] = "1.0"
     operation_id: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -27,6 +32,9 @@ class AutomatedTranslationRequest(AutomatedTranslationModel):
     source_language: Language
     target_language: Language
     style: TranslationStyle
+    dictionary_id: str | None = None
+    dictionary_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    dictionary_terms: tuple[TranslationDictionaryTerm, ...] = ()
     preceding_context: tuple[TranslationContextUnit, ...] = ()
     unit: TranslationContextUnit
     following_context: tuple[TranslationContextUnit, ...] = ()

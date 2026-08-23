@@ -472,6 +472,13 @@ uv run --locked transcriber translate automate "/path/to/episode_results.json" \
   --output-dir "$EWP_TRANSLATION_PILOT/candidates"
 ```
 
+An approved project dictionary is optional and never discovered automatically. Select its
+exact JSON file with `--dictionary /path/to/project-translation-dictionary.json`. The strict
+file declares its ID, project, approved job IDs, direction, and source/target entries. A job
+or direction mismatch fails before provider calls. The exact file SHA-256 is included in
+request/resume identity and candidate provenance; dictionary-assisted results must be
+benchmarked separately from no-dictionary results.
+
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
 After recording the required content-free evidence, remove it with

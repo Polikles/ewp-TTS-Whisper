@@ -36,6 +36,9 @@ target-language wording; matching a reference word-for-word is not required. Do 
 omit, add, explain, censor, correct the speaker's argument, or add citations or notes. Adjacent
 units are read-only context and must not be included in the answer. Follow the selected output
 mode exactly."""
+FAITHFUL_TRANSLATION_SYSTEM_PROMPT += """ When approved dictionary terms are supplied,
+use their exact target forms when the corresponding source term is present and applicable.
+Never force a dictionary entry into unrelated text."""
 
 JSON_SCHEMA_TRANSLATION_INSTRUCTION = """JSON-SCHEMA MODE:
 Return only the requested JSON object containing target_text for the owned unit."""
@@ -171,6 +174,7 @@ def _chat_request(
         "source_language": request.source_language,
         "target_language": request.target_language,
         "style": request.style.model_dump(by_alias=True),
+        "approved_dictionary_terms": [term.model_dump() for term in request.dictionary_terms],
         "preceding_read_only_context": [unit.model_dump() for unit in request.preceding_context],
         "owned_unit": request.unit.model_dump(),
         "following_read_only_context": [unit.model_dump() for unit in request.following_context],

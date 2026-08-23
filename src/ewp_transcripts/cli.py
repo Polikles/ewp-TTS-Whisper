@@ -87,6 +87,7 @@ from ewp_transcripts.translation_benchmark import (
     prepare_translation_benchmark_assessments,
 )
 from ewp_transcripts.translation_consent import TranslationConsentScope, load_translation_consents
+from ewp_transcripts.translation_dictionary import load_project_translation_dictionary
 from ewp_transcripts.translation_lm_studio import (
     LmStudioTranslationConfig,
     LmStudioTranslationProvider,
@@ -574,6 +575,13 @@ def translate_automate_command(
             help="Read-only sentence units on each side of the owned unit.",
         ),
     ] = 1,
+    dictionary_path: Annotated[
+        Path | None,
+        typer.Option(
+            "--dictionary",
+            help="Explicit approved project translation dictionary JSON.",
+        ),
+    ] = None,
     consent: Annotated[
         RequestedCorrectionConsent | None,
         typer.Option("--consent", help="API consent: reject, once, or persist."),
@@ -625,6 +633,12 @@ def translate_automate_command(
             normalized_result.parent / "translation-state-ewp-transcripts"
         )
         style = TranslationStyle(register=register.value, discourse=discourse.value)
+        dictionary = None
+        dictionary_sha256 = None
+        if dictionary_path is not None:
+            dictionary, dictionary_sha256 = load_project_translation_dictionary(
+                normalize_input_path(dictionary_path)
+            )
         provider: AutomatedTranslationProvider
         if requested_provider is RequestedTranslationProvider.MOCK:
             provider = DeterministicMockTranslationProvider()
@@ -654,6 +668,8 @@ def translate_automate_command(
                 preview=preview,
                 consent_choice=consent_choice,
                 context_units=context_units,
+                dictionary=dictionary,
+                dictionary_sha256=dictionary_sha256,
             )
         elif preview:
             outcome = preview_automated_translation(
@@ -666,6 +682,8 @@ def translate_automate_command(
                 resume_directory=state_directory,
                 consent_choice=consent_choice,
                 context_units=context_units,
+                dictionary=dictionary,
+                dictionary_sha256=dictionary_sha256,
             )
         else:
             outcome = apply_automated_translation(
@@ -679,6 +697,8 @@ def translate_automate_command(
                 output_directory=_optional_user_path(output_directory),
                 consent_choice=consent_choice,
                 context_units=context_units,
+                dictionary=dictionary,
+                dictionary_sha256=dictionary_sha256,
             )
     except (ApplicationError, ValueError) as error:
         if isinstance(error, ApplicationError):

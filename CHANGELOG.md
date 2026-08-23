@@ -40,6 +40,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added strict, explicitly selected project translation dictionaries with direction/job
+  scope, deterministic file hashes, request/resume identity, provider context, and immutable
+  candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`
+  names an exact JSON file.
 - Added provider-neutral automated translation requests and responses with one exact owned
   sentence unit, bounded read-only context, deterministic operation identity, strict local
   response binding, and a network-free deterministic mock provider.

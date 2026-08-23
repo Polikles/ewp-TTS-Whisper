@@ -108,8 +108,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    Record model artifact, backend, prompt, chunking, latency, resource use, request/token
    volume, cost, retries, and reviewer effort. Do not claim translation accuracy from the
    artistically free English corpus; first define a narrower manually approved reference.
-3. **Project-scoped dictionaries.** Implement explicit, hashed, optional dictionaries
-   usable as correction/translation context. Candidate extraction from accepted audits
+3. **Project-scoped dictionaries.** The first strict, explicit, hashed translation-context
+   slice is implemented. Extend the same contract to correction and add operator examples
+   and dictionary-assisted benchmark evidence. Candidate extraction from accepted audits
    requires human approval. Benchmark raw, LLM-only, dictionary-assisted LLM, and manual
    gold; reject dictionaries that create harmful confident replacements.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
