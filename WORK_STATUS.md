@@ -46,6 +46,11 @@ The rerun then showed Bielik's chat template adding a valid string `translator_n
 and later `translation_notes` field. The adapter now discards only those two observed
 aliases with an explicit per-unit warning; unknown provider metadata continues to fail
 closed. Parser-version changes invalidate resume identity.
+The resulting zero-context run completed 79 requests with zero retries in 28,854 ms and
+fixed the numeric split, but manual review found 25 spurious outer-quote wrappers and three
+`Szymon` to `Simon` anglicizations. Valid JSON-string responses are now unwrapped and the
+prompt requires exact personal-name copying. A fresh confirmation run remains pending;
+the reviewed candidate is non-final evidence.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,

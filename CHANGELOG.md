@@ -209,6 +209,10 @@ All notable changes to EWP-transcripts are documented here.
   with a content-free per-unit artifact warning; malformed JSON, unknown fields, and
   non-string values fail. The versioned compatibility-envelope contract participates in
   prompt hashing, provenance, and resume identity.
+- Unwrapped Bielik's observed valid JSON-string serialization in `plain-text` mode so
+  transport quotation marks cannot become transcript punctuation. Strengthened the
+  source-faithful prompt to copy personal names exactly without anglicizing or normalizing
+  them; both changes participate in prompt/resume identity.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed

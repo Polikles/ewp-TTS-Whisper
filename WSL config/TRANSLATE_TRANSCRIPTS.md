@@ -247,6 +247,9 @@ identity, so use a fresh temporary pilot root.
 If Bielik still returns a valid one-field `target_text` or `translated_text` JSON object,
 the adapter unwraps that exact compatibility envelope locally. Extra fields, invalid JSON,
 and non-string values remain hard failures and are never copied into review text.
+An entire valid JSON string is likewise unwrapped so serialization quotes do not become
+transcript punctuation. The prompt explicitly requires character-for-character personal-name
+preservation, but names remain a mandatory manual-review and convention check.
 The observed optional string `translator_notes` and `translation_notes` aliases are the
 only allowed extra fields. Either is discarded rather than published and produces a
 content-free

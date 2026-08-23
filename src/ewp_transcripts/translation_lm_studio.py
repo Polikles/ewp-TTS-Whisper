@@ -26,14 +26,15 @@ from ewp_transcripts.domain.errors import (
 
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
-_PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v2"
+_PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v3"
 
 FAITHFUL_TRANSLATION_SYSTEM_PROMPT = """Translate exactly one owned transcript unit into
 the requested target language. Preserve meaning, facts, intent, uncertainty, emphasis,
-tone, register, names, numbers, and speaker character. Use natural idiomatic target-language
-wording; matching a reference word-for-word is not required. Do not summarize, omit, add,
-explain, censor, correct the speaker's argument, or add citations or notes. Adjacent units
-are read-only context and must not be included in the answer. Follow the selected output
+tone, register, names, numbers, and speaker character. Copy personal names exactly,
+character-for-character; never translate, anglicize, or normalize them. Use natural idiomatic
+target-language wording; matching a reference word-for-word is not required. Do not summarize,
+omit, add, explain, censor, correct the speaker's argument, or add citations or notes. Adjacent
+units are read-only context and must not be included in the answer. Follow the selected output
 mode exactly."""
 
 JSON_SCHEMA_TRANSLATION_INSTRUCTION = """JSON-SCHEMA MODE:
@@ -272,7 +273,12 @@ def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
 
     stripped = content.strip()
     warning_codes: tuple[str, ...] = ()
-    if stripped.startswith("{") or stripped.endswith("}"):
+    if stripped.startswith('"') and stripped.endswith('"'):
+        document = json.loads(stripped)
+        if not isinstance(document, str):
+            raise ValueError("invalid plain-text translation envelope")
+        stripped = document
+    elif stripped.startswith("{") or stripped.endswith("}"):
         document = json.loads(stripped)
         if (
             not isinstance(document, dict)

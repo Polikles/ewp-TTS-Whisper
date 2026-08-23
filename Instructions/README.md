@@ -493,6 +493,10 @@ identity.
 Some Bielik templates emit a valid one-field JSON envelope even in plain-text mode. The
 adapter accepts and unwraps only `target_text` or `translated_text` with one string value;
 malformed JSON, additional fields, and non-string values are rejected.
+It also unwraps a valid JSON string returned as the entire response, preventing serialization
+quotes from becoming transcript punctuation. Ordinary prose and quotation marks that are not
+a complete valid JSON string remain unchanged. The prompt requires personal names to be copied
+exactly rather than translated, anglicized, or normalized; manual name review is still required.
 The observed exceptions are optional string `translator_notes` and `translation_notes`
 fields. Neither is copied into transcript text; the adapter discards it and records
 `PROVIDER_TRANSLATOR_NOTES_DISCARDED` on that unit so manual review can treat the output as
