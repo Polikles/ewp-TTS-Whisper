@@ -55,6 +55,22 @@ def test_units_do_not_split_after_abbreviations_or_domains() -> None:
     assert units[0].source_text == "To tzw. test etykawpetli.pl działa."
 
 
+def test_units_do_not_split_legal_case_name_after_v_abbreviation() -> None:
+    transcript = EffectiveTranscript(
+        language="en",
+        tokens=(
+            _token(1, "Battle"),
+            _token(2, "v."),
+            _token(3, "Microsoft"),
+            _token(4, "continues."),
+        ),
+    )
+
+    units = plan_translation_units(transcript)
+
+    assert [unit.source_text for unit in units] == ["Battle v. Microsoft continues."]
+
+
 def test_speaker_change_is_a_hard_unit_boundary() -> None:
     transcript = EffectiveTranscript(
         language="en",

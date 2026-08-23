@@ -15,3 +15,10 @@ def test_polish_period_after_closing_quote_still_splits_normally() -> None:
         "Powiedział „To działa”.",
         "Potem wyszedł.",
     )
+
+
+def test_legal_case_v_abbreviation_does_not_end_sentence() -> None:
+    assert split_sentences("Battle v. Microsoft was an important case. Next topic.") == (
+        "Battle v. Microsoft was an important case.",
+        "Next topic.",
+    )

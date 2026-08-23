@@ -25,6 +25,7 @@ _NON_BREAKING_ABBREVIATIONS = frozenset(
         "tzn.",
         "tzw.",
         "tys.",
+        "v.",
         "vs.",
     }
 )

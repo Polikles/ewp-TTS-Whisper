@@ -70,6 +70,12 @@ English may use different word order and punctuation, but it must retain facts, 
 uncertainty, speaker identity, and casual podcast style. Remove model-added annotations
 such as `[cite: 1]`; citations that were not spoken are not transcript content.
 
+Sentence boundaries provide narrower subtitle timing and audit scope; they do not require
+literal one-to-one syntax. Report false source splits rather than merging or deleting
+machine-owned units. Known abbreviations such as `v.` in `Battle v. Microsoft` are treated
+as non-ending tokens. A future version may add bounded speaker-chunk unitization if real
+translation work shows that sentence units are consistently too restrictive.
+
 If a web LLM is used, transcript text leaves the machine and the run is not reproducible
 through the current CLI provider contract. Check the provider's privacy settings, never
 send secrets, and manually review every target line. A useful instruction is:

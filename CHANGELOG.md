@@ -94,6 +94,10 @@ All notable changes to EWP-transcripts are documented here.
   validation until a narrower translation-quality reference contract exists.
 - Fixed English sentence boundaries ending in closing quotation marks while preserving
   both English `."` and Polish `”.` punctuation in sentence planning and exports.
+- Prevented legal case names such as `Battle v. Microsoft` from splitting translation
+  units after `v.`. Documented that sentence units improve subtitle timing, audit locality,
+  and bounded retries without asserting one-to-one Polish-English syntax; bounded
+  speaker-chunk unitization remains a versioned fallback if corpus evidence requires it.
 - Added the v0.4 manual-first translation contract: exact source lineage, deterministic
   speaker-safe sentence units, immutable complete artifacts, staged batch review and
   export, and a shared validation boundary for future instruction and specialist models.
@@ -102,6 +106,9 @@ All notable changes to EWP-transcripts are documented here.
 
 - Prepared 24 English translation reviews from the private canonical corpus and each
   result's latest exact compatible corrected Polish revision: 24 prepared, 0 failed.
+- Applied and exported the operator-mapped English corpus without errors; generated SRT
+  and VTT were reported readable. This is structural pipeline evidence, not an accuracy
+  score for artistically translated text.
 - English sentence boundaries ending in closing quotation marks, Polish punctuation with
   a period after the closing quote, and preservation through translated TXT/SRT output.
 
