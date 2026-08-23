@@ -62,6 +62,11 @@ candidate remains non-final; exact-parent manual correction is the next gate.
 The first manual apply exposed that a separate accepted-output directory restarted child
 numbering at one. Publication now allocates strictly after the recorded parent number;
 the incorrectly numbered temporary artifact is rejected as qualification evidence.
+After that fix, the corrected review published as exact-parent manual child translation 2,
+its 79-unit audit published successfully, and deterministic TXT, SRT, and VTT exports were
+written successfully. The automated candidate-to-manual-acceptance workflow is therefore
+qualified end to end for this pilot. The next gate is its exact-lineage semantic assessment
+and content-free benchmark report.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,
@@ -86,9 +91,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    exact-scope consent, retry/resume, immutable candidate, and single-file CLI slice is
    implemented. Next run a real verified-Polish `pl -> en`, `preserve/preserve`,
    no-dictionary LM Studio pilot and inspect its operational evidence. This baseline is
-   complete for Bielik. Next correct and accept its exact-parent review, then audit/export
-   it. Keep `en -> pl` separate. Cloud translation remains a later adapter after the local
-   pilot establishes the request/prompt baseline.
+   complete for Bielik, including exact-parent manual acceptance, audit, and export. Next
+   complete its semantic assessment/report. Keep `en -> pl` separate. Cloud translation
+   remains a later adapter after the local pilot establishes the request/prompt baseline.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
    content-free reporting boundary is implemented. Next define and approve the narrower
    reference, then validate preparation, provider execution, manual correction, apply,

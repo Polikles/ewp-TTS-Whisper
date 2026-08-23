@@ -219,6 +219,9 @@ All notable changes to EWP-transcripts are documented here.
   provider time, 1,051 target tokens, no provider warnings, and no remaining transport or
   ownership defects. Manual review still found semantic errors and three personal-name
   convention failures, so the candidate remains non-final pending exact-parent correction.
+- Qualified the corrected Bielik candidate through exact-parent manual publication as
+  translation 2, a successful 79-unit audit, and deterministic TXT/SRT/VTT export. The
+  automated artifact remains non-final and distinct from its accepted manual child.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed
