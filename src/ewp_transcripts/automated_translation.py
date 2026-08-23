@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
@@ -66,7 +67,7 @@ def build_automated_translation_request(
     applicable_entries = tuple(
         entry
         for entry in (dictionary.entries if dictionary is not None else ())
-        if entry.source.casefold() in unit.source_text.casefold()
+        if _dictionary_source_occurs(entry.source, unit.source_text)
     )
     context_start = max(0, unit_index - context_units)
     context_end = min(len(review.units), unit_index + context_units + 1)
@@ -112,6 +113,14 @@ def build_automated_translation_request(
             context(review.units[index]) for index in range(unit_index + 1, context_end)
         ),
     )
+
+
+def _dictionary_source_occurs(source: str, owned_text: str) -> bool:
+    """Match one source term as a Unicode word/phrase, never as an inner substring."""
+
+    folded_source = source.casefold()
+    folded_text = owned_text.casefold()
+    return re.search(rf"(?<!\w){re.escape(folded_source)}(?!\w)", folded_text) is not None
 
 
 def validate_automated_translation_response(

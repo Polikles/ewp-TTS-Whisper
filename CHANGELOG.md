@@ -216,6 +216,9 @@ All notable changes to EWP-transcripts are documented here.
 - Restricted dictionary context to entries whose source form occurs in the owned unit. The
   first exploratory dictionary pilot sent every entry to every request and caused an
   invented speaker label, so that run is rejected as benchmark evidence.
+- Tightened applicable dictionary matching to Unicode word/phrase boundaries. Entries are
+  selected from source text only—`Szymon` never rewrites a source `Simon`—and are not
+  post-translation substitutions.
 - Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode.
   Raw prose is accepted directly; Bielik's valid one-field `target_text` or
   `translated_text` compatibility envelope is strictly parsed and unwrapped locally.

@@ -44,6 +44,7 @@ def test_request_includes_only_dictionary_terms_present_in_owned_unit() -> None:
         target_language="pl",
         entries=(
             TranslationDictionaryEntry(source="Welcome", target="Witamy"),
+            TranslationDictionaryEntry(source="come", target="przyjść"),
             TranslationDictionaryEntry(source="Unrelated", target="Niepowiązane"),
         ),
     )

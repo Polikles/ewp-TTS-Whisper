@@ -486,6 +486,11 @@ separate files for unrelated projects. Translation snapshots and accepted manual
 carry dictionary version, ID, project, and SHA-256. Audits declare that object or `null`, and
 exports write a deterministic `.provenance.json` sidecar with the same dictionary-or-none
 record without adding metadata to transcript or subtitle text.
+Matching is case-insensitive but uses Unicode word/phrase boundaries, not inner substrings.
+The dictionary is source-directed context rather than post-processing: a Polish-source
+`Szymon` entry does not activate for source `Simon`, and target text is never globally
+search/replaced. Truly ambiguous identical source forms still require model context and
+manual review.
 
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
