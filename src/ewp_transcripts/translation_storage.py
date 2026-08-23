@@ -128,7 +128,18 @@ def publish_next_translation(
         )
         prefix = first.removesuffix("001.json")
         pattern = re.compile(rf"^{re.escape(prefix)}(?P<number>[0-9]{{3,}})\.json$")
-        number = max(_allocated_numbers(output_directory, pattern, "number"), default=0) + 1
+        parent_number = (
+            translation.parent_translation.translation_number
+            if translation.parent_translation is not None
+            else 0
+        )
+        number = (
+            max(
+                (*_allocated_numbers(output_directory, pattern, "number"), parent_number),
+                default=0,
+            )
+            + 1
+        )
         allocated = TranscriptTranslation.model_validate(
             translation.model_copy(update={"translation_number": number}).model_dump()
         )

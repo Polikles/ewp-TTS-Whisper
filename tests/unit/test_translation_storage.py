@@ -1,8 +1,9 @@
 """Tests for non-destructive translation artifact publication."""
 
 from pathlib import Path
+from uuid import uuid4
 
-from ewp_transcripts.domain.translation import load_transcript_translation
+from ewp_transcripts.domain.translation import TranslationParent, load_transcript_translation
 from ewp_transcripts.translation_review_format import load_translation_review
 from ewp_transcripts.translation_review_service import prepare_translation_review
 from ewp_transcripts.translation_service import build_manual_translation
@@ -49,3 +50,21 @@ def test_translation_publication_allocates_immutable_numbers(tmp_path: Path) -> 
     assert first_path.name == "S01E01_pl_translation_001.json"
     assert second_path.name == "S01E01_pl_translation_002.json"
     assert load_transcript_translation(second_path) == second
+
+
+def test_child_translation_numbers_after_parent_in_separate_directory(tmp_path: Path) -> None:
+    translation = build_manual_translation(_completed_review()).model_copy(
+        update={
+            "parent_translation": TranslationParent(
+                translation_id=uuid4(),
+                translation_number=7,
+                sha256="a" * 64,
+                filename="S01E01_pl_translation_007.json",
+            )
+        }
+    )
+
+    child, child_path = publish_next_translation(translation, output_directory=tmp_path)
+
+    assert child.translation_number == 8
+    assert child_path.name == "S01E01_pl_translation_008.json"

@@ -59,6 +59,9 @@ in three of four occurrences despite the prompt. The owner confirmed `Ethics in 
 as the English title, `etykawpetli.pl` as the preferred Polish-domain spelling (both owned
 spellings are valid), and initiator/catalyst as the intended sense of `aktywator`. The
 candidate remains non-final; exact-parent manual correction is the next gate.
+The first manual apply exposed that a separate accepted-output directory restarted child
+numbering at one. Publication now allocates strictly after the recorded parent number;
+the incorrectly numbered temporary artifact is rejected as qualification evidence.
 
 External structural evidence is complete for this slice: the owner mapped the private
 English corpus into the current scheme, applied and exported all files without errors,

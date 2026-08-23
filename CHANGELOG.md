@@ -202,6 +202,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Required an exact-parent manual child to receive a translation number greater than its
+  parent even when candidates and accepted translations use separate output directories.
 - Removed a contradictory JSON instruction from LM Studio `plain-text` translation mode.
   Raw prose is accepted directly; Bielik's valid one-field `target_text` or
   `translated_text` compatibility envelope is strictly parsed and unwrapped locally.
