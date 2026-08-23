@@ -490,6 +490,9 @@ each operation owns exactly one unit, the whole assistant content can safely be 
 that unit's candidate after non-empty/control-character/fence validation. All modes retain
 exact local operation/unit binding. Output mode is part of prompt provenance and resume
 identity.
+Some Bielik templates emit a valid one-field JSON envelope even in plain-text mode. The
+adapter accepts and unwraps only `target_text` or `translated_text` with one string value;
+malformed JSON, additional fields, and non-string values are rejected.
 `--context-units` controls how many adjacent source units are sent on each side as
 read-only context. The initial Bielik baseline uses `0`: the first context-one pilot copied
 adjacent meaning into owned units and omitted owned text. Context-assisted runs are

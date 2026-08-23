@@ -244,6 +244,9 @@ owns one unit, so the complete assistant content becomes that unit's candidate a
 non-empty, control-character, and Markdown-fence checks. It does not permit labels, notes,
 explanations, or context output. Changing output mode changes prompt provenance and resume
 identity, so use a fresh temporary pilot root.
+If Bielik still returns a valid one-field `target_text` or `translated_text` JSON object,
+the adapter unwraps that exact compatibility envelope locally. Extra fields, invalid JSON,
+and non-string values remain hard failures and are never copied into review text.
 
 The initial Bielik rerun uses `--context-units 0`. A context-one pilot completed all 80
 requests but repeatedly translated neighboring content instead of the owned unit. Any later

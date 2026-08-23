@@ -221,13 +221,12 @@ def _parse_chat_response(
         if not isinstance(content, str):
             raise TypeError
         if output_mode == "plain-text":
-            target_text = " ".join(content.split())
+            target_text = _plain_text_target(content)
             if (
                 not target_text
                 or "\x00" in content
                 or target_text.startswith("```")
                 or target_text.endswith("```")
-                or (target_text.startswith("{") and target_text.endswith("}"))
             ):
                 raise ValueError("invalid plain-text translation")
         else:
@@ -261,6 +260,25 @@ def _parse_chat_response(
 
 def _optional_nonnegative_int(value: object) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+
+def _plain_text_target(content: str) -> str:
+    """Accept raw prose or one strict Bielik compatibility envelope."""
+
+    stripped = content.strip()
+    if stripped.startswith("{") or stripped.endswith("}"):
+        document = json.loads(stripped)
+        if (
+            not isinstance(document, dict)
+            or len(document) != 1
+            or next(iter(document)) not in {"target_text", "translated_text"}
+        ):
+            raise ValueError("invalid plain-text translation envelope")
+        value = next(iter(document.values()))
+        if not isinstance(value, str):
+            raise ValueError("invalid plain-text translation envelope")
+        stripped = value
+    return " ".join(stripped.split())
 
 
 def _normalized_endpoint(endpoint: str, *, allow_remote: bool) -> str:
