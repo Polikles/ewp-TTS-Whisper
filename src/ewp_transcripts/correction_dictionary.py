@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
 from collections import defaultdict
 from pathlib import Path
 from typing import Literal, cast
@@ -21,6 +22,14 @@ from ewp_transcripts.domain.revision import (
 from ewp_transcripts.revision_audit import build_revision_audit
 
 
+class CorrectionDictionaryEvidence(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    job_id: str = Field(min_length=1)
+    source_context: str = Field(min_length=1)
+    target_context: str = Field(min_length=1)
+
+
 class CorrectionDictionaryCandidate(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
@@ -28,13 +37,14 @@ class CorrectionDictionaryCandidate(BaseModel):
     target: str = Field(min_length=1)
     occurrences: int = Field(ge=1)
     case_count: int = Field(ge=1)
+    evidence: tuple[CorrectionDictionaryEvidence, ...] = Field(min_length=1)
     status: Literal["pending", "approved", "rejected"] = "pending"
 
 
 class CorrectionDictionaryProposal(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
-    proposal_version: Literal["1.0"] = "1.0"
+    proposal_version: Literal["1.1"] = "1.1"
     project_id: str = Field(min_length=1)
     source_language: Literal["pl"] = "pl"
     canonical_directory_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
@@ -84,7 +94,7 @@ def propose_correction_dictionary(
             selected[revision.job_id] = (revision.revision_number, path)
     if not selected:
         raise ValueError("No compatible manual revisions found for dictionary proposal")
-    mappings: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+    mappings: dict[str, list[tuple[str, str, CorrectionDictionaryEvidence]]] = defaultdict(list)
     for job_id, (_number, revision_path) in sorted(selected.items()):
         revision = load_transcript_revision(revision_path)
         assert revision.base_result.filename is not None
@@ -94,20 +104,56 @@ def propose_correction_dictionary(
         audit = build_revision_audit(
             base, revision, base_path=base_path, revision_path=revision_path
         )
+        source_tokens = tuple(
+            word for segment in base.transcript.segments for word in segment.words
+        )
+        source_positions = {word.word_id: index for index, word in enumerate(source_tokens)}
+        target_positions = {
+            token.token_id: index for index, token in enumerate(revision.transcript.tokens)
+        }
         changes = cast(list[dict[str, object]], audit["changes"])
         for change in changes:
             if change["classification"] not in {"substitution", "merge", "split"}:
                 continue
-            before, after = change["before"], change["after"]
+            before_raw, after_raw = change["before"], change["after"]
             if (
-                isinstance(before, str)
-                and isinstance(after, str)
+                isinstance(before_raw, str)
+                and isinstance(after_raw, str)
+                and (before := _strip_boundary_punctuation(before_raw))
+                and (after := _strip_boundary_punctuation(after_raw))
                 and before.casefold() != after.casefold()
             ):
-                mappings[before.casefold()].append((before, after, job_id))
+                source_ids = change.get("source_word_ids")
+                token_id = change.get("token_id")
+                if (
+                    not isinstance(source_ids, list)
+                    or not source_ids
+                    or not isinstance(token_id, str)
+                ):
+                    continue
+                source_indexes = [
+                    source_positions[item] for item in source_ids if item in source_positions
+                ]
+                target_index = target_positions.get(token_id)
+                if not source_indexes or target_index is None:
+                    continue
+                evidence = CorrectionDictionaryEvidence(
+                    job_id=job_id,
+                    source_context=_context(
+                        tuple(word.text for word in source_tokens),
+                        min(source_indexes),
+                        max(source_indexes) + 1,
+                    ),
+                    target_context=_context(
+                        tuple(token.text for token in revision.transcript.tokens),
+                        target_index,
+                        target_index + 1,
+                    ),
+                )
+                mappings[before.casefold()].append((before, after, evidence))
     candidates: list[CorrectionDictionaryCandidate] = []
     for observations in mappings.values():
-        targets = {after.casefold() for _before, after, _job in observations}
+        targets = {after.casefold() for _before, after, _evidence in observations}
         if len(targets) != 1:
             continue
         if len(observations) < minimum_occurrences:
@@ -117,7 +163,8 @@ def propose_correction_dictionary(
                 source=observations[0][0],
                 target=observations[0][1],
                 occurrences=len(observations),
-                case_count=len({job for _before, _after, job in observations}),
+                case_count=len({item.job_id for _before, _after, item in observations}),
+                evidence=tuple(item for _before, _after, item in observations),
             )
         )
     candidates.sort(key=lambda item: (-item.case_count, -item.occurrences, item.source.casefold()))
@@ -199,3 +246,21 @@ def _directory_hash(paths) -> str:  # type: ignore[no-untyped-def]
         digest.update(sha256_file(path).encode())
         digest.update(b"\0")
     return digest.hexdigest()
+
+
+def _strip_boundary_punctuation(value: str) -> str:
+    value = value.strip()
+    start = 0
+    end = len(value)
+    while start < end and unicodedata.category(value[start]).startswith("P"):
+        start += 1
+    while end > start and unicodedata.category(value[end - 1]).startswith("P"):
+        end -= 1
+    return value[start:end].strip()
+
+
+def _context(tokens: tuple[str, ...], start: int, end: int, *, radius: int = 4) -> str:
+    left = " ".join(tokens[max(0, start - radius) : start])
+    owned = " ".join(tokens[start:end])
+    right = " ".join(tokens[end : min(len(tokens), end + radius)])
+    return " ".join(part for part in (left, f"[[{owned}]]", right) if part)

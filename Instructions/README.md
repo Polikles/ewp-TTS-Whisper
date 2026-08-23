@@ -525,7 +525,11 @@ uv run --locked transcriber dictionary correction approve \
 
 The default proposal threshold is two consistent occurrences. This is candidate discovery,
 not automatic correction: grammar/style edits and ambiguous mappings still require human
-judgment. Correction and translation dictionaries are separately selected and versioned.
+judgment. Each proposal occurrence includes `source_context` and `target_context`; `[[...]]`
+marks the changed span. Use that evidence for short or grammatically ambiguous forms rather
+than treating a token pair as a global replacement rule. Proposal keys discard leading and
+trailing punctuation/quotation marks but preserve internal punctuation such as a domain's
+dots. Correction and translation dictionaries are separately selected and versioned.
 
 Select an approved dictionary explicitly for Gemini 2.5 Flash through the existing
 OpenRouter correction command:

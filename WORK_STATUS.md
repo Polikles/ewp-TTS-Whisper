@@ -136,8 +136,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    Polish correction-dictionary proposal and approval are now implemented: exact compatible
    manual revisions yield pending repeated/consistent mappings, every item must be manually
    approved or rejected, and the published project dictionary retains proposal and corpus
-   lineage. A private `/tmp` pilot found 46 pending candidates across 22 compatible cases at
-   the default two-occurrence threshold. Explicit Gemini/OpenRouter dictionary selection,
+   lineage. The initial context-free private proposal was rejected after ambiguous short
+   forms and punctuation-bearing keys were observed. Proposal v1.1 adds marked source/target
+   context per occurrence and strips only boundary punctuation from lexical keys. A fresh
+   `/tmp` pilot found 41 pending candidates across 22 compatible cases with context on every
+   item and no punctuation-bearing boundary keys. Explicit Gemini/OpenRouter selection,
    per-chunk source matching, resume identity, revision provenance, and audit reporting are
    implemented. Manual proposal review and the four-branch correction benchmark remain next.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for

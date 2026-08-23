@@ -48,6 +48,10 @@ All notable changes to EWP-transcripts are documented here.
   Only source-present entries reach each editable chunk; dictionary ID/hash alter operation
   and resume identity, while immutable LLM revision provenance and audits record the selected
   project dictionary or `null`.
+- Versioned Polish correction proposals to `1.1`. Every occurrence now includes marked
+  source and corrected neighboring context for human decisions, while leading/trailing
+  punctuation and quotation marks are removed from proposed lexical keys. Older context-free
+  proposals therefore cannot be approved by the new command.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

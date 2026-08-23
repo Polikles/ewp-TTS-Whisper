@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.correction_dictionary import (
+    _strip_boundary_punctuation,
     approve_correction_dictionary,
     propose_correction_dictionary,
     select_correction_dictionary_terms,
@@ -54,6 +55,8 @@ def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> 
     assert [(item.source, item.target, item.status) for item in proposal.candidates] == [
         ("Welcome", "Greetings", "pending")
     ]
+    assert "[[Welcome]]" in proposal.candidates[0].evidence[0].source_context
+    assert "[[Greetings]]" in proposal.candidates[0].evidence[0].target_context
 
     proposal_path = tmp_path / "proposal.json"
     write_correction_dictionary_proposal(proposal, proposal_path)
@@ -78,3 +81,9 @@ def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> 
     selected = select_correction_dictionary_terms(dictionary, "Welcome everyone")
     assert [(item.source, item.target) for item in selected] == [("Welcome", "Greetings")]
     assert select_correction_dictionary_terms(dictionary, "A welcoming message") == ()
+
+
+def test_dictionary_keys_discard_boundary_quotes_and_punctuation() -> None:
+    assert _strip_boundary_punctuation("Anthropic,") == "Anthropic"
+    assert _strip_boundary_punctuation('"akceptuję",') == "akceptuję"
+    assert _strip_boundary_punctuation("etykawpetli.pl") == "etykawpetli.pl"
