@@ -85,7 +85,7 @@ corpus content, API keys, provider payloads, and runtime resume/lock files remai
 Git.
 
 The current automated-translation, semantic-benchmark, and translation-dictionary tree
-passes the same complete gate with **576 tests**.
+passes the same complete gate with **577 tests**.
 
 ## Next session: ordered v0.4 work
 
@@ -119,6 +119,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    mistranslation fixes.
    Dictionary provenance is first-class and inherited by exact-parent manual children;
    audits declare the dictionary object or null, while exports publish a provenance sidecar.
+   The accepted general project-dictionary pilot preserved semantic performance at 71/79
+   faithful (`0.89873418`) while reducing convention failures from 6 to 2. It produced the
+   same 6 minor and 2 major semantic errors as the no-dictionary baseline. Per-unit source
+   filtering caused no harmful insertion, but Bielik still anglicized 2/4 `Szymon`
+   occurrences, so dictionaries are context assistance rather than enforcement.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

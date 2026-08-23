@@ -242,6 +242,9 @@ All notable changes to EWP-transcripts are documented here.
 - Completed the first human semantic translation report for the no-dictionary Bielik
   `pl -> en` baseline: 71/79 faithful units, 6 minor errors, 2 major errors, semantic pass
   rate `0.89873418`, and 6 separately reported convention violations.
+- Completed the paired general project-dictionary report. Semantic results were unchanged
+  at 71/79 faithful, while convention violations fell from 6 to 2 without harmful insertion;
+  remaining name failures confirm dictionary context is not an enforcement mechanism.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed
