@@ -203,6 +203,19 @@ The correction benchmark must test two dictionary hypotheses explicitly:
 - whether manual review starting from an LLM candidate reduces reviewer time and accepted
   edit count relative to starting from raw ASR, both without and with dictionary context.
 
+The planned production pipeline uses Gemini 2.5 for the Polish automated-review candidate;
+evaluated local models did not improve ASR error rate. Its project-scoped dictionary is
+explicit hashed context. The required stage order is:
+
+```text
+transcript -> Gemini-assisted Polish review -> manual Polish review -> export
+           -> translation (manual or LLM-assisted)
+```
+
+Translation consumes the accepted Polish revision, not the unaccepted Gemini candidate.
+Correction and translation dictionaries remain distinct versioned artifacts even where
+approved project identifiers overlap.
+
 Use a four-branch matrix—raw ASR, LLM only, dictionary-assisted LLM, and manual gold—and
 record lexical error, harmful/style changes, reviewer corrections, and review time. A
 dictionary is accepted only if gains are not offset by confident harmful replacements.

@@ -245,6 +245,9 @@ All notable changes to EWP-transcripts are documented here.
 - Completed the paired general project-dictionary report. Semantic results were unchanged
   at 71/79 faithful, while convention violations fell from 6 to 2 without harmful insertion;
   remaining name failures confirm dictionary context is not an enforcement mechanism.
+- Documented the planned production order: Gemini 2.5 dictionary-assisted Polish review
+  candidate, manual Polish acceptance, export, then translation from the accepted revision.
+  Correction and translation dictionaries remain separate auditable artifacts.
 - Added explicit `--context-units` control and fixed Polish unit planning so a numeric
   period followed by a lowercase continuation, such as `6. rano`, does not create a false
   sentence boundary. This supports a zero-context rerun after the Bielik pilot showed

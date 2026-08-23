@@ -108,7 +108,8 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    volume, cost, retries, and reviewer effort. Do not claim translation accuracy from the
    artistically free English corpus; first define a narrower manually approved reference.
 3. **Project-scoped dictionaries.** The first strict, explicit, hashed translation-context
-   slice is implemented. Extend the same contract to correction and add operator examples
+   slice is implemented. Extend the same contract to Polish automated correction, using
+   Gemini 2.5 because evaluated local models did not improve ASR error rate, and add operator examples
    and dictionary-assisted benchmark evidence. Candidate extraction from accepted audits
    requires human approval. Benchmark raw, LLM-only, dictionary-assisted LLM, and manual
    gold; reject dictionaries that create harmful confident replacements.
@@ -124,6 +125,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    same 6 minor and 2 major semantic errors as the no-dictionary baseline. Per-unit source
    filtering caused no harmful insertion, but Bielik still anglicized 2/4 `Szymon`
    occurrences, so dictionaries are context assistance rather than enforcement.
+   The intended stage order is `transcript -> Gemini-assisted Polish review candidate ->
+   manual Polish review -> export -> translation (manual or LLM-assisted)`. Translation
+   starts from the accepted Polish revision, never the unreviewed candidate. Correction and
+   translation dictionaries remain separately versioned and hashed even when they share
+   approved identifiers.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

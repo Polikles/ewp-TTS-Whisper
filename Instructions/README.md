@@ -200,6 +200,11 @@ The recommended workflow is `prepare -> edit in Windows VS Code -> preview -> ap
 export`. Keep canonical results, reviews, revisions, audits, and exports in separate
 directories.
 
+The planned production path first generates a non-final Gemini 2.5 Polish correction
+candidate, accepts or corrects it through manual revision, exports the verified Polish
+transcript, and only then translates that accepted revision manually or with an LLM.
+Project dictionaries for correction and translation are explicit and audited separately.
+
 ### Prepare one or many reviews
 
 ```bash
