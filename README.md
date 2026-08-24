@@ -151,7 +151,7 @@ Recommended starting documents:
 ## Core project rules
 
 - Audio and transcript text remain on the local machine during transcription.
-- Final JSON files are the source of truth; TXT, SRT, VTT, and YTT are derived exports.
+- Final JSON files are the source of truth; TXT, SRT, VTT, YTT, and HTML are derived exports.
 - Source files are never modified.
 - Completed jobs with the same SHA-256 signature are skipped unless `--force` is used.
 

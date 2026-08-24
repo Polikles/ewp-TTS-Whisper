@@ -574,6 +574,12 @@ renderer styling remain separate later slices.
 
 ## 12. Platform transcript delivery and HTML — planned for v0.4
 
+Implemented foundation: raw and manually revised `--format html` exports now emit the
+specified escaped, deterministic fragment with sentence-level native buttons, explicit
+speaker turns, BCP 47 language, and integer timing/speaker/kind metadata. No CSS,
+JavaScript, inline styles, or event handlers are emitted. Translated HTML and the consuming
+mock player acceptance work remain.
+
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;
 - publish multiple Podcasting 2.0 transcript links where appropriate, including a

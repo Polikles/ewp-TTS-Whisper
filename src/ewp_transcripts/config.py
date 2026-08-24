@@ -208,6 +208,7 @@ class OutputsConfig(StrictConfigModel):
     generate_vtt: bool = True
     generate_segments_json: bool = False
     generate_ytt: bool = False
+    generate_html: bool = False
     batch_output_directory_name: str = "output-ewp-transcripts"
     encoding: Literal["utf-8"] = "utf-8"
 

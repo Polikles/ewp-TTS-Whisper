@@ -227,6 +227,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added opt-in raw and manually revised embeddable HTML transcript fragments with
+  sentence-level seek buttons, explicit speaker turns, stable timing/speaker/kind data,
+  escaped untrusted text, language metadata, and no embedded styling or behavior.
+
 - Added an opt-in deterministic YouTube srv3 YTT export with one existing planned cue per
   paragraph, preserved planned line wrapping, millisecond timing, configurable stable
   speaker pens, bottom-center placement, structured non-speech italics, and parser-backed

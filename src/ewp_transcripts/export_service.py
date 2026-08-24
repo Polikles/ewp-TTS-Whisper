@@ -28,11 +28,13 @@ from ewp_transcripts.domain.revision import (
     validate_revision_base,
 )
 from ewp_transcripts.effective_transcript import (
+    EffectiveTranscript,
     effective_canonical_result,
     resolve_effective_transcript,
 )
 from ewp_transcripts.exporters import (
     build_subtitle_cues,
+    render_html_transcript,
     render_segments_json,
     render_srt,
     render_transcript,
@@ -49,6 +51,7 @@ class ExportFormat(StrEnum):
     VTT = "vtt"
     SEGMENTS = "segments"
     YTT = "ytt"
+    HTML = "html"
 
 
 _SAFE_RENDER_FAILURES = frozenset(
@@ -135,19 +138,19 @@ def export_result(
         results_path=results_path,
         results_sha256=hashlib.sha256(payload).hexdigest(),
     )
-    rendered_result = result
-    if selected_revision is not None:
-        try:
-            effective = resolve_effective_transcript(
-                result,
-                selected_revision,
-                base_path=results_path,
-            )
-            rendered_result = effective_canonical_result(result, effective)
-        except (ValidationError, ValueError) as error:
+    try:
+        effective = resolve_effective_transcript(
+            result,
+            selected_revision,
+            base_path=results_path if selected_revision is not None else None,
+        )
+        rendered_result = effective_canonical_result(result, effective)
+    except (ValidationError, ValueError) as error:
+        if selected_revision is not None:
             raise InvalidCanonicalResultError(
                 "Cannot resolve revised transcript for export"
             ) from error
+        raise InvalidCanonicalResultError("Cannot resolve transcript for export") from error
 
     with output_directory_lock(destination):
         if selected_revision is None:
@@ -191,6 +194,7 @@ def export_result(
             generated_at=generated_at or datetime.now(UTC),
             revision=selected_revision,
             revision_path=revision_path,
+            effective_transcript=effective,
         )
         for path, content in rendered:
             _publish_exclusive(path, content)
@@ -368,6 +372,7 @@ def _export_path(directory: Path, job_id: str, format_: ExportFormat, version: i
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
         ExportFormat.YTT: ("subtitles_srv3", "ytt"),
+        ExportFormat.HTML: ("transcript", "html"),
     }[format_]
     return directory / f"{job_id}_{role}{suffix}.{extension}"
 
@@ -386,6 +391,7 @@ def _revision_export_path(
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
         ExportFormat.YTT: ("subtitles_srv3", "ytt"),
+        ExportFormat.HTML: ("transcript", "html"),
     }[format_]
     result_suffix = "" if result.result_version == 1 else f"_v{result.result_version:03d}"
     export_suffix = "" if export_version == 1 else f"_v{export_version:03d}"
@@ -430,6 +436,7 @@ def _render_exports(
     generated_at: datetime,
     revision: TranscriptRevision | None,
     revision_path: Path | None,
+    effective_transcript: EffectiveTranscript,
 ) -> tuple[tuple[Path, str], ...]:
     cues = None
     rendered: list[tuple[Path, str]] = []
@@ -437,6 +444,13 @@ def _render_exports(
         try:
             if format_ is ExportFormat.TXT:
                 content = render_transcript(result)
+            elif format_ is ExportFormat.HTML:
+                content = render_html_transcript(
+                    effective_transcript,
+                    speaker_labels={
+                        speaker.speaker_id: speaker.speaker_label for speaker in result.speakers
+                    },
+                )
             elif format_ is ExportFormat.SEGMENTS:
                 content = render_segments_json(
                     result,

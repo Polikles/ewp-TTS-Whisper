@@ -30,6 +30,7 @@ def test_exports_all_formats_without_source_audio_or_models(tmp_path: Path) -> N
             ExportFormat.VTT,
             ExportFormat.SEGMENTS,
             ExportFormat.YTT,
+            ExportFormat.HTML,
         ),
         generated_at=FIXED_TIME,
     )
@@ -41,12 +42,15 @@ def test_exports_all_formats_without_source_audio_or_models(tmp_path: Path) -> N
         "S01E01_subtitles.vtt",
         "S01E01_segments.json",
         "S01E01_subtitles_srv3.ytt",
+        "S01E01_transcript.html",
     }
     assert outcome.skipped == ()
     assert (tmp_path / "S01E01_subtitles.vtt").read_text(encoding="utf-8").startswith("WEBVTT\n")
     segments = json.loads((tmp_path / "S01E01_segments.json").read_text(encoding="utf-8"))
     assert segments["derived_from"]["results_file"] == "S01E01_results.json"
     assert ET.parse(tmp_path / "S01E01_subtitles_srv3.ytt").getroot().attrib["format"] == "3"
+    html = (tmp_path / "S01E01_transcript.html").read_text(encoding="utf-8")
+    assert html.startswith('<section class="ewp-transcript" lang="en">')
     assert not Path("D:/podcast/S01E01-jan.wav").exists()
 
 
@@ -163,7 +167,13 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
 
     outcome = export_result(
         result_path,
-        formats=(ExportFormat.TXT, ExportFormat.SRT, ExportFormat.SEGMENTS, ExportFormat.YTT),
+        formats=(
+            ExportFormat.TXT,
+            ExportFormat.SRT,
+            ExportFormat.SEGMENTS,
+            ExportFormat.YTT,
+            ExportFormat.HTML,
+        ),
         revision=applied.revision_path,
         generated_at=FIXED_TIME,
     )
@@ -174,6 +184,7 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
         "S01E01_subtitles_revision_001.srt",
         "S01E01_segments_revision_001.json",
         "S01E01_subtitles_srv3_revision_001.ytt",
+        "S01E01_transcript_revision_001.html",
     }
     transcript = (tmp_path / "S01E01_transcript_revision_001.txt").read_text(encoding="utf-8")
     assert "carefully discuss corrected transcription" in transcript
@@ -186,6 +197,8 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
     assert "carefully discuss corrected transcription" in " ".join(
         " ".join(ytt_root.itertext()).split()
     )
+    html = (tmp_path / "S01E01_transcript_revision_001.html").read_text(encoding="utf-8")
+    assert "carefully discuss corrected transcription" in html
 
 
 def test_latest_revision_selection_does_not_change_raw_export(tmp_path: Path) -> None:

@@ -113,6 +113,7 @@ Primary options:
 --format srt
 --format vtt
 --format ytt
+--format html
 --segments
 --force
 --allow-duration-mismatch
@@ -171,6 +172,7 @@ Options:
 --format srt
 --format vtt
 --format ytt
+--format html
 --format segments
 --segments
 --output-dir PATH

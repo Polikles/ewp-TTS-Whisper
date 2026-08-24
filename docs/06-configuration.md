@@ -46,12 +46,16 @@ Complete example: [`../examples/config.example.toml`](../examples/config.example
 - `[quality]` — diagnostics without audio repair.
 - `[correction]` — automated-correction editable chunk and read-only context sizes.
 
-YTT export is disabled in default output generation until its YouTube srv3 upload profile
-is qualified. Request it explicitly with `--format ytt`, or set
+YTT export is disabled in default output generation because it is YouTube-specific.
+Request it explicitly with `--format ytt`, or set
 `[outputs].generate_ytt = true`. `[subtitles].ytt_speaker_palette` is a non-empty ordered
 list of `#RRGGBB` colors; it cycles deterministically when a transcript has more speakers
 than configured colors. Speaker colors remain presentation configuration, not transcript
 data.
+
+HTML fragment export is also opt-in: request `--format html`, or set
+`[outputs].generate_html = true`. The generated fragment deliberately has no renderer
+styling or behavior configuration because CSS and JavaScript belong to the consuming site.
 
 ### Warning-only quality thresholds
 

@@ -2467,6 +2467,7 @@ def export_command(
                     (config.outputs.generate_vtt, ExportFormat.VTT),
                     (config.outputs.generate_segments_json, ExportFormat.SEGMENTS),
                     (config.outputs.generate_ytt, ExportFormat.YTT),
+                    (config.outputs.generate_html, ExportFormat.HTML),
                 )
                 if enabled
             ]

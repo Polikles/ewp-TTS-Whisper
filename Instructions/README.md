@@ -162,14 +162,14 @@ uv run --locked transcriber transcribe "/path/to/season" \
 Polish is the default. `--language en` and `--language auto` are supported but not yet
 quality-qualified on a representative English corpus. Useful options include:
 
-- `--format txt|srt|vtt|ytt` (repeatable) and `--segments`;
+- `--format txt|srt|vtt|ytt|html` (repeatable) and `--segments`;
 - `--speaker NAME` for one known single-speaker source;
 - repeatable `--speaker-map SOURCE=NAME` for grouped sources;
 - `--channel-mode split-speakers` only with source knowledge;
 - `--keep-temp` to retain an owned successful workspace;
 - `--force` to create the next `_vNNN` result set without overwriting.
 
-Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/YTT/segments are
+Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/YTT/HTML/segments are
 derived and regenerable. Duplicate matching jobs skip safely. Never edit canonical JSON.
 
 ## 8. Export raw results: `export`
@@ -178,7 +178,7 @@ Single result:
 
 ```bash
 uv run --locked transcriber export "/path/to/episode_results.json" \
-  --format txt --format srt --format vtt --format ytt --format segments \
+  --format txt --format srt --format vtt --format ytt --format html --format segments \
   --output-dir "/path/to/exports"
 ```
 
@@ -186,7 +186,7 @@ Directory batch:
 
 ```bash
 uv run --locked transcriber export "/path/to/results" \
-  --format txt --format srt --format vtt --format ytt --format segments \
+  --format txt --format srt --format vtt --format ytt --format html --format segments \
   --output-dir "/path/to/exports"
 ```
 
@@ -196,7 +196,11 @@ Existing identical destinations skip; `--force` creates later export versions.
 YTT uses the same planned cues and line wrapping as SRT/VTT, serialized as YouTube srv3
 timed-text XML with deterministic speaker pens and bottom-center placement. Configure its
 ordered fallback palette with `[subtitles].ytt_speaker_palette`. It is opt-in
-(`--format ytt`) until the srv3 profile has passed an unlisted upload check.
+(`--format ytt`) because it is a YouTube-specific export; its real Polish two-speaker
+upload profile is qualified.
+HTML is an embeddable, script-free fragment with sentence-level seek metadata and explicit
+speaker turns. It contains no CSS or JavaScript; the consuming site supplies playback,
+highlighting, and presentation enhancements.
 
 ## 9. Correct transcripts: `revise`
 
@@ -688,7 +692,7 @@ Latest compatible revision per result:
 ```bash
 uv run --locked transcriber export "/path/to/results" \
   --revision "/path/to/revisions" \
-  --format txt --format srt --format vtt --format ytt --format segments \
+  --format txt --format srt --format vtt --format ytt --format html --format segments \
   --output-dir "/path/to/corrected"
 ```
 
