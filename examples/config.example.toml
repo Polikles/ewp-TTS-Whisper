@@ -77,7 +77,7 @@ min_gap_ms = 80
 max_merge_gap_ms = 1200
 min_words_per_cue = 4
 speaker_labels = "on-change"   # on-change | always | never
-ytt_speaker_palette = ["#FFFFFF", "#00AEEF", "#FFD700", "#00C853", "#E040FB", "#00E5FF"]
+ytt_speaker_palette = ["#FEFEFE", "#00AEEF", "#FFD700", "#00C853", "#E040FB", "#00E5FF"]
 
 [outputs]
 generate_txt = true

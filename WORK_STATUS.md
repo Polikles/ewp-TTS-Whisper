@@ -183,8 +183,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    deterministic YouTube srv3 timed-text XML based on the owner-supplied accepted example.
    It reuses planned cues/line breaks, numeric speaker pens, centered bottom placement, and
    a separate non-speech pen. The first srv3 upload correctly centered cues and preserved
-   text/timing, but YouTube flattened ElementTree's XML-equivalent `<br />` spelling. The
-   renderer now forces native srv3 `<br/>` bytes and remains opt-in pending one retry.
+   text/timing, but YouTube flattened `<br/>` line elements. The owner-supplied corrected
+   template uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer now
+   matches that structure and remains opt-in pending one retry.
 6. **Embeddable HTML transcript.** Emit the specified accessible, escaped, deterministic
    HTML fragment with no CSS, JavaScript, inline styles, or event handlers. Build the
    separate mock player site that supplies its own CSS/JavaScript and tests highlighting,

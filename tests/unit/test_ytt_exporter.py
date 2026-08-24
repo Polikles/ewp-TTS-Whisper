@@ -11,7 +11,7 @@ from ewp_transcripts.exporters.ytt import render_ytt
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
-PALETTE = ("#FFFFFF", "#00AEEF", "#FFD700")
+PALETTE = ("#FEFEFE", "#00AEEF", "#FFD700")
 
 
 def test_ytt_maps_each_planned_cue_with_timing_position_and_speaker_pen() -> None:
@@ -36,7 +36,7 @@ def test_ytt_maps_each_planned_cue_with_timing_position_and_speaker_pen() -> Non
         "ws": "3",
         "p": "1",
     }
-    assert pens[0].attrib["fc"] == "#FFFFFF"
+    assert pens[0].attrib["fc"] == "#FEFEFE"
     window_style = root.find("./head/ws")
     position = root.find("./head/wp")
     assert window_style is not None
@@ -68,7 +68,7 @@ def test_ytt_escapes_text_and_uses_separate_non_speech_pen() -> None:
     assert "&amp;" in rendered and "&lt;" in rendered
 
 
-def test_ytt_preserves_planned_lines_with_break_elements() -> None:
+def test_ytt_preserves_planned_lines_with_literal_newline() -> None:
     cue = SubtitleCue(0, 1_000, ("First line", "Second line"), "speaker_001")
 
     rendered = render_ytt((cue,), speaker_ids=("speaker_001",), speaker_palette=PALETTE)
@@ -76,12 +76,10 @@ def test_ytt_preserves_planned_lines_with_break_elements() -> None:
     paragraph = root.find("./body/p")
 
     assert paragraph is not None
-    line_break = paragraph.find("br")
-    assert paragraph.text == "First line"
-    assert line_break is not None
-    assert line_break.tail == "Second line"
-    assert "First line<br/>Second line" in rendered
-    assert "<br />" not in rendered
+    assert paragraph.text == "First line\nSecond line"
+    assert paragraph.find("br") is None
+    assert "First line\nSecond line" in rendered
+    assert "<br" not in rendered
 
 
 @pytest.mark.parametrize("palette", [(), ("blue",)])

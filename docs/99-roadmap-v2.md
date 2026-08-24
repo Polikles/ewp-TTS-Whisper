@@ -523,8 +523,9 @@ Two conservative TTML pilots were accepted with correct timing, language, turn l
 diacritics, but YouTube ignored wrapping, centering, and colors. The active implementation
 therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted example and
 remains opt-in pending an unlisted upload check. Its first upload centered cues and
-preserved text/timing but flattened XML-equivalent `<br />`; native `<br/>` byte spelling
-is now enforced for the compatibility retry.
+preserved text/timing but flattened `<br/>` line elements. The owner-supplied corrected
+template instead uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer
+now matches that structure for the compatibility retry.
 
 - add a deterministic `.ytt` export using YouTube's srv3 timed-text XML profile;
 - use UTF-8 XML with `<timedtext format="3">` and millisecond `t`/`d` timing;

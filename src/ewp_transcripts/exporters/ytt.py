@@ -72,15 +72,9 @@ def render_ytt(
                 "p": non_speech_pen_id if cue.kind != "speech" else pen_ids[speaker_key],
             },
         )
-        paragraph.text = cue.lines[0]
-        for line in cue.lines[1:]:
-            line_break = ET.SubElement(paragraph, "br")
-            line_break.tail = line
+        paragraph.text = "\n".join(cue.lines)
 
     payload = ET.tostring(root, encoding="unicode", short_empty_elements=True)
-    # YouTube's srv3 importer is not a general XML consumer: an upload pilot flattened
-    # lines for ElementTree's equivalent ``<br />`` spelling. Match native srv3 bytes.
-    payload = payload.replace("<br />", "<br/>")
     document = '<?xml version="1.0" encoding="UTF-8"?>\n' + payload + "\n"
     try:
         ET.fromstring(document)

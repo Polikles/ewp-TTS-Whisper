@@ -193,7 +193,7 @@ class SubtitlesConfig(StrictConfigModel):
     min_words_per_cue: int = Field(default=4, ge=1)
     speaker_labels: Literal["on-change", "always", "never"] = "on-change"
     ytt_speaker_palette: tuple[str, ...] = (
-        "#FFFFFF",
+        "#FEFEFE",
         "#00AEEF",
         "#FFD700",
         "#00C853",
