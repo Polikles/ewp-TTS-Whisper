@@ -231,7 +231,8 @@ All notable changes to EWP-transcripts are documented here.
   paragraph, preserved `<br/>` line wrapping, millisecond timing, configurable stable
   speaker pens, bottom-center placement, structured non-speech italics, and parser-backed
   validation. This replaces the standards-based TTML profile after two accepted uploads
-  discarded its wrapping, alignment, and colors.
+  discarded its wrapping, alignment, and colors. The renderer forces native `<br/>` bytes
+  because a subsequent srv3 upload flattened XML-equivalent `<br />` elements.
 
 - Correction benchmark report v5 now derives exact normalized source-relative edit sets
   for candidate and manual gold, reporting per-case and aggregate true-positive,

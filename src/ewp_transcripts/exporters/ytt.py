@@ -78,6 +78,9 @@ def render_ytt(
             line_break.tail = line
 
     payload = ET.tostring(root, encoding="unicode", short_empty_elements=True)
+    # YouTube's srv3 importer is not a general XML consumer: an upload pilot flattened
+    # lines for ElementTree's equivalent ``<br />`` spelling. Match native srv3 bytes.
+    payload = payload.replace("<br />", "<br/>")
     document = '<?xml version="1.0" encoding="UTF-8"?>\n' + payload + "\n"
     try:
         ET.fromstring(document)

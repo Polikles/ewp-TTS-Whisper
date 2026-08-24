@@ -71,7 +71,8 @@ def test_ytt_escapes_text_and_uses_separate_non_speech_pen() -> None:
 def test_ytt_preserves_planned_lines_with_break_elements() -> None:
     cue = SubtitleCue(0, 1_000, ("First line", "Second line"), "speaker_001")
 
-    root = ET.fromstring(render_ytt((cue,), speaker_ids=("speaker_001",), speaker_palette=PALETTE))
+    rendered = render_ytt((cue,), speaker_ids=("speaker_001",), speaker_palette=PALETTE)
+    root = ET.fromstring(rendered)
     paragraph = root.find("./body/p")
 
     assert paragraph is not None
@@ -79,6 +80,8 @@ def test_ytt_preserves_planned_lines_with_break_elements() -> None:
     assert paragraph.text == "First line"
     assert line_break is not None
     assert line_break.tail == "Second line"
+    assert "First line<br/>Second line" in rendered
+    assert "<br />" not in rendered
 
 
 @pytest.mark.parametrize("palette", [(), ("blue",)])
