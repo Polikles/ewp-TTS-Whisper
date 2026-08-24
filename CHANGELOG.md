@@ -68,6 +68,10 @@ All notable changes to EWP-transcripts are documented here.
   dictionaries project-scoped while allowing held-out and future episodes. Recorded the
   in-sample `s0e01` result: dictionary assistance removed 10/72 gold-relative errors versus
   2/72 without it, but no generalization claim is made because the case informed extraction.
+- Recorded the held-out `s0e00` Gemini comparison. Dictionary assistance reduced raw WER by
+  50% (22 errors to 11) versus 3 errors removed without a dictionary, with comparable runtime
+  and cost and no token/speaker drift. Three exact edits unsupported by gold remain explicitly
+  pending manual harm/style classification.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

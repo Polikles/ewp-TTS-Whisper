@@ -159,6 +159,13 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    adherence rather than generalization; four unsupported exact edits also need manual review.
    Runtime scope is being corrected so derivation job IDs remain audit evidence while explicit
    matching project selection permits a genuinely held-out/future-episode comparison.
+   The held-out `s0e00` comparison now supplies generalization evidence: dictionary-assisted
+   Gemini halved raw WER from `0.02561118` (22 errors) to `0.01280559` (11), versus
+   `0.02211874` (19) without a dictionary. Exact-edit precision/recall/F1 were
+   `0.82352941`/`0.7`/`0.75675676`, versus `1.0`/`0.15`/`0.26086957` for the conservative
+   control. Runtime/cost were nearly equal and both preserved tokens/speakers without warnings.
+   Manual classification of three dictionary-assisted edits unsupported by gold is the final
+   acceptance gate before expanding the dictionary-assisted correction benchmark.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.
