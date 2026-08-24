@@ -52,6 +52,7 @@ class CorrectionDictionaryProposal(BaseModel):
     case_count: int = Field(ge=1)
     job_ids: tuple[str, ...] = Field(min_length=1)
     minimum_occurrences: int = Field(ge=1)
+    previous_dictionary_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     candidates: tuple[CorrectionDictionaryCandidate, ...]
 
 
@@ -59,11 +60,12 @@ class CorrectionDictionaryEntry(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
     source: str = Field(min_length=1)
     target: str = Field(min_length=1)
+    status: Literal["approved", "rejected"] = "approved"
 
 
 class ProjectCorrectionDictionary(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
-    dictionary_version: Literal["1.0"] = "1.0"
+    dictionary_version: Literal["1.1"] = "1.1"
     dictionary_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
     project_id: str = Field(min_length=1)
     language: Literal["pl"] = "pl"
@@ -78,6 +80,8 @@ def propose_correction_dictionary(
     revision_directory: Path,
     project_id: str,
     minimum_occurrences: int = 2,
+    previous_dictionary: ProjectCorrectionDictionary | None = None,
+    previous_dictionary_sha256: str | None = None,
 ) -> CorrectionDictionaryProposal:
     """Aggregate consistent lexical mappings from latest exact manual revisions."""
 
@@ -94,6 +98,19 @@ def propose_correction_dictionary(
             selected[revision.job_id] = (revision.revision_number, path)
     if not selected:
         raise ValueError("No compatible manual revisions found for dictionary proposal")
+    if previous_dictionary is not None:
+        if previous_dictionary.project_id != project_id:
+            raise ValueError("Previous correction dictionary belongs to another project")
+        if previous_dictionary_sha256 is None:
+            raise ValueError("Previous correction dictionary SHA-256 is required")
+    previous_decisions = (
+        {
+            (entry.source.casefold(), entry.target.casefold()): entry.status
+            for entry in previous_dictionary.entries
+        }
+        if previous_dictionary is not None
+        else {}
+    )
     mappings: dict[str, list[tuple[str, str, CorrectionDictionaryEvidence]]] = defaultdict(list)
     for job_id, (_number, revision_path) in sorted(selected.items()):
         revision = load_transcript_revision(revision_path)
@@ -165,6 +182,9 @@ def propose_correction_dictionary(
                 occurrences=len(observations),
                 case_count=len({item.job_id for _before, _after, item in observations}),
                 evidence=tuple(item for _before, _after, item in observations),
+                status=previous_decisions.get(
+                    (observations[0][0].casefold(), observations[0][1].casefold()), "pending"
+                ),
             )
         )
     candidates.sort(key=lambda item: (-item.case_count, -item.occurrences, item.source.casefold()))
@@ -175,6 +195,7 @@ def propose_correction_dictionary(
         case_count=len(selected),
         job_ids=tuple(sorted(selected)),
         minimum_occurrences=minimum_occurrences,
+        previous_dictionary_sha256=previous_dictionary_sha256,
         candidates=tuple(candidates),
     )
 
@@ -195,17 +216,20 @@ def approve_correction_dictionary(
     proposal = CorrectionDictionaryProposal.model_validate_json(payload)
     if any(candidate.status == "pending" for candidate in proposal.candidates):
         raise ValueError("Dictionary proposal still contains pending candidates")
-    approved = tuple(
-        CorrectionDictionaryEntry(source=item.source, target=item.target)
+    decisions = tuple(
+        CorrectionDictionaryEntry(
+            source=item.source,
+            target=item.target,
+            status=cast(Literal["approved", "rejected"], item.status),
+        )
         for item in proposal.candidates
-        if item.status == "approved"
     )
     dictionary = ProjectCorrectionDictionary(
         dictionary_id=dictionary_id,
         project_id=proposal.project_id,
         job_ids=proposal.job_ids,
         proposal_sha256=hashlib.sha256(payload).hexdigest(),
-        entries=approved,
+        entries=decisions,
     )
     if output_path.exists():
         raise ValueError(f"Correction dictionary output already exists: {output_path}")
@@ -232,6 +256,8 @@ def select_correction_dictionary_terms(
 
     selected = []
     for entry in dictionary.entries:
+        if entry.status != "approved":
+            continue
         pattern = rf"(?<!\w){re.escape(entry.source)}(?!\w)"
         if re.search(pattern, editable_text, flags=re.IGNORECASE):
             selected.append(CorrectionDictionaryTerm(source=entry.source, target=entry.target))

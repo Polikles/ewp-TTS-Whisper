@@ -166,6 +166,13 @@ def correction_dictionary_propose_command(
     output_path: Annotated[
         Path, typer.Option("--output", help="Private editable proposal JSON path.")
     ],
+    previous_dictionary_path: Annotated[
+        Path | None,
+        typer.Option(
+            "--previous-dictionary",
+            help="Carry forward approved/rejected decisions from this exact dictionary.",
+        ),
+    ] = None,
     minimum_occurrences: Annotated[
         int,
         typer.Option("--min-occurrences", min=1, help="Minimum consistent mapping count."),
@@ -174,11 +181,19 @@ def correction_dictionary_propose_command(
     """Propose pending correction terms; never activate them automatically."""
 
     try:
+        previous_dictionary = None
+        previous_dictionary_sha256 = None
+        if previous_dictionary_path is not None:
+            previous_dictionary, previous_dictionary_sha256 = load_project_correction_dictionary(
+                normalize_input_path(previous_dictionary_path)
+            )
         proposal = propose_correction_dictionary(
             canonical_directory=normalize_input_path(canonical_directory),
             revision_directory=normalize_input_path(revision_directory),
             project_id=project_id,
             minimum_occurrences=minimum_occurrences,
+            previous_dictionary=previous_dictionary,
+            previous_dictionary_sha256=previous_dictionary_sha256,
         )
         normalized_output = output_path.expanduser().absolute()
         write_correction_dictionary_proposal(proposal, normalized_output)
@@ -186,8 +201,12 @@ def correction_dictionary_propose_command(
         typer.echo(f"Error: {error}", err=True)
         raise typer.Exit(code=4) from error
     typer.echo(f"PROPOSAL {normalized_output}")
+    approved = sum(item.status == "approved" for item in proposal.candidates)
+    rejected = sum(item.status == "rejected" for item in proposal.candidates)
+    pending = sum(item.status == "pending" for item in proposal.candidates)
     typer.echo(
-        f"SUMMARY cases={proposal.case_count} candidates={len(proposal.candidates)} approved=0"
+        f"SUMMARY cases={proposal.case_count} candidates={len(proposal.candidates)} "
+        f"pending={pending} approved={approved} rejected={rejected}"
     )
 
 
@@ -209,7 +228,12 @@ def correction_dictionary_approve_command(
         typer.echo(f"Error: {error}", err=True)
         raise typer.Exit(code=4) from error
     typer.echo(f"DICTIONARY {output_path.expanduser().absolute()}")
-    typer.echo(f"SUMMARY entries={len(dictionary.entries)} project={dictionary.project_id}")
+    approved = sum(item.status == "approved" for item in dictionary.entries)
+    rejected = sum(item.status == "rejected" for item in dictionary.entries)
+    typer.echo(
+        f"SUMMARY entries={len(dictionary.entries)} approved={approved} rejected={rejected} "
+        f"project={dictionary.project_id}"
+    )
 
 
 class RequestedChannelMode(StrEnum):

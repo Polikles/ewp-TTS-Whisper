@@ -82,6 +82,29 @@ def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> 
     assert [(item.source, item.target) for item in selected] == [("Welcome", "Greetings")]
     assert select_correction_dictionary_terms(dictionary, "A welcoming message") == ()
 
+    carried = propose_correction_dictionary(
+        canonical_directory=canonical,
+        revision_directory=revisions,
+        project_id="example",
+        minimum_occurrences=1,
+        previous_dictionary=dictionary,
+        previous_dictionary_sha256="c" * 64,
+    )
+    assert carried.previous_dictionary_sha256 == "c" * 64
+    assert carried.candidates[0].status == "approved"
+
+    rejected_payload = json.loads(proposal_path.read_text(encoding="utf-8"))
+    rejected_payload["candidates"][0]["status"] = "rejected"
+    rejected_path = tmp_path / "rejected-proposal.json"
+    rejected_path.write_text(json.dumps(rejected_payload), encoding="utf-8")
+    rejected_dictionary = approve_correction_dictionary(
+        proposal_path=rejected_path,
+        dictionary_id="example-pl-v2",
+        output_path=tmp_path / "rejected-dictionary.json",
+    )
+    assert rejected_dictionary.entries[0].status == "rejected"
+    assert select_correction_dictionary_terms(rejected_dictionary, "Welcome everyone") == ()
+
 
 def test_dictionary_keys_discard_boundary_quotes_and_punctuation() -> None:
     assert _strip_boundary_punctuation("Anthropic,") == "Anthropic"

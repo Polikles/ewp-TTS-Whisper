@@ -52,6 +52,10 @@ All notable changes to EWP-transcripts are documented here.
   source and corrected neighboring context for human decisions, while leading/trailing
   punctuation and quotation marks are removed from proposed lexical keys. Older context-free
   proposals therefore cannot be approved by the new command.
+- Made correction dictionaries durable decision ledgers: approved and rejected mappings are
+  both retained, only approved mappings reach providers, and `--previous-dictionary` carries
+  exact prior decisions into later proposals instead of reopening them as pending. Added the
+  versioned `dictionaries/<project>/<purpose>/<language-or-direction>/` repository catalog.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

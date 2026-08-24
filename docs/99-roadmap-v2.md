@@ -231,6 +231,10 @@ redistribution terms must be reviewed before committing derived entries. Trainin
 dictionary-extraction partitions must be disjoint from held-out evaluation partitions;
 the same examples cannot both teach the dictionary and inflate its reported WER result.
 The no-dictionary baseline remains mandatory.
+This post-functional work is an explicit retained TODO: measure ASR error rates on the listed
+public Polish datasets first, then derive and manually review a separately versioned general
+dictionary from dataset ASR/reference differences. It must not inherit project decisions or
+reuse its extraction/evaluation examples across training and held-out benchmark partitions.
 
 The next private correction benchmark is deliberately deferred rather than part of the
 immediate v0.3 acceptance path. Manual-gold errata recorded in

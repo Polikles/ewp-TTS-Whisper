@@ -143,6 +143,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    item and no punctuation-bearing boundary keys. Explicit Gemini/OpenRouter selection,
    per-chunk source matching, resume identity, revision provenance, and audit reporting are
    implemented. Manual proposal review and the four-branch correction benchmark remain next.
+   The owner reviewed proposal v1.1: 19 mappings were approved and 22 rejected. Publication is
+   being upgraded to retain both decision classes so rejected mappings remain suppressed in
+   later proposals; only approved entries are provider context. The redistributable podcast
+   dictionary will live in the dedicated versioned `dictionaries/` catalog once transferred
+   from the owner's WSL `/tmp` pilot.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

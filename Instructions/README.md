@@ -531,6 +531,13 @@ than treating a token pair as a global replacement rule. Proposal keys discard l
 trailing punctuation/quotation marks but preserve internal punctuation such as a domain's
 dots. Correction and translation dictionaries are separately selected and versioned.
 
+Published correction dictionaries retain both `approved` and `rejected` decisions. Provider
+requests use only approved entries. When refreshing a project proposal, pass the prior artifact
+with `--previous-dictionary /path/to/previous.json`; exact matching decisions are carried
+forward instead of returning as pending. Store redistributable project artifacts at
+`dictionaries/<project-id>/correction/<language>/<dictionary-id>.json`, publishing a new
+immutable ID/file for every changed decision set. Keep private proposals and pilots in `/tmp`.
+
 Select an approved dictionary explicitly for Gemini 2.5 Flash through the existing
 OpenRouter correction command:
 
