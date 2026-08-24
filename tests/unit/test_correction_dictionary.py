@@ -1,5 +1,6 @@
 """Tests for project correction dictionary proposal extraction."""
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import pytest
 from ewp_transcripts.correction_dictionary import (
     _strip_boundary_punctuation,
     approve_correction_dictionary,
+    load_project_correction_dictionary,
     propose_correction_dictionary,
     select_correction_dictionary_terms,
     write_correction_dictionary_proposal,
@@ -19,6 +21,9 @@ from ewp_transcripts.revision_service import build_revision
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
+PROJECT_DICTIONARY = (
+    ROOT / "dictionaries/ethics-in-the-loop/correction/pl/ethics-in-the-loop-pl-v1.json"
+)
 
 
 def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> None:
@@ -110,3 +115,13 @@ def test_dictionary_keys_discard_boundary_quotes_and_punctuation() -> None:
     assert _strip_boundary_punctuation("Anthropic,") == "Anthropic"
     assert _strip_boundary_punctuation('"akceptuję",') == "akceptuję"
     assert _strip_boundary_punctuation("etykawpetli.pl") == "etykawpetli.pl"
+
+
+def test_published_project_dictionary_retains_exact_review_lineage() -> None:
+    dictionary, digest = load_project_correction_dictionary(PROJECT_DICTIONARY)
+    proposal = PROJECT_DICTIONARY.with_name("ethics-in-the-loop-pl-v1.proposal.json")
+
+    assert digest == "5d1bb1c57ac60930d81bf7120f8eed0df4369b0cb21fdaac5927d13d954b15db"
+    assert dictionary.proposal_sha256 == hashlib.sha256(proposal.read_bytes()).hexdigest()
+    assert sum(item.status == "approved" for item in dictionary.entries) == 19
+    assert sum(item.status == "rejected" for item in dictionary.entries) == 22

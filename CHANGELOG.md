@@ -56,6 +56,9 @@ All notable changes to EWP-transcripts are documented here.
   both retained, only approved mappings reach providers, and `--previous-dictionary` carries
   exact prior decisions into later proposals instead of reopening them as pending. Added the
   versioned `dictionaries/<project>/<purpose>/<language-or-direction>/` repository catalog.
+- Published the reviewed Ethics in the Loop Polish correction proposal and dictionary in that
+  catalog: 19 approved and 22 rejected decisions across 22 compatible public podcast cases,
+  with exact proposal lineage verified by the automated gate.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

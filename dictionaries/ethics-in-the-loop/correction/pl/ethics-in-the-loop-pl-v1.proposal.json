@@ -1,0 +1,1434 @@
+{
+  "proposal_version": "1.1",
+  "project_id": "ethics-in-the-loop",
+  "source_language": "pl",
+  "canonical_directory_sha256": "5cad97001a227f9e09fd5b6df4e69d603a624e1e62c02ff09e172acfcdab4b01",
+  "revision_directory_sha256": "c7e89c302877feb72a1d87280a309ae5f70de13c041d7eaaa935fc34f6bb62fd",
+  "case_count": 22,
+  "job_ids": [
+    "S0E03_mono_normalized",
+    "S0E04",
+    "S0E05",
+    "S0E06",
+    "S0E07",
+    "S0E08",
+    "S0E09",
+    "S0E10",
+    "S2E1",
+    "S2E10p1",
+    "S2E10p2",
+    "S2E2",
+    "S2E3",
+    "S2E4v2_part1",
+    "S2E4v2_part2",
+    "S2E5",
+    "S2E6",
+    "S2E7",
+    "S2E8p1",
+    "S2E8p2",
+    "S2E9",
+    "s0e01"
+  ],
+  "minimum_occurrences": 2,
+  "candidates": [
+    {
+      "source": "podcastu",
+      "target": "podkastu",
+      "occurrences": 46,
+      "case_count": 22,
+      "evidence": [
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "Was w trzecim odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w trzecim odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "przygotowywania się do tego [[podcastu]] spotkałem się tak naprawdę",
+          "target_context": "przygotowywania się do tego [[podkastu]] spotkałem się, tak naprawdę,"
+        },
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "powrócimy w późniejszych odcinkach [[podcastu.]] Nie można tu także",
+          "target_context": "powrócimy w późniejszych odcinkach [[podkastu.]] Nie można tu także"
+        },
+        {
+          "job_id": "S0E04",
+          "source_context": "Was w czwartym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w czwartym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "Was w piątym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w piątym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E06",
+          "source_context": "Was w szóstym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w szóstym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E06",
+          "source_context": "zobaczyć w opisie tego [[podcastu]] i na blogu. Badania",
+          "target_context": "zobaczyć w opisie tego [[podkastu]] i na blogu. Badania"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "Was w siódmym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w siódmym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "co jest istotą tego [[podcastu]] i to, o czym",
+          "target_context": "co jest istotą tego [[podkastu]] i to, o czym"
+        },
+        {
+          "job_id": "S0E08",
+          "source_context": "Was w ósmym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w ósmym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "Was w dziewiątym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w dziewiątym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "do generowania transkrypcji naszego [[podcastu.]] Został wytrenowany na około",
+          "target_context": "do generowania transkrypcji naszego [[podkastu.]] Został wytrenowany na około"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "Z punktu widzenia naszego [[podcastu,]] przypomnę, etyka w pętli,",
+          "target_context": "Z punktu widzenia naszego [[podkastu,]] przypomnę, \"Etyka w Pętli\","
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "Was w dziesiątym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w dziesiątym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "naukowe, opracowuję materiały do [[podcastu]] wraz z Szymonem, a",
+          "target_context": "naukowe, opracowuję materiały do [[podkastu]] wraz z Szymonem, a"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "wygląda backstage tworzenia naszego [[podcastu.]] Od pomysłu po efekt",
+          "target_context": "wygląda backstage tworzenia naszego [[podkastu.]] Od pomysłu po efekt"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "właściwie wiąże się tworzenie [[podcastu]] i w trakcie nagrań",
+          "target_context": "właściwie wiąże się tworzenie [[podkastu]] i w trakcie nagrań"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "jeżeli chodzi o przygotowanie [[podcastu,]] Zapomnieliśmy o tym, aby",
+          "target_context": "jeżeli chodzi o przygotowanie [[podkastu,]] zapomnieliśmy o tym, aby"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "pierwszym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "pierwszym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "poszukać sponsora dla naszego [[podcastu]] albo chociaż chętnych na",
+          "target_context": "poszukać sponsora dla naszego [[podkastu]] albo chociaż chętnych na"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "pierwszej części dziesiątego odcinka [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "pierwszej części dziesiątego odcinka [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "też zachęcamy do komentowania [[podcastu,]] do wysyłania maili na",
+          "target_context": "też zachęcamy do komentowania [[podkastu,]] do wysyłania maili na"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "publicznych, tak ta forma [[podcastu]] jest dla nas czymś",
+          "target_context": "publicznych, tak ta forma [[podkastu]] jest dla nas czymś"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "drugiej części dziesiątego odcinka [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "drugiej części dziesiątego odcinka [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "dla nas obu forma [[podcastu]] jest dość nowa, jakkolwiek",
+          "target_context": "dla nas obu forma [[podkastu]] jest dość nowa, jakkolwiek"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "drugim odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "drugim odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "trzecim odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "trzecim odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E4v2_part1",
+          "source_context": "czwartym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "czwartym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "drugiej części czwartego odcinka [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "drugiej części czwartego odcinka [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "piątym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "piątym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "jak w przypadku naszego [[podcastu.]] To również są przykłady",
+          "target_context": "jak w przypadku naszego [[podkastu.]] To również są przykłady"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "szóstym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "szóstym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "ale w trakcie tego [[podcastu]] postaramy się Wam je",
+          "target_context": "ale w trakcie tego [[podkastu]] postaramy się Wam je"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "Jeśli pamiętacie poprzednie odcinki [[podcastu,]] to wiecie, że sztuczna",
+          "target_context": "Jeśli pamiętacie poprzednie odcinki [[podkastu,]] to wiecie, że sztuczna"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "Wam w pierwszych odcinkach [[podcastu.]] Jest ich mniej niż",
+          "target_context": "Wam w pierwszych odcinkach [[podkastu.]] Jest ich mniej niż"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "będziemy podrzucać w ramach [[podcastu.]] Jak wspomniałem przy okazji",
+          "target_context": "będziemy podrzucać w ramach [[podkastu.]] Jak wspomniałem przy okazji"
+        },
+        {
+          "job_id": "S2E7",
+          "source_context": "siódmym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "siódmym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "ósmym odcinku drugiej serii [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "ósmym odcinku drugiej serii [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "samych tematów, fragmenty tego [[podcastu]] brzmią czasem jak wykład.",
+          "target_context": "samych tematów, fragmenty tego [[podkastu]] brzmią czasem jak wykład."
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "drugiej części ósmego odcinka [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "drugiej części ósmego odcinka [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "Was w dziewiątym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w dziewiątym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "rzeczami związanymi z budową [[podcastu.]] Jednak niedługo semestr się",
+          "target_context": "rzeczami związanymi z budową [[podkastu.]] Jednak niedługo semestr się"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "Was w pierwszym odcinku [[podcastu]] Etyka w pętli. Razem",
+          "target_context": "Was w pierwszym odcinku [[podkastu]] \"Etyka w Pętli\". Razem"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "właśnie, bo nazwa naszego [[podcastu]] nawiązuje do sztucznej inteligencji",
+          "target_context": "właśnie, bo nazwa naszego [[podkastu]] nawiązuje do sztucznej inteligencji,"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "i planach rozwoju naszego [[podcastu,]] natomiast merytoryczny odcinek zaczyna",
+          "target_context": "i planach rozwoju naszego [[podkastu,]] natomiast merytoryczny odcinek zaczyna"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "świetnie pasuje do naszego [[podcastu,]] bo poruszamy zarówno kwestie",
+          "target_context": "świetnie pasuje do naszego [[podkastu,]] bo poruszamy zarówno kwestie"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "etykawpętli.pl",
+      "target": "etykawpetli.pl",
+      "occurrences": 37,
+      "case_count": 22,
+      "evidence": [
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S0E04",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E06",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S0E08",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E08",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "platformie oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "platformie oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "na YouTubie i blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "na YouTube i blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "na YouTubie i blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "na YouTube i blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E4v2_part1",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E4v2_part1",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E7",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Niedługo zaczniemy także publikować",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Niedługo zaczniemy także publikować"
+        },
+        {
+          "job_id": "S2E7",
+          "source_context": "Apple Podcast i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Apple Podcasts i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "także YouTubie i blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "także YouTube i blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "Podcast oraz naszym blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Podcasts oraz naszym blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "Podcast oraz naszym blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz naszym blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "Podcast oraz naszym blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "Podcasts oraz naszym blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "na YouTubie i blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "na YouTube i blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "też YouTube i blogu [[etykawpętli.pl.]] Dziękujemy, że byliście z",
+          "target_context": "też YouTube i blogu [[etykawpetli.pl.]] Dziękujemy, że byliście z"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "Podcast oraz na blogu [[etykawpętli.pl.]] Ten podcast to nie",
+          "target_context": "Podcasts oraz na blogu [[etykawpetli.pl.]] Ten podkast to nie"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "tą",
+      "target": "tę",
+      "occurrences": 9,
+      "case_count": 8,
+      "evidence": [
+        {
+          "job_id": "S0E06",
+          "source_context": "butelek. Wyobraźcie sobie teraz [[tą]] skalę i zobaczcie jak",
+          "target_context": "butelek. Wyobraźcie sobie teraz [[tę]] skalę i zobaczcie, jak"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "fali gotówki, która zalała [[tą]] firmę. Czy nas to",
+          "target_context": "fali gotówki, która zalała [[tę]] firmę. Czy nas to"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "może nie wszystkim na [[tą]] chwilę odpowiada. Będziemy bardziej",
+          "target_context": "może nie wszystkim na [[tę]] chwilę odpowiada. Będziemy bardziej"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "przejawów udawania, że posiada [[tą]] wiedzę. Drugim kryterium jest",
+          "target_context": "przejawów udawania, że posiada [[tę]] wiedzę. Drugim kryterium jest"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "Greenex nie zapłaci za [[tą]] sprawę z własnej kieszeni,",
+          "target_context": "GreenX nie zapłaci za [[tę]] sprawę z własnej kieszeni,"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "dlaczego AI, przynajmniej na [[tą]] chwilę, nie jest jak",
+          "target_context": "AI - przynajmniej na [[tę]] chwilę - nie jest"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "o w ogóle całą [[tą]] sytuację, to Unia Europejska",
+          "target_context": "o w ogóle całą [[tę]] sytuację, to Unia Europejska"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "nie, to system uzna [[tą]] odpowiedź, że jest wyjątkowo",
+          "target_context": "nie, to system uzna [[tę]] odpowiedź, że jest wyjątkowo"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "kompetencji jesteśmy w stanie [[tą]] odpowiedź zweryfikować. Bo czym",
+          "target_context": "kompetencji jesteśmy w stanie [[tę]] odpowiedź zweryfikować. Bo czym"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Antropic",
+      "target": "Anthropic",
+      "occurrences": 10,
+      "case_count": 6,
+      "evidence": [
+        {
+          "job_id": "S0E05",
+          "source_context": "jest pozew skierowany przeciwko [[Antropic.]] Chodzi tutaj o pozew",
+          "target_context": "jest pozew skierowany przeciwko [[Anthropic.]] Chodzi tutaj o pozew"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "pozwu. Autorzy twierdzili, że [[Antropic]] piratował setki tysięcy książek",
+          "target_context": "pozwu. Autorzy twierdzili, że [[Anthropic]] piratował setki tysięcy książek"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "autorów w sprawie przeciwko [[Antropic.]] Innym przykładem jest The",
+          "target_context": "autorów w sprawie przeciwko [[Anthropic.]] Innym przykładem jest The"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "Spółki takie jak OpenAI, [[Antropic]] czy SpaceX chcą wejść",
+          "target_context": "Spółki takie jak OpenAI, [[Anthropic]] czy SpaceX chcą wejść"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "które były publikowane przez [[Antropic,]] które opisywały badania, podczas",
+          "target_context": "które były publikowane przez [[Anthropic,]] które opisywały badania, podczas"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "model CLOT od firmy [[Antropic]] został zintegrowany z systemami",
+          "target_context": "model Claude od firmy [[Anthropic]] został zintegrowany z systemami"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "Mythos produkowanego przez firmę [[Antropic,]] który podobno jest bardzo",
+          "target_context": "Mythos produkowy przez firmę [[Anthropic,]] który podobno jest bardzo"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "ale także dlatego, że [[Antropic]] bardzo ukrywa dane, które",
+          "target_context": "ale także dlatego, że [[Anthropic]] bardzo ukrywa dane, które"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "ich idealny marketingowy obraz. [[Antropic]] twierdzi, że ten model",
+          "target_context": "ich idealny marketingowy obraz. [[Anthropic]] twierdzi, że ten model"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "między innymi przez korporację [[Antropic,]] żeby móc wyprodukować ładnie",
+          "target_context": "między innymi przez korporację [[Anthropic,]] żeby móc wyprodukować ładnie"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "o",
+      "target": "na",
+      "occurrences": 6,
+      "case_count": 5,
+      "evidence": [
+        {
+          "job_id": "S0E05",
+          "source_context": "systemów generatywnych. Narzędzia oparte [[o]] sztuczną inteligencję wykorzystywane choćby",
+          "target_context": "systemów generatywnych. Narzędzia oparte [[na]] sztucznej inteligencji, wykorzystywane choćby"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "symboliczne reprezentacje świata oparte [[o]] konkretną ontologię, czyli strukturę,",
+          "target_context": "symboliczne reprezentacje świata oparte [[na]] konkretnej ontologii, czyli strukturze,"
+        },
+        {
+          "job_id": "S2E1",
+          "source_context": "na wykorzystanie narzędzi opartych [[o]] algorytmy do wstępnej analizy",
+          "target_context": "na wykorzystanie narzędzi opartych [[na]] algorytmach do wstępnej analizy"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "że oprócz wykrywaczy opartych [[o]] algorytmy są jeszcze tzw.",
+          "target_context": "że oprócz wykrywaczy opartych [[na]] algorytmach są jeszcze tzw."
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "nowy system AI oparty [[o]] najnowsze mechanizmy samoleczenia przechodzi",
+          "target_context": "nowy system AI oparty [[na]] najnowszych mechanizmach samoleczenia przechodzi"
+        },
+        {
+          "job_id": "S2E4v2_part1",
+          "source_context": "na przeglądarki internetowe oparte [[o]] agentów AI. Na przykład",
+          "target_context": "na przeglądarki internetowe oparte [[na]] agentach AI. Na przykład"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "czata",
+      "target": "czatu",
+      "occurrences": 5,
+      "case_count": 5,
+      "evidence": [
+        {
+          "job_id": "S0E04",
+          "source_context": "wysłania listy klientów do [[czata]] GPT z prośbą o",
+          "target_context": "wysłania listy klientów do [[czatu]] GPT z prośbą o"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "teraz jedna z wersji [[czata]] GPT ma funkcję Ucz",
+          "target_context": "teraz jedna z wersji [[czatu]] GPT ma funkcję \"Ucz"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "notabene premiera publicznie dostępnego [[czata]] GPT-3.5 miała miejsce 1",
+          "target_context": "notabene premiera publicznie dostępnego [[czatu]] GPT-3.5 miała miejsce 1"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "ta awantura, OpenAI, twórcy [[czata]] GPT, całe nabiało wypięło",
+          "target_context": "ta awantura, OpenAI, twórcy [[czatu]] GPT, całe na biało"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "jak OpenAI, czyli twórcy [[czata]] GPT, korzystają z dostawców",
+          "target_context": "jak OpenAI, czyli twórcy [[czatu]] GPT, korzystają z dostawców"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Mid Journey",
+      "target": "Midjourney",
+      "occurrences": 5,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E05",
+          "source_context": "użytkowników, a nie samo [[Mid Journey.]] Mid Journey komercyjnie udostępnia",
+          "target_context": "użytkowników, a nie samo [[Midjourney.]] Midjourney komercyjnie udostępnia model"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "nie samo Mid Journey. [[Mid Journey]] komercyjnie udostępnia model sztucznej",
+          "target_context": "a nie samo Midjourney. [[Midjourney]] komercyjnie udostępnia model sztucznej"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "Chodzi o to, że [[Mid Journey]] w swoich komercyjnych modelach",
+          "target_context": "Chodzi o to, że [[Midjourney]] w swoich komercyjnych modelach"
+        },
+        {
+          "job_id": "S0E10",
+          "source_context": "dla modeli takich jak [[Mid Journey,]] Dali, ChatGPT i wielu,",
+          "target_context": "dla modeli takich jak [[Midjourney,]] Dall-E, ChatGPT i wielu,"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "takich jak znany nam [[Mid Journey,]] Dali czy Nano Banana.",
+          "target_context": "takich jak znany nam [[Midjourney,]] Dall-E czy Nano Banana."
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "7",
+      "target": "24/7",
+      "occurrences": 3,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E04",
+          "source_context": "przy nas 24 na [[7.]] Wraz z rozwojem technologii",
+          "target_context": "jest obecna przy nas [[24/7.]] Wraz z rozwojem technologii"
+        },
+        {
+          "job_id": "S0E06",
+          "source_context": "są oświetlone 24 na [[7,]] co także uprzykrza życie",
+          "target_context": "hale magazynowe, są oświetlone [[24/7,]] co także uprzykrza życie"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "Wasze otoczenie 24 na [[7]] tylko po to, żeby",
+          "target_context": "Was i Wasze otoczenie [[24/7]] tylko po to, żeby"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "inteligencji",
+      "target": "inteligencję",
+      "occurrences": 3,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E10",
+          "source_context": "zapytać o to sztucznej [[inteligencji.]] Tak, to serio może",
+          "target_context": "zapytać o to sztuczną [[inteligencję.]] Tak, to serio może"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "narracji. Gdy zapytamy sztucznej [[inteligencji]] o cechy systemów AI,",
+          "target_context": "narracji. Gdy zapytamy sztuczną [[inteligencję]] o cechy systemów AI,"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "życia, np. pytając sztucznej [[inteligencji]] w jaki sposób odkamienić",
+          "target_context": "życia, np. pytając sztuczną [[inteligencję]] w jaki sposób odkamienić"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "jest",
+      "target": "są",
+      "occurrences": 3,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E08",
+          "source_context": "w ciągu życia. USA [[jest]] liderem, ale zapowiada się,",
+          "target_context": "w ciągu życia. USA [[są]] liderem, ale zapowiada się,"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "wszystkim modele chmurowe. To [[jest]] takie, z którymi wchodzimy",
+          "target_context": "wszystkim modele chmurowe. To [[są]] takie, z którymi wchodzimy"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "korzystają firmy kurierskie, nie [[jest]] w stanie dopasować rozmiaru",
+          "target_context": "korzystają firmy kurierskie, nie [[są]] w stanie dopasować rozmiaru"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "podcaście",
+      "target": "podkaście",
+      "occurrences": 3,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E06",
+          "source_context": "sztuczną inteligencję. W naszym [[podcaście]] kładziemy nacisk na to,",
+          "target_context": "sztuczną inteligencję. W naszym [[podkaście]] kładziemy nacisk na to,"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "chcemy Wam pokazać w [[podcaście.]] Tak, bo na podstawie",
+          "target_context": "chcemy Wam pokazać w [[podkaście.]] Tak, bo na podstawie"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "niektóre tematy w tym [[podcaście]] będą wracać, będą się",
+          "target_context": "niektóre tematy w tym [[podkaście]] będą wracać, będą się"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "sztucznej",
+      "target": "sztuczną",
+      "occurrences": 3,
+      "case_count": 3,
+      "evidence": [
+        {
+          "job_id": "S0E10",
+          "source_context": "warto zapytać o to [[sztucznej]] inteligencji. Tak, to serio",
+          "target_context": "warto zapytać o to [[sztuczną]] inteligencję. Tak, to serio"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "w narracji. Gdy zapytamy [[sztucznej]] inteligencji o cechy systemów",
+          "target_context": "w narracji. Gdy zapytamy [[sztuczną]] inteligencję o cechy systemów"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "codziennego życia, np. pytając [[sztucznej]] inteligencji w jaki sposób",
+          "target_context": "codziennego życia, np. pytając [[sztuczną]] inteligencję w jaki sposób"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "każe",
+      "target": "każę",
+      "occurrences": 4,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E05",
+          "source_context": "praw? Na przykład, jeśli [[każe]] sztucznej inteligencji wygenerować ilustracje",
+          "target_context": "praw? Na przykład, jeśli [[każę]] sztucznej inteligencji wygenerować ilustracje"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "swoim profilu na GPT. [[Każe]] mu się trzymać faktów,",
+          "target_context": "swoim profilu na GPT. [[Każę]] mu się trzymać faktów,"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "mu się trzymać faktów, [[każe]] mu znajdować błędy i",
+          "target_context": "mu się trzymać faktów, [[każę]] mu znajdować błędy i"
+        },
+        {
+          "job_id": "S2E2",
+          "source_context": "mu znajdować błędy i [[każe]] mu nie ukrywać, jeżeli",
+          "target_context": "mu znajdować błędy i [[każę]] mu nie ukrywać, jeżeli"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Morawek",
+      "target": "Moravec",
+      "occurrences": 4,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E8p1",
+          "source_context": "W niej bowiem Hans [[Morawek]] argumentuje, że maszyny już",
+          "target_context": "W niej bowiem Hans [[Moravec]] argumentuje, że maszyny już"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "ludzkiej inteligencji. Tam też [[Morawek]] opisał proces przenoszenia umysłów",
+          "target_context": "ludzkiej inteligencji. Tam też [[Moravec]] opisał proces przenoszenia umysłów"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "ukazać się w czerwcu. [[Morawek]] zauważył pewną ciekawą własność,",
+          "target_context": "[2026; wyszedł w sierpniu]. [[Moravec]] zauważył pewną ciekawą własność,"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "nadejdzie. Pamiętajmy jednak, że [[Morawek]] twierdził w swojej książce,",
+          "target_context": "nadejdzie. Pamiętajmy jednak, że [[Moravec]] twierdził w swojej książce,"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Moraweka",
+      "target": "Moraveca",
+      "occurrences": 4,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E7",
+          "source_context": "jeden z przejawów paradoksu [[Moraweka.]] Rzeczy, które dla nas",
+          "target_context": "jeden z przejawów paradoksu [[Moraveca.]] Rzeczy, które dla nas"
+        },
+        {
+          "job_id": "S2E7",
+          "source_context": "Powiemy także o paradoksie [[Moraweka,]] który zapowiedzieliśmy dzisiaj. Dlaczego",
+          "target_context": "Powiemy także o paradoksie [[Moraveca,]] który zapowiedzieliśmy dzisiaj. Dlaczego"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "końca, czyli od paradoksu [[Moraweka.]] Został sformułowany w książce",
+          "target_context": "końca, czyli od paradoksu [[Moraveca.]] Został sformułowany w książce"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "została potem nazwana paradoksem [[Moraweka.]] Rzeczy, które są dla",
+          "target_context": "została potem nazwana \"paradoksem [[Moraveca\".]] Rzeczy, które są dla"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Antropik",
+      "target": "Anthropic",
+      "occurrences": 3,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "wcześniej systemach broni autonomicznej. [[Antropik]] odmówił usunięcia tych klauzul,",
+          "target_context": "wcześniej systemach broni autonomicznej. [[Anthropic]] odmówił usunięcia tych klauzul,"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "umowę z Pentagonem, jeżeli [[Antropik]] się z niej wycofuje.",
+          "target_context": "umowę z Pentagonem, jeżeli [[Anthropic]] się z niej wycofuje."
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "przez prawdziwych ludzkich specjalistów. [[Antropik]] chwali się, że z",
+          "target_context": "przez prawdziwych ludzkich specjalistów. [[Anthropic]] chwali się, że z"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Gellmana",
+      "target": "Gell-Manna",
+      "occurrences": 3,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "wiedzieliście czym jest amnezja [[Gellmana?]] Bo to jest kolejne",
+          "target_context": "wiedzieliście, czym jest \"amnezja [[Gell-Manna\"?]] Bo to jest kolejne"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "tym, jak działa amnezja [[Gellmana,]] o której powiedzieliśmy w",
+          "target_context": "tym, jak działa amnezja [[Gell-Manna,]] o której powiedzieliśmy w"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "chociażby o tej amnezji [[Gellmana,]] ale tutaj problem jest",
+          "target_context": "chociażby o tej amnezji [[Gell-Manna,]] ale tutaj problem jest"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "algorytmy",
+      "target": "algorytmach",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E1",
+          "source_context": "wykorzystanie narzędzi opartych o [[algorytmy]] do wstępnej analizy i",
+          "target_context": "wykorzystanie narzędzi opartych na [[algorytmach]] do wstępnej analizy i"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "oprócz wykrywaczy opartych o [[algorytmy]] są jeszcze tzw. wrapery.",
+          "target_context": "oprócz wykrywaczy opartych na [[algorytmach]] są jeszcze tzw. wrappery."
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Clarka",
+      "target": "Clarke'a",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E2",
+          "source_context": "późniejszym odcinku. Trzecie prawo [[Clarka,]] jednego z najsłynniejszych pisarzy",
+          "target_context": "późniejszym odcinku. Trzecie prawo [[Clarke'a,]] jednego z najsłynniejszych pisarzy"
+        },
+        {
+          "job_id": "S2E8p2",
+          "source_context": "Często przywołujemy także Artura [[Clarka,]] który napisał, że odpowiednio",
+          "target_context": "Często przywołujemy także Arthura [[Clarke'a,]] który napisał, że odpowiednio"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Dali",
+      "target": "Dall-E",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E10",
+          "source_context": "takich jak Mid Journey, [[Dali,]] ChatGPT i wielu, wielu",
+          "target_context": "modeli takich jak Midjourney, [[Dall-E,]] ChatGPT i wielu, wielu"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "znany nam Mid Journey, [[Dali]] czy Nano Banana. Skuteczność",
+          "target_context": "jak znany nam Midjourney, [[Dall-E]] czy Nano Banana. Skuteczność"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "damianu",
+      "target": "Damian",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E8p1",
+          "source_context": "Cześć, tu Szymon. i [[damianu.]] Witamy Was w ósmym",
+          "target_context": "Cześć, tu Szymon. I [[Damian.]] Witamy Was w ósmym"
+        },
+        {
+          "job_id": "s0e01",
+          "source_context": "Cześć, tu Szymon. I [[damianu.]] Witamy Was w pierwszym",
+          "target_context": "Cześć, tu Szymon. I [[Damian.]] Witamy Was w pierwszym"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "GPT",
+      "target": "ChatGPT",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E10p1",
+          "source_context": "możemy powiedzieć, że czat [[GPT]] jest kontrolowany przez OpenAI.",
+          "target_context": "bo możemy powiedzieć, że [[ChatGPT]] jest kontrolowany przez OpenAI."
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "wersji podanej przez czat [[GPT.]] I to jest dobry",
+          "target_context": "w wersji podanej przez [[ChatGPT.]] I to jest dobry"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "IDEAS",
+      "target": "AIDEAS",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E6",
+          "source_context": "udział w nowym kursie [[IDEAS,]] który jest prowadzony przez",
+          "target_context": "udział w nowym kursie [[AIDEAS,]] który jest prowadzony przez"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "w kursach takich jak [[Ideas]] czy Umiejętności Jutra. Czasem",
+          "target_context": "w kursach takich jak [[AIDEAS]] czy Umiejętności Jutra. Czasem"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "inteligencję",
+      "target": "inteligencji",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "systemy nie posiadają, np. [[inteligencję]] czy emocje. To z",
+          "target_context": "systemy nie posiadają, np. [[inteligencji]] czy emocji. To z"
+        },
+        {
+          "job_id": "S0E05",
+          "source_context": "Narzędzia oparte o sztuczną [[inteligencję]] wykorzystywane choćby w analityce",
+          "target_context": "Narzędzia oparte na sztucznej [[inteligencji,]] wykorzystywane choćby w analityce,"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "ją",
+      "target": "Damian",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E1",
+          "source_context": "tu Szymon. I dam [[ją.]] Witamy Was w pierwszym",
+          "target_context": "Cześć, tu Szymon. I [[Damian.]] Witamy Was w pierwszym"
+        },
+        {
+          "job_id": "S2E10p1",
+          "source_context": "tu Szymon. I dam [[ją.]] Witamy Was w pierwszej",
+          "target_context": "Cześć, tu Szymon. I [[Damian.]] Witamy Was w pierwszej"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "klot",
+      "target": "Claude",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E05",
+          "source_context": "ich do uczenia modelu [[klot.]] W 2025 roku sędzia",
+          "target_context": "ich do uczenia modelu [[Claude.]] W 2025 roku sędzia"
+        },
+        {
+          "job_id": "S2E4v2_part2",
+          "source_context": "inwigilacji. Wspomniałeś o użyciu [[klot.]] Jakie problemy związane z",
+          "target_context": "inwigilacji. Wspomniałeś o użyciu [[Claude.]] Jakie problemy związane z"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "który",
+      "target": "które",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S0E03_mono_normalized",
+          "source_context": "wspomnieć o science fiction, [[który]] napędza nasz strach, ale",
+          "target_context": "wspomnieć o science fiction, [[które]] napędza nasz strach, ale"
+        },
+        {
+          "job_id": "S0E08",
+          "source_context": "wybranych przez nas metryk, [[który]] ma znaczenie dla naszej",
+          "target_context": "wybranych przez nas metryk, [[które]] mają znaczenie dla naszej"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Moldbook",
+      "target": "Moltbook",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E2",
+          "source_context": "konwersacje poprzez sieć społecznościową [[Moldbook,]] gdzie odpowiadały na wiadomości",
+          "target_context": "konwersacje poprzez sieć społecznościową [[Moltbook,]] gdzie odpowiadały na wiadomości"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "człowiekiem. Platformy takie jak [[Moldbook,]] o którym wspominaliśmy w",
+          "target_context": "człowiekiem. Platformy takie jak [[Moltbook,]] o którym wspominaliśmy w"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Np",
+      "target": "przykład",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E1",
+          "source_context": "szansę, że AI zmyśla. [[Np.]] Gemini ma taką irytującą",
+          "target_context": "że AI zmyśla. Na [[przykład]] Gemini ma taką irytującą"
+        },
+        {
+          "job_id": "S2E4v2_part1",
+          "source_context": "to zazwyczaj je wykona. [[Np.]] kiedy wrzucam do sztucznej",
+          "target_context": "zazwyczaj je wykona. Na [[przykład,]] kiedy wrzucam do sztucznej"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "te",
+      "target": "tę",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E10p1",
+          "source_context": "obrębie instytucji tworzonych przez [[te]] korporacje. To także stawia",
+          "target_context": "obrębie instytucji tworzonych przez [[tę]] korporację. To także stawia"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "ale jednocześnie może zaskarżyć [[te]] implementacje tego samego unijnego",
+          "target_context": "ale jednocześnie może zaskarżyć [[tę]] implementację tego samego unijnego"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "wraperami",
+      "target": "wrapperami",
+      "occurrences": 2,
+      "case_count": 2,
+      "evidence": [
+        {
+          "job_id": "S2E10p2",
+          "source_context": "i systemów, które są [[wraperami]] na modele innych dostawców,",
+          "target_context": "i systemów, które są [[wrapperami]] na modele innych dostawców,"
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "narzędzi jest tak zwanymi [[wraperami]] na GPT. Oznacza to,",
+          "target_context": "narzędzi jest tak zwanymi [[wrapperami]] na GPT. Oznacza to,"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "akceptuje",
+      "target": "akceptuję",
+      "occurrences": 5,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E5",
+          "source_context": "w momencie, kiedy mamy [[akceptuje]] i nie akceptuje dwa",
+          "target_context": "w momencie, kiedy mamy [[\"akceptuję\"]] i \"nie akceptuję\" -"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "mamy akceptuje i nie [[akceptuje]] dwa przyciski do kliknięcia,",
+          "target_context": "mamy \"akceptuję\" i \"nie [[akceptuję\"]] - dwa przyciski do"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "na nas kliknięcie akurat [[akceptuje,]] abyśmy się na coś",
+          "target_context": "na nas kliknięcie akurat [[\"akceptuję\",]] abyśmy się na coś"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "tła, zaś przycisk nie [[akceptuje]] jest dziwnym trafem w",
+          "target_context": "tła, zaś przycisk \"nie [[akceptuję\"]] jest dziwnym trafem w"
+        },
+        {
+          "job_id": "S2E5",
+          "source_context": "a dwa odruchowo kliknąć [[akceptuje,]] bo przecież nasz mózg",
+          "target_context": "a dwa odruchowo kliknąć [[\"akceptuję\",]] bo przecież nasz mózg"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Green X",
+      "target": "GreenX",
+      "occurrences": 4,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E10p2",
+          "source_context": "brzegu przykład – pozew [[Green X]] Metals przeciwko Polsce. Swoją",
+          "target_context": "brzegu przykład – pozew [[GreenX]] Metals przeciwko Polsce. Swoją"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "na razie bezskutecznie. Tymczasem [[Green X]] szykuje się do egzekucji",
+          "target_context": "na razie bezskutecznie. Tymczasem [[GreenX]] szykuje się do egzekucji"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "pozwu korporacji górniczej, czyli [[Green X]] przeciwko Polsce, to nie",
+          "target_context": "pozwu korporacji górniczej, czyli [[GreenX]] przeciwko Polsce, to nie"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "na który powołał się [[Green X]] w sprawie przeciwko Polsce.",
+          "target_context": "na który powołał się [[GreenX]] w sprawie przeciwko Polsce."
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "Fold",
+      "target": "AlphaFold",
+      "occurrences": 3,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E8p1",
+          "source_context": "Trzeba wspomnieć o Alfa [[Fold,]] czyli systemie pracującym nad",
+          "target_context": "pracy. Trzeba wspomnieć o [[AlphaFold,]] czyli systemie pracującym nad"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "tego systemu, czyli Alfa [[Fold]] 3, korzysta z modeli",
+          "target_context": "wersja tego systemu, czyli [[AlphaFold]] 3, korzysta z modeli"
+        },
+        {
+          "job_id": "S2E8p1",
+          "source_context": "jest zaskakująco wysoka. Alfa [[Fold]] 2 osiągnął w konkursie",
+          "target_context": "również jest zaskakująco wysoka. [[AlphaFold]] 2 osiągnął w konkursie"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "GOFI",
+      "target": "GOFAI",
+      "occurrences": 3,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S0E07",
+          "source_context": "sztuczną inteligencję, taką jak [[GOFI,]] machine learning i generatywną",
+          "target_context": "sztuczną inteligencję, taką jak [[GOFAI,]] machine learning i generatywną"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "Pierwsza z nich, czyli [[GOFI.]] Stara, ale dobra AI.",
+          "target_context": "Pierwsza z nich, czyli [[GOFAI]] - stara, ale dobra"
+        },
+        {
+          "job_id": "S0E07",
+          "source_context": "tutaj. Czyli, że rodzaje [[GoFi,]] machine learning i generatywna",
+          "target_context": "tutaj. Czyli, że rodzaje [[GOFAI,]] machine learning i generatywna"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "corpo",
+      "target": "korpo",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E3",
+          "source_context": "sytuacji, bo w świecie [[corpo]] zawsze jest dobrze i",
+          "target_context": "sytuacji, bo w świecie [[korpo]] zawsze jest dobrze i"
+        },
+        {
+          "job_id": "S2E3",
+          "source_context": "zastąpiony chatbotem. Co powie [[Corpo?]] Z dumą ogłaszamy zakończenie",
+          "target_context": "zastąpiony chatbotem. Co powie [[korpo?]] Z dumą ogłaszamy zakończenie"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "fit",
+      "target": "feed",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E6",
+          "source_context": "pod nas, czyli spersonalizowany [[fit,]] co oznacza, że coraz",
+          "target_context": "pod nas, czyli spersonalizowany [[feed,]] co oznacza, że coraz"
+        },
+        {
+          "job_id": "S2E6",
+          "source_context": "sposób np. jest budowany [[fit]] na TikToku, przewijaj, przewijaj,",
+          "target_context": "sposób np. jest budowany [[feed]] na TikToku, przewijaj, przewijaj,"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "Greenex",
+      "target": "GreenX",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E10p2",
+          "source_context": "bo możemy zauważyć, że [[Greenex]] stwierdziło, że uwaga, zmiana",
+          "target_context": "bo możemy zauważyć, że [[GreenX]] stwierdziło, że uwaga, zmiana"
+        },
+        {
+          "job_id": "S2E10p2",
+          "source_context": "prawa krajowego. Co więcej, [[Greenex]] nie zapłaci za tą",
+          "target_context": "prawa krajowego. Co więcej, [[GreenX]] nie zapłaci za tę"
+        }
+      ],
+      "status": "approved"
+    },
+    {
+      "source": "konsensus",
+      "target": "Consensus",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E9",
+          "source_context": "częściej polecanych aplikacji jest [[konsensus]] pisany przez C. Jest",
+          "target_context": "częściej polecanych aplikacji jest [[Consensus]] - pisany przez C."
+        },
+        {
+          "job_id": "S2E9",
+          "source_context": "W dodatku ta aplikacja [[Konsensus]] ma ten sam problem",
+          "target_context": "W dodatku ta aplikacja [[Consensus]] ma ten sam problem"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "lat",
+      "target": "latach",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S0E09",
+          "source_context": "tysięcy godzin, czyli 77 [[lat]] nagrań audio pobranych z",
+          "target_context": "tysiącach godzin, czyli 77 [[latach]] nagrań audio pobranych z"
+        },
+        {
+          "job_id": "S0E09",
+          "source_context": "tys. godzin, czyli 32 [[lat]] nagrań oraz otwarty model",
+          "target_context": "tys. godzin, czyli 32 [[latach]] nagrań oraz otwarty model"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "source": "przemysłu",
+      "target": "przemysł",
+      "occurrences": 2,
+      "case_count": 1,
+      "evidence": [
+        {
+          "job_id": "S2E7",
+          "source_context": "i postulowane pod hasłem [[przemysłu]] 4.0 albo przemysłu 5.0.",
+          "target_context": "i postulowane pod hasłem [[\"przemysł]] 4.0\" albo \"przemysł 5.0\"."
+        },
+        {
+          "job_id": "S2E7",
+          "source_context": "hasłem przemysłu 4.0 albo [[przemysłu]] 5.0. A tutaj okazało",
+          "target_context": "hasłem \"przemysł 4.0\" albo [[\"przemysł]] 5.0\". A tutaj okazało"
+        }
+      ],
+      "status": "rejected"
+    }
+  ]
+}
