@@ -153,6 +153,8 @@ def test_private_review_stages_bounded_unsupported_edit_context(tmp_path: Path) 
     review = prepare_correction_benchmark_review(load_correction_benchmark_manifest(manifest_path))
 
     assert review["private_transcript_content"] is True
+    assert review["context_normalization"] == "ewp-correction-lexical-v2"
+    assert "punctuation" in review["display_notice"]
     edit = review["cases"][0]["unsupported_edits"][0]
     assert edit["source_before"] == "transcription"
     assert edit["candidate_after"] == "openai"

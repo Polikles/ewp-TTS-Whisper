@@ -166,6 +166,12 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    control. Runtime/cost were nearly equal and both preserved tokens/speakers without warnings.
    Manual classification of three dictionary-assisted edits unsupported by gold is the final
    acceptance gate before expanding the dictionary-assisted correction benchmark.
+   The owner classified all three as supported convention edits: ASCII `etykawpetli.pl` is the
+   preferred spelling of the owned address, while the diacritic spelling is also valid. No
+   harmful held-out edit was identified. The dictionary-assisted held-out pilot is therefore
+   accepted, with 14 exact-gold plus 3 owner-supported convention edits. Review output now
+   explains that lexical normalization may visually separate domain punctuation without
+   changing the candidate artifact.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

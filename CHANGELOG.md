@@ -75,6 +75,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added `benchmark correction review`, which writes an exact-manifest-bound private `/tmp`
   artifact containing only unsupported edits, bounded normalized source context, and any
   overlapping gold edits for focused human classification. Content-free reports stay clean.
+- Added an explicit normalization notice to private correction reviews so punctuation removed
+  for lexical scoring is not mistaken for artifact corruption. Recorded owner review of the
+  three held-out dictionary edits as supported ASCII domain conventions, with no harmful edit.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

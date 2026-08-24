@@ -329,6 +329,11 @@ def prepare_correction_benchmark_review(
         "review_version": "ewp-correction-unsupported-review-v1",
         "manifest_sha256": _sha256(manifest.path),
         "private_transcript_content": True,
+        "context_normalization": CORRECTION_NORMALIZATION_VERSION,
+        "display_notice": (
+            "Review context is lexically normalized for scoring; punctuation such as the dot "
+            "in a domain may display as a space and does not describe artifact rendering."
+        ),
         "cases": cases,
     }
 
