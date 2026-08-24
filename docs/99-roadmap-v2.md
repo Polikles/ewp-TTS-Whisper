@@ -576,9 +576,10 @@ renderer styling remain separate later slices.
 
 Implemented foundation: raw and manually revised `--format html` exports now emit the
 specified escaped, deterministic fragment with sentence-level native buttons, explicit
-speaker turns, BCP 47 language, and integer timing/speaker/kind metadata. No CSS,
-JavaScript, inline styles, or event handlers are emitted. Translated HTML and the consuming
-mock player acceptance work remain.
+speaker turns, BCP 47 language, and integer timing/speaker/kind metadata. Immutable
+translation artifacts use the same contract with target language/text and inherited unit
+timing. No CSS, JavaScript, inline styles, or event handlers are emitted. The consuming
+mock player acceptance work remains.
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;

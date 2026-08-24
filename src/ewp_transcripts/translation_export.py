@@ -13,6 +13,7 @@ from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.domain.errors import InvalidTranslationError, OutputReservationError
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.domain.translation import TranscriptTranslation, load_transcript_translation
+from ewp_transcripts.exporters.html import HtmlTranscriptUnit, render_html_units
 from ewp_transcripts.exporters.subtitles import (
     SubtitleCue,
     render_srt,
@@ -26,6 +27,7 @@ class TranslationExportFormat(StrEnum):
     TXT = "txt"
     SRT = "srt"
     VTT = "vtt"
+    HTML = "html"
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,6 +192,23 @@ def export_translation(
     for export_format in selected:
         if export_format == TranslationExportFormat.TXT:
             rendered = render_translation_text(translation)
+        elif export_format == TranslationExportFormat.HTML:
+            rendered = render_html_units(
+                language=translation.direction.target_language,
+                units=tuple(
+                    HtmlTranscriptUnit(
+                        speaker_id=unit.speaker_id,
+                        text=unit.target_text,
+                        start_ms=unit.start_ms,
+                        end_ms=unit.end_ms,
+                    )
+                    for unit in translation.units
+                ),
+                speaker_labels={
+                    speaker_id: speaker_id
+                    for speaker_id in {unit.speaker_id for unit in translation.units}
+                },
+            )
         else:
             try:
                 if cues is None:

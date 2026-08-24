@@ -58,6 +58,22 @@ def test_translation_subtitles_stay_inside_unit_timing_and_render(tmp_path: Path
     ).read_text(encoding="utf-8")
 
 
+def test_translation_html_uses_target_language_text_and_unit_timing(tmp_path: Path) -> None:
+    outcome = export_translation(
+        EXAMPLE,
+        formats=(TranslationExportFormat.HTML,),
+        output_directory=tmp_path,
+    )
+
+    html_path = tmp_path / "S01E01_pl_translation_001.html"
+    assert html_path in outcome.written
+    rendered = html_path.read_text(encoding="utf-8")
+    assert rendered.startswith('<section class="ewp-transcript" lang="pl">')
+    assert "Witamy w kolejnym odcinku." in rendered
+    assert 'data-start-ms="1240" data-end-ms="3900"' in rendered
+    assert 'data-speaker-id="speaker_001"' in rendered
+
+
 def test_english_quote_punctuation_is_preserved_in_text_and_subtitles() -> None:
     translation = load_transcript_translation(EXAMPLE)
     units = (

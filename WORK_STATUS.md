@@ -192,9 +192,10 @@ remaining v0.4 workstreams; details and acceptance criteria live in
 6. **Embeddable HTML transcript.** Raw and manually revised `--format html` export is
    implemented as an escaped deterministic fragment with a BCP 47 language, explicit
    speaker turns, sentence-level native buttons, integer timing/speaker/kind metadata, and
-   no CSS, JavaScript, inline styles, or event handlers. Translated HTML plus the separate
-   mock player site's highlighting, seeking, keyboard, light/dark, and no-script tests
-   remain before this slice is complete.
+   no CSS, JavaScript, inline styles, or event handlers. Immutable translation artifacts
+   now export the same HTML contract using target language/text and inherited unit timing.
+   The separate mock player site's highlighting, seeking, keyboard, light/dark, and
+   no-script tests remain before this slice is complete.
 7. **v0.4 closure.** Reconcile requirements, traceability, operator documentation,
    changelog, schemas/examples, package version and artifacts. Run the full automated and
    packaging gates. Full clean-machine installation-through-workflow qualification stays

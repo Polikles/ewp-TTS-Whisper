@@ -448,11 +448,12 @@ Export one snapshot or a directory without audio or models:
 
 ```bash
 uv run --locked transcriber translate export "/path/to/translations" \
-  --format txt --format srt --format vtt \
+  --format txt --format srt --format vtt --format html \
   --output-dir "/path/to/translated-exports"
 ```
 
-TXT uses stable speaker IDs because display names are presentation data. SRT/VTT inherit
+TXT and HTML use stable speaker IDs because translation artifacts do not invent display
+names. SRT/VTT inherit
 sentence-unit timing. If translated text needs multiple cues for line capacity, timing is
 distributed within that unit; target-word alignment is not claimed. Identical files skip
 safely, conflicting files fail before any requested format is written.

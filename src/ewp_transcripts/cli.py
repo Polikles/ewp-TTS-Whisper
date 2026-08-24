@@ -1123,7 +1123,7 @@ def translate_export_command(
     ],
     output_directory: Annotated[
         Path | None,
-        typer.Option("--output-dir", help="Write translated TXT output here."),
+        typer.Option("--output-dir", help="Write translated derived exports here."),
     ] = None,
     formats: Annotated[
         list[TranslationExportFormat] | None,
@@ -1138,7 +1138,7 @@ def translate_export_command(
         typer.Option("--config", help="Read an explicit TOML configuration file."),
     ] = None,
 ) -> None:
-    """Render deterministic UTF-8 TXT from one immutable translation."""
+    """Render deterministic UTF-8 exports from one immutable translation."""
 
     try:
         config = load_config(explicit_path=config_path)
