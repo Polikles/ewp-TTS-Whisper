@@ -172,9 +172,11 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    accepted, with 14 exact-gold plus 3 owner-supported convention edits. Review output now
    explains that lexical normalization may visually separate domain punctuation without
    changing the candidate artifact.
-4. **Timed-event semantics.** Design and version the additive canonical JSON change for
-   `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
-   renderer infers non-speech presentation from text.
+4. **Timed-event semantics.** The additive schema `1.1` foundation is implemented with segment
+   kinds `speech`, `music`, `laugh`, `cough`, and `note`; legacy omissions default to speech.
+   Raw/revised effective projection, derived segment JSON, and subtitle cue planning preserve
+   kind without changing SRT/VTT presentation. Explicit non-speech authoring remains separate;
+   TTML and HTML may now consume the shared semantic field without inferring it from text.
 5. **YouTube TTML export.** Implement the small UTF-8 TTML 1.0-compatible YouTube profile
    in the roadmap, mapping each existing cue to one `<p>`, applying deterministic
    speaker styles/colors, and validating XML. Finish with an unlisted YouTube upload

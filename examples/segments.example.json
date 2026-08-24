@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "generated_at": "2026-07-29T14:09:00Z",
   "job_id": "S01E01",
   "derived_from": {
@@ -27,6 +27,7 @@
       "start_ms": 1240,
       "end_ms": 3900,
       "text": "Welcome to another episode.",
+      "kind": "speech",
       "speaker_id": "speaker_001",
       "overlap": false,
       "active_speaker_ids": [
@@ -44,6 +45,7 @@
       "start_ms": 4320,
       "end_ms": 6320,
       "text": "Today we discuss transcription.",
+      "kind": "speech",
       "speaker_id": "speaker_002",
       "overlap": false,
       "active_speaker_ids": [

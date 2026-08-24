@@ -147,7 +147,7 @@ def run_diarization_pipeline(
         raise TranscriptNormalizationError("Diarization returned no speakers")
 
     return CanonicalResult(
-        schema_version="1.0",
+        schema_version="1.1",
         application_version=__version__,
         run_id=state.run_id,
         job_id=inspection.job_id,
@@ -286,7 +286,7 @@ def run_source_speaker_pipeline(
     )
 
     return CanonicalResult(
-        schema_version="1.0",
+        schema_version="1.1",
         application_version=__version__,
         run_id=state.run_id,
         job_id=inspection.job_id,
@@ -440,7 +440,7 @@ def run_single_speaker_pipeline(
     warnings = (*_inspection_warnings(inspection), *normalized.warnings)
 
     return CanonicalResult(
-        schema_version="1.0",
+        schema_version="1.1",
         application_version=__version__,
         run_id=state.run_id,
         job_id=inspection.job_id,

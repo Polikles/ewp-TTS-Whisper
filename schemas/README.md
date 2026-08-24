@@ -2,8 +2,9 @@
 
 The schemas use JSON Schema Draft 2020-12.
 
-- `results.schema.json` — canonical results and partial/failed state files.
-- `segments.schema.json` — optional derived segment export.
+- `results.schema.json` — canonical results and partial/failed state files. Schema `1.1` adds
+  segment `kind`; older artifacts default to `speech` in the domain model.
+- `segments.schema.json` — optional derived segment export; schema `1.1` emits event kind.
 - `revision.schema.json` — immutable corrected transcript snapshots.
 - `translation.schema.json` — immutable complete Polish-English translation snapshots.
 

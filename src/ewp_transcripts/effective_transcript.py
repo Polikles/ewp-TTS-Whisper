@@ -10,6 +10,7 @@ from ewp_transcripts.domain.canonical import (
     CanonicalSegment,
     CanonicalTranscript,
     CanonicalWord,
+    TimedEventKind,
 )
 from ewp_transcripts.domain.revision import (
     TranscriptRevision,
@@ -31,6 +32,7 @@ class EffectiveToken:
     timing_source: str
     overlap: bool
     active_speaker_ids: tuple[str, ...]
+    kind: TimedEventKind = "speech"
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,7 +54,7 @@ def resolve_effective_transcript(
 
     canonical_words = tuple(word for segment in base.transcript.segments for word in segment.words)
     context_by_word_id = {
-        word.word_id: (segment.overlap, segment.active_speaker_ids)
+        word.word_id: (segment.overlap, segment.active_speaker_ids, segment.kind)
         for segment in base.transcript.segments
         for word in segment.words
     }
@@ -70,6 +72,7 @@ def resolve_effective_transcript(
                     timing_source=word.timestamp_source,
                     overlap=context_by_word_id[word.word_id][0],
                     active_speaker_ids=tuple(sorted(context_by_word_id[word.word_id][1])),
+                    kind=context_by_word_id[word.word_id][2],
                 )
                 for word in canonical_words
             ),
@@ -102,7 +105,7 @@ def resolve_effective_transcript(
                     token.speaker_id,
                     *(
                         speaker_id
-                        for context_overlap, active_speakers in contexts
+                        for context_overlap, active_speakers, _kind in contexts
                         if context_overlap
                         for speaker_id in active_speakers
                     ),
@@ -118,7 +121,8 @@ def resolve_effective_transcript(
                 start_ms=start_ms,
                 end_ms=end_ms,
                 timing_source=timing_source,
-                overlap=any(overlap for overlap, _ in contexts),
+                overlap=any(overlap for overlap, _speakers, _kind in contexts),
+                kind=_resolved_kind(contexts),
                 active_speaker_ids=active_speaker_ids,
             )
         )
@@ -156,6 +160,7 @@ def effective_canonical_result(
             start_ms=min(token.start_ms for token in group),
             end_ms=max(token.end_ms for token in group),
             text=" ".join(token.text for token in group),
+            kind=group[0].kind,
             speaker_id=group[0].speaker_id,
             overlap=group[0].overlap,
             active_speaker_ids=group[0].active_speaker_ids,
@@ -210,8 +215,19 @@ def _segment_speaker(base: CanonicalResult, word_id: str) -> str:
     raise ValueError(f"Canonical word has no effective speaker: {word_id}")
 
 
-def _effective_group_key(token: EffectiveToken) -> tuple[str, bool, tuple[str, ...]]:
-    return token.speaker_id, token.overlap, token.active_speaker_ids
+def _effective_group_key(
+    token: EffectiveToken,
+) -> tuple[str, bool, tuple[str, ...], TimedEventKind]:
+    return token.speaker_id, token.overlap, token.active_speaker_ids, token.kind
+
+
+def _resolved_kind(
+    contexts: tuple[tuple[bool, tuple[str, ...], TimedEventKind], ...],
+) -> TimedEventKind:
+    kinds = {kind for _overlap, _speakers, kind in contexts}
+    if len(kinds) != 1:
+        raise ValueError("Revision token cannot combine canonical segments of different kinds")
+    return next(iter(kinds))
 
 
 def _mark_cross_speaker_timing_overlaps(

@@ -641,6 +641,16 @@
         "text": {
           "type": "string"
         },
+        "kind": {
+          "enum": [
+            "speech",
+            "music",
+            "laugh",
+            "cough",
+            "note"
+          ],
+          "default": "speech"
+        },
         "speaker_id": {
           "type": [
             "string",

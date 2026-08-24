@@ -6,7 +6,12 @@ from dataclasses import dataclass
 from typing import Literal
 
 from ewp_transcripts.config import SubtitlesConfig
-from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSegment, CanonicalWord
+from ewp_transcripts.domain.canonical import (
+    CanonicalResult,
+    CanonicalSegment,
+    CanonicalWord,
+    TimedEventKind,
+)
 
 _NONFINAL_CONNECTIVES = frozenset(
     {
@@ -42,6 +47,7 @@ class SubtitleCue:
     lines: tuple[str, ...]
     speaker_id: str | None
     overlap: bool = False
+    kind: TimedEventKind = "speech"
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +61,7 @@ class _CueDraft:
     overlap: bool
     sequence: int
     words: tuple[CanonicalWord, ...] = ()
+    kind: TimedEventKind = "speech"
 
 
 def build_subtitle_cues(
@@ -101,6 +108,7 @@ def build_subtitle_cues(
                     overlap=segment.overlap,
                     sequence=segment_index * 1_000_000 + index,
                     words=words,
+                    kind=segment.kind,
                 )
             )
         previous_segment_speaker = speaker_id
@@ -146,6 +154,7 @@ def build_subtitle_cues(
                 ),
                 speaker_id=draft.speaker_id,
                 overlap=draft.overlap,
+                kind=draft.kind,
             )
         )
         previous_speaker = draft.speaker_id
@@ -195,6 +204,7 @@ def _repartition_continuous_chains(
                         overlap=first.overlap,
                         sequence=first.sequence + chunk_index,
                         words=chunk,
+                        kind=first.kind,
                     )
                     for chunk_index, chunk in enumerate(partition)
                 ]
@@ -209,6 +219,7 @@ def _same_continuous_chain(
     gap_ms = following.start_ms - previous.end_ms
     return (
         previous.speaker_id == following.speaker_id
+        and previous.kind == following.kind
         and previous.overlap == following.overlap
         and bool(previous.words)
         and bool(following.words)
@@ -340,6 +351,7 @@ def _merge_adjacent_drafts(
         chars_per_second = len(text) * 1000 / max(duration_ms, 1)
         can_merge = (
             previous.speaker_id == draft.speaker_id
+            and previous.kind == draft.kind
             and not previous.overlap
             and not draft.overlap
             and 0 <= gap_ms <= settings.max_merge_gap_ms
@@ -356,6 +368,7 @@ def _merge_adjacent_drafts(
                 overlap=False,
                 sequence=previous.sequence,
                 words=((*previous.words, *draft.words) if previous.words and draft.words else ()),
+                kind=previous.kind,
             )
         else:
             merged.append(draft)
@@ -460,6 +473,7 @@ def _draft_with_words(draft: _CueDraft, words: tuple[CanonicalWord, ...]) -> _Cu
         overlap=draft.overlap,
         sequence=draft.sequence,
         words=words,
+        kind=draft.kind,
     )
 
 
@@ -882,6 +896,7 @@ def _extend_short_cues(
                 lines=cue.lines,
                 speaker_id=cue.speaker_id,
                 overlap=cue.overlap,
+                kind=cue.kind,
             )
         )
     return tuple(extended)

@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Sha256 = str
+TimedEventKind = Literal["speech", "music", "laugh", "cough", "note"]
 
 
 class CanonicalModel(BaseModel):
@@ -149,6 +150,7 @@ class CanonicalSegment(CanonicalModel):
     start_ms: int = Field(ge=0)
     end_ms: int = Field(ge=0)
     text: str
+    kind: TimedEventKind = "speech"
     speaker_id: str | None
     overlap: bool
     active_speaker_ids: tuple[str, ...]

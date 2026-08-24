@@ -41,6 +41,20 @@ def test_builds_bounded_cues_with_labels_on_speaker_changes() -> None:
     assert all(len(line) <= 50 for cue in cues for line in cue.lines)
 
 
+def test_cue_planning_preserves_event_kind_without_styling_it() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    second = second.model_copy(update={"kind": "laugh"})
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+
+    cues = build_subtitle_cues(result)
+
+    assert [cue.kind for cue in cues] == ["speech", "laugh"]
+    assert "[" not in " ".join(cues[1].lines)
+
+
 def test_srt_and_vtt_have_valid_headers_timestamps_and_spacing() -> None:
     cues = (
         SubtitleCue(1240, 3900, ("First cue.",), "speaker_001"),

@@ -35,6 +35,8 @@ def test_segments_export_satisfies_schema_and_records_provenance() -> None:
         "results_schema_version": "1.0",
     }
     assert document["generated_at"] == "2026-08-03T12:00:00Z"
+    assert document["schema_version"] == "1.1"
+    assert {segment["kind"] for segment in document["segments"]} == {"speech"}
 
 
 def test_segments_export_merges_consecutive_canonical_segments_in_one_turn() -> None:
@@ -67,6 +69,32 @@ def test_segments_export_merges_consecutive_canonical_segments_in_one_turn() -> 
         "Welcome to another episode. Today we discuss transcription."
     )
     assert len(document["segments"][0]["word_ids"]) == 8
+
+
+def test_segments_export_does_not_merge_different_event_kinds() -> None:
+    result = load_canonical_result(EXAMPLE_PATH)
+    first, second = result.transcript.segments
+    second = second.model_copy(
+        update={
+            "speaker_id": "speaker_001",
+            "active_speaker_ids": ("speaker_001",),
+            "kind": "laugh",
+        }
+    )
+    result = result.model_copy(
+        update={"transcript": result.transcript.model_copy(update={"segments": (first, second)})}
+    )
+
+    document = json.loads(
+        render_segments_json(
+            result,
+            results_file="S01E01_results.json",
+            results_sha256=RESULTS_SHA256,
+            generated_at=datetime(2026, 8, 3, 12, 0, tzinfo=UTC),
+        )
+    )
+
+    assert [segment["kind"] for segment in document["segments"]] == ["speech", "laugh"]
 
 
 def test_segments_export_can_omit_word_ids() -> None:

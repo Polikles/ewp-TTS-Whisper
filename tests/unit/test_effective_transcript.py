@@ -27,6 +27,26 @@ def test_raw_effective_transcript_preserves_every_canonical_word() -> None:
         word.text for segment in base.transcript.segments for word in segment.words
     ]
     assert effective.revision_number is None
+    assert {token.kind for token in effective.tokens} == {"speech"}
+
+
+def test_revision_projection_preserves_segment_kind(tmp_path: Path) -> None:
+    base = load_canonical_result(RESULT)
+    first, second = base.transcript.segments
+    first = first.model_copy(update={"kind": "note"})
+    base = base.model_copy(
+        update={"transcript": base.transcript.model_copy(update={"segments": (first, second)})}
+    )
+    base_path = tmp_path / "S01E01_results.json"
+    base_path.write_text(base.model_dump_json(indent=2), encoding="utf-8")
+    revision = build_revision(prepare_review(base_path), base, base_path=base_path)
+
+    effective = resolve_effective_transcript(base, revision, base_path=base_path)
+    projected = effective_canonical_result(base, effective)
+
+    assert {token.kind for token in effective.tokens[:4]} == {"note"}
+    assert projected.transcript.segments[0].kind == "note"
+    assert projected.transcript.segments[-1].kind == "speech"
 
 
 def test_revision_resolves_corrected_text_speaker_and_inherited_timing() -> None:

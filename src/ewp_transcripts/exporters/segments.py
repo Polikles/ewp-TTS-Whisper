@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
 
-from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSegment
+from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSegment, TimedEventKind
 
 
 class SegmentExportItem(TypedDict):
@@ -16,6 +16,7 @@ class SegmentExportItem(TypedDict):
     start_ms: int
     end_ms: int
     text: str
+    kind: TimedEventKind
     speaker_id: str | None
     overlap: bool
     active_speaker_ids: list[str]
@@ -48,7 +49,7 @@ def render_segments_json(
         derived_from["revision_file"] = Path(revision_file).name
         derived_from["revision_number"] = revision_number
     document = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": generated_at.isoformat().replace("+00:00", "Z"),
         "job_id": result.job_id,
         "derived_from": derived_from,
@@ -86,6 +87,7 @@ def _speaker_turns(
                 "start_ms": segment.start_ms,
                 "end_ms": segment.end_ms,
                 "text": segment.text.strip(),
+                "kind": segment.kind,
                 "speaker_id": segment.speaker_id,
                 "overlap": segment.overlap,
                 "active_speaker_ids": list(segment.active_speaker_ids),
@@ -98,6 +100,7 @@ def _speaker_turns(
 def _same_turn(turn: SegmentExportItem, segment: CanonicalSegment) -> bool:
     return (
         turn["speaker_id"] == segment.speaker_id
+        and turn["kind"] == segment.kind
         and turn["overlap"] == segment.overlap
         and turn["active_speaker_ids"] == list(segment.active_speaker_ids)
     )

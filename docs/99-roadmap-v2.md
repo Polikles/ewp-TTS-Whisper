@@ -561,6 +561,12 @@ presentation choices such as colors, labels, brackets, and italics remain render
 configuration. Schema documentation, migration/compatibility behavior, fixtures, and
 raw/revised export tests are required before enabling the field in production output.
 
+Implemented foundation: canonical schema `1.1` places the closed kind vocabulary on timed
+segments; schema `1.0` omissions default to `speech`. Effective raw/revised projection, derived
+segment JSON `1.1`, and subtitle cue planning preserve kind without changing current SRT/VTT
+presentation. See `24-v0.4-timed-event-semantics.md`. Explicit non-speech authoring and
+renderer styling remain separate later slices.
+
 ## 12. Platform transcript delivery and HTML — planned for v0.4
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web

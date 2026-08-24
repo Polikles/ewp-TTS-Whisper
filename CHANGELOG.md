@@ -40,6 +40,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Added canonical result schema `1.1` timed-segment semantics with the closed `speech`, `music`,
+  `laugh`, `cough`, and `note` vocabulary. Legacy results without `kind` load as `speech`;
+  revised effective projection, segment JSON `1.1`, and subtitle cue planning retain kinds
+  without inferring brackets, italics, colors, or other presentation.
 - Added `dictionary correction propose` to derive repeated, consistent Polish correction
   candidates from exact canonical/manual-revision pairs, and `dictionary correction approve`
   to publish only a fully reviewed, project-scoped dictionary. Proposals retain corpus hashes

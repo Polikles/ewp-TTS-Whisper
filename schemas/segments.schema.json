@@ -94,6 +94,7 @@
           "start_ms",
           "end_ms",
           "text",
+          "kind",
           "speaker_id",
           "overlap"
         ],
@@ -111,6 +112,15 @@
           },
           "text": {
             "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "speech",
+              "music",
+              "laugh",
+              "cough",
+              "note"
+            ]
           },
           "speaker_id": {
             "type": [
