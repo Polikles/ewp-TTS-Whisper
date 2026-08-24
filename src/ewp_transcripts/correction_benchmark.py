@@ -273,6 +273,66 @@ def evaluate_correction_benchmark(
     }
 
 
+def prepare_correction_benchmark_review(
+    manifest: CorrectionBenchmarkManifest,
+) -> dict[str, object]:
+    """Build private bounded context for manual classification of unsupported edits."""
+
+    cases: list[dict[str, object]] = []
+    for case in manifest.cases:
+        root = manifest.path.parent
+        base_path = root / case.base_path
+        source_path = root / case.source_path
+        candidate_path = root / case.candidate_path
+        gold_path = root / case.gold_path
+        for path, digest, label in (
+            (base_path, case.base_sha256, "base"),
+            (source_path, case.source_sha256, "source"),
+            (candidate_path, case.candidate_sha256, "candidate"),
+            (gold_path, case.gold_sha256, "gold"),
+        ):
+            _require_hash(path, digest, case.case_id, label)
+        base = load_canonical_result(base_path)
+        candidate = _validated_revision(candidate_path, base, case.base_sha256)
+        gold = _validated_revision(gold_path, base, case.base_sha256)
+        source_text = (
+            _canonical_text(base)
+            if case.source_kind == "canonical"
+            else _revision_text(_validated_revision(source_path, base, case.base_sha256))
+        )
+        source_words = normalize_transcript(_without_annotations(source_text)).split()
+        candidate_edits = _normalized_edits(source_text, _revision_text(candidate))
+        gold_edits = _normalized_edits(source_text, _revision_text(gold))
+        unsupported = []
+        for start, end, after in sorted(candidate_edits - gold_edits):
+            overlapping = [
+                {"source_start": left, "source_end": right, "after": " ".join(replacement)}
+                for left, right, replacement in sorted(gold_edits)
+                if _edit_spans_overlap(start, end, left, right)
+            ]
+            unsupported.append(
+                {
+                    "source_start": start,
+                    "source_end": end,
+                    "source_before": " ".join(source_words[start:end]),
+                    "candidate_after": " ".join(after),
+                    "source_context": " ".join(
+                        source_words[max(0, start - 6) : min(len(source_words), end + 6)]
+                    ),
+                    "overlapping_gold_edits": overlapping,
+                    "classification": "pending",
+                    "notes": "",
+                }
+            )
+        cases.append({"case_id": case.case_id, "unsupported_edits": unsupported})
+    return {
+        "review_version": "ewp-correction-unsupported-review-v1",
+        "manifest_sha256": _sha256(manifest.path),
+        "private_transcript_content": True,
+        "cases": cases,
+    }
+
+
 def _aggregate(reports: list[dict[str, object]]) -> dict[str, object]:
     """Aggregate the three comparisons without exposing transcript content."""
 
@@ -400,6 +460,14 @@ def _normalized_edits(source_text: str, target_text: str) -> set[tuple[int, int,
         ).get_opcodes()
         if tag != "equal"
     }
+
+
+def _edit_spans_overlap(
+    first_start: int, first_end: int, second_start: int, second_end: int
+) -> bool:
+    if first_start == first_end or second_start == second_end:
+        return first_start == second_start
+    return max(first_start, second_start) < min(first_end, second_end)
 
 
 def _ratio(numerator: int, denominator: int) -> float | None:

@@ -562,6 +562,19 @@ replacement is performed. Dictionary ID, version, project, exact SHA-256, and pr
 are retained by the resulting revision and its audit. Changing dictionaries invalidates
 resume reuse.
 
+After producing a correction benchmark report, stage unsupported edits for focused manual
+review without diffing complete transcripts:
+
+```bash
+uv run --locked transcriber benchmark correction review \
+  "/tmp/private-benchmark/manifest.toml" \
+  --output "/tmp/private-benchmark/unsupported-review.json"
+```
+
+This review contains bounded transcript context and must remain private under `/tmp`. Each edit
+starts with `classification: pending`; inspect it against audio/context and classify it manually
+as supported alternative, stylistic but acceptable, or harmful. Do not commit the review file.
+
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.
 After recording the required content-free evidence, remove it with

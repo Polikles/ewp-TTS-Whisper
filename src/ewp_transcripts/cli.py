@@ -56,6 +56,7 @@ from ewp_transcripts.correction_benchmark import (
     build_correction_benchmark_bundle,
     evaluate_correction_benchmark,
     load_correction_benchmark_manifest,
+    prepare_correction_benchmark_review,
 )
 from ewp_transcripts.correction_consent import (
     REMOTE_LOCAL_API_WARNING,
@@ -465,6 +466,35 @@ def correction_benchmark_report_command(
         f"warnings={activity['warning_count']} "
         f"speaker_changes={activity['speaker_changes']}"
     )
+
+
+@correction_benchmark_app.command("review")
+def correction_benchmark_review_command(
+    manifest_path: Annotated[Path, typer.Argument(help="Exact-hash correction manifest.")],
+    output_path: Annotated[
+        Path, typer.Option("--output", help="Private unsupported-edit review JSON under /tmp.")
+    ],
+) -> None:
+    """Stage bounded private context for manual unsupported-edit classification."""
+
+    try:
+        normalized_output = output_path.expanduser().absolute()
+        if normalized_output.exists():
+            raise ValueError(f"Correction review output already exists: {normalized_output}")
+        manifest = load_correction_benchmark_manifest(normalize_input_path(manifest_path))
+        review = prepare_correction_benchmark_review(manifest)
+        normalized_output.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        normalized_output.write_text(
+            json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        normalized_output.chmod(0o600)
+    except (OSError, ValueError) as error:
+        typer.echo(f"Error: {error}", err=True)
+        raise typer.Exit(code=2) from error
+    cases = cast(list[dict[str, object]], review["cases"])
+    unsupported = sum(len(cast(list[object], case["unsupported_edits"])) for case in cases)
+    typer.echo(f"REVIEW {normalized_output}")
+    typer.echo(f"SUMMARY cases={len(cases)} unsupported_edits={unsupported} pending={unsupported}")
 
 
 @correction_benchmark_app.command("operations")

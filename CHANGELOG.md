@@ -72,6 +72,9 @@ All notable changes to EWP-transcripts are documented here.
   50% (22 errors to 11) versus 3 errors removed without a dictionary, with comparable runtime
   and cost and no token/speaker drift. Three exact edits unsupported by gold remain explicitly
   pending manual harm/style classification.
+- Added `benchmark correction review`, which writes an exact-manifest-bound private `/tmp`
+  artifact containing only unsupported edits, bounded normalized source context, and any
+  overlapping gold edits for focused human classification. Content-free reports stay clean.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

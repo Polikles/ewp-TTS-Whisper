@@ -16,6 +16,7 @@ from ewp_transcripts.correction_benchmark import (
     build_correction_benchmark_bundle,
     evaluate_correction_benchmark,
     load_correction_benchmark_manifest,
+    prepare_correction_benchmark_review,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -136,6 +137,26 @@ def test_benchmark_rejects_changed_candidate(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="candidate SHA-256 mismatch"):
         evaluate_correction_benchmark(manifest)
+
+
+def test_private_review_stages_bounded_unsupported_edit_context(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    _write_revision(tmp_path / "gold_revision.json", 2, corrected=False)
+    manifest_path.write_text(
+        manifest_path.read_text(encoding="utf-8").replace(
+            load_correction_benchmark_manifest(manifest_path).cases[0].gold_sha256,
+            _sha(tmp_path / "gold_revision.json"),
+        ),
+        encoding="utf-8",
+    )
+
+    review = prepare_correction_benchmark_review(load_correction_benchmark_manifest(manifest_path))
+
+    assert review["private_transcript_content"] is True
+    edit = review["cases"][0]["unsupported_edits"][0]
+    assert edit["source_before"] == "transcription"
+    assert edit["candidate_after"] == "openai"
+    assert edit["classification"] == "pending"
 
 
 def test_benchmark_rejects_parent_path_escape(tmp_path: Path) -> None:
