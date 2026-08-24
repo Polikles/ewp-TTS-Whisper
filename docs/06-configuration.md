@@ -40,11 +40,18 @@ Complete example: [`../examples/config.example.toml`](../examples/config.example
 - `[channels]` — classification mode and thresholds;
 - `[models]` — models, cache paths, compute type, batch size;
 - `[diarization]` — model, speaker count, overlap behavior;
-- `[subtitles]` — cue rules;
+- `[subtitles]` — cue rules and the ordered TTML speaker-color palette;
 - `[outputs]` — default exports and naming;
 - `[runtime]` — work directories, temporary files, locks, logging;
 - `[quality]` — diagnostics without audio repair.
 - `[correction]` — automated-correction editable chunk and read-only context sizes.
+
+TTML export is disabled in default output generation until its YouTube upload profile is
+qualified. Request it explicitly with `--format ttml`, or set
+`[outputs].generate_ttml = true`. `[subtitles].ttml_speaker_palette` is a non-empty ordered
+list of `#RRGGBB` colors; it cycles deterministically when a transcript has more speakers
+than configured colors. Speaker colors remain presentation configuration, not transcript
+data.
 
 ### Warning-only quality thresholds
 

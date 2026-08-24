@@ -36,6 +36,7 @@ from ewp_transcripts.exporters import (
     render_segments_json,
     render_srt,
     render_transcript,
+    render_ttml,
     render_vtt,
 )
 from ewp_transcripts.output_lock import output_directory_lock
@@ -47,6 +48,7 @@ class ExportFormat(StrEnum):
     SRT = "srt"
     VTT = "vtt"
     SEGMENTS = "segments"
+    TTML = "ttml"
 
 
 _SAFE_RENDER_FAILURES = frozenset(
@@ -365,6 +367,7 @@ def _export_path(directory: Path, job_id: str, format_: ExportFormat, version: i
         ExportFormat.SRT: ("subtitles", "srt"),
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
+        ExportFormat.TTML: ("subtitles", "ttml"),
     }[format_]
     return directory / f"{job_id}_{role}{suffix}.{extension}"
 
@@ -382,6 +385,7 @@ def _revision_export_path(
         ExportFormat.SRT: ("subtitles", "srt"),
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
+        ExportFormat.TTML: ("subtitles", "ttml"),
     }[format_]
     result_suffix = "" if result.result_version == 1 else f"_v{result.result_version:03d}"
     export_suffix = "" if export_version == 1 else f"_v{export_version:03d}"
@@ -445,7 +449,17 @@ def _render_exports(
             else:
                 if cues is None:
                     cues = build_subtitle_cues(result, subtitles_config)
-                content = render_srt(cues) if format_ is ExportFormat.SRT else render_vtt(cues)
+                if format_ is ExportFormat.SRT:
+                    content = render_srt(cues)
+                elif format_ is ExportFormat.VTT:
+                    content = render_vtt(cues)
+                else:
+                    content = render_ttml(
+                        cues,
+                        language=result.transcript.language,
+                        speaker_ids=(speaker.speaker_id for speaker in result.speakers),
+                        speaker_palette=subtitles_config.ttml_speaker_palette,
+                    )
         except ValueError as error:
             detail = str(error)
             safe_detail = detail if detail in _SAFE_RENDER_FAILURES else "invalid renderer input"

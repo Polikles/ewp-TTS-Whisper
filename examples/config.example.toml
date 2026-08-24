@@ -77,11 +77,13 @@ min_gap_ms = 80
 max_merge_gap_ms = 1200
 min_words_per_cue = 4
 speaker_labels = "on-change"   # on-change | always | never
+ttml_speaker_palette = ["#FFFFFF", "#00AEEF", "#FFD700", "#00C853", "#E040FB", "#00E5FF"]
 
 [outputs]
 generate_txt = true
 generate_srt = true
 generate_vtt = true
+generate_ttml = false
 generate_segments_json = false
 batch_output_directory_name = "output-ewp-transcripts"
 encoding = "utf-8"

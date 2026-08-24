@@ -1,6 +1,7 @@
 """Tests for safe model-free export orchestration."""
 
 import json
+import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -28,6 +29,7 @@ def test_exports_all_formats_without_source_audio_or_models(tmp_path: Path) -> N
             ExportFormat.SRT,
             ExportFormat.VTT,
             ExportFormat.SEGMENTS,
+            ExportFormat.TTML,
         ),
         generated_at=FIXED_TIME,
     )
@@ -38,11 +40,13 @@ def test_exports_all_formats_without_source_audio_or_models(tmp_path: Path) -> N
         "S01E01_subtitles.srt",
         "S01E01_subtitles.vtt",
         "S01E01_segments.json",
+        "S01E01_subtitles.ttml",
     }
     assert outcome.skipped == ()
     assert (tmp_path / "S01E01_subtitles.vtt").read_text(encoding="utf-8").startswith("WEBVTT\n")
     segments = json.loads((tmp_path / "S01E01_segments.json").read_text(encoding="utf-8"))
     assert segments["derived_from"]["results_file"] == "S01E01_results.json"
+    assert ET.parse(tmp_path / "S01E01_subtitles.ttml").getroot().tag.endswith("tt")
     assert not Path("D:/podcast/S01E01-jan.wav").exists()
 
 
@@ -159,7 +163,7 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
 
     outcome = export_result(
         result_path,
-        formats=(ExportFormat.TXT, ExportFormat.SRT, ExportFormat.SEGMENTS),
+        formats=(ExportFormat.TXT, ExportFormat.SRT, ExportFormat.SEGMENTS, ExportFormat.TTML),
         revision=applied.revision_path,
         generated_at=FIXED_TIME,
     )
@@ -169,6 +173,7 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
         "S01E01_transcript_revision_001.txt",
         "S01E01_subtitles_revision_001.srt",
         "S01E01_segments_revision_001.json",
+        "S01E01_subtitles_revision_001.ttml",
     }
     transcript = (tmp_path / "S01E01_transcript_revision_001.txt").read_text(encoding="utf-8")
     assert "carefully discuss corrected transcription" in transcript
@@ -177,6 +182,10 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
     )
     assert segments["derived_from"]["revision_number"] == 1
     assert segments["derived_from"]["revision_file"] == applied.revision_path.name
+    ttml_root = ET.parse(tmp_path / "S01E01_subtitles_revision_001.ttml").getroot()
+    assert "carefully discuss corrected transcription" in " ".join(
+        "".join(ttml_root.itertext()).split()
+    )
 
 
 def test_latest_revision_selection_does_not_change_raw_export(tmp_path: Path) -> None:

@@ -112,6 +112,7 @@ Primary options:
 --format txt                   # repeatable
 --format srt
 --format vtt
+--format ttml
 --segments
 --force
 --allow-duration-mismatch
@@ -169,6 +170,7 @@ Options:
 --format txt
 --format srt
 --format vtt
+--format ttml
 --format segments
 --segments
 --output-dir PATH

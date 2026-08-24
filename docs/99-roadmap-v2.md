@@ -519,6 +519,9 @@ critical path.
 
 ## 11. Subtitles
 
+The conservative TTML profile below is implemented locally and remains opt-in pending the
+required unlisted YouTube acceptance check.
+
 - add a deterministic `.ttml` export using a deliberately small TTML 1.0-compatible
   profile optimized for maximum YouTube upload/rendering compatibility rather than
   general or strictly exhaustive TTML conformance;

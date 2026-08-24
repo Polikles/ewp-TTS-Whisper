@@ -2466,6 +2466,7 @@ def export_command(
                     (config.outputs.generate_srt, ExportFormat.SRT),
                     (config.outputs.generate_vtt, ExportFormat.VTT),
                     (config.outputs.generate_segments_json, ExportFormat.SEGMENTS),
+                    (config.outputs.generate_ttml, ExportFormat.TTML),
                 )
                 if enabled
             ]
