@@ -59,6 +59,10 @@ All notable changes to EWP-transcripts are documented here.
 - Published the reviewed Ethics in the Loop Polish correction proposal and dictionary in that
   catalog: 19 approved and 22 rejected decisions across 22 compatible public podcast cases,
   with exact proposal lineage verified by the automated gate.
+- Recorded the first dictionary-assisted Gemini 2.5 Flash correction smoke: four clean
+  OpenRouter requests, exact dictionary provenance, no token/speaker drift or warnings, and
+  `$0.023449` provider-reported cost. Quality claims remain gated on the matched no-dictionary
+  control and manual-gold comparison.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

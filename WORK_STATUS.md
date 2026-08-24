@@ -148,6 +148,10 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    approved entries are provider context. The redistributable proposal and dictionary are
    published in the versioned `dictionaries/` catalog with exact SHA-256 values
    `7556eb83...43152` and `5d1bb1c5...15db`; automated tests verify their lineage and counts.
+   A dictionary-assisted Gemini 2.5 Flash `s0e01` smoke then completed four requests with no
+   retries in 25,442 ms for `$0.023449`, preserving all 2,411 tokens and speaker attribution
+   while proposing 17 substitutions with no warnings. This proves operation and provenance,
+   not quality; an identical no-dictionary control and exact manual-gold comparison are next.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.
