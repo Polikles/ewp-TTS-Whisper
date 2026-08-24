@@ -200,7 +200,9 @@ ordered fallback palette with `[subtitles].ytt_speaker_palette`. It is opt-in
 upload profile is qualified.
 HTML is an embeddable, script-free fragment with sentence-level seek metadata and explicit
 speaker turns. It contains no CSS or JavaScript; the consuming site supplies playback,
-highlighting, and presentation enhancements.
+highlighting, and presentation enhancements. `examples/html-player/` demonstrates that
+integration with a native audio player, keyboard activation, current-sentence following,
+accessible focus, speaker colors, and light/dark presentation.
 
 ## 9. Correct transcripts: `revise`
 

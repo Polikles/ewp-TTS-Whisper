@@ -230,6 +230,9 @@ All notable changes to EWP-transcripts are documented here.
 - Added opt-in raw, manually revised, and translated embeddable HTML transcript fragments with
   sentence-level seek buttons, explicit speaker turns, stable timing/speaker/kind data,
   escaped untrusted text, language metadata, and no embedded styling or behavior.
+- Added a separate consuming-site HTML audio-player example with site-owned CSS/JavaScript,
+  click and keyboard seeking, playback highlighting/following, accessible focus,
+  reduced-motion handling, light/dark presentation, and readable unenhanced markup.
 
 - Added an opt-in deterministic YouTube srv3 YTT export with one existing planned cue per
   paragraph, preserved planned line wrapping, millisecond timing, configurable stable

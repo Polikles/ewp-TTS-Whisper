@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light dark;
+  --page: #f7f7fa;
+  --text: #202124;
+  --surface: #ffffff;
+  --border: #c7c9d1;
+  --active: #fff2a8;
+  --speaker-1: #075ea8;
+  --speaker-2: #8a3b00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #17181b;
+    --text: #f2f3f5;
+    --surface: #24262b;
+    --border: #60636b;
+    --active: #514900;
+    --speaker-1: #75bfff;
+    --speaker-2: #ffad73;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font: 1rem/1.55 system-ui, sans-serif;
+}
+
+main {
+  max-width: 52rem;
+  margin: auto;
+  padding: 1.5rem;
+}
+
+audio {
+  width: 100%;
+  margin-block: 1rem 2rem;
+}
+
+.ewp-transcript__turn {
+  margin-block: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.ewp-transcript__speaker {
+  margin: 0 0 0.5rem;
+  color: var(--speaker-1);
+  font-weight: 700;
+}
+
+.ewp-transcript__turn[data-speaker-id="speaker_002"] .ewp-transcript__speaker {
+  color: var(--speaker-2);
+}
+
+.ewp-transcript__cue {
+  margin: 0.35rem 0;
+}
+
+.ewp-transcript__seek {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ewp-transcript__seek:hover,
+.ewp-transcript__seek:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+.ewp-transcript__seek[aria-current="true"] {
+  background: var(--active);
+}

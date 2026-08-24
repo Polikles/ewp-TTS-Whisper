@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EWP synchronized transcript example</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="player.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>Synchronized transcript example</h1>
+      <p class="instructions">
+        Replace <code>episode.mp3</code> and the transcript section with your own exports.
+        The transcript remains readable when JavaScript or CSS is unavailable.
+      </p>
+      <audio id="ewp-player" controls preload="metadata" src="episode.mp3">
+        Your browser does not support HTML audio.
+      </audio>
+
+      <section class="ewp-transcript" lang="en">
+        <div class="ewp-transcript__turn" data-speaker-id="speaker_001">
+          <p class="ewp-transcript__speaker">jan</p>
+          <p class="ewp-transcript__cue">
+            <button type="button" class="ewp-transcript__seek" data-start-ms="1240" data-end-ms="3900" data-speaker-id="speaker_001" data-kind="speech">
+              Welcome to another episode.
+            </button>
+          </p>
+        </div>
+        <div class="ewp-transcript__turn" data-speaker-id="speaker_002">
+          <p class="ewp-transcript__speaker">anna</p>
+          <p class="ewp-transcript__cue">
+            <button type="button" class="ewp-transcript__seek" data-start-ms="4320" data-end-ms="6320" data-speaker-id="speaker_002" data-kind="speech">
+              Today we discuss transcription.
+            </button>
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

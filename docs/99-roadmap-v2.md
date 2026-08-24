@@ -579,7 +579,10 @@ specified escaped, deterministic fragment with sentence-level native buttons, ex
 speaker turns, BCP 47 language, and integer timing/speaker/kind metadata. Immutable
 translation artifacts use the same contract with target language/text and inherited unit
 timing. No CSS, JavaScript, inline styles, or event handlers are emitted. The consuming
-mock player acceptance work remains.
+mock player is implemented separately with native audio, site-owned CSS/JavaScript,
+click/keyboard seeking, current-sentence following, accessible focus, reduced-motion,
+light/dark presentation, and readable unenhanced markup. A manual real-media browser check
+remains.
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;
