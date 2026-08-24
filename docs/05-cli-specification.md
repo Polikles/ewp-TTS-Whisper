@@ -112,7 +112,7 @@ Primary options:
 --format txt                   # repeatable
 --format srt
 --format vtt
---format ttml
+--format ytt
 --segments
 --force
 --allow-duration-mismatch
@@ -170,7 +170,7 @@ Options:
 --format txt
 --format srt
 --format vtt
---format ttml
+--format ytt
 --format segments
 --segments
 --output-dir PATH

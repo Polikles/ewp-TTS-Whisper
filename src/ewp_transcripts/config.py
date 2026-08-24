@@ -192,7 +192,7 @@ class SubtitlesConfig(StrictConfigModel):
     max_merge_gap_ms: int = Field(default=1200, ge=0)
     min_words_per_cue: int = Field(default=4, ge=1)
     speaker_labels: Literal["on-change", "always", "never"] = "on-change"
-    ttml_speaker_palette: tuple[str, ...] = (
+    ytt_speaker_palette: tuple[str, ...] = (
         "#FFFFFF",
         "#00AEEF",
         "#FFD700",
@@ -207,7 +207,7 @@ class OutputsConfig(StrictConfigModel):
     generate_srt: bool = True
     generate_vtt: bool = True
     generate_segments_json: bool = False
-    generate_ttml: bool = False
+    generate_ytt: bool = False
     batch_output_directory_name: str = "output-ewp-transcripts"
     encoding: Literal["utf-8"] = "utf-8"
 

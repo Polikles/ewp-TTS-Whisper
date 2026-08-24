@@ -19,7 +19,7 @@ items belong to one monolithic "Version 2" release.
 4. **v0.4 manual and automated translation**, with a structured translation artifact,
    corrected transcript as the normal source, an explicit raw/dirty source option, and
    optional manual revision of automated output.
-5. **v0.4 platform transcript exports**, including a YouTube-oriented TTML 1.0 subset
+5. **v0.4 platform transcript exports**, including YouTube srv3 YTT
    and an embeddable synchronized HTML transcript fragment, with the compatibility,
    accessibility, security, and raw/revised/translated-source tests in sections 11-12.
 6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence;
@@ -519,21 +519,16 @@ critical path.
 
 ## 11. Subtitles
 
-The conservative TTML profile below is implemented locally. Its first unlisted upload was
-accepted with correct timing, language, turn labels, and diacritics, but YouTube flattened
-literal newlines and ignored referenced alignment/colors. A compatibility retry uses TTML
-`<br/>` elements and inline centering/color; the profile remains opt-in pending that result.
+Two conservative TTML pilots were accepted with correct timing, language, turn labels, and
+diacritics, but YouTube ignored wrapping, centering, and colors. The active implementation
+therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted example and
+remains opt-in pending an unlisted upload check.
 
-- add a deterministic `.ttml` export using a deliberately small TTML 1.0-compatible
-  profile optimized for maximum YouTube upload/rendering compatibility rather than
-  general or strictly exhaustive TTML conformance;
-- use UTF-8 XML, the `http://www.w3.org/ns/ttml` TTML namespace and
-  `http://www.w3.org/ns/ttml#styling` styling namespace, with root `xml:lang` matching
-  the output language and clock times formatted as `HH:MM:SS.mmm`;
-- map exactly one already-planned canonical subtitle cue to one `<p>`; TTML rendering
+- add a deterministic `.ytt` export using YouTube's srv3 timed-text XML profile;
+- use UTF-8 XML with `<timedtext format="3">` and millisecond `t`/`d` timing;
+- map exactly one already-planned canonical subtitle cue to one `<p>`; YTT rendering
   must not introduce another cue segmentation pass;
-- give every spoken cue a speaker-specific style whose XML ID is derived deterministically
-  and collision-safely from the stable speaker ID as `speaker-<normalized-id>`;
+- give every spoken cue a deterministic numeric speaker pen derived from stable speaker order;
 - print the visible speaker name only on the first cue of a continuous speaker turn while
   retaining that speaker's style on every continuation cue;
 - keep speaker colors in renderer configuration, never transcript data. The initial
@@ -541,14 +536,13 @@ literal newlines and ignored referenced alignment/colors. A compatibility retry 
   speaker, blue for the second, yellow for the third, then distinct green, magenta, and
   cyan entries for additional speakers. Exact color values and palette exhaustion rules
   require an unlisted YouTube smoke test and remain configurable;
-- allow a separate italic style for structured non-speech cues, but do not infer
+- allow a separate italic pen for structured non-speech cues, but do not infer
   non-speech semantics or italics from transcript punctuation or text;
-- omit absolute positioning, regions, font family, font size, background, outline,
-  TTML extensions, and SMPTE namespaces from the initial YouTube profile unless later
-  compatibility evidence explicitly justifies them;
+- use the tested srv3 centered window and bottom-center position records without adding
+  unrelated generated-format attributes;
 - serialize with a real XML serializer, escape text and attributes, reject invalid XML
   instead of emitting it, and test parsing, namespaces, language, cue cardinality,
-  timing, style references, XML-ID collisions, escaping, and deterministic bytes;
+  timing, pen references, line breaks, escaping, and deterministic bytes;
 - manually validate upload acceptance, Polish diacritics, timing, labels, and speaker
   colors on YouTube before treating the profile as qualified;
 - styled WebVTT;
@@ -557,7 +551,7 @@ literal newlines and ignored referenced alignment/colors. A compatibility retry 
 - platform presets;
 - visual preview.
 
-Before non-speech-aware TTML or HTML rendering is implemented, design and version an
+Before non-speech-aware YTT or HTML rendering is implemented, design and version an
 additive canonical JSON schema update that records the semantic `kind` of a timed event.
 The initial vocabulary must at least accommodate `speech`, `music`, `laugh`, `cough`,
 and `note`, while defining whether the field belongs on segments/cues or a distinct event
@@ -608,7 +602,7 @@ accessible seeking, light/dark presentation, and behavior with enhancement disab
 
 The reviewed `ewp_transcripts_agent_pack` contracts are compatible with this direction
 after these scope decisions: implementation is scheduled for v0.4, HTML output is
-fragment-only, TTML is specifically a conservative YouTube profile, and RSS transcript
+fragment-only, YTT is specifically a YouTube srv3 profile, and RSS transcript
 material is publishing policy rather than a required exporter. Its examples are design
 inputs, not accepted golden files; repository terminology, current cue generation, schema
 versioning, and exporter architecture remain authoritative during implementation.

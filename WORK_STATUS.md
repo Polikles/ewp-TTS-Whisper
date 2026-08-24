@@ -176,14 +176,13 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    kinds `speech`, `music`, `laugh`, `cough`, and `note`; legacy omissions default to speech.
    Raw/revised effective projection, derived segment JSON, and subtitle cue planning preserve
    kind without changing SRT/VTT presentation. Explicit non-speech authoring remains separate;
-   TTML and HTML may now consume the shared semantic field without inferring it from text.
-5. **YouTube TTML export.** The small UTF-8 TTML 1.0-compatible profile is implemented:
-   it maps each existing cue to one `<p>`, emits language metadata and clock times,
-   applies configurable deterministic speaker styles plus structured non-speech italics,
-   and validates serialized XML. The first unlisted upload was accepted and verified
-   timing, turn labels, language, and Polish diacritics, but YouTube flattened literal
-   newlines and discarded referenced alignment/colors. A compatibility retry now uses
-   TTML `<br/>` plus inline centering/color; the exporter remains opt-in pending its result.
+   YTT and HTML may now consume the shared semantic field without inferring it from text.
+5. **YouTube srv3 YTT export.** Two standards-based TTML uploads were accepted and verified
+   timing, turn labels, language, and Polish diacritics, but YouTube discarded wrapping,
+   centering, and colors even when encoded inline. The failed profile has been replaced by
+   deterministic YouTube srv3 timed-text XML based on the owner-supplied accepted example.
+   It reuses planned cues/line breaks, numeric speaker pens, centered bottom placement, and
+   a separate non-speech pen. The exporter remains opt-in pending an unlisted upload check.
 6. **Embeddable HTML transcript.** Emit the specified accessible, escaped, deterministic
    HTML fragment with no CSS, JavaScript, inline styles, or event handlers. Build the
    separate mock player site that supplies its own CSS/JavaScript and tests highlighting,

@@ -36,8 +36,8 @@ from ewp_transcripts.exporters import (
     render_segments_json,
     render_srt,
     render_transcript,
-    render_ttml,
     render_vtt,
+    render_ytt,
 )
 from ewp_transcripts.output_lock import output_directory_lock
 from ewp_transcripts.review_discovery import discover_review_results
@@ -48,7 +48,7 @@ class ExportFormat(StrEnum):
     SRT = "srt"
     VTT = "vtt"
     SEGMENTS = "segments"
-    TTML = "ttml"
+    YTT = "ytt"
 
 
 _SAFE_RENDER_FAILURES = frozenset(
@@ -367,7 +367,7 @@ def _export_path(directory: Path, job_id: str, format_: ExportFormat, version: i
         ExportFormat.SRT: ("subtitles", "srt"),
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
-        ExportFormat.TTML: ("subtitles", "ttml"),
+        ExportFormat.YTT: ("subtitles_srv3", "ytt"),
     }[format_]
     return directory / f"{job_id}_{role}{suffix}.{extension}"
 
@@ -385,7 +385,7 @@ def _revision_export_path(
         ExportFormat.SRT: ("subtitles", "srt"),
         ExportFormat.VTT: ("subtitles", "vtt"),
         ExportFormat.SEGMENTS: ("segments", "json"),
-        ExportFormat.TTML: ("subtitles", "ttml"),
+        ExportFormat.YTT: ("subtitles_srv3", "ytt"),
     }[format_]
     result_suffix = "" if result.result_version == 1 else f"_v{result.result_version:03d}"
     export_suffix = "" if export_version == 1 else f"_v{export_version:03d}"
@@ -454,11 +454,10 @@ def _render_exports(
                 elif format_ is ExportFormat.VTT:
                     content = render_vtt(cues)
                 else:
-                    content = render_ttml(
+                    content = render_ytt(
                         cues,
-                        language=result.transcript.language,
                         speaker_ids=(speaker.speaker_id for speaker in result.speakers),
-                        speaker_palette=subtitles_config.ttml_speaker_palette,
+                        speaker_palette=subtitles_config.ytt_speaker_palette,
                     )
         except ValueError as error:
             detail = str(error)

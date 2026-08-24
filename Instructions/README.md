@@ -162,14 +162,14 @@ uv run --locked transcriber transcribe "/path/to/season" \
 Polish is the default. `--language en` and `--language auto` are supported but not yet
 quality-qualified on a representative English corpus. Useful options include:
 
-- `--format txt|srt|vtt|ttml` (repeatable) and `--segments`;
+- `--format txt|srt|vtt|ytt` (repeatable) and `--segments`;
 - `--speaker NAME` for one known single-speaker source;
 - repeatable `--speaker-map SOURCE=NAME` for grouped sources;
 - `--channel-mode split-speakers` only with source knowledge;
 - `--keep-temp` to retain an owned successful workspace;
 - `--force` to create the next `_vNNN` result set without overwriting.
 
-Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/TTML/segments are
+Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/YTT/segments are
 derived and regenerable. Duplicate matching jobs skip safely. Never edit canonical JSON.
 
 ## 8. Export raw results: `export`
@@ -178,7 +178,7 @@ Single result:
 
 ```bash
 uv run --locked transcriber export "/path/to/episode_results.json" \
-  --format txt --format srt --format vtt --format ttml --format segments \
+  --format txt --format srt --format vtt --format ytt --format segments \
   --output-dir "/path/to/exports"
 ```
 
@@ -186,17 +186,17 @@ Directory batch:
 
 ```bash
 uv run --locked transcriber export "/path/to/results" \
-  --format txt --format srt --format vtt --format ttml --format segments \
+  --format txt --format srt --format vtt --format ytt --format segments \
   --output-dir "/path/to/exports"
 ```
 
 Export is audio-free, model-free, and non-recursive unless `--recursive` is supplied.
 Existing identical destinations skip; `--force` creates later export versions.
 `--speaker-labels on-change|always|never` changes subtitle labels.
-TTML uses the same planned cues as SRT/VTT, UTF-8 XML, output-language metadata, and
-deterministic speaker colors. Configure its ordered fallback palette with
-`[subtitles].ttml_speaker_palette`. It is opt-in (`--format ttml`) until the YouTube
-profile has passed an unlisted upload check.
+YTT uses the same planned cues and line wrapping as SRT/VTT, serialized as YouTube srv3
+timed-text XML with deterministic speaker pens and bottom-center placement. Configure its
+ordered fallback palette with `[subtitles].ytt_speaker_palette`. It is opt-in
+(`--format ytt`) until the srv3 profile has passed an unlisted upload check.
 
 ## 9. Correct transcripts: `revise`
 
@@ -688,7 +688,7 @@ Latest compatible revision per result:
 ```bash
 uv run --locked transcriber export "/path/to/results" \
   --revision "/path/to/revisions" \
-  --format txt --format srt --format vtt --format ttml --format segments \
+  --format txt --format srt --format vtt --format ytt --format segments \
   --output-dir "/path/to/corrected"
 ```
 

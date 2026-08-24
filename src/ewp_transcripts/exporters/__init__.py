@@ -8,7 +8,7 @@ from ewp_transcripts.exporters.subtitles import (
     render_vtt,
 )
 from ewp_transcripts.exporters.transcript import render_transcript
-from ewp_transcripts.exporters.ttml import render_ttml
+from ewp_transcripts.exporters.ytt import render_ytt
 
 __all__ = [
     "SubtitleCue",
@@ -16,6 +16,6 @@ __all__ = [
     "render_segments_json",
     "render_srt",
     "render_transcript",
-    "render_ttml",
     "render_vtt",
+    "render_ytt",
 ]
