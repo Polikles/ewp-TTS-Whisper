@@ -233,7 +233,9 @@ All notable changes to EWP-transcripts are documented here.
   validation. This replaces the standards-based TTML profile after two accepted uploads
   discarded its wrapping, alignment, and colors. After a subsequent srv3 upload flattened
   `<br/>` elements, the renderer adopted the owner-supplied corrected template's literal
-  in-paragraph newlines and near-white `#FEFEFE` default pen.
+  in-paragraph newlines and near-white `#FEFEFE` default pen. The resulting bytes passed an
+  unlisted YouTube upload with correct two-line wrapping, distinct speaker colors,
+  centering, timing, turn labels, and Polish diacritics.
 
 - Correction benchmark report v5 now derives exact normalized source-relative edit sets
   for candidate and manual gold, reporting per-case and aggregate true-positive,

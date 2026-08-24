@@ -185,7 +185,10 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    a separate non-speech pen. The first srv3 upload correctly centered cues and preserved
    text/timing, but YouTube flattened `<br/>` line elements. The owner-supplied corrected
    template uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer now
-   matches that structure and remains opt-in pending one retry.
+   matches that structure byte-for-byte. The final unlisted upload fully passed: two-line
+   wrapping, distinct speaker colors, centering, timing, turn labels, and Polish diacritics
+   all rendered correctly. YTT remains opt-in because it is platform-specific, not because
+   qualification is pending.
 6. **Embeddable HTML transcript.** Emit the specified accessible, escaped, deterministic
    HTML fragment with no CSS, JavaScript, inline styles, or event handlers. Build the
    separate mock player site that supplies its own CSS/JavaScript and tests highlighting,

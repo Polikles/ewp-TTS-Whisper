@@ -525,7 +525,10 @@ therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted exa
 remains opt-in pending an unlisted upload check. Its first upload centered cues and
 preserved text/timing but flattened `<br/>` line elements. The owner-supplied corrected
 template instead uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer
-now matches that structure for the compatibility retry.
+now matches that structure byte-for-byte. The final unlisted upload passed two-line
+wrapping, distinct speaker colors, centering, timing, turn labels, and Polish diacritics.
+The profile is qualified for the tested real Polish two-speaker case and stays opt-in as a
+platform-specific export.
 
 - add a deterministic `.ytt` export using YouTube's srv3 timed-text XML profile;
 - use UTF-8 XML with `<timedtext format="3">` and millisecond `t`/`d` timing;
