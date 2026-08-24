@@ -184,7 +184,7 @@ def test_revision_exports_corrected_text_with_distinct_names_and_provenance(
     assert segments["derived_from"]["revision_file"] == applied.revision_path.name
     ttml_root = ET.parse(tmp_path / "S01E01_subtitles_revision_001.ttml").getroot()
     assert "carefully discuss corrected transcription" in " ".join(
-        "".join(ttml_root.itertext()).split()
+        " ".join(ttml_root.itertext()).split()
     )
 
 

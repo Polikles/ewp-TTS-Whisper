@@ -57,7 +57,8 @@ def render_ttml(
     body = ET.SubElement(root, _tag("body"))
     division = ET.SubElement(body, _tag("div"))
     for cue in cues:
-        styles = [style_ids.get(cue.speaker_id or "unknown", style_ids["unknown"])]
+        speaker_key = cue.speaker_id if cue.speaker_id in style_ids else "unknown"
+        styles = [style_ids[speaker_key]]
         if cue.kind != "speech":
             styles.append("non-speech")
         paragraph = ET.SubElement(
@@ -67,9 +68,16 @@ def render_ttml(
                 "begin": _clock(cue.start_ms),
                 "end": _clock(cue.end_ms),
                 "style": " ".join(styles),
+                f"{{{TTS_NS}}}color": speaker_palette[
+                    ordered_speakers.index(speaker_key) % len(speaker_palette)
+                ],
+                f"{{{TTS_NS}}}textAlign": "center",
             },
         )
-        paragraph.text = "\n".join(cue.lines)
+        paragraph.text = cue.lines[0]
+        for line in cue.lines[1:]:
+            line_break = ET.SubElement(paragraph, _tag("br"))
+            line_break.tail = line
     payload = ET.tostring(root, encoding="unicode", short_empty_elements=True)
     document = '<?xml version="1.0" encoding="UTF-8"?>\n' + payload + "\n"
     try:

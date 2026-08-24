@@ -230,6 +230,8 @@ All notable changes to EWP-transcripts are documented here.
 - Added an opt-in deterministic YouTube-oriented TTML export with one existing planned cue
   per paragraph, UTF-8 XML and language metadata, configurable stable speaker colors,
   structured non-speech italics, collision-safe XML IDs, and parser-backed validation.
+  After the first accepted unlisted upload, planned newlines are now serialized as TTML
+  `<br/>` elements and centering/color are repeated inline for YouTube compatibility.
 
 - Correction benchmark report v5 now derives exact normalized source-relative edit sets
   for candidate and manual gold, reporting per-case and aggregate true-positive,

@@ -180,8 +180,10 @@ remaining v0.4 workstreams; details and acceptance criteria live in
 5. **YouTube TTML export.** The small UTF-8 TTML 1.0-compatible profile is implemented:
    it maps each existing cue to one `<p>`, emits language metadata and clock times,
    applies configurable deterministic speaker styles plus structured non-speech italics,
-   and validates serialized XML. It remains opt-in pending an unlisted YouTube upload
-   check for language, timing, labels, diacritics, and colors.
+   and validates serialized XML. The first unlisted upload was accepted and verified
+   timing, turn labels, language, and Polish diacritics, but YouTube flattened literal
+   newlines and discarded referenced alignment/colors. A compatibility retry now uses
+   TTML `<br/>` plus inline centering/color; the exporter remains opt-in pending its result.
 6. **Embeddable HTML transcript.** Emit the specified accessible, escaped, deterministic
    HTML fragment with no CSS, JavaScript, inline styles, or event handlers. Build the
    separate mock player site that supplies its own CSS/JavaScript and tests highlighting,

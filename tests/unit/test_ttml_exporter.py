@@ -33,6 +33,8 @@ def test_ttml_maps_each_planned_cue_with_language_timing_and_speaker_style() -> 
     assert paragraphs[0].attrib["begin"] == "00:00:01.240"
     assert paragraphs[0].attrib["end"] == "00:00:03.900"
     assert paragraphs[0].attrib["style"] == "speaker-speaker-001"
+    assert paragraphs[0].attrib[f"{{{TTS_NS}}}color"] == "#FFFFFF"
+    assert paragraphs[0].attrib[f"{{{TTS_NS}}}textAlign"] == "center"
     assert styles[0].attrib[f"{{{TTS_NS}}}color"] == "#FFFFFF"
     assert (
         render_ttml(
@@ -69,6 +71,26 @@ def test_ttml_escapes_text_and_uses_separate_non_speech_style() -> None:
     assert paragraph.text == 'A & B < "C"'
     assert paragraph.attrib["style"] == "speaker-speaker-001 non-speech"
     assert "&amp;" in rendered and "&lt;" in rendered
+
+
+def test_ttml_encodes_planned_lines_as_ttml_break_elements() -> None:
+    cue = SubtitleCue(0, 1_000, ("First line", "Second line"), "speaker_001")
+
+    root = ET.fromstring(
+        render_ttml(
+            (cue,),
+            language="pl",
+            speaker_ids=("speaker_001",),
+            speaker_palette=PALETTE,
+        )
+    )
+    paragraph = root.find(f".//{{{TTML_NS}}}p")
+
+    assert paragraph is not None
+    line_break = paragraph.find(f"{{{TTML_NS}}}br")
+    assert paragraph.text == "First line"
+    assert line_break is not None
+    assert line_break.tail == "Second line"
 
 
 def test_ttml_style_ids_are_collision_safe() -> None:
