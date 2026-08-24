@@ -15,6 +15,9 @@ set; Git history is not a substitute for the artifact's own version, ID, proposa
 content hash. Correction dictionaries retain both approved and rejected decisions. Only
 approved entries are sent to a provider; rejected entries are carried into later proposals so
 the same mapping does not return as pending without an explicit human decision change.
+Correction dictionary `job_ids` are derivation lineage, not an applicability allowlist. Runtime
+use requires an explicit matching project ID, allowing reviewed conventions to apply to future
+jobs in that project without becoming global defaults.
 
 Private-corpus proposals, model state, and pilot output remain under `/tmp` and outside Git.
 Commit a reviewed dictionary only when its source and included evidence are redistributable.

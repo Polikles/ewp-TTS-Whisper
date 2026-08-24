@@ -152,6 +152,13 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    retries in 25,442 ms for `$0.023449`, preserving all 2,411 tokens and speaker attribution
    while proposing 17 substitutions with no warnings. This proves operation and provenance,
    not quality; an identical no-dictionary control and exact manual-gold comparison are next.
+   That comparison is complete but in-sample: no-dictionary Gemini removed 2/72 errors
+   (`0.02926421` WER), while dictionary-assisted Gemini removed 10/72 (`0.02591973` WER),
+   with exact-edit precision/recall improving from `0.66666667`/`0.05882353` to
+   `0.76470588`/`0.38235294`. Because `s0e01` contributed to dictionary derivation, this proves
+   adherence rather than generalization; four unsupported exact edits also need manual review.
+   Runtime scope is being corrected so derivation job IDs remain audit evidence while explicit
+   matching project selection permits a genuinely held-out/future-episode comparison.
 4. **Timed-event semantics.** Design and version the additive canonical JSON change for
    `speech`, `music`, `laugh`, `cough`, `note`, and compatibility defaults before either
    renderer infers non-speech presentation from text.

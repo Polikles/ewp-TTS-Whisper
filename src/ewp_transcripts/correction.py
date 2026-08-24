@@ -410,6 +410,7 @@ def build_correction_revision(
     execution_policy: object | None = None,
     dictionary: ProjectCorrectionDictionary | None = None,
     dictionary_sha256: str | None = None,
+    dictionary_project_id: str | None = None,
 ) -> TranscriptRevision:
     """Build one provider-backed revision without publishing it."""
 
@@ -426,8 +427,10 @@ def build_correction_revision(
     if dictionary is not None:
         if dictionary_sha256 is None:
             raise InvalidCorrectionResponseError("Correction dictionary SHA-256 is required")
-        if base.job_id not in dictionary.job_ids:
-            raise InvalidCorrectionResponseError("Correction dictionary does not include this job")
+        if dictionary_project_id != dictionary.project_id:
+            raise InvalidCorrectionResponseError(
+                "Correction dictionary project does not match explicit project selection"
+            )
     chunks = plan_correction_chunks(effective, config)
     corrected_blocks: list[tuple[ReviewSpeakerBlock, ...]] = []
     for chunk in chunks:

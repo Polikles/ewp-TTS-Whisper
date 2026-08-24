@@ -63,6 +63,11 @@ All notable changes to EWP-transcripts are documented here.
   OpenRouter requests, exact dictionary provenance, no token/speaker drift or warnings, and
   `$0.023449` provider-reported cost. Quality claims remain gated on the matched no-dictionary
   control and manual-gold comparison.
+- Reclassified correction dictionary `job_ids` as derivation lineage rather than a runtime
+  allowlist, and required explicit matching `revise correct --project-id` selection. This keeps
+  dictionaries project-scoped while allowing held-out and future episodes. Recorded the
+  in-sample `s0e01` result: dictionary assistance removed 10/72 gold-relative errors versus
+  2/72 without it, but no generalization claim is made because the case informed extraction.
 - Added strict, explicitly selected project translation dictionaries with direction/job
   scope, deterministic file hashes, request/resume identity, provider context, and immutable
   candidate provenance. Dictionaries remain disabled unless `translate automate --dictionary`

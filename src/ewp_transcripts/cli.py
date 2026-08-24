@@ -81,6 +81,7 @@ from ewp_transcripts.domain.errors import (
     ApplicationError,
     InvalidCanonicalResultError,
     InvalidConfigurationError,
+    InvalidCorrectionResponseError,
     MissingCapabilityError,
     OutputLockUnavailableError,
     OutputReservationError,
@@ -1550,6 +1551,13 @@ def revise_correct_command(
         Path | None,
         typer.Option("--dictionary", help="Explicit approved project correction dictionary."),
     ] = None,
+    dictionary_project_id: Annotated[
+        str | None,
+        typer.Option(
+            "--project-id",
+            help="Explicit project identity required when selecting a correction dictionary.",
+        ),
+    ] = None,
     provider_name: Annotated[
         RequestedCorrectionProvider,
         typer.Option("--provider", help="Correction API provider: lm-studio or openrouter."),
@@ -1665,6 +1673,10 @@ def revise_correct_command(
             dictionary, dictionary_sha256 = load_project_correction_dictionary(
                 normalize_input_path(dictionary_path)
             )
+        if (dictionary is None) != (dictionary_project_id is None):
+            raise InvalidCorrectionResponseError(
+                "--dictionary and --project-id must be selected together"
+            )
         state_directory = _optional_user_path(resume_directory) or (
             normalized_result.parent / "correction-state-ewp-transcripts"
         )
@@ -1678,6 +1690,7 @@ def revise_correct_command(
                 resume_directory=state_directory,
                 dictionary=dictionary,
                 dictionary_sha256=dictionary_sha256,
+                dictionary_project_id=dictionary_project_id,
             )
             typer.echo(f"PREVIEW {outcome.base_result_path}")
             typer.echo(
@@ -1696,6 +1709,7 @@ def revise_correct_command(
             resume_directory=state_directory,
             dictionary=dictionary,
             dictionary_sha256=dictionary_sha256,
+            dictionary_project_id=dictionary_project_id,
         )
     except ApplicationError as error:
         _expected_error(error)

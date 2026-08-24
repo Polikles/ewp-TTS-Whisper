@@ -617,6 +617,7 @@ def preview_correction(
     resume_directory: Path | None = None,
     dictionary: ProjectCorrectionDictionary | None = None,
     dictionary_sha256: str | None = None,
+    dictionary_project_id: str | None = None,
 ) -> CorrectionPreviewOutcome:
     """Authorize and build one correction revision without publishing it."""
 
@@ -644,6 +645,7 @@ def preview_correction(
         ),
         dictionary=dictionary,
         dictionary_sha256=dictionary_sha256,
+        dictionary_project_id=dictionary_project_id,
     )
     return CorrectionPreviewOutcome(normalized, revision)
 
@@ -708,6 +710,7 @@ def apply_correction(
     resume_directory: Path | None = None,
     dictionary: ProjectCorrectionDictionary | None = None,
     dictionary_sha256: str | None = None,
+    dictionary_project_id: str | None = None,
 ) -> CorrectionApplyOutcome:
     """Authorize, validate, and atomically publish one correction revision."""
 
@@ -721,6 +724,7 @@ def apply_correction(
         resume_directory=resume_directory,
         dictionary=dictionary,
         dictionary_sha256=dictionary_sha256,
+        dictionary_project_id=dictionary_project_id,
     )
     revision, path = publish_next_revision(
         preview.revision,

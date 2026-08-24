@@ -546,6 +546,7 @@ uv run --locked transcriber revise correct "/path/to/episode_results.json" \
   --provider openrouter \
   --model "google/gemini-2.5-flash" \
   --dictionary "$pilot_root/correction-dictionary.json" \
+  --project-id "my-project" \
   --allow-cloud --consent once \
   --resume-dir "$pilot_root/state" \
   --output-dir "$pilot_root/candidates" \
@@ -553,10 +554,13 @@ uv run --locked transcriber revise correct "/path/to/episode_results.json" \
 ```
 
 The API key remains in the configured environment variable and is never copied into an
-artifact. A dictionary/job mismatch fails before provider calls. Only entries whose source
-form occurs in the editable chunk are included as context; no deterministic replacement is
-performed. Dictionary ID, version, project, exact SHA-256, and proposal lineage are retained
-by the resulting revision and its audit. Changing dictionaries invalidates resume reuse.
+artifact. An explicit project mismatch fails before provider calls. Dictionary `job_ids`
+record the manual-revision cases from which decisions were derived; they are not an allowlist,
+so the same explicitly selected project dictionary can assist future episodes. Only entries
+whose source form occurs in the editable chunk are included as context; no deterministic
+replacement is performed. Dictionary ID, version, project, exact SHA-256, and proposal lineage
+are retained by the resulting revision and its audit. Changing dictionaries invalidates
+resume reuse.
 
 All pilot-generated state, candidates, exports, and reports belong under this temporary
 directory—not in the private corpus, repository, or another long-lived project directory.

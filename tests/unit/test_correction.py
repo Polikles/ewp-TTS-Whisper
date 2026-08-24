@@ -570,7 +570,7 @@ def test_correction_dictionary_is_chunk_scoped_and_audited_in_revision() -> None
     dictionary = ProjectCorrectionDictionary(
         dictionary_id="example-pl-v1",
         project_id="example",
-        job_ids=("S01E01",),
+        job_ids=("dictionary-training-case",),
         proposal_sha256="a" * 64,
         entries=(CorrectionDictionaryEntry(source="transcription.", target="OpenAI."),),
     )
@@ -582,12 +582,22 @@ def test_correction_dictionary_is_chunk_scoped_and_audited_in_revision() -> None
         provider,
         dictionary=dictionary,
         dictionary_sha256=digest,
+        dictionary_project_id="example",
     )
 
     assert revision.provenance.llm is not None
     assert revision.provenance.llm.dictionary is not None
     assert revision.provenance.llm.dictionary.dictionary_id == "example-pl-v1"
     assert revision.provenance.llm.dictionary.sha256 == digest
+
+    with pytest.raises(InvalidCorrectionResponseError, match="project"):
+        build_mock_correction_revision(
+            result,
+            provider,
+            dictionary=dictionary,
+            dictionary_sha256=digest,
+            dictionary_project_id="another-project",
+        )
 
 
 def test_automated_revision_rejects_speaker_reassignment(monkeypatch: pytest.MonkeyPatch) -> None:
