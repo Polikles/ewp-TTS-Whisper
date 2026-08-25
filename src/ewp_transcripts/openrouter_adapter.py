@@ -220,7 +220,9 @@ def _urllib_transport(
     except urllib.error.HTTPError as error:
         if error.code in {408, 409, 425, 429} or error.code >= 500:
             raise RetryableCorrectionProviderError("OpenRouter request failed") from None
-        raise PermanentCorrectionProviderError("OpenRouter request was rejected") from None
+        raise PermanentCorrectionProviderError(
+            f"OpenRouter request was rejected with HTTP status {error.code}"
+        ) from None
     except (TimeoutError, urllib.error.URLError):
         raise RetryableCorrectionProviderError("OpenRouter is temporarily unavailable") from None
     except (OSError, json.JSONDecodeError):

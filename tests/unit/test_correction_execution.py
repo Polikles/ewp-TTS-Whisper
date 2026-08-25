@@ -114,6 +114,12 @@ def test_permanent_and_invalid_responses_are_not_retried() -> None:
     assert permanent.calls == 1
     assert secret not in str(raised.value)
 
+    status = "OpenRouter request was rejected with HTTP status 402"
+    rejected = _Provider(failures=[PermanentCorrectionProviderError(status)])
+    with pytest.raises(PermanentCorrectionProviderError, match="HTTP status 402"):
+        execute_correction_call(rejected, _request())
+    assert rejected.calls == 1
+
     class InvalidProvider(_Provider):
         def correct(
             self,

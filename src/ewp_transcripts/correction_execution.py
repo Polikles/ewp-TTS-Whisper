@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -15,6 +16,10 @@ from ewp_transcripts.domain.correction import (
 from ewp_transcripts.domain.errors import (
     PermanentCorrectionProviderError,
     RetryableCorrectionProviderError,
+)
+
+_SAFE_PERMANENT_FAILURE = re.compile(
+    r"OpenRouter request was rejected with HTTP status [1-5][0-9]{2}"
 )
 
 
@@ -85,8 +90,9 @@ def execute_correction_call(
                     "Correction provider failed after bounded retries"
                 ) from None
             sleep(policy.retry_delay_seconds)
-        except PermanentCorrectionProviderError:
-            raise PermanentCorrectionProviderError(
-                "Correction provider reported a permanent failure"
-            ) from None
+        except PermanentCorrectionProviderError as error:
+            message = str(error)
+            if not _SAFE_PERMANENT_FAILURE.fullmatch(message):
+                message = "Correction provider reported a permanent failure"
+            raise PermanentCorrectionProviderError(message) from None
     raise AssertionError("positive max_attempts guarantees a return or provider error")

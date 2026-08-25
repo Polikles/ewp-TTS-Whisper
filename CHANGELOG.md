@@ -28,6 +28,9 @@ meaningful behavior change under Semantic Versioning.
   preserving the configured work root and any sibling jobs.
 - Automated correction now reports a concise canonical-input error when an empty shell
   variable or other mistake resolves to a directory, instead of exposing a Python traceback.
+- Sanitized OpenRouter correction failures now retain the numeric HTTP status for diagnosis
+  while continuing to discard provider bodies, request content, credentials, and arbitrary
+  exception text.
 
 ## 0.4.0 - 2026-08-25
 
