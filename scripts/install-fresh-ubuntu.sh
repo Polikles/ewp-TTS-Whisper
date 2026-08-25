@@ -90,6 +90,10 @@ if [[ "$mode" == "install" ]]; then
     fi
     uv python install 3.12
     (cd -- "$repo_root" && uv sync --locked)
+    printf '%s\n' \
+        'Application installation completed.' \
+        'If uv is unavailable after this script exits, open a new shell or run:' \
+        '  source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH"'
 fi
 
 required_commands=(git ffmpeg ffprobe curl uv)

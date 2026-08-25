@@ -55,13 +55,16 @@ git clone https://github.com/Polikles/ewp-transcripts.git \
   "$HOME/transkrypcje/ewp-transcripts"
 cd "$HOME/transkrypcje/ewp-transcripts"
 ./scripts/install-fresh-ubuntu.sh --install
+source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH"
+./scripts/setup-models.sh
 ```
 
 The script explicitly confirms system changes, installs the locked application
-environment, and verifies diagnostics. It does not update an existing checkout or
-download gated models. Complete model preparation separately using
-[`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only verification
-again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
+environment, and verifies diagnostics. It does not update an existing checkout or download
+models. The separate model script downloads exact pinned snapshots, privately prompts for
+the gated Hugging Face token, and verifies readiness. Review the manual equivalent in
+[`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only application
+verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
 
 ## How to use
 
@@ -70,7 +73,15 @@ Transcribe one file or a directory after `doctor` reports model readiness:
 ```bash
 uv run --locked transcriber transcribe "/path/to/input" \
   --output-dir "/path/to/results"
+
+uv run --locked transcriber export "/path/to/results" \
+  --format txt --format srt --format vtt --format ytt --format html --format segments \
+  --output-dir "/path/to/exports"
 ```
+
+Transcription directly writes canonical JSON and the configured TXT/SRT/VTT/segments
+outputs. The model-free `export` command generates or regenerates every format, including
+YouTube srv3 YTT and embeddable HTML, from that immutable result.
 
 The recommended correction workflow stages editable reviews before publishing immutable
 revisions:

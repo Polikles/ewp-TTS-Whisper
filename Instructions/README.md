@@ -162,7 +162,7 @@ uv run --locked transcriber transcribe "/path/to/season" \
 Polish is the default. `--language en` and `--language auto` are supported but not yet
 quality-qualified on a representative English corpus. Useful options include:
 
-- `--format txt|srt|vtt|ytt|html` (repeatable) and `--segments`;
+- `--format txt|srt|vtt` (repeatable) and `--segments`;
 - `--speaker NAME` for one known single-speaker source;
 - repeatable `--speaker-map SOURCE=NAME` for grouped sources;
 - `--channel-mode split-speakers` only with source knowledge;
@@ -170,7 +170,8 @@ quality-qualified on a representative English corpus. Useful options include:
 - `--force` to create the next `_vNNN` result set without overwriting.
 
 Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/YTT/HTML/segments are
-derived and regenerable. Duplicate matching jobs skip safely. Never edit canonical JSON.
+derived and regenerable; YTT and HTML are generated afterward with the model-free `export`
+command. Duplicate matching jobs skip safely. Never edit canonical JSON.
 
 ## 8. Export raw results: `export`
 

@@ -4,6 +4,10 @@ Run this from the synchronized repository after `INSTALL_APPLICATION.md`. Model 
 an explicit online operation; normal transcription remains offline and never downloads a
 missing resource.
 
+For the guided path, run `./scripts/setup-models.sh`. It performs the exact pinned downloads
+and checks below, and privately prompts for the gated Hugging Face token. The remaining
+sections document the equivalent manual procedure for inspection and troubleshooting.
+
 ## 1. Prepare cache locations
 
 ```bash

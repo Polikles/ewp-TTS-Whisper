@@ -79,7 +79,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.4 tree passes formatting, lint, type checks, and all **602 tests**. Canonical
+The current v0.4 tree passes formatting, lint, type checks, and all **603 tests**. Canonical
 results and accepted revisions remain immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.
 
@@ -204,7 +204,7 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
    the renderer must not apply heuristic timestamp shifts.
 7. **v0.4 closure.** Requirements, traceability, operator documentation, changelog,
    schemas/examples, and package version are reconciled. The full locked gate passes with
-   602 tests, and the 0.4.0 wheel/source archives pass metadata, privacy-content, and isolated
+   603 tests, and the 0.4.0 wheel/source archives pass metadata, privacy-content, and isolated
    installed-wheel CLI/HTML/YTT smoke checks. Full clean-machine
    installation-through-workflow qualification remains the next manual release-candidate
    gate and later becomes automated.

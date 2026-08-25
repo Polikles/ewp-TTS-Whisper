@@ -67,7 +67,7 @@ git log -1 --oneline
 git status --short
 ```
 
-Expected commit: `f7d7b76` or later and an empty Git status.
+Expected commit: `4ce45d6` or later and an empty Git status.
 
 ## 3. Install exactly from the committed lock and build artifacts
 
@@ -89,8 +89,8 @@ uv run --locked transcriber --help
 sha256sum uv.lock dist/ewp_transcripts-*.whl dist/ewp_transcripts-*.tar.gz
 ```
 
-Expected: 400 or more tests, compatible installed packages, version `0.2.0`, all seven MVP
-commands in help, and both wheel and source distribution artifacts.
+Expected: 602 or more tests, compatible installed packages, version `0.4.0`, all current
+top-level commands in help, and both wheel and source distribution artifacts.
 
 ## 4. Validate clean-machine diagnostics
 

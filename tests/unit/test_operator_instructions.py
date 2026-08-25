@@ -10,6 +10,10 @@ def test_primary_readme_links_complete_operator_runbook() -> None:
     primary = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "Instructions/README.md" in primary
+    assert "./scripts/install-fresh-ubuntu.sh --install" in primary
+    assert "./scripts/setup-models.sh" in primary
+    assert "transcriber transcribe" in primary
+    assert "transcriber export" in primary
     assert RUNBOOK.is_file()
 
 
