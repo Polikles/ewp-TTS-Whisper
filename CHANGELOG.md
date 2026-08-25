@@ -15,6 +15,10 @@ meaningful behavior change under Semantic Versioning.
   arguments or files.
 - Added a first-time Hugging Face guide covering gated pyannote terms, read-only token
   creation, hidden installer entry, revocation, and placeholders for future screenshots.
+- Added candidate-aware manual review preparation. `revise prepare --revision` prefills
+  from an exact compatible correction revision and protects its ID/number/hash plus
+  automated-versus-manual verification label; preview/apply resolve that parent explicitly
+  with `--revisions-dir` and publish an exact-lineage manual child.
 
 ### Changed
 

@@ -1240,6 +1240,10 @@ def revise_prepare_command(
         Path | None,
         typer.Option("--output-dir", help="Write EWP-REVIEW files to this directory."),
     ] = None,
+    source_revision: Annotated[
+        Path | None,
+        typer.Option("--revision", help="Prefill from this exact compatible revision."),
+    ] = None,
     recursive: Annotated[
         bool,
         typer.Option("--recursive", help="Include completed results in subdirectories."),
@@ -1261,6 +1265,7 @@ def revise_prepare_command(
             input_path,
             config=config,
             output_directory=_optional_user_path(output_directory),
+            source_revision_path=_optional_user_path(source_revision),
             recursive=recursive,
             anchor_target_words=config.revision.anchor_target_words,
         )
@@ -1402,6 +1407,10 @@ def revise_preview_command(
         Path | None,
         typer.Option("--results-dir", help="Directory containing the exact base result."),
     ] = None,
+    revisions_directory: Annotated[
+        Path | None,
+        typer.Option("--revisions-dir", help="Directory containing the exact parent revision."),
+    ] = None,
     recursive: Annotated[
         bool,
         typer.Option("--recursive", help="Include review files in subdirectories."),
@@ -1425,6 +1434,7 @@ def revise_preview_command(
                 normalized_review,
                 config=config,
                 results_directory=_optional_user_path(results_directory),
+                revisions_directory=_optional_user_path(revisions_directory),
                 recursive=recursive,
                 apply=False,
             )
@@ -1432,6 +1442,7 @@ def revise_preview_command(
             outcome = preview_review_file(
                 normalized_review,
                 results_directory=_optional_user_path(results_directory),
+                revisions_directory=_optional_user_path(revisions_directory),
                 long_gap_warning_ms=config.revision.long_gap_warning_ms,
             )
     except ApplicationError as error:
@@ -1461,6 +1472,10 @@ def revise_apply_command(
     results_directory: Annotated[
         Path | None,
         typer.Option("--results-dir", help="Directory containing the exact base result."),
+    ] = None,
+    revisions_directory: Annotated[
+        Path | None,
+        typer.Option("--revisions-dir", help="Directory containing the exact parent revision."),
     ] = None,
     output_directory: Annotated[
         Path | None,
@@ -1497,6 +1512,7 @@ def revise_apply_command(
                 normalized_review,
                 config=config,
                 results_directory=_optional_user_path(results_directory),
+                revisions_directory=_optional_user_path(revisions_directory),
                 output_directory=_optional_user_path(output_directory),
                 recursive=recursive,
                 apply=not no_apply,
@@ -1505,6 +1521,7 @@ def revise_apply_command(
             preview = preview_review_file(
                 normalized_review,
                 results_directory=_optional_user_path(results_directory),
+                revisions_directory=_optional_user_path(revisions_directory),
                 long_gap_warning_ms=config.revision.long_gap_warning_ms,
             )
             revision = preview.revision
@@ -1514,6 +1531,7 @@ def revise_apply_command(
                 normalized_review,
                 config=config,
                 results_directory=_optional_user_path(results_directory),
+                revisions_directory=_optional_user_path(revisions_directory),
                 output_directory=_optional_user_path(output_directory),
             )
             revision = applied.revision

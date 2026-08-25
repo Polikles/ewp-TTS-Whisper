@@ -233,6 +233,19 @@ uv run --locked transcriber revise prepare "/path/to/results" \
   --output-dir "/path/to/reviews"
 ```
 
+To manually review an automated correction candidate, prefill from its exact immutable
+revision instead of starting over from raw ASR:
+
+```bash
+uv run --locked transcriber revise prepare "/path/to/episode_results.json" \
+  --revision "/path/to/candidates/episode_revision_001.json" \
+  --output-dir "/path/to/reviews"
+```
+
+The protected header records the candidate ID, number, SHA-256, and
+`x_source_verification: automated_candidate`. Preview/apply use `--revisions-dir` to locate
+that exact parent when candidates and accepted revisions are stored separately.
+
 Edit `*.review.txt` in Windows VS Code. Its search and **Change All Occurrences** tools
 are preferable for long transcripts. Preserve all `#` metadata, `@@ anchor`, and
 `@@ speaker` directives. Edit only transcript text and existing speaker assignments.
@@ -241,7 +254,8 @@ are preferable for long transcripts. Preserve all `#` metadata, `@@ anchor`, and
 
 ```bash
 uv run --locked transcriber revise preview "/path/to/reviews" \
-  --results-dir "/path/to/results"
+  --results-dir "/path/to/results" \
+  --revisions-dir "/path/to/candidates"
 ```
 
 This is equivalent to `revise apply ... --no-apply`. A failed item in a continuing batch
@@ -252,6 +266,7 @@ does not invalidate successful items, but the command returns exit code 5.
 ```bash
 uv run --locked transcriber revise apply "/path/to/reviews" \
   --results-dir "/path/to/results" \
+  --revisions-dir "/path/to/candidates" \
   --output-dir "/path/to/revisions" \
   --audit
 ```

@@ -263,6 +263,7 @@ Common options:
 --recursive
 --config PATH
 --results-dir PATH             # resolve base results for review files
+--revisions-dir PATH           # resolve an exact parent revision for prepared reviews
 --json-output                  # preview/batch structured outcome where supported
 ```
 
@@ -271,6 +272,9 @@ Common options:
 Creates human-readable `.review.txt` work files with immutable base metadata, stable word
 anchors, speaker directives, and editable transcript text. It never modifies the base
 result. Batch prepare is part of v0.2.0, not a later convenience feature.
+For one canonical result, `--revision PATH` prefills text from an exact compatible manual
+or automated revision and records its ID, number, and hash as protected parent lineage.
+Preview/apply then use `--revisions-dir` when that parent is stored separately from results.
 
 ### `revise apply`
 

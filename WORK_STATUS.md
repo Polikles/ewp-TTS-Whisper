@@ -79,7 +79,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.5 tree passes formatting, lint, type checks, and all **605 tests** while its
+The current v0.5 tree passes formatting, lint, type checks, and all **606 tests** while its
 clean-machine workflow gate continues. Canonical results and accepted revisions remain
 immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.

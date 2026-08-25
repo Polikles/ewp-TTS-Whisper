@@ -3,11 +3,13 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
+from ewp_transcripts.application import preview_review_file
 from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.domain.review import validate_review_base
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.review_format import parse_review, render_review
 from ewp_transcripts.review_service import prepare_review
+from ewp_transcripts.revision_service import build_revision
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULT_EXAMPLE = ROOT / "examples/results.example.json"
@@ -49,3 +51,37 @@ def test_prepared_review_round_trips_without_changing_canonical_file() -> None:
 
     assert reparsed == review
     assert RESULT_EXAMPLE.read_bytes() == before
+
+
+def test_prepare_review_prefills_exact_revision_and_records_parent(tmp_path: Path) -> None:
+    base_path = tmp_path / RESULT_EXAMPLE.name
+    base_path.write_bytes(RESULT_EXAMPLE.read_bytes())
+    base = load_canonical_result(base_path)
+    original = prepare_review(base_path, generated_at=NOW)
+    revision = build_revision(original, base, base_path=base_path, created_at=NOW)
+    revision_path = tmp_path / "S01E01_revision_001.json"
+    revision_path.write_text(revision.model_dump_json(indent=2) + "\n", encoding="utf-8")
+
+    review = prepare_review(
+        base_path,
+        source_revision_path=revision_path,
+        generated_at=NOW,
+    )
+
+    assert review.header.source_revision_id is not None
+    assert review.header.source_revision_number == 1
+    assert review.header.source_revision_sha256 == sha256_file(revision_path)
+    assert review.header.extensions[0].value == "manually_verified"
+    rendered = render_review(review)
+    assert "Today we discuss transcription." in rendered
+    review_path = tmp_path / "S01E01.review.txt"
+    review_path.write_text(rendered, encoding="utf-8")
+
+    preview = preview_review_file(
+        review_path,
+        results_directory=tmp_path,
+        revisions_directory=tmp_path,
+    )
+
+    assert preview.revision.parent_revision is not None
+    assert preview.revision.parent_revision.sha256 == sha256_file(revision_path)

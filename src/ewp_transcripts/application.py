@@ -526,6 +526,7 @@ def preview_review_file(
     review_path: str | Path,
     *,
     results_directory: Path | None = None,
+    revisions_directory: Path | None = None,
     long_gap_warning_ms: int = 2000,
 ) -> RevisionPreviewOutcome:
     """Run the complete review parse, base verification, and alignment path without writes."""
@@ -542,7 +543,7 @@ def preview_review_file(
             result_version=base.result_version,
             revision_number=review.header.source_revision_number,
         )
-        parent_path = (results_directory or base_path.parent) / parent_name
+        parent_path = (revisions_directory or results_directory or base_path.parent) / parent_name
         if not parent_path.is_file():
             raise InvalidReviewError(
                 "REVISION_BASE_HASH_MISMATCH",
@@ -565,6 +566,7 @@ def apply_review_file(
     *,
     config: ApplicationConfig,
     results_directory: Path | None = None,
+    revisions_directory: Path | None = None,
     output_directory: Path | None = None,
 ) -> RevisionApplyOutcome:
     """Validate one review through preview and atomically publish its full snapshot."""
@@ -572,6 +574,7 @@ def apply_review_file(
     preview = preview_review_file(
         review_path,
         results_directory=results_directory,
+        revisions_directory=revisions_directory,
         long_gap_warning_ms=config.revision.long_gap_warning_ms,
     )
     revision, path = publish_next_revision(
@@ -857,6 +860,7 @@ def process_review_batch(
     *,
     config: ApplicationConfig,
     results_directory: Path | None = None,
+    revisions_directory: Path | None = None,
     output_directory: Path | None = None,
     recursive: bool = False,
     apply: bool = True,
@@ -873,6 +877,7 @@ def process_review_batch(
                     review_path,
                     config=config,
                     results_directory=results_directory,
+                    revisions_directory=revisions_directory,
                     output_directory=output_directory,
                 )
                 jobs.append(
@@ -887,6 +892,7 @@ def process_review_batch(
                 previewed = preview_review_file(
                     review_path,
                     results_directory=results_directory,
+                    revisions_directory=revisions_directory,
                     long_gap_warning_ms=config.revision.long_gap_warning_ms,
                 )
                 jobs.append(
@@ -915,12 +921,17 @@ def prepare_review_file(
     result_path: Path,
     *,
     output_directory: Path | None = None,
+    source_revision_path: Path | None = None,
     anchor_target_words: int = 200,
     lock_timeout_seconds: float = 0,
 ) -> ReviewPreparationOutcome:
     """Prepare and non-destructively publish one review without loading models or audio."""
 
-    review = prepare_review(result_path, anchor_target_words=anchor_target_words)
+    review = prepare_review(
+        result_path,
+        source_revision_path=source_revision_path,
+        anchor_target_words=anchor_target_words,
+    )
     path = publish_review(
         review,
         output_directory=result_path.parent if output_directory is None else output_directory,
@@ -1430,6 +1441,7 @@ def prepare_review_batch(
     *,
     config: ApplicationConfig,
     output_directory: Path | None = None,
+    source_revision_path: Path | None = None,
     recursive: bool = False,
     anchor_target_words: int = 200,
 ) -> BatchReviewPreparationOutcome:
@@ -1437,6 +1449,11 @@ def prepare_review_batch(
 
     results = discover_review_results(input_path, recursive=recursive)
     normalized_input = normalize_input_path(input_path)
+    if source_revision_path is not None and len(results) != 1:
+        raise InvalidReviewError(
+            "REVISION_BASE_HASH_MISMATCH",
+            "--revision requires exactly one canonical result",
+        )
     destination = output_directory or (
         normalized_input.parent
         if normalized_input.is_file()
@@ -1449,6 +1466,7 @@ def prepare_review_batch(
             prepared = prepare_review_file(
                 result_path,
                 output_directory=destination,
+                source_revision_path=source_revision_path,
                 anchor_target_words=anchor_target_words,
                 lock_timeout_seconds=config.runtime.lock_timeout_seconds,
             )
