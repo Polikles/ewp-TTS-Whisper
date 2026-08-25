@@ -13,6 +13,7 @@ from ewp_transcripts.domain.automated_translation import (
     AutomatedTranslationResponse,
 )
 from ewp_transcripts.domain.errors import (
+    InvalidTranslationResponseError,
     PermanentTranslationHttpError,
     PermanentTranslationProviderError,
     RetryableTranslationProviderError,
@@ -59,7 +60,7 @@ def execute_translation_call(
     sleep: Callable[[float], None] = time.sleep,
     monotonic: Callable[[], float] = time.monotonic,
 ) -> TranslationExecutionOutcome:
-    """Retry only explicit translation-provider failures within strict bounds."""
+    """Retry transient provider and response-contract failures within strict bounds."""
 
     policy = policy or TranslationExecutionPolicy()
     started = monotonic()
@@ -80,8 +81,12 @@ def execute_translation_call(
                     cost_usd_micros=usage.cost_usd_micros if usage else None,
                 ),
             )
-        except RetryableTranslationProviderError:
+        except (RetryableTranslationProviderError, InvalidTranslationResponseError) as error:
             if attempt == policy.max_attempts:
+                if isinstance(error, InvalidTranslationResponseError):
+                    raise InvalidTranslationResponseError(
+                        "Translation provider returned invalid responses after bounded retries"
+                    ) from None
                 raise RetryableTranslationProviderError(
                     "Translation provider failed after bounded retries"
                 ) from None

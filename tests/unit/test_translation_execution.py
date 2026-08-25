@@ -9,6 +9,7 @@ from ewp_transcripts.automated_translation import (
     build_automated_translation_request,
 )
 from ewp_transcripts.domain.errors import (
+    InvalidTranslationResponseError,
     PermanentTranslationHttpError,
     PermanentTranslationProviderError,
     RetryableTranslationProviderError,
@@ -50,6 +51,57 @@ def test_execution_retries_only_sanitized_retryable_failures() -> None:
     assert outcome.metrics.attempts == 2
     assert outcome.metrics.retries == 1
     assert outcome.metrics.request_count == 2
+
+
+def test_execution_retries_invalid_response_contract_failures() -> None:
+    class InvalidOnceProvider(DeterministicMockTranslationProvider):
+        def __init__(self) -> None:
+            super().__init__()
+            self.calls = 0
+
+        def translate(self, request, *, timeout_seconds=None):  # type: ignore[no-untyped-def]
+            self.calls += 1
+            if self.calls == 1:
+                raise InvalidTranslationResponseError("private malformed output")
+            return super().translate(request, timeout_seconds=timeout_seconds)
+
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    provider = InvalidOnceProvider()
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    outcome = execute_translation_call(
+        provider,
+        request,
+        policy=TranslationExecutionPolicy(max_attempts=2, retry_delay_seconds=0),
+    )
+
+    assert outcome.metrics.attempts == 2
+    assert outcome.metrics.retries == 1
+
+
+def test_execution_stops_invalid_responses_at_retry_limit_without_content() -> None:
+    class InvalidProvider(DeterministicMockTranslationProvider):
+        def __init__(self) -> None:
+            super().__init__()
+            self.calls = 0
+
+        def translate(self, request, *, timeout_seconds=None):  # type: ignore[no-untyped-def]
+            self.calls += 1
+            raise InvalidTranslationResponseError("private malformed output")
+
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    provider = InvalidProvider()
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    with pytest.raises(InvalidTranslationResponseError, match="bounded retries") as raised:
+        execute_translation_call(
+            provider,
+            request,
+            policy=TranslationExecutionPolicy(max_attempts=3, retry_delay_seconds=0),
+        )
+
+    assert provider.calls == 3
+    assert "private malformed output" not in str(raised.value)
 
 
 def test_resume_summary_contains_no_text(tmp_path: Path) -> None:
