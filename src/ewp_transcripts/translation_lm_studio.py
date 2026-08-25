@@ -26,7 +26,7 @@ from ewp_transcripts.domain.errors import (
 
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
-_PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v3"
+_PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v4"
 
 FAITHFUL_TRANSLATION_SYSTEM_PROMPT = """Translate exactly one owned transcript unit into
 the requested target language. Preserve meaning, facts, intent, uncertainty, emphasis,
@@ -230,7 +230,7 @@ def _parse_chat_response(
             raise TypeError
         warning_codes: tuple[str, ...] = ()
         if output_mode == "plain-text":
-            target_text, warning_codes = _plain_text_target(content)
+            target_text, warning_codes = _plain_text_target(content, request=request)
             if (
                 not target_text
                 or "\x00" in content
@@ -272,7 +272,11 @@ def _optional_nonnegative_int(value: object) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
+def _plain_text_target(
+    content: str,
+    *,
+    request: AutomatedTranslationRequest,
+) -> tuple[str, tuple[str, ...]]:
     """Accept raw prose or one strict Bielik compatibility envelope."""
 
     stripped = content.strip()
@@ -282,8 +286,28 @@ def _plain_text_target(content: str) -> tuple[str, tuple[str, ...]]:
         if not isinstance(document, str):
             raise ValueError("invalid plain-text translation envelope")
         stripped = document
-    elif stripped.startswith("{") or stripped.endswith("}"):
+    else:
+        lines = stripped.splitlines()
+        if len(lines) == 2 and lines[1].lstrip().startswith("{"):
+            label = json.loads(lines[0])
+            if label != request.unit.unit_id:
+                raise ValueError("invalid plain-text translation envelope")
+            stripped = lines[1].strip()
+    if stripped.startswith("{") or stripped.endswith("}"):
         document = json.loads(stripped)
+        echoed_fields = {"unit_id", "speaker_id", "source_text"}
+        if isinstance(document, dict) and echoed_fields & set(document):
+            if (
+                set(document) != {*echoed_fields, "target_text"}
+                or document.get("unit_id") != request.unit.unit_id
+                or document.get("speaker_id") != request.unit.speaker_id
+                or document.get("source_text") != request.unit.source_text
+            ):
+                raise ValueError("invalid plain-text translation envelope")
+            value = document["target_text"]
+            if not isinstance(value, str):
+                raise ValueError("invalid plain-text translation envelope")
+            return " ".join(value.split()), ("PROVIDER_SOURCE_ENVELOPE_DISCARDED",)
         if (
             not isinstance(document, dict)
             or not 1 <= len(document) <= 2

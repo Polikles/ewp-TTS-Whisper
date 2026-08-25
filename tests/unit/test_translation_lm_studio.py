@@ -117,7 +117,7 @@ def test_plain_text_mode_unwraps_json_string_compatibility_output() -> None:
     response = provider.translate(request, timeout_seconds=1)
 
     assert response.target_text == "Welcome to the podcast 'Ethics in a Loop'."
-    assert provider.provenance_parameters["compatibility_envelope"] == "bielik-envelope-v3"
+    assert provider.provenance_parameters["compatibility_envelope"] == "bielik-envelope-v4"
 
 
 @pytest.mark.parametrize("field", ["target_text", "translated_text"])
@@ -144,6 +144,47 @@ def test_plain_text_mode_rejects_extra_json_fields() -> None:
                 {"message": {"content": '{"translated_text":"Translation.","note":"extra"}'}}
             ]
         }
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    with pytest.raises(InvalidTranslationResponseError):
+        provider.translate(request, timeout_seconds=1)
+
+
+def test_plain_text_mode_accepts_exact_echoed_source_envelope_with_warning() -> None:
+    def transport(_url, _headers, _payload, _timeout):  # type: ignore[no-untyped-def]
+        envelope = request.unit.model_dump()
+        envelope["target_text"] = "Faithful translation."
+        content = "\n".join((json.dumps(request.unit.unit_id), json.dumps(envelope)))
+        return {"choices": [{"message": {"content": content}}]}
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
+        transport=transport,
+    )
+    review = prepare_translation_review(EXAMPLE, target_language="pl")
+    request = build_automated_translation_request(review, 0, provider=provider)
+
+    response = provider.translate(request, timeout_seconds=1)
+
+    assert response.target_text == "Faithful translation."
+    assert response.warning_codes == ("PROVIDER_SOURCE_ENVELOPE_DISCARDED",)
+
+
+@pytest.mark.parametrize("mismatched_field", ["unit_id", "speaker_id", "source_text"])
+def test_plain_text_mode_rejects_mismatched_echoed_source_envelope(
+    mismatched_field: str,
+) -> None:
+    def transport(_url, _headers, _payload, _timeout):  # type: ignore[no-untyped-def]
+        envelope = request.unit.model_dump()
+        envelope[mismatched_field] = "wrong"
+        envelope["target_text"] = "Wrong unit translation."
+        return {"choices": [{"message": {"content": json.dumps(envelope)}}]}
 
     provider = LmStudioTranslationProvider(
         LmStudioTranslationConfig(model_id="bielik", output_mode="plain-text"),
@@ -187,7 +228,7 @@ def test_plain_text_mode_discards_known_translator_notes_with_warning(
 
     assert response.target_text == "My name is Damian."
     assert response.warning_codes == ("PROVIDER_TRANSLATOR_NOTES_DISCARDED",)
-    assert provider.provenance_parameters["compatibility_envelope"] == "bielik-envelope-v3"
+    assert provider.provenance_parameters["compatibility_envelope"] == "bielik-envelope-v4"
 
 
 def test_adapter_sanitizes_invalid_response_without_content() -> None:
