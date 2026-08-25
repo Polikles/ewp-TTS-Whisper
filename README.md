@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.4.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.5.0` remains an internal beta, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
@@ -62,8 +62,10 @@ source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH
 The script explicitly confirms system changes, installs the locked application
 environment, and verifies diagnostics. It does not update an existing checkout or download
 models. The separate model script downloads exact pinned snapshots, privately prompts for
-the gated Hugging Face token, and verifies readiness. Review the manual equivalent in
-[`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only application
+the gated Hugging Face token, and verifies readiness. The
+[`Hugging Face token guide`](WSL%20config/HUGGING_FACE_TOKEN.md) explains account access,
+terms acceptance, creation of a read-only token, secure entry, and revocation. Review the
+manual equivalent in [`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only application
 verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
 
 ## How to use
@@ -79,9 +81,12 @@ uv run --locked transcriber export "/path/to/results" \
   --output-dir "/path/to/exports"
 ```
 
-Transcription directly writes canonical JSON and the configured TXT/SRT/VTT/segments
-outputs. The model-free `export` command generates or regenerates every format, including
-YouTube srv3 YTT and embeddable HTML, from that immutable result.
+By default, transcription writes canonical JSON, machine-readable segments, and a TXT
+preview. The TXT is not evidence of manual verification. The model-free `export` command
+can generate every format—including raw SRT/VTT, YouTube srv3 YTT, and embeddable HTML—from
+that immutable result. Review and apply corrections before publishing subtitles or using
+the transcript as a translation source. Explicit raw export remains available for urgent
+or diagnostic use and must be labelled unreviewed.
 
 The recommended correction workflow stages editable reviews before publishing immutable
 revisions:

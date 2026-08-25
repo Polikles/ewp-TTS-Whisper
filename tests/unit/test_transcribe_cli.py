@@ -354,7 +354,7 @@ def test_transcribe_segments_flag_adds_to_default_exports(
     outcome = CliRunner().invoke(app, ["transcribe", str(source), "--segments"])
 
     assert outcome.exit_code == 0
-    assert observed == [(True, True, True, True)]
+    assert observed == [(True, False, False, True)]
 
 
 def test_directory_transcribe_prints_stable_summary_and_partial_failure_exit(

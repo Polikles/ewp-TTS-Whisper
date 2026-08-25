@@ -4,7 +4,7 @@ Last updated: **2026-08-25**.
 
 ## Checkpoint
 
-Version `0.4.0` is an internal beta on `main`; it is not tagged or published as a public
+Version `0.5.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. The repository is public and licensed under `AGPL-3.0-or-later`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
@@ -79,8 +79,9 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.4 tree passes formatting, lint, type checks, and all **603 tests**. Canonical
-results and accepted revisions remain immutable. Private corpus content, API keys,
+The current v0.5 tree passes formatting, lint, type checks, and all **604 tests** while its
+clean-machine workflow gate continues. Canonical results and accepted revisions remain
+immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.
 
 ## v0.4 delivered work

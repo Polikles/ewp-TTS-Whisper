@@ -89,7 +89,7 @@ uv run --locked transcriber --help
 sha256sum uv.lock dist/ewp_transcripts-*.whl dist/ewp_transcripts-*.tar.gz
 ```
 
-Expected: 602 or more tests, compatible installed packages, version `0.4.0`, all current
+Expected: 604 or more tests, compatible installed packages, version `0.5.0`, all current
 top-level commands in help, and both wheel and source distribution artifacts.
 
 ## 4. Validate clean-machine diagnostics
@@ -161,8 +161,9 @@ sha256sum "$EWP_FRESH_ROOT/input/installation-smoke.wav" \
 git status --short
 ```
 
-Inspect and dry-run must identify one mono source and plan canonical JSON plus TXT/SRT/VTT
-without loading or downloading models. Cleanup preview must select nothing. Git status
+Inspect and dry-run must identify one mono source and plan canonical JSON plus the TXT
+preview and segments JSON without loading or downloading models. Cleanup preview must
+select nothing. Git status
 must be empty. `LICENSE` must be present in the clean checkout and built distributions.
 
 ## 6. Preserve evidence and dispose only by explicit choice

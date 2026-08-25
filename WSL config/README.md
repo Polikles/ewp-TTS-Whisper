@@ -18,6 +18,8 @@ Follow these documents in order:
 5. [`INSTALL_APPLICATION.md`](INSTALL_APPLICATION.md) — clone and synchronize the
    committed lockfile.
 6. [`MODEL_SETUP.md`](MODEL_SETUP.md) — explicitly download the pinned local models.
+   First-time users: [`HUGGING_FACE_TOKEN.md`](HUGGING_FACE_TOKEN.md) explains gated
+   pyannote access and read-only token handling with screenshot placeholders.
 7. [`OFFLINE_MODE.md`](OFFLINE_MODE.md) — verify normal local-only operation.
 
 Use [`VERIFY_ENVIRONMENT.md`](VERIFY_ENVIRONMENT.md) before changing an existing system

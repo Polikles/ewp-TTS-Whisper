@@ -30,6 +30,10 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.models.compute_type == "float16"
     assert config.models.batch_size == 4
     assert config.outputs.batch_output_directory_name == "output-ewp-transcripts"
+    assert config.outputs.generate_txt is True
+    assert config.outputs.generate_srt is False
+    assert config.outputs.generate_vtt is False
+    assert config.outputs.generate_segments_json is True
     assert config.revision.anchor_target_words == 200
     assert config.revision.long_gap_warning_ms == 2000
     assert config.revision.generate_audit is False

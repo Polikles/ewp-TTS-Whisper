@@ -204,9 +204,9 @@ class SubtitlesConfig(StrictConfigModel):
 
 class OutputsConfig(StrictConfigModel):
     generate_txt: bool = True
-    generate_srt: bool = True
-    generate_vtt: bool = True
-    generate_segments_json: bool = False
+    generate_srt: bool = False
+    generate_vtt: bool = False
+    generate_segments_json: bool = True
     generate_ytt: bool = False
     generate_html: bool = False
     batch_output_directory_name: str = "output-ewp-transcripts"

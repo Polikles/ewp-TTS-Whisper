@@ -53,6 +53,16 @@ def test_cleanup_removes_only_verified_workspace(tmp_path: Path) -> None:
     assert (sibling / "model.bin").read_bytes() == b"model"
 
 
+def test_cleanup_removes_empty_run_parent_but_not_work_root(tmp_path: Path) -> None:
+    root = tmp_path / "work"
+    workspace = allocate_work_directory(root, run_id=RUN_ID, job_id="episode")
+
+    cleanup_work_directory(workspace)
+
+    assert root.is_dir()
+    assert not workspace.path.parent.exists()
+
+
 def test_tampered_marker_blocks_cleanup(tmp_path: Path) -> None:
     workspace = allocate_work_directory(tmp_path / "work", run_id=RUN_ID, job_id="episode")
     workspace.marker_path.write_text("{}", encoding="utf-8")

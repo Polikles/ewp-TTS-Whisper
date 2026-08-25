@@ -7,7 +7,12 @@ import pytest
 
 from ewp_transcripts import application
 from ewp_transcripts.application import transcribe_one
-from ewp_transcripts.config import ApplicationConfig, DiarizationConfig, RuntimeConfig
+from ewp_transcripts.config import (
+    ApplicationConfig,
+    DiarizationConfig,
+    OutputsConfig,
+    RuntimeConfig,
+)
 from ewp_transcripts.domain import (
     AudioStream,
     ChannelClassification,
@@ -279,6 +284,11 @@ def test_transcribe_routes_automatic_count_to_diarization_pipeline(
 def _config(tmp_path: Path) -> ApplicationConfig:
     return ApplicationConfig(
         diarization=DiarizationConfig(speaker_count=1),
+        outputs=OutputsConfig(
+            generate_srt=True,
+            generate_vtt=True,
+            generate_segments_json=False,
+        ),
         runtime=RuntimeConfig(work_root=tmp_path / "work"),
     )
 

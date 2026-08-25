@@ -57,6 +57,11 @@ HTML fragment export is also opt-in: request `--format html`, or set
 `[outputs].generate_html = true`. The generated fragment deliberately has no renderer
 styling or behavior configuration because CSS and JavaScript belong to the consuming site.
 
+Fresh transcription defaults to canonical JSON, machine-readable segments JSON, and a TXT
+preview. SRT and VTT are disabled by default so unreviewed ASR is less likely to be mistaken
+for publication-ready subtitles. All formats remain available through explicit
+`transcriber export`; the recommended production path reviews and applies a revision first.
+
 ### Warning-only quality thresholds
 
 Inspection decodes each source once and reports four lightweight diagnostics. The MVP

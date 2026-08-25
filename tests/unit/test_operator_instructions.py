@@ -69,6 +69,7 @@ def test_operator_runbook_links_all_required_detailed_guides() -> None:
         "CUDA_SETUP.md",
         "INSTALL_APPLICATION.md",
         "MODEL_SETUP.md",
+        "HUGGING_FACE_TOKEN.md",
         "OFFLINE_MODE.md",
         "REVISE_TRANSCRIPTS.md",
         "TRANSLATE_TRANSCRIPTS.md",

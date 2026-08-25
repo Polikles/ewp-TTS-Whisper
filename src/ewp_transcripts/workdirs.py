@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
@@ -132,6 +133,9 @@ def cleanup_work_directory(workspace: WorkDirectory) -> None:
         shutil.rmtree(workspace.path)
     except OSError as error:
         raise UnsafeWorkDirectoryError(f"Cannot clean work directory: {workspace.path}") from error
+    # A shared run directory remains while it contains another job workspace.
+    with suppress(OSError):
+        workspace.path.parent.rmdir()
 
 
 def _validate_work_directory(workspace: WorkDirectory) -> None:

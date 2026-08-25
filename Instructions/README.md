@@ -20,8 +20,9 @@ preset. RAM, VRAM, and runtime requirements will be characterized later per pres
 3. [`../WSL config/INSTALL_TOOLS.md`](../WSL%20config/INSTALL_TOOLS.md)
 4. [`../WSL config/CUDA_SETUP.md`](../WSL%20config/CUDA_SETUP.md)
 5. [`../WSL config/INSTALL_APPLICATION.md`](../WSL%20config/INSTALL_APPLICATION.md)
-6. [`../WSL config/MODEL_SETUP.md`](../WSL%20config/MODEL_SETUP.md)
-7. [`../WSL config/OFFLINE_MODE.md`](../WSL%20config/OFFLINE_MODE.md)
+6. [`../WSL config/HUGGING_FACE_TOKEN.md`](../WSL%20config/HUGGING_FACE_TOKEN.md)
+7. [`../WSL config/MODEL_SETUP.md`](../WSL%20config/MODEL_SETUP.md)
+8. [`../WSL config/OFFLINE_MODE.md`](../WSL%20config/OFFLINE_MODE.md)
 
 Normal source-checkout use begins in the repository:
 
@@ -169,9 +170,12 @@ quality-qualified on a representative English corpus. Useful options include:
 - `--keep-temp` to retain an owned successful workspace;
 - `--force` to create the next `_vNNN` result set without overwriting.
 
-Every successful job creates immutable `*_results.json`. TXT/SRT/VTT/YTT/HTML/segments are
-derived and regenerable; YTT and HTML are generated afterward with the model-free `export`
-command. Duplicate matching jobs skip safely. Never edit canonical JSON.
+Every successful job creates immutable `*_results.json`. The review-first defaults also
+create machine-readable segments and a TXT preview; the preview is not manually verified.
+TXT/SRT/VTT/YTT/HTML/segments are all derived and regenerable with the model-free `export`
+command. Raw subtitles may be exported explicitly for diagnosis or urgent use, but review
+and apply corrections before publication and especially before translation. Duplicate
+matching jobs skip safely. Never edit canonical JSON.
 
 ## 8. Export raw results: `export`
 

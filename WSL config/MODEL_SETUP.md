@@ -7,6 +7,8 @@ missing resource.
 For the guided path, run `./scripts/setup-models.sh`. It performs the exact pinned downloads
 and checks below, and privately prompts for the gated Hugging Face token. The remaining
 sections document the equivalent manual procedure for inspection and troubleshooting.
+First-time users should follow [`HUGGING_FACE_TOKEN.md`](HUGGING_FACE_TOKEN.md) for the
+browser-based terms, read-only token, hidden prompt, and revocation steps.
 
 ## 1. Prepare cache locations
 

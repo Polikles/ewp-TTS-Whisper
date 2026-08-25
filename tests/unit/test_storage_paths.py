@@ -44,7 +44,7 @@ def test_version_one_uses_unsuffixed_role_first_names(tmp_path: Path) -> None:
         tmp_path,
         job_id="episode",
         version=1,
-        config=OutputsConfig(generate_segments_json=True),
+        config=OutputsConfig(generate_srt=True),
     )
 
     assert paths.results.name == "episode_results.json"
@@ -60,7 +60,7 @@ def test_later_version_suffix_is_shared_by_complete_output_set(tmp_path: Path) -
         tmp_path,
         job_id="episode",
         version=2,
-        config=OutputsConfig(generate_segments_json=True),
+        config=OutputsConfig(generate_vtt=True),
     )
 
     assert paths.results.name == "episode_results_v002.json"
