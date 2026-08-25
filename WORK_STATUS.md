@@ -201,7 +201,12 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    and light/dark rendering, but Chromium-family clicks restarted at zero. The retry waits
    for metadata and seek completion; explicit theme and auto-follow controls were added.
    A second Chromium retry isolated the remaining failure to Python's basic static server;
-   the example now includes a range-capable server and byte-range calculation tests.
+   the example now includes a range-capable server and byte-range calculation tests. The
+   final retry returned valid `206 Partial Content` and passed seeking in Chrome and Brave;
+   Firefox and LibreWolf had already passed. Theme/auto-follow controls and the no-script
+   fallback also passed. The HTML slice is accepted. Minor acoustic spill across an
+   occasional sentence boundary is inherited from word alignment and explicitly deferred;
+   the renderer must not apply heuristic timestamp shifts.
 7. **v0.4 closure.** Reconcile requirements, traceability, operator documentation,
    changelog, schemas/examples, package version and artifacts. Run the full automated and
    packaging gates. Full clean-machine installation-through-workflow qualification stays

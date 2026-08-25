@@ -585,7 +585,11 @@ light/dark presentation, and readable unenhanced markup. A manual real-media bro
 passed Firefox/LibreWolf but exposed Chromium-family clicks restarting at zero. The retry
 waits for metadata and seek completion and adds explicit theme/auto-follow controls. A
 second Chromium retry isolated the remaining failure to the basic Python static server;
-the example now includes a single-range `206 Partial Content` server.
+the example now includes a single-range `206 Partial Content` server. The final retry
+passed Chrome and Brave seeking; Firefox and LibreWolf, theme/auto-follow controls, and the
+no-script fallback also passed. The HTML delivery slice is accepted. Occasional minor
+acoustic spill across sentence boundaries is inherited from word alignment and deferred
+to alignment-quality work; renderers must not hide it with heuristic timestamp shifts.
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;

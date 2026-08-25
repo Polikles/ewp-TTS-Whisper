@@ -235,7 +235,10 @@ All notable changes to EWP-transcripts are documented here.
   reduced-motion handling, explicit theme and auto-follow controls, light/dark
   presentation, and readable unenhanced markup. Cross-browser seeking waits for media
   metadata and seek completion before playback, and the example includes a range-capable
-  local server for Chromium media seeking.
+  local server for Chromium media seeking. Real-media qualification passed Firefox,
+  LibreWolf, Chrome, and Brave, including theme/auto-follow controls and a readable
+  no-script fallback. Minor sentence-boundary acoustic spill remains an explicitly
+  accepted inherited word-alignment limitation.
 
 - Added an opt-in deterministic YouTube srv3 YTT export with one existing planned cue per
   paragraph, preserved planned line wrapping, millisecond timing, configurable stable

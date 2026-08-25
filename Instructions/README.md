@@ -203,6 +203,9 @@ speaker turns. It contains no CSS or JavaScript; the consuming site supplies pla
 highlighting, and presentation enhancements. `examples/html-player/` demonstrates that
 integration with a native audio player, keyboard activation, current-sentence following,
 accessible focus, speaker colors, and light/dark presentation.
+Sentence seek times inherit the exact word-alignment boundary. An occasional boundary
+sound may acoustically belong to the adjacent sentence; do not compensate with arbitrary
+timestamp offsets in the fragment or player.
 
 ## 9. Correct transcripts: `revise`
 
