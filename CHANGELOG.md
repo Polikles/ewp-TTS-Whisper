@@ -232,7 +232,9 @@ All notable changes to EWP-transcripts are documented here.
   escaped untrusted text, language metadata, and no embedded styling or behavior.
 - Added a separate consuming-site HTML audio-player example with site-owned CSS/JavaScript,
   click and keyboard seeking, playback highlighting/following, accessible focus,
-  reduced-motion handling, light/dark presentation, and readable unenhanced markup.
+  reduced-motion handling, explicit theme and auto-follow controls, light/dark
+  presentation, and readable unenhanced markup. Cross-browser seeking waits for media
+  metadata and seek completion before playback.
 
 - Added an opt-in deterministic YouTube srv3 YTT export with one existing planned cue per
   paragraph, preserved planned line wrapping, millisecond timing, configurable stable

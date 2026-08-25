@@ -582,7 +582,8 @@ timing. No CSS, JavaScript, inline styles, or event handlers are emitted. The co
 mock player is implemented separately with native audio, site-owned CSS/JavaScript,
 click/keyboard seeking, current-sentence following, accessible focus, reduced-motion,
 light/dark presentation, and readable unenhanced markup. A manual real-media browser check
-remains.
+passed Firefox/LibreWolf but exposed Chromium-family clicks restarting at zero. The retry
+waits for metadata and seek completion and adds explicit theme/auto-follow controls.
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;

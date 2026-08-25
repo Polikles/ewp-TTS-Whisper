@@ -13,5 +13,9 @@ the player. Playback marks and follows the active sentence. CSS demonstrates acc
 focus, speaker colors, and light/dark presentation. Without CSS or JavaScript, the audio
 controls and transcript remain in logical reading order.
 
+The controls above the player switch between system/light/dark themes and enable or disable
+automatic scrolling. To test the fallback in Chromium browsers, open DevTools, press
+Ctrl+Shift+P, run `Disable JavaScript`, and reload. Run `Enable JavaScript` afterward.
+
 Do not copy `styles.css` or `player.js` into an exported fragment. They belong to the
 consuming site and are deliberately outside the renderer contract.

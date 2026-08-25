@@ -197,7 +197,9 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    The separate mock player site is implemented with its own CSS/JavaScript and contract
    tests for highlighting, seeking, native keyboard activation, reduced-motion-aware
    following, light/dark presentation, and readable no-script structure. A manual browser
-   interaction check with real media remains before this slice is complete.
+   pilot passed Firefox/LibreWolf audio, mouse/keyboard seeking, highlighting, following,
+   and light/dark rendering, but Chromium-family clicks restarted at zero. The retry waits
+   for metadata and seek completion; explicit theme and auto-follow controls were added.
 7. **v0.4 closure.** Reconcile requirements, traceability, operator documentation,
    changelog, schemas/examples, package version and artifacts. Run the full automated and
    packaging gates. Full clean-machine installation-through-workflow qualification stays

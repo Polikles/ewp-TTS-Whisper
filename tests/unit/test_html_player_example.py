@@ -29,6 +29,11 @@ def test_mock_player_embeds_accessible_fragment_without_inline_enhancement() -> 
         tag == "button" and attrs.get("type") == "button" and "data-start-ms" in attrs
         for tag, attrs in parser.tags
     )
+    assert any(tag == "select" and attrs.get("id") == "ewp-theme" for tag, attrs in parser.tags)
+    assert any(
+        tag == "input" and attrs.get("id") == "ewp-auto-follow" and "checked" in attrs
+        for tag, attrs in parser.tags
+    )
     assert not any(
         name == "style" or name.startswith("on") for _tag, attrs in parser.tags for name in attrs
     )
@@ -44,6 +49,11 @@ def test_mock_player_owns_accessible_visual_and_playback_enhancement() -> None:
     assert '[aria-current="true"]' in styles
     assert 'cue.addEventListener("click"' in script
     assert 'player.addEventListener("timeupdate"' in script
-    assert "player.currentTime = Number(cue.dataset.startMs) / 1000" in script
+    assert "await metadataReady()" in script
+    assert "player.currentTime = targetSeconds" in script
+    assert 'player.addEventListener("seeked"' in script
     assert 'activeCue.setAttribute("aria-current", "true")' in script
     assert "scrollIntoView" in script
+    assert 'theme.addEventListener("change"' in script
+    assert ':root[data-theme="light"]' in styles
+    assert ':root[data-theme="dark"]' in styles
