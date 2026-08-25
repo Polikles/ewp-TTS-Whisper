@@ -62,6 +62,31 @@ def test_request_includes_only_dictionary_terms_present_in_owned_unit() -> None:
     ]
 
 
+def test_project_wide_dictionary_applies_to_future_job_ids() -> None:
+    dictionary = ProjectTranslationDictionary(
+        dictionary_id="example-project",
+        project_id="example",
+        job_ids=("*",),
+        source_language="en",
+        target_language="pl",
+        entries=(TranslationDictionaryEntry(source="Welcome", target="Witamy"),),
+    )
+
+    assert dictionary.applies_to("future-episode") is True
+
+
+def test_project_wide_dictionary_rejects_mixed_wildcard_scope() -> None:
+    with pytest.raises(ValueError, match="project-wide"):
+        ProjectTranslationDictionary(
+            dictionary_id="example-project",
+            project_id="example",
+            job_ids=("*", "S01E01"),
+            source_language="en",
+            target_language="pl",
+            entries=(TranslationDictionaryEntry(source="Welcome", target="Witamy"),),
+        )
+
+
 def test_response_must_match_operation_and_owned_unit() -> None:
     review = prepare_translation_review(EXAMPLE, target_language="pl")
     provider = DeterministicMockTranslationProvider()

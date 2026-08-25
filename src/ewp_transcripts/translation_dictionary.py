@@ -33,10 +33,17 @@ class ProjectTranslationDictionary(BaseModel):
     def unique_entries(self) -> ProjectTranslationDictionary:
         if len(set(self.job_ids)) != len(self.job_ids):
             raise ValueError("translation dictionary job IDs must be unique")
+        if "*" in self.job_ids and self.job_ids != ("*",):
+            raise ValueError("project-wide translation dictionaries must use only '*' scope")
         sources = [entry.source.casefold() for entry in self.entries]
         if len(set(sources)) != len(sources):
             raise ValueError("translation dictionary source entries must be unique")
         return self
+
+    def applies_to(self, job_id: str) -> bool:
+        """Return whether this explicitly selected dictionary covers one project job."""
+
+        return self.job_ids == ("*",) or job_id in self.job_ids
 
 
 def load_project_translation_dictionary(

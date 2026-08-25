@@ -226,7 +226,7 @@ def build_automated_translation(
     if dictionary is not None:
         if dictionary_sha256 is None:
             raise ValueError("translation dictionary SHA-256 is required")
-        if review.header.job_id not in dictionary.job_ids:
+        if not dictionary.applies_to(review.header.job_id):
             raise ValueError("translation dictionary is not approved for this job")
         if (dictionary.source_language, dictionary.target_language) != (
             review.header.source_language,
