@@ -4,6 +4,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.4.0 - 2026-08-25
+
+### Validated
+
+- Passed the complete locked release gate: formatting, lint, static typing, and all 602
+  tests.
+- Built the 0.4.0 wheel and source archive, checked their metadata and contents for private
+  benchmark or runtime material, and smoke-tested the installed wheel's import, CLI version,
+  HTML export, and YouTube srv3 YTT export from an isolated target directory.
+
 ### Changed
 
 - Added an explicit LM Studio translation `plain-text` mode for single-unit responses when

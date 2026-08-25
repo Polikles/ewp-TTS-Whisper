@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.3.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.4.0` remains an internal beta, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
@@ -13,6 +13,10 @@
   `main`; local wheel/sdist packaging and model-free installed-wheel validation passed.
 - The v0.3.0 local/cloud automated-correction workflow is implemented and benchmarked;
   its output remains a non-final review candidate requiring human acceptance.
+- The v0.4.0 translation, project-dictionary, timed-event, YouTube srv3 YTT, and embeddable
+  synchronized HTML workflows are implemented and acceptance-audited.
+- The v0.4.0 locked test gate, wheel/source build, archive privacy inspection, and isolated
+  installed-wheel CLI/export smoke tests pass.
 
 ## Known limitations before the first MVP release
 
@@ -98,6 +102,8 @@ Optional exports are generated from that canonical file:
 <job_id>_transcript.txt
 <job_id>_subtitles.srt
 <job_id>_subtitles.vtt
+<job_id>_subtitles_srv3.ytt
+<job_id>_transcript.html
 ```
 
 Reprocessing the same source with `--force` creates a consistently versioned result set:
@@ -107,6 +113,8 @@ Reprocessing the same source with `--force` creates a consistently versioned res
 <job_id>_transcript_v002.txt
 <job_id>_subtitles_v002.srt
 <job_id>_subtitles_v002.vtt
+<job_id>_subtitles_srv3_v002.ytt
+<job_id>_transcript_v002.html
 ```
 
 ## Documentation
@@ -135,10 +143,13 @@ Recommended starting documents:
 8. [`docs/21-v0.2.0-transcript-revision-plan.md`](docs/21-v0.2.0-transcript-revision-plan.md) — implementation and acceptance plan.
 9. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — post-0.1 priorities.
 10. [`docs/22-v0.3-automated-correction.md`](docs/22-v0.3-automated-correction.md) — accepted v0.3 correction contract and acceptance checklist.
+11. [`docs/23-v0.4-translation-contract.md`](docs/23-v0.4-translation-contract.md) — accepted v0.4 translation and semantic-benchmark contract.
+12. [`docs/24-v0.4-timed-event-semantics.md`](docs/24-v0.4-timed-event-semantics.md) — canonical timed-event semantics used by YTT and HTML.
 
 ## Examples and schemas
 
 - [`examples/config.example.toml`](examples/config.example.toml)
+- [`examples/html-player/`](examples/html-player/) — consuming synchronized-player example.
 - [`examples/results.example.json`](examples/results.example.json)
 - [`examples/segments.example.json`](examples/segments.example.json)
 - [`examples/review.example.txt`](examples/review.example.txt)

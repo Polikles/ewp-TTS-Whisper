@@ -102,3 +102,18 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 | FR-K16 | implemented | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
 | FR-K17, FR-K18 | implemented | Exact-lineage canonical/revision cases report lexical outcomes, exact normalized gold-relative edit precision/recall, revision activity, warnings, alignment warnings, and speaker preservation. Private resume evidence now aggregates attempts, retries, provider latency, requests, tokens, cost, and legacy-entry coverage; unsupported/style interpretation remains an explicit manual review task. |
 | FR-K19 | implemented | CLI and operator documentation label automated output as a non-final candidate and require manual wording/speaker/punctuation/quotation review before final or gold use. |
+
+## v0.4 translation and platform-export acceptance
+
+The v0.4 contracts are defined in `23-v0.4-translation-contract.md`,
+`24-v0.4-timed-event-semantics.md`, and the corresponding roadmap gates.
+
+| Capability | Status | Implementation and evidence |
+| --- | --- | --- |
+| Manual and automated translation | verified | Exact source lineage, speaker-safe sentence units, immutable manual/non-final artifacts, prepare/preview/apply/audit/export, retry/resume providers, and accepted Bielik end-to-end pilot. |
+| Semantic translation benchmark | verified | Exact-lineage private human assessments and content-free direction-specific reports; semantic fidelity is separate from dictionary convention adherence. |
+| Project dictionaries | verified | Explicit versioned/hashed translation and correction dictionaries, retained approval/rejection decisions, source-aware provider context, audit provenance, Gemini comparison, and accepted held-out `s0e00` result. |
+| Timed-event semantics | verified | Canonical/derived schema `1.1`, legacy speech default, revision/effective inheritance, closed kind vocabulary, and YTT/HTML consumption. |
+| YouTube srv3 YTT | verified | Deterministic parser-tested exporter and successful unlisted real Polish upload covering wrapping, colors, centering, timing, labels, and diacritics. |
+| Embeddable HTML | verified | Escaped sentence-level raw/revised/translated fragments plus separate player; real-media Firefox, LibreWolf, Chrome, and Brave qualification covers range seeking, keyboard/mouse interaction, highlighting/following, theme controls, and no-script fallback. |
+| Privacy and reproducibility | verified | `/tmp`-only pilots, no committed private payloads or secrets, content-free benchmark evidence, deterministic exports, immutable source artifacts, the 602-test locked gate, archive-content inspection, and isolated installed-wheel CLI/HTML/YTT smoke checks. |

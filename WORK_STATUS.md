@@ -1,10 +1,10 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-23**.
+Last updated: **2026-08-25**.
 
 ## Checkpoint
 
-Version `0.3.0` is an internal beta on `main`; it is not tagged or published as a public
+Version `0.4.0` is an internal beta on `main`; it is not tagged or published as a public
 release. The repository is public and licensed under `AGPL-3.0-or-later`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
@@ -24,8 +24,8 @@ The first v0.4 vertical slice—manual Polish/English translation—is implement
   legal case names such as `Battle v. Microsoft`;
 - a complete operator playbook in `WSL config/TRANSLATE_TRANSCRIPTS.md`.
 
-The first automated-translation and benchmark slices are also implemented in the current
-working tree: provider-neutral single-owner unit requests, bounded read-only context, a
+The automated-translation and benchmark slices are also implemented on `main`:
+provider-neutral single-owner unit requests, bounded read-only context, a
 deterministic mock provider, retry/resume execution, immutable non-final candidates,
 content-free operations reporting, exact-scope consent, and the first network-isolated LM
 Studio adapter are present. Failure-isolated directory execution and explicit manual
@@ -35,8 +35,8 @@ manual references can be staged into
 private per-unit assessments, and completed reviews produce content-free,
 direction-specific semantic reports. Meaning fidelity is explicitly independent of
 lexical overlap; names, project conventions, and selected-dictionary adherence are a
-separate dimension. The first corrected LM Studio baseline is complete; manual acceptance
-and the first exact-lineage semantic report remain pending.
+separate dimension. The corrected LM Studio baseline, manual acceptance, exact-lineage
+semantic report, and project-dictionary comparison are complete.
 
 The first real Bielik 11B v3 Q8 `s0e00` pilot completed operationally: 80 requests, zero
 retries, 49,605 ms provider time, and complete resume reuse on publication. Its candidate
@@ -79,18 +79,13 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The quality gate at checkpoint commit `0ee7841` passed formatting, lint, type checks, and
-all **544 tests**. Canonical results and accepted revisions remain immutable. Private
-corpus content, API keys, provider payloads, and runtime resume/lock files remain outside
-Git.
+The current v0.4 tree passes formatting, lint, type checks, and all **602 tests**. Canonical
+results and accepted revisions remain immutable. Private corpus content, API keys,
+provider payloads, and runtime resume/lock files remain outside Git.
 
-The current automated-translation, semantic-benchmark, and translation-dictionary tree
-passes the same complete gate with **579 tests**.
+## v0.4 delivered work
 
-## Next session: ordered v0.4 work
-
-Start with item 1 and complete one vertical slice at a time. These are the complete
-remaining v0.4 workstreams; details and acceptance criteria live in
+These are the delivered v0.4 workstreams; details and acceptance criteria live in
 `docs/23-v0.4-translation-contract.md` and `docs/99-roadmap-v2.md`.
 
 1. **Automated translation.** The provider-neutral request/response, mock, LM Studio,
@@ -207,11 +202,12 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    fallback also passed. The HTML slice is accepted. Minor acoustic spill across an
    occasional sentence boundary is inherited from word alignment and explicitly deferred;
    the renderer must not apply heuristic timestamp shifts.
-7. **v0.4 closure.** Reconcile requirements, traceability, operator documentation,
-   changelog, schemas/examples, package version and artifacts. Run the full automated and
-   packaging gates. Full clean-machine installation-through-workflow qualification stays
-   deferred until most/all functional requirements exist; its first run is manual and
-   later becomes automated.
+7. **v0.4 closure.** Requirements, traceability, operator documentation, changelog,
+   schemas/examples, and package version are reconciled. The full locked gate passes with
+   602 tests, and the 0.4.0 wheel/source archives pass metadata, privacy-content, and isolated
+   installed-wheel CLI/HTML/YTT smoke checks. Full clean-machine
+   installation-through-workflow qualification remains the next manual release-candidate
+   gate and later becomes automated.
 
 ## Explicitly deferred, not lost
 
