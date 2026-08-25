@@ -24,7 +24,10 @@ from ewp_transcripts.domain.correction import (
     CorrectionToken,
     CorrectionUsage,
 )
-from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
+from ewp_transcripts.domain.errors import (
+    InvalidCanonicalResultError,
+    InvalidCorrectionResponseError,
+)
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
 from ewp_transcripts.domain.revision import (
     RevisionDictionaryProvenance,
@@ -419,7 +422,12 @@ def build_correction_revision(
     if execution_policy is not None and not isinstance(execution_policy, CorrectionExecutionPolicy):
         raise TypeError("execution_policy must be CorrectionExecutionPolicy")
 
-    base = load_canonical_result(result_path)
+    try:
+        base = load_canonical_result(result_path)
+    except (OSError, UnicodeError, ValueError) as error:
+        raise InvalidCanonicalResultError(
+            f"Cannot read canonical result JSON: {result_path}"
+        ) from error
     parent = (
         load_transcript_revision(source_revision_path) if source_revision_path is not None else None
     )

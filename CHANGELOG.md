@@ -26,6 +26,8 @@ meaningful behavior change under Semantic Versioning.
   revisions are the recommended subtitle and translation source.
 - Successful work-directory cleanup now also removes an empty per-run parent while
   preserving the configured work root and any sibling jobs.
+- Automated correction now reports a concise canonical-input error when an empty shell
+  variable or other mistake resolves to a directory, instead of exposing a Python traceback.
 
 ## 0.4.0 - 2026-08-25
 

@@ -129,3 +129,23 @@ def test_remote_endpoint_requires_opt_in_and_prints_network_warning(tmp_path: Pa
     assert opted_in.exit_code == 4
     assert "sent over the network" in opted_in.stderr
     assert "no request was made" in opted_in.stderr
+
+
+def test_directory_instead_of_canonical_json_is_a_concise_error(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "revise",
+            "correct",
+            str(tmp_path),
+            "--model",
+            "must-not-be-called",
+            "--consent",
+            "once",
+            "--preview",
+        ],
+    )
+
+    assert result.exit_code == 8
+    assert "Cannot read canonical result JSON" in result.stderr
+    assert "Traceback" not in result.stderr
