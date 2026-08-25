@@ -583,7 +583,9 @@ mock player is implemented separately with native audio, site-owned CSS/JavaScri
 click/keyboard seeking, current-sentence following, accessible focus, reduced-motion,
 light/dark presentation, and readable unenhanced markup. A manual real-media browser check
 passed Firefox/LibreWolf but exposed Chromium-family clicks restarting at zero. The retry
-waits for metadata and seek completion and adds explicit theme/auto-follow controls.
+waits for metadata and seek completion and adds explicit theme/auto-follow controls. A
+second Chromium retry isolated the remaining failure to the basic Python static server;
+the example now includes a single-range `206 Partial Content` server.
 
 - qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
   audio/video players; record account- or host-dependent limitations;

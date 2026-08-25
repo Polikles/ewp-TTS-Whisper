@@ -200,6 +200,8 @@ remaining v0.4 workstreams; details and acceptance criteria live in
    pilot passed Firefox/LibreWolf audio, mouse/keyboard seeking, highlighting, following,
    and light/dark rendering, but Chromium-family clicks restarted at zero. The retry waits
    for metadata and seek completion; explicit theme and auto-follow controls were added.
+   A second Chromium retry isolated the remaining failure to Python's basic static server;
+   the example now includes a range-capable server and byte-range calculation tests.
 7. **v0.4 closure.** Reconcile requirements, traceability, operator documentation,
    changelog, schemas/examples, package version and artifacts. Run the full automated and
    packaging gates. Full clean-machine installation-through-workflow qualification stays

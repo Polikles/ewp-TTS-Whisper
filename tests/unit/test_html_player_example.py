@@ -2,6 +2,7 @@
 
 from html.parser import HTMLParser
 from pathlib import Path
+from runpy import run_path
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/html-player"
@@ -57,3 +58,14 @@ def test_mock_player_owns_accessible_visual_and_playback_enhancement() -> None:
     assert 'theme.addEventListener("change"' in script
     assert ':root[data-theme="light"]' in styles
     assert ':root[data-theme="dark"]' in styles
+
+
+def test_mock_server_calculates_media_byte_ranges() -> None:
+    namespace = run_path(str(EXAMPLE / "serve.py"), run_name="ewp_html_player_server")
+    parse_byte_range = namespace["parse_byte_range"]
+
+    assert parse_byte_range("bytes=2-5", 10) == (2, 5)
+    assert parse_byte_range("bytes=6-", 10) == (6, 9)
+    assert parse_byte_range("bytes=-3", 10) == (7, 9)
+    assert parse_byte_range("bytes=10-11", 10) is None
+    assert parse_byte_range("invalid", 10) is None

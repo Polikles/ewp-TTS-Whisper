@@ -234,7 +234,8 @@ All notable changes to EWP-transcripts are documented here.
   click and keyboard seeking, playback highlighting/following, accessible focus,
   reduced-motion handling, explicit theme and auto-follow controls, light/dark
   presentation, and readable unenhanced markup. Cross-browser seeking waits for media
-  metadata and seek completion before playback.
+  metadata and seek completion before playback, and the example includes a range-capable
+  local server for Chromium media seeking.
 
 - Added an opt-in deterministic YouTube srv3 YTT export with one existing planned cue per
   paragraph, preserved planned line wrapping, millisecond timing, configurable stable
