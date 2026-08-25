@@ -4,7 +4,7 @@ Last updated: **2026-08-25**.
 
 ## Checkpoint
 
-Version `0.5.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.6.1` is the next internal beta on `main`; it is not tagged or published as a public
 release. The repository is public and licensed under `AGPL-3.0-or-later`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
@@ -79,7 +79,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.5 tree passes formatting, lint, type checks, and all **606 tests** while its
+The current v0.6 tree passes formatting, lint, type checks, and all **617 tests** while its
 clean-machine workflow gate continues. Canonical results and accepted revisions remain
 immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.
@@ -94,7 +94,12 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
    implemented. The verified-Polish `pl -> en`, `preserve/preserve`, no-dictionary Bielik
    baseline is complete, including exact-parent manual acceptance, audit, export, and the
    semantic assessment/report. Keep `en -> pl` separate.
-   Additional local models and cloud adapters remain separate later benchmark cases.
+   Local LLM translation is operationally usable, but it is not recommended for
+   publication-quality output on current evidence: Bielik remains noticeably mechanical
+   and requires comprehensive human semantic/convention review. This gate primarily
+   qualified LM Studio compatibility, failure handling, provenance, resume, review, and
+   export—not a broad model-quality ranking. Additional local models and settings were
+   intentionally not exhaustively tested.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
    content-free reporting boundary is implemented. The first narrower Bielik reference and
    complete candidate/correction/apply/audit/export/report path are qualified. Next compare

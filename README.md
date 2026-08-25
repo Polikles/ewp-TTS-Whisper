@@ -21,6 +21,10 @@
 ## Known limitations before the first MVP release
 
 - English and automatic language selection are part of the MVP contract because large-v2 is multilingual. The complete English path, especially word alignment, still requires validation with an English sample before its quality can be characterized.
+- Local LLM translation is supported as a non-final review candidate, but is not currently
+  recommended for publication-quality translation: the Bielik gate validated compatibility
+  and auditability, while its language remained too mechanical for acceptance without
+  comprehensive human review.
 - The current manually verified quality corpus contains three Polish cases and has no timestamp or diarization annotations. WER/CER are baselined; timestamp accuracy and DER/JER remain to be baselined after the corpus is expanded.
 - Subtitle syntax, readability, and timing passed short and complete-episode YouTube reviews.
 - The wheel passed isolated offline transcription, and the complete locked source installation passed in a fresh Ubuntu 24.04 WSL2 distribution.

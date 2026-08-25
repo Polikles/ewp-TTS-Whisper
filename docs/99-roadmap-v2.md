@@ -309,7 +309,7 @@ attribution. Unsupported combinations or language directions fail before provide
 Benchmarks keep each exact style configuration separate and compare the preserve/preserve
 baseline first.
 
-## 5. Automated translation — planned for v0.4
+## 5. Automated translation — implemented compatibility slice
 
 After manual translation establishes ground truth:
 
@@ -361,6 +361,17 @@ or packaging claims. Exact model artifact, revision, quantization, backend, prom
 hardware must be recorded. General instruction models and translation-specialized models
 may require different provider adapters and request contracts while producing the same
 validated translation artifact.
+
+Current conclusion: local LLM translation is usable as an explicitly non-final candidate,
+but is not recommended for publication-quality translation because observed output is too
+mechanical and still needs full human semantic and convention review. The completed Bielik
+gate tested compatibility and workflow behavior, not comparative quality; broad sweeps over
+models and generation settings are intentionally out of scope for the functional gate.
+
+Optional post-functional work may revisit local translation quality only after the remaining
+functional requirements are complete and a scalable semantic-comparison method avoids manual
+review of entire corpora for every model/configuration. Until then, do not schedule wide local
+model sweeps or infer a ranking from the single-model compatibility pilot.
 
 Polish-to-English and English-to-Polish are separate benchmark suites. They use separate
 manually approved gold translations, aggregate metrics, qualitative review, failure
