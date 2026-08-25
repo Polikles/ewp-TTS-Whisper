@@ -59,7 +59,8 @@ source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH
 ./scripts/setup-models.sh
 ```
 
-The script explicitly confirms system changes, installs the locked application
+The script explicitly confirms system changes, installs the required Ubuntu tools
+(including FFmpeg and `ripgrep`), installs the locked application
 environment, and verifies diagnostics. It does not update an existing checkout or download
 models. The separate model script downloads exact pinned snapshots, privately prompts for
 the gated Hugging Face token, and verifies readiness. The

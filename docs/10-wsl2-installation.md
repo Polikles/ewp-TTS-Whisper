@@ -68,7 +68,7 @@ A missing model during `transcribe` returns exit code 3 with instructions; it do
 The installer or developer bootstrap should:
 
 - install application dependencies from the lockfile;
-- verify FFmpeg;
+- verify FFmpeg and the `rg` text-search tool used by documented checks;
 - verify CUDA;
 - detect `HF_TOKEN` without displaying its value;
 - explain that gated-model terms must be accepted;

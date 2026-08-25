@@ -78,7 +78,7 @@ if [[ "$mode" == "install" ]]; then
 
     sudo apt update
     sudo apt upgrade
-    sudo apt install build-essential ca-certificates curl ffmpeg git
+    sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep
 
     if ! command -v uv >/dev/null 2>&1; then
         uv_installer="$(mktemp /tmp/ewp-uv-install-XXXXXXXX.sh)"
@@ -96,7 +96,7 @@ if [[ "$mode" == "install" ]]; then
         '  source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH"'
 fi
 
-required_commands=(git ffmpeg ffprobe curl uv)
+required_commands=(git ffmpeg ffprobe curl rg uv)
 for command_name in "${required_commands[@]}"; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         printf 'Error: required command is missing: %s\n' "$command_name" >&2
@@ -106,6 +106,7 @@ for command_name in "${required_commands[@]}"; do
 done
 
 git --version
+rg --version | head -n 1
 ffmpeg -version | head -n 1
 ffprobe -version | head -n 1
 uv --version

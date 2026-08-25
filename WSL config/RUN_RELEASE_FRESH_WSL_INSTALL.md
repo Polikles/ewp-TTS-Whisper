@@ -32,9 +32,10 @@ test ! -e "$HOME/transkrypcje/ewp-transcripts" \
 
 sudo apt update
 sudo apt upgrade
-sudo apt install build-essential ca-certificates curl ffmpeg git
+sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep
 
 git --version
+rg --version | head -n 1
 ffmpeg -version | head -n 1
 ffprobe -version | head -n 1
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits

@@ -12,6 +12,7 @@
 | Python | 3.12 |
 | Package manager | `uv`; dependencies are reproduced from the committed lockfile |
 | Media tools | FFmpeg and ffprobe from Ubuntu packages |
+| Text search | ripgrep (`rg`) from Ubuntu packages, used by documented verification checks |
 | Storage | Linux-filesystem space for source checkout, environments, models, and work files |
 | Network | Required during initial package and model setup; not required for normal offline transcription |
 

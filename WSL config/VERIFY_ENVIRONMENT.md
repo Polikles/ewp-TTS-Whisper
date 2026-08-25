@@ -26,6 +26,7 @@ nvidia-smi
 python3 --version
 command -v uv && uv --version
 git --version
+rg --version | head -n 1
 ffmpeg -version | head -n 1
 ffprobe -version | head -n 1
 df -h "$HOME"

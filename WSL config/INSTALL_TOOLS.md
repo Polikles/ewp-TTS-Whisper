@@ -15,13 +15,14 @@ Review the proposed changes before confirming. Restart WSL if the kernel or core
 ## 2. Install base packages
 
 ```bash
-sudo apt install build-essential ca-certificates curl ffmpeg git
+sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep
 ```
 
 Verify:
 
 ```bash
 git --version
+rg --version
 ffmpeg -version
 ffprobe -version
 curl --version
