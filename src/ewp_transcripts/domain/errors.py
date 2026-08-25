@@ -97,6 +97,18 @@ class TranslationProviderError(ApplicationError):
     """Base class for sanitized automated-translation provider failures."""
 
 
+class TranslationProviderUnavailableError(TranslationProviderError):
+    """Raised when the selected translation endpoint cannot serve requests."""
+
+    code = "TRANSLATION_PROVIDER_UNAVAILABLE"
+
+
+class TranslationModelUnavailableError(TranslationProviderError):
+    """Raised when the selected endpoint does not advertise the requested model."""
+
+    code = "TRANSLATION_MODEL_UNAVAILABLE"
+
+
 class RetryableTranslationProviderError(TranslationProviderError):
     """Raised for an explicitly retryable translation-provider failure."""
 

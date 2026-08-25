@@ -22,10 +22,13 @@ from ewp_transcripts.domain.errors import (
     InvalidTranslationResponseError,
     PermanentTranslationHttpError,
     RetryableTranslationProviderError,
+    TranslationModelUnavailableError,
+    TranslationProviderUnavailableError,
 )
 
 JsonObject = dict[str, Any]
 HttpTransport = Callable[[str, Mapping[str, str], bytes, float], JsonObject]
+AvailabilityTransport = Callable[[str, float], JsonObject]
 _PLAIN_TEXT_ENVELOPE_VERSION = "bielik-envelope-v4"
 
 FAITHFUL_TRANSLATION_SYSTEM_PROMPT = """Translate exactly one owned transcript unit into
@@ -86,12 +89,40 @@ class LmStudioTranslationProvider:
         config: LmStudioTranslationConfig,
         *,
         transport: HttpTransport | None = None,
+        availability_transport: AvailabilityTransport | None = None,
     ) -> None:
         self._config = config
         self._endpoint = _normalized_endpoint(
             config.endpoint, allow_remote=config.allow_remote_endpoint
         )
         self._transport = transport or _urllib_transport
+        self._availability_transport = availability_transport or _urllib_get_transport
+
+    def preflight(self, *, timeout_seconds: float = 3.0) -> None:
+        """Fail quickly unless the endpoint advertises the exact selected model."""
+
+        if timeout_seconds <= 0:
+            raise ValueError("LM Studio preflight requires a positive timeout")
+        try:
+            document = self._availability_transport(f"{self._endpoint}/models", timeout_seconds)
+            models = document["data"]
+            if not isinstance(models, list):
+                raise TypeError
+            identifiers = {
+                item["id"]
+                for item in models
+                if isinstance(item, dict) and isinstance(item.get("id"), str)
+            }
+        except TranslationProviderUnavailableError:
+            raise
+        except (KeyError, TypeError):
+            raise TranslationProviderUnavailableError(
+                "LM Studio availability response is invalid"
+            ) from None
+        if self.model_id not in identifiers:
+            raise TranslationModelUnavailableError(
+                "LM Studio is reachable but the selected model is not loaded"
+            )
 
     @property
     def provider_id(self) -> str:
@@ -371,4 +402,20 @@ def _urllib_transport(
         ) from None
     if not isinstance(document, dict):
         raise InvalidTranslationResponseError("LM Studio returned an invalid translation response")
+    return document
+
+
+def _urllib_get_transport(url: str, timeout: float) -> JsonObject:
+    request = urllib.request.Request(url, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+            document = json.loads(response.read().decode("utf-8"))
+    except (TimeoutError, urllib.error.URLError, urllib.error.HTTPError):
+        raise TranslationProviderUnavailableError("LM Studio endpoint is unavailable") from None
+    except (UnicodeError, json.JSONDecodeError):
+        raise TranslationProviderUnavailableError(
+            "LM Studio availability response is invalid"
+        ) from None
+    if not isinstance(document, dict):
+        raise TranslationProviderUnavailableError("LM Studio availability response is invalid")
     return document

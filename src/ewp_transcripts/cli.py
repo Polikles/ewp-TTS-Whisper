@@ -791,6 +791,8 @@ def translate_automate_command(
                 )
             )
         consent_choice = _translation_consent_choice(config, provider, consent)
+        if isinstance(provider, LmStudioTranslationProvider):
+            provider.preflight()
         if normalized_result.is_dir():
             batch = process_automated_translation_batch(
                 normalized_result,
@@ -2096,7 +2098,9 @@ def _transcribe_overrides(
 
 
 def _expected_error(error: ApplicationError) -> None:
-    typer.echo(f"Error: {error}", err=True)
+    stable_code = getattr(error, "code", None)
+    prefix = f"Error [{stable_code}]" if isinstance(stable_code, str) else "Error"
+    typer.echo(f"{prefix}: {error}", err=True)
     if isinstance(error, InvalidConfigurationError):
         raise typer.Exit(code=2) from error
     if isinstance(error, MissingCapabilityError):

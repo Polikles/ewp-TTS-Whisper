@@ -6,7 +6,11 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.automated_translation import build_automated_translation_request
-from ewp_transcripts.domain.errors import InvalidTranslationResponseError
+from ewp_transcripts.domain.errors import (
+    InvalidTranslationResponseError,
+    TranslationModelUnavailableError,
+    TranslationProviderUnavailableError,
+)
 from ewp_transcripts.translation_lm_studio import (
     LmStudioTranslationConfig,
     LmStudioTranslationProvider,
@@ -15,6 +19,42 @@ from ewp_transcripts.translation_review_service import prepare_translation_revie
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
+
+
+def test_preflight_accepts_exact_loaded_model() -> None:
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik"),
+        availability_transport=lambda _url, _timeout: {"data": [{"id": "bielik"}]},
+    )
+
+    provider.preflight()
+
+
+def test_preflight_rejects_reachable_endpoint_without_selected_model() -> None:
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik"),
+        availability_transport=lambda _url, _timeout: {"data": []},
+    )
+
+    with pytest.raises(TranslationModelUnavailableError) as raised:
+        provider.preflight()
+
+    assert raised.value.code == "TRANSLATION_MODEL_UNAVAILABLE"
+
+
+def test_preflight_reports_unavailable_endpoint_without_retrying_units() -> None:
+    def unavailable(_url: str, _timeout: float):
+        raise TranslationProviderUnavailableError("endpoint unavailable")
+
+    provider = LmStudioTranslationProvider(
+        LmStudioTranslationConfig(model_id="bielik"),
+        availability_transport=unavailable,
+    )
+
+    with pytest.raises(TranslationProviderUnavailableError) as raised:
+        provider.preflight()
+
+    assert raised.value.code == "TRANSLATION_PROVIDER_UNAVAILABLE"
 
 
 def test_adapter_sends_owned_unit_and_read_only_context() -> None:
