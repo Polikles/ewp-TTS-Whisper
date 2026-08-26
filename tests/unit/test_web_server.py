@@ -38,6 +38,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/")
     assert response.status == 200
     assert b"EWP Transcriber" in response.body
+    assert b'id="clear-workflow"' in response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
     assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
 

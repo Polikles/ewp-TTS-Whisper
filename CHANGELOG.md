@@ -28,6 +28,8 @@ The next internal-beta version is `0.8.0`.
 - Connected read-only GUI inspect and dry-run forms directly to existing application
   services, with structured results, bounded in-process operation history, explicit-root
   containment, symlink rejection, Origin validation, and bounded JSON requests.
+- Added a GUI Clear control that resets input/output fields and all visible operation results
+  without mutating server-side history or artifacts.
 - Added the first executable local-browser GUI slice: `transcriber gui` serves a bundled,
   responsive offline shell on loopback with versioned health/about/allowed-root APIs,
   compatibility checking, security headers, Host validation, coded errors, and no ML load.

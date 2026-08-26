@@ -130,6 +130,10 @@ report left the dry-run display unclear, so the interface now distinguishes insp
 dry-run completion, shows compact summary cards, treats a missing result as a coded defect,
 keeps full JSON in a disclosure panel, and places About in the page footer.
 
+The owner subsequently confirmed the clarified dry-run display, structured direct-file plan,
+ambiguous-directory error, and revised footer. A Clear control now resets both path fields and
+all visible result state locally without deleting operation evidence or filesystem content.
+
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
 The initial attempt to allocate the next result version was rejected after owner review:
