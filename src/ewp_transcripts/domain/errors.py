@@ -79,6 +79,12 @@ class AmbiguousGroupError(ApplicationError):
     code = "AMBIGUOUS_GROUP"
 
 
+class AmbiguousJobIdError(ApplicationError):
+    """Raised when separate discovered episodes would share one logical job identity."""
+
+    code = "AMBIGUOUS_JOB_ID"
+
+
 class MultipleAudioStreamsError(ApplicationError):
     """Raised when an input has multiple audio streams and none was selected."""
 

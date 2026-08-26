@@ -52,9 +52,9 @@ The next internal-beta version is `0.8.0`.
 
 ### Changed
 
-- Dry-run now simulates earlier jobs in the same batch when allocating later outputs. Inputs
-  with the same derived job ID therefore receive distinct versions (or an exact duplicate is
-  skipped) instead of advertising colliding paths.
+- Dry-run and transcription now reject a batch containing separate episodes with the same
+  derived job ID. They neither overwrite paths, misuse result versions as source aliases, nor
+  silently prefer one format; explicit per-input aliases remain future work.
 - Clarified the GUI footer as `EWP Transcriber v0.8.0` and `API v1.0`; license and warranty
   is now a direct link rather than an unhelpful plaintext disclaimer.
 - Standardized repository and package licensing on `AGPL-3.0-only`, added the named author

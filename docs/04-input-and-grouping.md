@@ -23,6 +23,13 @@ D:/podcast/season01
 
 Creates jobs from files directly inside the directory. Subdirectories are ignored unless `--recursive` is used.
 
+If separate discovered episodes derive the same `job_id` (for example `S01E01.mp3` and
+`S01E01.wav`), inspection reports both sources but dry-run and transcription fail with
+`AMBIGUOUS_JOB_ID`. The application does not assume that formats are duplicates, silently
+prefer one, or use result-version numbers as source aliases. Select one file directly or
+rename/relocate it. A future explicit per-input alias may permit intentional same-stem batch
+processing without making identity depend on neighboring directory contents.
+
 ### Explicit group
 
 Several paths supplied in one grouping operation create one episode. Explicit grouping takes precedence over filename conventions.

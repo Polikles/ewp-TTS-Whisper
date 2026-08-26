@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from ewp_transcripts import application
 from ewp_transcripts.application import dry_run
 from ewp_transcripts.config import ApplicationConfig
@@ -11,6 +13,7 @@ from ewp_transcripts.domain import (
     InspectionResult,
 )
 from ewp_transcripts.domain.enums import PlanDecision
+from ewp_transcripts.domain.errors import AmbiguousJobIdError
 
 
 def _inspection(input_path: Path) -> InspectionResult:
@@ -57,7 +60,7 @@ def test_dry_run_composes_inspection_and_output_planning(
     assert result.jobs[0].outputs.results == destination / "episode_results.json"
 
 
-def test_dry_run_simulates_versions_for_same_job_id(tmp_path: Path, monkeypatch) -> None:
+def test_dry_run_rejects_same_batch_job_id_collision(tmp_path: Path, monkeypatch) -> None:
     source = tmp_path / "media"
     source.mkdir()
     first = EpisodeInspection.model_construct(
@@ -75,10 +78,5 @@ def test_dry_run_simulates_versions_for_same_job_id(tmp_path: Path, monkeypatch)
     )
     monkeypatch.setattr(application, "inspect_input", lambda *args, **kwargs: inspection)
 
-    result = dry_run(source, config=ApplicationConfig(), output_directory=tmp_path / "planned")
-
-    assert result.jobs[0].outputs is not None
-    assert result.jobs[1].outputs is not None
-    assert result.jobs[0].outputs.results.name == "episode_results.json"
-    assert result.jobs[1].outputs.results.name == "episode_results_v002.json"
-    assert result.jobs[1].warnings[0].code.value == "SOURCE_NAME_COLLISION"
+    with pytest.raises(AmbiguousJobIdError, match="Separate discovered episodes"):
+        dry_run(source, config=ApplicationConfig(), output_directory=tmp_path / "planned")

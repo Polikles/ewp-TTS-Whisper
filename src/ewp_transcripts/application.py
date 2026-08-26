@@ -44,9 +44,7 @@ from ewp_transcripts.domain import (
     DryRunResult,
     EpisodeCandidate,
     EpisodeInspection,
-    ExistingResult,
     InspectionResult,
-    JobOutputPlan,
     JobReservation,
     TranscriptReview,
     TranscriptRevision,
@@ -60,6 +58,7 @@ from ewp_transcripts.domain.canonical import (
 from ewp_transcripts.domain.correction import CorrectionProvider
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import (
+    AmbiguousJobIdError,
     ApplicationError,
     InvalidReviewError,
     UnsupportedPipelineScopeError,
@@ -1613,38 +1612,44 @@ def dry_run(
         explicit_group_paths=explicit_group_paths,
         explicit_group_id=explicit_group_id,
     )
+    _require_unique_job_ids(inspection)
     destination = resolve_output_directory(
         inspection.discovery,
         config=effective_config.outputs,
         explicit_directory=output_directory,
     )
-    simulated_existing = list(find_existing_results(destination))
-    jobs: list[JobOutputPlan] = []
-    for episode in inspection.episodes:
-        plan = plan_job_outputs(
+    existing = find_existing_results(destination)
+    jobs = tuple(
+        plan_job_outputs(
             episode,
             output_directory=destination,
-            existing_results=tuple(simulated_existing),
+            existing_results=existing,
             force=force,
             config=effective_config.outputs,
         )
-        jobs.append(plan)
-        if plan.decision is PlanDecision.PROCESS:
-            assert plan.outputs is not None
-            simulated_existing.append(
-                ExistingResult(
-                    path=plan.outputs.results,
-                    job_id=plan.job_id,
-                    episode_signature_sha256=plan.episode_signature_sha256,
-                    result_version=plan.outputs.result_version,
-                )
-            )
+        for episode in inspection.episodes
+    )
     return DryRunResult(
         inspection=inspection,
         output_directory=destination,
         language=effective_config.general.language,
-        jobs=tuple(jobs),
+        jobs=jobs,
     )
+
+
+def _require_unique_job_ids(inspection: InspectionResult) -> None:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for episode in inspection.episodes:
+        if episode.job_id in seen:
+            duplicates.add(episode.job_id)
+        seen.add(episode.job_id)
+    if duplicates:
+        names = ", ".join(sorted(duplicates))
+        raise AmbiguousJobIdError(
+            "Separate discovered episodes share a job ID: "
+            f"{names}. Select one source directly or rename/relocate inputs explicitly."
+        )
 
 
 def transcribe_one(
@@ -1717,6 +1722,7 @@ def transcribe_batch(
         config=config,
         allow_duration_mismatch=allow_duration_mismatch,
     )
+    _require_unique_job_ids(inspected)
     inspected = apply_explicit_speaker_labels(inspected, speaker_map=speaker_map)
     destination = resolve_output_directory(
         inspected.discovery,

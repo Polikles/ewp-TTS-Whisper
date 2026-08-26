@@ -58,6 +58,7 @@ may still produce a traceback and are not assigned a misleading expected-error c
 | `AUDIO_PREPARATION_FAILED` | FFmpeg could not create the controlled working audio. | ASR did not receive a trusted input. | Check FFmpeg output, permissions, space, and media integrity. |
 | `CHANNEL_ANALYSIS_FAILED` | Channel samples could not be analyzed. | Automatic topology selection is unavailable. | Inspect the source and FFmpeg readiness. |
 | `AMBIGUOUS_GROUP` | Filename grouping produced more than one plausible episode. | Files are not combined by guesswork. | Use an explicit `--group` and `--group-id`. |
+| `AMBIGUOUS_JOB_ID` | Separate episodes discovered in one batch share the same derived job ID, often because formats or directories reuse a stem. | Neither source is silently preferred and version numbers are not misused as source disambiguators. | Select one source directly, or rename/relocate inputs until explicit per-input aliases are available. |
 | `MULTIPLE_AUDIO_STREAMS` | Media has multiple audio streams without an explicit choice. | The application refuses to pick possibly wrong audio. | Inspect streams and select the intended one. |
 | `SAMPLE_RATE_MISMATCH` | Explicitly grouped sources have incompatible sample rates. | Their timelines cannot be merged safely. | Supply matching sources or preprocess copies separately. |
 | `DURATION_MISMATCH` | Grouped duration drift exceeds the hard limit. | Merging could misattribute or omit speech. | Verify the group; override only after manual inspection. |

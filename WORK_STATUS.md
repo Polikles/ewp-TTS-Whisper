@@ -132,9 +132,11 @@ keeps full JSON in a disclosure panel, and places About in the page footer.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
-Application-level dry-run now simulates each earlier batch plan: a different signature is
-allocated the next result version and an exact duplicate is skipped. This correction applies
-to CLI and GUI planning alike and prevents the GUI from authorizing an impossible batch plan.
+The initial attempt to allocate the next result version was rejected after owner review:
+versions represent successive results for one logical job, not simultaneous source aliases.
+Dry-run and transcription now fail before publication with `AMBIGUOUS_JOB_ID`; they do not
+guess that the formats are interchangeable or make canonical identity depend on neighboring
+directory content. Users select one source directly until explicit per-input aliases exist.
 
 The `0.7.0` package candidate passed the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files
