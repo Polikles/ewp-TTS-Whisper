@@ -15,6 +15,7 @@ from typing import ClassVar
 from urllib.parse import urlsplit
 
 from ewp_transcripts import __version__
+from ewp_transcripts.web_workflows import GuiWorkflowController
 
 API_VERSION = "1"
 REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
@@ -134,6 +135,7 @@ class LocalGuiServer(ThreadingHTTPServer):
 
     def __init__(self, config: WebConfiguration) -> None:
         self.gui_config = config
+        self.gui_workflows = GuiWorkflowController(config.allowed_roots)
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
 
 
@@ -146,6 +148,38 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     _security_headers: ClassVar[dict[str, str]] = SECURITY_HEADERS
 
     def do_GET(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path == "/api/v1/operations":
+            host = self.headers.get("Host", "")
+            if host not in {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.MISDIRECTED_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_HOST_REJECTED",
+                                "message": (
+                                    "The request Host is not allowed by the local GUI server."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(
+                _json_response(
+                    HTTPStatus.OK,
+                    {
+                        "operations": [
+                            item.model_dump(mode="json")
+                            for item in self.server.gui_workflows.operations()
+                        ]
+                    },
+                )
+            )
+            return
         response = dispatch_get(
             self.server.gui_config,
             server_port=self.server.server_port,
@@ -157,6 +191,77 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response.body)
 
+    def do_POST(self) -> None:  # noqa: N802
+        host = self.headers.get("Host", "")
+        expected_origin = f"http://127.0.0.1:{self.server.server_port}"
+        if host not in {
+            f"127.0.0.1:{self.server.server_port}",
+            f"localhost:{self.server.server_port}",
+        }:
+            self._write_response(
+                _json_response(
+                    HTTPStatus.MISDIRECTED_REQUEST,
+                    {
+                        "error": {
+                            "code": "GUI_HOST_REJECTED",
+                            "message": "The request Host is not allowed by the local GUI server.",
+                        }
+                    },
+                )
+            )
+            return
+        if self.headers.get("Origin") not in {
+            expected_origin,
+            f"http://localhost:{self.server.server_port}",
+        }:
+            self._write_response(
+                _json_response(
+                    HTTPStatus.FORBIDDEN,
+                    {
+                        "error": {
+                            "code": "GUI_ORIGIN_REJECTED",
+                            "message": "The request Origin is not allowed by the local GUI server.",
+                        }
+                    },
+                )
+            )
+            return
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if not 0 < length <= 16_384:
+                raise ValueError("Request body size is invalid")
+            document = json.loads(self.rfile.read(length))
+            if not isinstance(document, dict):
+                raise ValueError("JSON body must be an object")
+        except (ValueError, json.JSONDecodeError):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.BAD_REQUEST,
+                    {
+                        "error": {
+                            "code": "GUI_REQUEST_INVALID",
+                            "message": "The request must contain a valid bounded JSON object.",
+                        }
+                    },
+                )
+            )
+            return
+        path = urlsplit(self.path).path
+        if path == "/api/v1/inspect":
+            operation = self.server.gui_workflows.run("inspect", document)
+        elif path == "/api/v1/dry-run":
+            operation = self.server.gui_workflows.run("dry-run", document)
+        else:
+            self._write_response(
+                _json_response(
+                    HTTPStatus.NOT_FOUND,
+                    {"error": {"code": "GUI_ROUTE_NOT_FOUND", "message": "No such GUI route."}},
+                )
+            )
+            return
+        status = HTTPStatus.OK if operation.status == "completed" else HTTPStatus.BAD_REQUEST
+        self._write_response(_json_response(status, operation.model_dump(mode="json")))
+
     def log_message(self, format: str, *args: object) -> None:
         return
 
@@ -166,6 +271,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(content_length))
         for name, value in self._security_headers.items():
             self.send_header(name, value)
+
+    def _write_response(self, response: WebResponse) -> None:
+        self.send_response(response.status)
+        self._headers(content_type=response.content_type, content_length=len(response.body))
+        self.end_headers()
+        self.wfile.write(response.body)
 
 
 def serve_gui(*, port: int, allowed_roots: list[Path], open_browser: bool = True) -> None:

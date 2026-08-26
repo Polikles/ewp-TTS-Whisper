@@ -8,4 +8,5 @@ main { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)
 section { background: #fff; border: 1px solid #d9d5cb; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 .4rem 1.4rem #20312712; }
 dl div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #ddd; padding: .6rem 0; }
 dt { font-weight: 700; } dd { margin: 0; text-align: right; } a { color: #075d84; } a:focus-visible { outline: .2rem solid #e36b2c; outline-offset: .2rem; } .notice { padding: 1rem; border: .15rem solid #9a4d00; }
+label { display: block; font-weight: 700; margin-top: 1rem; } input { box-sizing: border-box; width: 100%; padding: .65rem; margin-top: .35rem; font: inherit; } .actions { display: flex; gap: .6rem; margin-top: 1rem; } button { padding: .65rem 1rem; font: inherit; font-weight: 700; cursor: pointer; } pre { max-height: 28rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (prefers-color-scheme: dark) { :root { background: #111713; color: #eef3ef; } section { background: #1b241e; border-color: #38443c; box-shadow: none; } .eyebrow, a { color: #70d4b4; } dl div { border-color: #38443c; } }

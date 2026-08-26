@@ -8,7 +8,7 @@ The next internal-beta version is `0.8.0`.
 
 ### Validated
 
-- Passed formatting, lint, static typing, and all 626 tests for the first v0.8 GUI slice;
+- Passed formatting, lint, static typing, and all 631 tests for the current v0.8 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
@@ -22,6 +22,9 @@ The next internal-beta version is `0.8.0`.
 
 ### Added
 
+- Connected read-only GUI inspect and dry-run forms directly to existing application
+  services, with structured results, bounded in-process operation history, explicit-root
+  containment, symlink rejection, Origin validation, and bounded JSON requests.
 - Added the first executable local-browser GUI slice: `transcriber gui` serves a bundled,
   responsive offline shell on loopback with versioned health/about/allowed-root APIs,
   compatibility checking, security headers, Host validation, coded errors, and no ML load.

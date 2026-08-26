@@ -1,6 +1,9 @@
 import json
 import subprocess
+from email.message import Message
+from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -8,6 +11,7 @@ import pytest
 from ewp_transcripts import __version__
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
+    LocalGuiRequestHandler,
     WebConfiguration,
     _open_browser,
     dispatch_get,
@@ -74,3 +78,22 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
         "http://127.0.0.1:8765/",
     ]
     assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL
+
+
+def test_post_rejects_cross_origin_before_reading_body() -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "https://attacker.example"
+    handler.headers = headers
+    handler.path = "/api/v1/inspect"
+    handler.rfile = BytesIO(b"")
+    handler.server = SimpleNamespace(server_port=8765)
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 403
+    assert json.loads(response.body)["error"]["code"] == "GUI_ORIGIN_REJECTED"

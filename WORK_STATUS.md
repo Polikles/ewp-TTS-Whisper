@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **626 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **631 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -116,6 +116,12 @@ Chrome. All browsers reported the v0.8/API-v1 compatibility state, exact configu
 license/source information, and consistent rendering. PowerShell requests confirmed the
 security headers and the expected `421 GUI_HOST_REJECTED` response. WSL browser launching now
 uses the quiet Windows bridge after the initial `gio` launcher proved unsupported.
+
+The second GUI slice now connects inspect and dry-run directly to the existing application
+services. The browser accepts only server-side paths contained by configured roots, rejects
+symlinks and cross-origin POST requests, returns the existing structured inspection/plan
+models, and retains a bounded read-only in-process operation history. These operations load
+neither transcription models nor create final artifacts.
 
 The `0.7.0` package candidate passed the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files
