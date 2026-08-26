@@ -9,6 +9,7 @@ from ewp_transcripts.web_workflows import GuiWorkflowController
 class StubResult(BaseModel):
     selected: str
     mode: str
+    output_directory: str | None = None
 
 
 def test_inspect_calls_injected_application_service_and_records_result(tmp_path: Path) -> None:
@@ -24,7 +25,11 @@ def test_inspect_calls_injected_application_service_and_records_result(tmp_path:
     operation = controller.run("inspect", {"path": str(media)})
 
     assert operation.status == "completed"
-    assert operation.result == {"selected": str(media), "mode": "inspect"}
+    assert operation.result == {
+        "selected": str(media),
+        "mode": "inspect",
+        "output_directory": None,
+    }
     assert calls[0][0] == media
     assert "config" in calls[0][1]
     assert controller.operations() == (operation,)
@@ -38,13 +43,19 @@ def test_dry_run_passes_allowed_output_directory(tmp_path: Path) -> None:
 
     def plan(path: Path, **kwargs: Any) -> BaseModel:
         captured.update(kwargs)
-        return StubResult(selected=str(path), mode="dry-run")
+        return StubResult(
+            selected=str(path),
+            mode="dry-run",
+            output_directory=str(kwargs["output_directory"]),
+        )
 
     controller = GuiWorkflowController((tmp_path.resolve(),), dry_run_service=plan)
     operation = controller.run("dry-run", {"path": str(media), "output_directory": str(output)})
 
     assert operation.status == "completed"
     assert captured["output_directory"] == output
+    assert controller.has_completed_plan(media, output)
+    assert not controller.has_completed_plan(media, tmp_path / "other")
 
 
 def test_paths_outside_roots_and_symlinks_are_rejected(tmp_path: Path) -> None:

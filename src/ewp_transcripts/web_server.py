@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import secrets
 import subprocess
 import threading
 import webbrowser
@@ -15,6 +16,8 @@ from typing import ClassVar
 from urllib.parse import urlsplit
 
 from ewp_transcripts import __version__
+from ewp_transcripts.config import load_config
+from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 API_VERSION = "1.0"
@@ -136,9 +139,16 @@ class LocalGuiServer(ThreadingHTTPServer):
     daemon_threads = True
 
     def __init__(self, config: WebConfiguration) -> None:
+        application_config = load_config()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
+        self.gui_csrf_token = secrets.token_urlsafe(32)
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
+        self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
+
+    def server_close(self) -> None:
+        self.gui_transcriptions.close()
+        super().server_close()
 
 
 class LocalGuiRequestHandler(BaseHTTPRequestHandler):
@@ -150,6 +160,36 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     _security_headers: ClassVar[dict[str, str]] = SECURITY_HEADERS
 
     def do_GET(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path in {"/api/v1/session", "/api/v1/transcriptions"}:
+            host = self.headers.get("Host", "")
+            if host not in {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.MISDIRECTED_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_HOST_REJECTED",
+                                "message": (
+                                    "The request Host is not allowed by the local GUI server."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            if urlsplit(self.path).path == "/api/v1/session":
+                payload: dict[str, object] = {"csrf_token": self.server.gui_csrf_token}
+            else:
+                payload = {
+                    "jobs": [
+                        job.model_dump(mode="json") for job in self.server.gui_transcriptions.jobs()
+                    ]
+                }
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
         if urlsplit(self.path).path == "/api/v1/operations":
             host = self.headers.get("Host", "")
             if host not in {
@@ -253,6 +293,71 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             operation = self.server.gui_workflows.run("inspect", document)
         elif path == "/api/v1/dry-run":
             operation = self.server.gui_workflows.run("dry-run", document)
+        elif path == "/api/v1/transcriptions":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The transcription request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            if document.get("confirmed") is not True:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_CONFIRMATION_REQUIRED",
+                                "message": "Explicit transcription confirmation is required.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                input_path = self.server.gui_workflows.resolve_allowed_path(
+                    str(document.get("path", ""))
+                )
+                output_path = self.server.gui_workflows.resolve_allowed_path(
+                    str(document.get("output_directory", "")), directory=True
+                )
+                if not input_path.is_file():
+                    raise ValueError("The first transcription slice accepts one file")
+                if not self.server.gui_workflows.has_completed_plan(input_path, output_path):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_DRY_RUN_REQUIRED",
+                                    "message": (
+                                        "Run and review dry-run for this exact input and output."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                job = self.server.gui_transcriptions.submit(input_path, output_path)
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_PATH_REJECTED", "message": str(error)}},
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.ACCEPTED, job.model_dump(mode="json")))
+            return
         else:
             self._write_response(
                 _json_response(

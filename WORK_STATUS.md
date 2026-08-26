@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **632 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **635 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -133,6 +133,12 @@ keeps full JSON in a disclosure panel, and places About in the page footer.
 The owner subsequently confirmed the clarified dry-run display, structured direct-file plan,
 ambiguous-directory error, and revised footer. A Clear control now resets both path fields and
 all visible result state locally without deleting operation evidence or filesystem content.
+
+The first transcription-queue slice is implemented: one daemon worker serializes GPU jobs,
+the browser requires an explicit post-dry-run confirmation and per-process CSRF token, input
+and output remain confined to allowed roots, and polling reconstructs queue state after a
+browser refresh. The worker invokes `transcribe_one` directly and reports the existing atomic
+result path or a sanitized coded failure. Initial scope accepts one file per queued job.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

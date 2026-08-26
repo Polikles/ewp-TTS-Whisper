@@ -77,7 +77,7 @@ verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-
 
 ## How to use
 
-The first read-only browser GUI shell can be started without loading ML models:
+The local browser GUI can be started without loading ML models:
 
 ```bash
 uv run --locked transcriber gui \
@@ -86,8 +86,9 @@ uv run --locked transcriber gui \
 ```
 
 It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and exposes only the named directories. Transcription and review controls are still under
-implementation; use the CLI workflow below for production work.
+and exposes only the named directories. Inspect and dry-run are read-only; one explicitly
+confirmed file may be submitted to the serialized transcription queue. Review workflows are
+still under implementation, so retain the CLI workflow below for production work.
 
 Transcribe one file or a directory after `doctor` reports model readiness:
 

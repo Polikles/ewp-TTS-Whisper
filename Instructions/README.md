@@ -34,7 +34,7 @@ uv run --locked transcriber --version
 uv run --locked transcriber --help
 ```
 
-The initial read-only local browser shell is available on loopback:
+The local browser interface is available on loopback:
 
 ```bash
 uv run --locked transcriber gui \
@@ -44,7 +44,9 @@ uv run --locked transcriber gui \
 
 Use `--no-open-browser` when launching from a terminal that cannot open the host browser.
 The printed `http://127.0.0.1:PORT/` URL can then be opened manually. Only the explicitly
-allowed directories are shown. Workflow controls are not yet present in this first GUI slice.
+allowed directories are shown. Inspect/dry-run are non-mutating. The current queue accepts one
+file only and requires a reviewed dry-run plus an explicit confirmation before transcription.
+Closing the browser does not stop a job; stopping the server waits for active transcription.
 
 After cloning, a fresh Ubuntu 24.04 checkout can install the base packages, uv/Python,
 locked environment, and run diagnostics through the reviewable script:

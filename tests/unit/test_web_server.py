@@ -98,3 +98,24 @@ def test_post_rejects_cross_origin_before_reading_body() -> None:
     response = write_response.call_args.args[0]
     assert response.status == 403
     assert json.loads(response.body)["error"]["code"] == "GUI_ORIGIN_REJECTED"
+
+
+def test_transcription_post_requires_active_csrf_token() -> None:
+    body = b'{"path":"/tmp/source.wav","confirmed":true}'
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions"
+    handler.rfile = BytesIO(body)
+    handler.server = SimpleNamespace(server_port=8765, gui_csrf_token="expected")
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 403
+    assert json.loads(response.body)["error"]["code"] == "GUI_CSRF_REJECTED"
