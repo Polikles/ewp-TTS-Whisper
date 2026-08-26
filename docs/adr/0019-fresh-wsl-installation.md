@@ -66,3 +66,30 @@ The fresh-OS installation condition is complete. Installing model snapshots in e
 new distribution is not required to repeat this gate: pinned-model preparation and real
 offline transcription are already independently covered by the production GPU runbooks
 and ADR-0010.
+
+## 2026-08-25 cross-workflow follow-up
+
+A second dedicated Ubuntu 24.04.4 WSL2 distribution (`Ubuntu-test-C`) extended the original
+installation decision after the correction, translation, dictionary, YTT, and HTML workflows
+existed. The host reported WSL 2.7.11.0 and kernel 6.18.33.2; the guest exposed the RTX 3090
+with 24 GB VRAM. The guided installer supplied Git, FFmpeg/ffprobe, ripgrep, uv 0.12.5, and
+the locked Python environment. The separate model setup installed and verified the pinned
+ASR, Polish and English alignment, diarization, and NLTK resources without retaining an
+`HF_TOKEN`.
+
+The clean distribution then completed:
+
+- the locked source checks and package build;
+- offline `s0e00` transcription to canonical JSON, preview TXT, and segments JSON;
+- a three-second replay that skipped completed outputs without changing the canonical hash;
+- Gemini 2.5 Flash correction with the versioned project dictionary and recorded provenance;
+- candidate-backed manual-review preparation;
+- deterministic TXT, SRT, VTT, srv3 YTT, HTML, and segments export from the manually verified
+  private revision;
+- LM Studio/Bielik automated translation candidate publication, audit reconstruction, and
+  candidate-backed translation-review preparation.
+
+Runtime artifacts remained in disposable `/tmp` directories, private benchmark material and
+API credentials remained outside Git, and the OpenRouter key was removed after use. This
+closes the manual installation-through-workflow qualification; it does not convert automated
+correction or translation candidates into final, manually verified artifacts.

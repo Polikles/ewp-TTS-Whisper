@@ -300,12 +300,13 @@ Use `--no-write --json-output` to inspect reconstructed diagnostics without publ
 The detailed revision guide is
 [`../WSL config/REVISE_TRANSCRIPTS.md`](../WSL%20config/REVISE_TRANSCRIPTS.md).
 
-### Automated correction with LM Studio or OpenRouter (v0.3 development)
+### Automated correction with LM Studio or OpenRouter
 
-This command is implemented for controlled local benchmarking but has not yet completed
-the three-model acceptance run. In LM Studio, load exactly the intended model and start
-its local OpenAI-compatible server. Confirm the exact identifier without sending a
-transcript:
+The provider contract, local/cloud execution, manual-review boundary, and project-dictionary
+path are acceptance-audited. Gemini 2.5 Flash through OpenRouter is the qualified project
+workflow; evaluated local models remain useful for controlled experiments but did not improve
+the measured ASR error rate. In LM Studio, load exactly the intended model and start its local
+OpenAI-compatible server. Confirm the exact identifier without sending a transcript:
 
 An automated revision is always a **review candidate**, never a final or accepted
 transcript. WER/CER does not validate punctuation or quotation marks, and tested models
@@ -385,9 +386,9 @@ export OPENROUTER_API_KEY="YOUR_KEY"
 
 uv run --locked transcriber revise correct "/path/to/episode_results.json" \
   --provider openrouter \
-  --model "qwen/qwen-2.5-72b-instruct" \
-  --allow-cloud --consent once --preview \
-  --resume-dir "/private/path/openrouter-qwen72b/resume"
+  --model "google/gemini-2.5-flash" \
+  --allow-cloud --reasoning-max-tokens 0 --consent once --preview \
+  --resume-dir "/private/path/openrouter-gemini-2.5-flash/resume"
 ```
 
 Without `--allow-cloud`, strict-offline mode rejects the command before reading the key or
@@ -400,9 +401,9 @@ For example, add `--reasoning-max-tokens 0` to disable Gemini 2.5 thinking for t
 baseline. Enabled-reasoning runs are separate experiments because reasoning tokens affect
 latency and billing.
 
-## 10. Translate manually (v0.4 development)
+## 10. Translate manually
 
-The current translation slice is manual and model-free. It supports `pl -> en` and
+The manual translation workflow is model-free. It supports `pl -> en` and
 `en -> pl`; use the latest manually verified revision as the preferred source. Raw ASR
 and LLM-corrected revisions are allowed only when deliberately selected and remain marked
 as raw or automated candidates in the translation artifact.

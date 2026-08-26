@@ -538,8 +538,8 @@ critical path.
 
 Two conservative TTML pilots were accepted with correct timing, language, turn labels, and
 diacritics, but YouTube ignored wrapping, centering, and colors. The active implementation
-therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted example and
-remains opt-in pending an unlisted upload check. Its first upload centered cues and
+therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted example. It
+remains opt-in because it is platform-specific. Its first upload centered cues and
 preserved text/timing but flattened `<br/>` line elements. The owner-supplied corrected
 template instead uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer
 now matches that structure byte-for-byte. The final unlisted upload passed two-line
@@ -699,10 +699,11 @@ subprocess or maintain a second revision/translation model.
 The fresh instance used for the v0.3 correction benchmarks was installed from the
 v0.2.1-era repository and supplies sufficient installation evidence for the current
 development gate. A redundant manual installation-only rerun is not required for v0.3.
-Full clean-machine validation from installation through transcription, review, export,
-translation, and other eventual functional requirements is postponed until most or all
-of those workflows exist. The first complete run is manual; automation is designed only
-after the manual procedure and expected evidence have stabilized.
+Full clean-machine validation later passed manually for the current beta line on a fresh Ubuntu 24.04.4
+WSL2 distribution, covering installation, pinned-model setup, transcription, restart-safe
+replay, automated and candidate-backed review, verified export, and local translation
+candidate/audit/review preparation. Automation is designed only after the manual procedure
+and expected evidence have stabilized.
 
 ## 15. Operations
 

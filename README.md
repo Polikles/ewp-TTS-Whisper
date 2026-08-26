@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.6.1` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.6.2` remains an internal beta, not a public release.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.
@@ -15,8 +15,8 @@
   its output remains a non-final review candidate requiring human acceptance.
 - The v0.4.0 translation, project-dictionary, timed-event, YouTube srv3 YTT, and embeddable
   synchronized HTML workflows are implemented and acceptance-audited.
-- The v0.4.0 locked test gate, wheel/source build, archive privacy inspection, and isolated
-  installed-wheel CLI/export smoke tests pass.
+- The locked test gate, wheel/source build, archive privacy inspection, isolated
+  installed-wheel CLI/export smoke tests, and clean-WSL cross-workflow pilot pass.
 
 ## Known limitations before the first MVP release
 

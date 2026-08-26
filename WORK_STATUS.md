@@ -58,15 +58,15 @@ semantic errors and several minor wording/meaning issues. Bielik still anglicize
 in three of four occurrences despite the prompt. The owner confirmed `Ethics in the Loop`
 as the English title, `etykawpetli.pl` as the preferred Polish-domain spelling (both owned
 spellings are valid), and initiator/catalyst as the intended sense of `aktywator`. The
-candidate remains non-final; exact-parent manual correction is the next gate.
+candidate remained non-final until the exact-parent manual correction described below.
 The first manual apply exposed that a separate accepted-output directory restarted child
 numbering at one. Publication now allocates strictly after the recorded parent number;
 the incorrectly numbered temporary artifact is rejected as qualification evidence.
 After that fix, the corrected review published as exact-parent manual child translation 2,
 its 79-unit audit published successfully, and deterministic TXT, SRT, and VTT exports were
 written successfully. The automated candidate-to-manual-acceptance workflow is therefore
-qualified end to end for this pilot. The next gate is its exact-lineage semantic assessment
-and content-free benchmark report.
+qualified end to end for this pilot. Its exact-lineage semantic assessment and content-free
+benchmark report, described next, completed the gate.
 That report is now complete for `pl -> en`: 79 units, 71 faithful, 6 minor errors,
 2 major errors, no critical errors, semantic pass rate `0.89873418`, and 6 separately
 counted convention failures. Issue totals are 1 addition, 5 mistranslations, and 2
@@ -79,9 +79,12 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.6 tree passes formatting, lint, type checks, and all **617 tests** while its
-clean-machine workflow gate continues. Canonical results and accepted revisions remain
-immutable. Private corpus content, API keys,
+The current v0.6 tree passes formatting, lint, type checks, and all **617 tests**. A fresh
+Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
+setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
+candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
+translation candidate, audit, and review preparation. Canonical results and accepted
+revisions remain immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.
 
 ## v0.4 delivered work
@@ -102,9 +105,10 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
    intentionally not exhaustively tested.
 2. **Translation pipeline benchmark.** The exact-lineage human semantic assessment and
    content-free reporting boundary is implemented. The first narrower Bielik reference and
-   complete candidate/correction/apply/audit/export/report path are qualified. Next compare
-   local candidates Qwen 2.5 32B Q4,
-   Bielik 11B Q8, Llama 3.3 8B Q8, MADLAD-400, and NLLB-200 separately from cloud models.
+   complete candidate/correction/apply/audit/export/report path are qualified. Optional
+   post-functional quality work may compare local candidates Qwen 2.5 32B Q4, Bielik 11B Q8,
+   Llama 3.3 8B Q8, MADLAD-400, and NLLB-200 separately from cloud models once semantic
+   assessment can scale without whole-corpus manual review.
    Record model artifact, backend, prompt, chunking, latency, resource use, request/token
    volume, cost, retries, and reviewer effort. Do not claim translation accuracy from the
    artistically free English corpus; first define a narrower manually approved reference.
@@ -119,7 +123,7 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
    dictionary was sent to every unit and Bielik invented an unrelated speaker label. Request
    planning now exposes only entries whose source form occurs in the owned unit. That run is
    rejected; the next pilot must use only durable names/titles/addresses, not episode-specific
-   mistranslation fixes.
+   mistranslation fixes. The subsequent scoped pilot is described below.
    Dictionary provenance is first-class and inherited by exact-parent manual children;
    audits declare the dictionary object or null, while exports publish a provenance sidecar.
    The accepted general project-dictionary pilot preserved semantic performance at 71/79
@@ -143,7 +147,8 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
    `/tmp` pilot found 41 pending candidates across 22 compatible cases with context on every
    item and no punctuation-bearing boundary keys. Explicit Gemini/OpenRouter selection,
    per-chunk source matching, resume identity, revision provenance, and audit reporting are
-   implemented. Manual proposal review and the four-branch correction benchmark remain next.
+   implemented. The subsequent manual proposal review and controlled dictionary comparisons
+   are recorded below.
    The owner reviewed proposal v1.1: 19 mappings were approved and 22 rejected. Both decision
    classes are retained so rejected mappings remain suppressed in later proposals; only
    approved entries are provider context. The redistributable proposal and dictionary are
@@ -211,9 +216,9 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
 7. **v0.4 closure.** Requirements, traceability, operator documentation, changelog,
    schemas/examples, and package version are reconciled. The full locked gate passes with
    603 tests, and the 0.4.0 wheel/source archives pass metadata, privacy-content, and isolated
-   installed-wheel CLI/HTML/YTT smoke checks. Full clean-machine
-   installation-through-workflow qualification remains the next manual release-candidate
-   gate and later becomes automated.
+   installed-wheel CLI/HTML/YTT smoke checks. The later beta-line clean-machine
+   installation-through-workflow qualification also passed manually; repeatable automation
+   may be added after the evidence format stabilizes.
 
 ## Explicitly deferred, not lost
 
