@@ -1,10 +1,11 @@
 [project]
 name = "ewp-transcripts"
-version = "0.6.1"
+version = "0.6.2"
 description = "Local-first transcription for edited podcast and training recordings"
 readme = "README.md"
-license = "AGPL-3.0-or-later"
-license-files = ["LICENSE"]
+authors = [{ name = "Damian Szczech", email = "szczech.dam+ewptranscript@gmail.com" }]
+license = "AGPL-3.0-only"
+license-files = ["LICENSE", "LICENSING.md"]
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "pyannote-audio==4.0.7",

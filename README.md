@@ -202,11 +202,11 @@ If documents conflict, use the following order:
 
 ## License
 
-Copyright © 2025–2026 Polikles.
+Copyright © 2025–2026 Damian Szczech.
 
 EWP Transcriber is free software licensed under the
-[GNU Affero General Public License v3.0 or later](LICENSE)
-(`AGPL-3.0-or-later`).
+[GNU Affero General Public License v3.0 only](LICENSE)
+(`AGPL-3.0-only`).
 
 You may use, modify, and redistribute the software, including commercially, subject to
 the GNU AGPL. Modified versions remain subject to its copyleft requirements, including

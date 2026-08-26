@@ -693,6 +693,8 @@ subprocess or maintain a second revision/translation model.
 - GUI installer;
 - Ubuntu 26.04 LTS qualification;
 - optional native Windows support as Tier 2.
+- Add canonical project URLs to package metadata and release surfaces.
+- Add the public project website once its address and deployment are ready.
 
 The fresh instance used for the v0.3 correction benchmarks was installed from the
 v0.2.1-era repository and supplies sufficient installation evidence for the current

@@ -1,11 +1,11 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-25**.
+Last updated: **2026-08-26**.
 
 ## Checkpoint
 
-Version `0.6.1` is the next internal beta on `main`; it is not tagged or published as a public
-release. The repository is public and licensed under `AGPL-3.0-or-later`.
+Version `0.6.2` is the next internal beta on `main`; it is not tagged or published as a public
+release. The repository is public and licensed under `AGPL-3.0-only`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
