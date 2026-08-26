@@ -4,7 +4,7 @@ Last updated: **2026-08-26**.
 
 ## Checkpoint
 
-Version `0.7.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.8.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.7 tree passes formatting, lint, type checks, and all **620 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **625 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -104,7 +104,14 @@ server-side path roots, direct service calls, single-GPU queueing, review/transl
 coverage, privacy/security controls, and the pre-Docker implementation sequence. GUI
 requirements remain planned; the existing exported HTML transcript player is not the GUI.
 
-The `0.7.0` package candidate passes the 620-test locked gate and the 140-package environment
+The first executable GUI slice is implemented in v0.8. `transcriber gui` starts a
+loopback-only server with bundled offline HTML/CSS/JavaScript, versioned health/about/root
+endpoints, frontend/API compatibility checking, explicit normalized allowed roots, Host
+validation, restrictive browser security headers, coded failures, and About/license/source
+information. It does not load ML models. The current shell is deliberately read-only; the
+next slice connects inspect/dry-run application services and a job view.
+
+The `0.7.0` package candidate passed the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files
 and no runtime/private payload filenames or credential-shaped values. An external `/tmp`
 target installation proved wheel provenance outside the checkout, version/help, coded usage

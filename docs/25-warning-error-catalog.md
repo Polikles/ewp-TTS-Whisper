@@ -96,6 +96,9 @@ may still produce a traceback and are not assigned a misleading expected-error c
 
 | Code | Meaning and likely cause | Safety implication | Operator action |
 |---|---|---|---|
+| `GUI_START_FAILED` | The loopback listener or an allowed-root configuration could not be initialized. | The browser service did not start. | Check the port, directory existence/type, and permissions, then retry. |
+| `GUI_HOST_REJECTED` | A browser request used a Host value other than the active loopback endpoint. | DNS-rebinding and unintended virtual-host access are rejected. | Open the exact URL printed by `transcriber gui`. |
+| `GUI_ROUTE_NOT_FOUND` | The browser requested an unknown API or asset route. | No filesystem fallback is attempted. | Refresh the bundled frontend; report persistent frontend/backend mismatch. |
 | `CLI_USAGE_ERROR` | Typer rejected a missing argument/option, unknown command/option, or invalid declared value. | The command body did not run. | Read the usage panel and command-specific `--help`, then correct the invocation. |
 | `CLI_CONSENT_INVALID` | Interactive consent was not `reject`, `once`, or `persist`. | No new consent is granted. | Enter one documented value. |
 | `CLI_SPEAKER_COUNT_INVALID` | Speaker count is neither `auto` nor a positive integer. | Invalid diarization settings are rejected. | Correct the option value. |

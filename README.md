@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.7.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.8.0` remains an internal beta, not a public release.
 - Development remains untagged on `main` while requirements work continues. The first public
   release is planned only as the checkpoint immediately before Docker-image work begins.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
@@ -76,6 +76,18 @@ manual equivalent in [`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md).
 verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
 
 ## How to use
+
+The first read-only browser GUI shell can be started without loading ML models:
+
+```bash
+uv run --locked transcriber gui \
+  --allow-root "/path/to/media" \
+  --allow-root "/path/to/project"
+```
+
+It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
+and exposes only the named directories. Transcription and review controls are still under
+implementation; use the CLI workflow below for production work.
 
 Transcribe one file or a directory after `doctor` reports model readiness:
 

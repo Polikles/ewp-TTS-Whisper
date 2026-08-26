@@ -4,10 +4,12 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.7.0`.
+The next internal-beta version is `0.8.0`.
 
 ### Validated
 
+- Passed formatting, lint, static typing, and all 625 tests for the first v0.8 GUI slice;
+  verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Passed formatting, lint, static typing, and all 620 tests; the locked environment contains
   140 mutually compatible packages.
 - Built the `0.7.0` wheel and source archive, verified version and `AGPL-3.0-only` metadata,
@@ -18,6 +20,9 @@ The next internal-beta version is `0.7.0`.
 
 ### Added
 
+- Added the first executable local-browser GUI slice: `transcriber gui` serves a bundled,
+  responsive offline shell on loopback with versioned health/about/allowed-root APIs,
+  compatibility checking, security headers, Host validation, coded errors, and no ML load.
 - Accepted one self-contained local browser GUI architecture for WSL2, bare-metal Ubuntu,
   and the future Docker image, with normative workflow, allowed-root filesystem, security,
   privacy, accessibility, diagnostics, and staged implementation requirements.

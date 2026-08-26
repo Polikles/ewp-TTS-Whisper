@@ -125,11 +125,11 @@ by the existing exported HTML transcript player.
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
-| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | planned | One bundled loopback web service with versioned `/api/v1`, direct application-service calls, offline assets, and API compatibility checks. |
-| FR-L03, FR-L17, NFR-020 | planned | Allowed-root path broker, traversal/symlink rejection, host/origin and state-change protection, restrictive CSP, escaping, and negative security tests. |
+| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | `transcriber gui`, bundled offline assets, loopback-only adapter, `/api/v1` health/about/root endpoints, and frontend compatibility rejection. Application-workflow calls begin in the next slice. |
+| FR-L03, FR-L17, NFR-020 | partial | Existing directories are normalized into explicit roots; Host validation, restrictive CSP, safe fixed routing, and negative tests are implemented. Root-contained browsing, origin/state-change controls, and download identity arrive with the first state-changing API. |
 | FR-L04, FR-L05 | planned | Inspect/dry-run vertical slice followed by a deterministic single-GPU queue with recoverable operation state. |
 | FR-L06, FR-L07, FR-L08, FR-L09 | planned | Anchor-preserving transcript and translation editors using existing preview/apply/audit/export services and exact lineage. |
 | FR-L10 | planned | Project dictionary selection/provenance first; proposal/review management in a later GUI slice. |
-| FR-L11, FR-L12 | planned | Coded diagnostic/action surfaces and session-only credential/consent handling with strict-offline tests. |
-| FR-L14, FR-L15, NFR-018 | planned | About/license/source surfaces plus accessible synchronized media review and theme/follow controls. |
+| FR-L11, FR-L12 | partial | Startup, Host, and route failures have documented stable codes. Session-only credential/consent handling arrives with provider workflows. |
+| FR-L14, FR-L15, NFR-018 | partial | Version, license/warranty, source, and issue information is implemented in the responsive keyboard-native shell. Synchronized media review and explicit theme/follow controls remain planned. |
 | NFR-017, NFR-019 | planned | Shared contract tests across WSL2-compatible/native launch modes, then the identical packaged application in Docker; offline acceptance after model setup. |

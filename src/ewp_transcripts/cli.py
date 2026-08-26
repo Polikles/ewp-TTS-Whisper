@@ -104,6 +104,7 @@ from ewp_transcripts.translation_lm_studio import (
     LmStudioTranslationProvider,
 )
 from ewp_transcripts.translation_state import summarize_translation_resume_state
+from ewp_transcripts.web_server import serve_gui
 
 
 class CodedTyperGroup(TyperGroup):
@@ -199,6 +200,36 @@ app.add_typer(dictionary_app, name="dictionary")
 dictionary_app.add_typer(correction_dictionary_app, name="correction")
 benchmark_app.add_typer(correction_benchmark_app, name="correction")
 benchmark_app.add_typer(translation_benchmark_app, name="translation")
+
+
+@app.command("gui")
+def gui_command(
+    port: Annotated[
+        int,
+        typer.Option("--port", min=0, max=65535, help="Loopback port; use 0 to allocate one."),
+    ] = 8765,
+    allow_root: Annotated[
+        list[Path] | None,
+        typer.Option(
+            "--allow-root",
+            help="Server-visible directory available to the GUI; repeat as needed.",
+        ),
+    ] = None,
+    open_browser: Annotated[
+        bool,
+        typer.Option(
+            "--open-browser/--no-open-browser",
+            help="Open the local GUI in the default browser.",
+        ),
+    ] = True,
+) -> None:
+    """Run the loopback-only local browser interface."""
+
+    try:
+        serve_gui(port=port, allowed_roots=allow_root or [], open_browser=open_browser)
+    except (OSError, ValueError) as error:
+        typer.echo(f"GUI_START_FAILED: {error}", err=True)
+        raise typer.Exit(code=2) from error
 
 
 @correction_dictionary_app.command("propose")

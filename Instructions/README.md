@@ -34,6 +34,18 @@ uv run --locked transcriber --version
 uv run --locked transcriber --help
 ```
 
+The initial read-only local browser shell is available on loopback:
+
+```bash
+uv run --locked transcriber gui \
+  --allow-root "/path/to/media" \
+  --allow-root "/path/to/project"
+```
+
+Use `--no-open-browser` when launching from a terminal that cannot open the host browser.
+The printed `http://127.0.0.1:PORT/` URL can then be opened manually. Only the explicitly
+allowed directories are shown. Workflow controls are not yet present in this first GUI slice.
+
 After cloning, a fresh Ubuntu 24.04 checkout can install the base packages, uv/Python,
 locked environment, and run diagnostics through the reviewable script:
 
