@@ -17,6 +17,10 @@ def test_release_version_and_license_metadata() -> None:
     ]
     assert metadata["project"]["license"] == "AGPL-3.0-only"
     assert metadata["project"]["license-files"] == ["LICENSE", "LICENSING.md"]
+    assert metadata["project"]["urls"] == {
+        "Repository": "https://github.com/Polikles/ewp-transcripts",
+        "Issues": "https://github.com/Polikles/ewp-transcripts/issues",
+    }
 
 
 def test_agpl_license_and_public_notice_are_present() -> None:

@@ -120,12 +120,13 @@ compatible; the root-project-only version update produced this lock hash:
 The declared Hatchling backend built the source archive and then the wheel from that archive:
 
 ```text
-262afc3627e889cb4eabaec038013f087a92122330b3a88513f409894c37ce71  ewp_transcripts-0.7.0-py3-none-any.whl
-258b99a4158d8b1a44870111c0d5c95c28c00766828b58532ddf1e97528da18e  ewp_transcripts-0.7.0.tar.gz
+4c50de8391b551389216889f5f59dc18109fea35ac2fb8dc9f5ffb810617c5cf  ewp_transcripts-0.7.0-py3-none-any.whl
+26a2ffa8ada5d6b1d38db8a126a96eb7a02838decf3dc22918811d6aac682767  ewp_transcripts-0.7.0.tar.gz
 ```
 
-Wheel metadata reported version `0.7.0` and license expression `AGPL-3.0-only`; both `LICENSE`
-and `LICENSING.md` were present. A content/name scan found no canonical result, revision,
+Wheel metadata reported version `0.7.0`, license expression `AGPL-3.0-only`, and canonical
+repository and issue-tracker URLs; both `LICENSE` and `LICENSING.md` were present. A
+content/name scan found no canonical result, revision,
 translation, resume/operations, semantic-assessment, or dictionary-proposal payload and no
 credential-shaped Hugging Face or OpenRouter value. Documentation references to private
 testing, disposable `/tmp` paths, environment-variable names, and placeholder values are
