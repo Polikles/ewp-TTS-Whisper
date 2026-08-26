@@ -8,7 +8,7 @@ The next internal-beta version is `0.8.0`.
 
 ### Validated
 
-- Passed formatting, lint, static typing, and all 635 tests for the current v0.8 GUI slices;
+- Passed formatting, lint, static typing, and all 637 tests for the current v0.8 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
@@ -33,6 +33,11 @@ The next internal-beta version is `0.8.0`.
 - Added the first state-changing GUI workflow: an explicitly confirmed, CSRF-protected,
   single-worker transcription queue for one allowed-root file, with refresh-safe polling,
   sanitized failures, and existing atomic application publication underneath.
+- Split queue staging from execution. Users can collect files from different allowed roots
+  into one shared output directory, review/remove staged rows in a table, then explicitly
+  start the serialized queue. The readable planning/queue tables expose decisions, warnings,
+  logical job IDs, and planned results; duplicate inputs and logical-output collisions stop
+  before execution. Added expandable on-page guidance and bundled local help.
 - Added the first executable local-browser GUI slice: `transcriber gui` serves a bundled,
   responsive offline shell on loopback with versioned health/about/allowed-root APIs,
   compatibility checking, security headers, Host validation, coded errors, and no ML load.

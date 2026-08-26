@@ -85,6 +85,8 @@ def dispatch_get(
     path = urlsplit(target).path
     if path == "/":
         return _asset_response("index.html", "text/html; charset=utf-8")
+    if path == "/help":
+        return _asset_response("help.html", "text/html; charset=utf-8")
     if path == "/favicon.ico":
         return WebResponse(HTTPStatus.NO_CONTENT, None, b"")
     if path.startswith("/assets/") and path.removeprefix("/assets/") in _ASSET_TYPES:
@@ -293,7 +295,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             operation = self.server.gui_workflows.run("inspect", document)
         elif path == "/api/v1/dry-run":
             operation = self.server.gui_workflows.run("dry-run", document)
-        elif path == "/api/v1/transcriptions":
+        elif path.startswith("/api/v1/transcriptions"):
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
                 self._write_response(
@@ -307,6 +309,40 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 ),
                             }
                         },
+                    )
+                )
+                return
+            if path == "/api/v1/transcriptions/start":
+                count = self.server.gui_transcriptions.start()
+                self._write_response(_json_response(HTTPStatus.ACCEPTED, {"queued": count}))
+                return
+            if path == "/api/v1/transcriptions/remove":
+                job_id = document.get("job_id")
+                removed = (
+                    self.server.gui_transcriptions.remove(job_id)
+                    if isinstance(job_id, str)
+                    else False
+                )
+                if not removed:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_ITEM_IMMUTABLE",
+                                    "message": "Only an existing staged queue item can be removed.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                self._write_response(_json_response(HTTPStatus.OK, {"removed": job_id}))
+                return
+            if path != "/api/v1/transcriptions":
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.NOT_FOUND,
+                        {"error": {"code": "GUI_ROUTE_NOT_FOUND", "message": "No such GUI route."}},
                     )
                 )
                 return
@@ -332,7 +368,37 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 if not input_path.is_file():
                     raise ValueError("The first transcription slice accepts one file")
-                if not self.server.gui_workflows.has_completed_plan(input_path, output_path):
+                active_output = self.server.gui_transcriptions.active_output_directory()
+                if active_output is not None and active_output != str(output_path):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_OUTPUT_MISMATCH",
+                                    "message": (
+                                        "All active queue jobs must use the same output directory."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                if self.server.gui_transcriptions.contains_active_input(input_path):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_DUPLICATE",
+                                    "message": "This input is already staged, queued, or running.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                plan = self.server.gui_workflows.completed_plan(input_path, output_path)
+                if plan is None:
                     self._write_response(
                         _json_response(
                             HTTPStatus.BAD_REQUEST,
@@ -347,7 +413,41 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
-                job = self.server.gui_transcriptions.submit(input_path, output_path)
+                planned_jobs = plan.get("jobs")
+                if not isinstance(planned_jobs, list) or len(planned_jobs) != 1:
+                    raise ValueError("The staged dry-run must contain exactly one job")
+                planned_job = planned_jobs[0]
+                if not isinstance(planned_job, dict):
+                    raise ValueError("The staged dry-run has no valid job plan")
+                planned_outputs = planned_job.get("outputs")
+                if not isinstance(planned_outputs, dict):
+                    raise ValueError("The staged dry-run has no valid output plan")
+                planned_job_id = planned_job.get("job_id")
+                planned_result_path = planned_outputs.get("results")
+                if not isinstance(planned_job_id, str) or not isinstance(planned_result_path, str):
+                    raise ValueError("The staged dry-run has no valid result identity")
+                if self.server.gui_transcriptions.contains_active_planned_job(planned_job_id):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_JOB_ID_COLLISION",
+                                    "message": (
+                                        "An active queue item already uses this job ID. "
+                                        "Rename one source before staging it."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                job = self.server.gui_transcriptions.stage(
+                    input_path,
+                    output_path,
+                    planned_job_id=planned_job_id,
+                    planned_result_path=planned_result_path,
+                )
             except (FileNotFoundError, OSError, ValueError) as error:
                 self._write_response(
                     _json_response(

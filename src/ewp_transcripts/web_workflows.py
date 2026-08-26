@@ -78,17 +78,26 @@ class GuiWorkflowController:
     def operations(self) -> tuple[GuiOperation, ...]:
         return tuple(self._operations)
 
+    def completed_plan(self, input_path: Path, output_directory: Path) -> dict[str, Any] | None:
+        """Return the newest exact dry-run produced by this server session."""
+
+        return next(
+            (
+                operation.result
+                for operation in self._operations
+                if operation.kind == "dry-run"
+                and operation.status == "completed"
+                and operation.input_path == str(input_path)
+                and operation.result is not None
+                and operation.result.get("output_directory") == str(output_directory)
+            ),
+            None,
+        )
+
     def has_completed_plan(self, input_path: Path, output_directory: Path) -> bool:
         """Confirm this server session produced the exact dry-run being authorized."""
 
-        return any(
-            operation.kind == "dry-run"
-            and operation.status == "completed"
-            and operation.input_path == str(input_path)
-            and operation.result is not None
-            and operation.result.get("output_directory") == str(output_directory)
-            for operation in self._operations
-        )
+        return self.completed_plan(input_path, output_directory) is not None
 
     def resolve_allowed_path(self, raw_path: str, *, directory: bool = False) -> Path:
         candidate = Path(raw_path).expanduser()

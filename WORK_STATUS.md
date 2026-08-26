@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **635 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **637 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -134,11 +134,20 @@ The owner subsequently confirmed the clarified dry-run display, structured direc
 ambiguous-directory error, and revised footer. A Clear control now resets both path fields and
 all visible result state locally without deleting operation evidence or filesystem content.
 
-The first transcription-queue slice is implemented: one daemon worker serializes GPU jobs,
+The first transcription-queue slice is implemented: one worker serializes GPU jobs,
 the browser requires an explicit post-dry-run confirmation and per-process CSRF token, input
 and output remain confined to allowed roots, and polling reconstructs queue state after a
 browser refresh. The worker invokes `transcribe_one` directly and reports the existing atomic
 result path or a sanitized coded failure. Initial scope accepts one file per queued job.
+
+Owner testing confirmed real GPU completion and that refresh preserved the active row. Based
+on that review, adding an item no longer starts work: jobs remain `STAGED` in a table, may be
+removed, share one enforced output directory, and begin only through a separate Start queue
+action. The page now summarizes planned jobs for non-technical users, labels raw JSON as
+technical detail, contains expandable brief instructions, and serves a bundled `/help` page
+with a link to the complete repository runbook. Each staged row records its logical job ID
+and planned result path; duplicate active inputs, output-directory changes, and colliding
+logical job IDs are rejected before GPU work begins.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

@@ -55,6 +55,7 @@ def test_dry_run_passes_allowed_output_directory(tmp_path: Path) -> None:
     assert operation.status == "completed"
     assert captured["output_directory"] == output
     assert controller.has_completed_plan(media, output)
+    assert controller.completed_plan(media, output) == operation.result
     assert not controller.has_completed_plan(media, tmp_path / "other")
 
 

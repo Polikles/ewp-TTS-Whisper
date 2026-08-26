@@ -86,9 +86,11 @@ uv run --locked transcriber gui \
 ```
 
 It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and exposes only the named directories. Inspect and dry-run are read-only; one explicitly
-confirmed file may be submitted to the serialized transcription queue. Review workflows are
-still under implementation, so retain the CLI workflow below for production work.
+and exposes only the named directories. Inspect and dry-run are read-only. Each reviewed file
+can be staged without starting GPU work; collect distinct episode files under one shared
+output directory, review/remove rows, then select **Start queue** to process them serially.
+Brief instructions and a complete local help page are bundled into the GUI. Review workflows
+are still under implementation, so retain the CLI workflow below for production work.
 
 Transcribe one file or a directory after `doctor` reports model readiness:
 

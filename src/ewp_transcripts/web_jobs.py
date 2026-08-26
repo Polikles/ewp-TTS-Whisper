@@ -22,9 +22,11 @@ class GuiTranscriptionJob(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     job_id: str
-    status: Literal["queued", "running", "completed", "failed"]
+    status: Literal["staged", "queued", "running", "completed", "failed"]
     input_path: str
     output_directory: str
+    planned_job_id: str
+    planned_result_path: str
     created_at: datetime
     updated_at: datetime
     result_path: str | None = None
@@ -56,21 +58,83 @@ class GuiTranscriptionQueue:
         )
         self._worker.start()
 
-    def submit(self, input_path: Path, output_directory: Path) -> GuiTranscriptionJob:
+    def stage(
+        self,
+        input_path: Path,
+        output_directory: Path,
+        *,
+        planned_job_id: str,
+        planned_result_path: str,
+    ) -> GuiTranscriptionJob:
         now = datetime.now(UTC)
         job = GuiTranscriptionJob(
             job_id=str(uuid4()),
-            status="queued",
+            status="staged",
             input_path=str(input_path),
             output_directory=str(output_directory),
+            planned_job_id=planned_job_id,
+            planned_result_path=planned_result_path,
             created_at=now,
             updated_at=now,
         )
         with self._lock:
             self._jobs[job.job_id] = job
             self._order.appendleft(job.job_id)
-        self._pending.put((job.job_id, input_path, output_directory))
         return job
+
+    def start(self) -> int:
+        """Queue every staged job in stable insertion order."""
+
+        pending: list[tuple[str, Path, Path]] = []
+        with self._lock:
+            for job_id in reversed(self._order):
+                job = self._jobs[job_id]
+                if job.status != "staged":
+                    continue
+                self._jobs[job_id] = job.model_copy(
+                    update={"status": "queued", "updated_at": datetime.now(UTC)}
+                )
+                pending.append((job_id, Path(job.input_path), Path(job.output_directory)))
+        for item in pending:
+            self._pending.put(item)
+        return len(pending)
+
+    def remove(self, job_id: str) -> bool:
+        """Remove one staged job; running/history entries remain immutable."""
+
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None or job.status != "staged":
+                return False
+            del self._jobs[job_id]
+            self._order.remove(job_id)
+            return True
+
+    def active_output_directory(self) -> str | None:
+        with self._lock:
+            return next(
+                (
+                    self._jobs[job_id].output_directory
+                    for job_id in self._order
+                    if self._jobs[job_id].status in {"staged", "queued", "running"}
+                ),
+                None,
+            )
+
+    def contains_active_planned_job(self, planned_job_id: str) -> bool:
+        with self._lock:
+            return any(
+                job.planned_job_id == planned_job_id
+                and job.status in {"staged", "queued", "running"}
+                for job in self._jobs.values()
+            )
+
+    def contains_active_input(self, input_path: Path) -> bool:
+        with self._lock:
+            return any(
+                job.input_path == str(input_path) and job.status in {"staged", "queued", "running"}
+                for job in self._jobs.values()
+            )
 
     def jobs(self) -> tuple[GuiTranscriptionJob, ...]:
         with self._lock:
