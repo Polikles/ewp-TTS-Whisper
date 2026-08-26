@@ -123,6 +123,13 @@ symlinks and cross-origin POST requests, returns the existing structured inspect
 models, and retains a bounded read-only in-process operation history. These operations load
 neither transcription models nor create final artifacts.
 
+External WSL2 validation inspected the real `s0e00.wav`, returned the expected episode,
+stream, channel, fingerprint, and quality evidence, rejected `/etc/hosts`, rejected a hostile
+Origin with HTTP 403, and confirmed that dry-run created no output directory. The initial
+report left the dry-run display unclear, so the interface now distinguishes inspection from
+dry-run completion, shows compact summary cards, treats a missing result as a coded defect,
+keeps full JSON in a disclosure panel, and places About in the page footer.
+
 The `0.7.0` package candidate passed the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files
 and no runtime/private payload filenames or credential-shaped values. An external `/tmp`

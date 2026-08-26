@@ -12,6 +12,9 @@ The next internal-beta version is `0.8.0`.
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
+- Qualified real WAV inspection, allowed-root rejection, cross-origin rejection, and the
+  dry-run no-write invariant from WSL2; moved About into a compact footer and added explicit
+  inspect/dry-run summaries plus a collapsible structured result.
 - Passed formatting, lint, static typing, and all 620 tests; the locked environment contains
   140 mutually compatible packages.
 - Built the `0.7.0` wheel and source archive, verified version and `AGPL-3.0-only` metadata,

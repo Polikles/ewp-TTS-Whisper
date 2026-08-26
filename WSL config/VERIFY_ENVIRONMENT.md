@@ -6,6 +6,10 @@ Do not include usernames, tokens, complete environment dumps, SSH configuration,
 
 ## 1. Windows PowerShell
 
+Prefer one-line PowerShell commands in manual test instructions. PowerShell continuation
+syntax differs from Bash, and copied multiline shell commands can otherwise execute as
+separate commands with misleading partial results.
+
 ```powershell
 Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsBuildNumber
 wsl --version
