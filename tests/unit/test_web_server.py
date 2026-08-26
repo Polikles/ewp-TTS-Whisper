@@ -1,10 +1,17 @@
 import json
+import subprocess
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
 from ewp_transcripts import __version__
-from ewp_transcripts.web_server import SECURITY_HEADERS, WebConfiguration, dispatch_get
+from ewp_transcripts.web_server import (
+    SECURITY_HEADERS,
+    WebConfiguration,
+    _open_browser,
+    dispatch_get,
+)
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -48,3 +55,22 @@ def test_web_configuration_rejects_files_and_missing_roots(tmp_path: Path) -> No
         WebConfiguration.create(port=8765, allowed_roots=[source])
     with pytest.raises(FileNotFoundError):
         WebConfiguration.create(port=8765, allowed_roots=[tmp_path / "missing"])
+
+
+def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
+    run = Mock()
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+
+    _open_browser("http://127.0.0.1:8765/")
+
+    assert run.call_args.args[0] == [
+        "powershell.exe",
+        "-NoProfile",
+        "-Command",
+        "Start-Process",
+        "http://127.0.0.1:8765/",
+    ]
+    assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL

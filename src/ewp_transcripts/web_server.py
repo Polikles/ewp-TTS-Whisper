@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import threading
 import webbrowser
 from dataclasses import dataclass
@@ -175,10 +176,29 @@ def serve_gui(*, port: int, allowed_roots: list[Path], open_browser: bool = True
     print(f"GUI {url}")
     print("Press Ctrl+C to stop.")
     if open_browser:
-        threading.Timer(0.1, webbrowser.open, args=(url,)).start()
+        threading.Timer(0.1, _open_browser, args=(url,)).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         server.server_close()
+
+
+def _open_browser(url: str) -> None:
+    """Open a host browser without leaking platform-launcher noise to the terminal."""
+
+    try:
+        release = Path("/proc/sys/kernel/osrelease").read_text(encoding="utf-8")
+        if "microsoft" in release.casefold():
+            subprocess.run(
+                ["powershell.exe", "-NoProfile", "-Command", "Start-Process", url],
+                check=False,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return
+        webbrowser.open(url)
+    except (OSError, subprocess.SubprocessError):
+        return
