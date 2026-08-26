@@ -675,6 +675,11 @@ subprocess or maintain a second revision/translation model.
 
 ## 14. Distribution
 
+No internal beta is tagged or published while requirements work continues. The first public
+release is a deliberate checkpoint immediately before Docker-image implementation begins;
+Docker artifacts are not the mechanism used to discover whether the source application is
+releaseable.
+
 - For v0.3, provide a reviewable fresh-install and verification script that installs and
   verifies prerequisites, the locked application environment, model readiness, and
   diagnostics while retaining explicit consent for gated model access and avoiding

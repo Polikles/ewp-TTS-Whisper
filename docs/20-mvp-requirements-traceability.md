@@ -75,8 +75,7 @@ Status meanings:
 
 ## v0.2.0 implemented transcript-revision requirements
 
-These requirements are intentionally **planned**, not implementation claims. Their
-normative definitions are in `02-requirements.md` and `13-transcript-revisions.md`.
+Their normative definitions are in `02-requirements.md` and `13-transcript-revisions.md`.
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
@@ -93,15 +92,15 @@ normative definitions are in `02-requirements.md` and `13-transcript-revisions.m
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
-| FR-K00, FR-K01, FR-K03, FR-K07 | implemented | Provider-neutral mock, LM Studio, and OpenRouter paths correct canonical or explicitly selected compatible revision text through the existing aligner and immutable revision storage. Child revisions retain exact parent lineage and remain complete standalone snapshots. |
-| FR-K02, FR-K04 | implemented | Strict speaker-block text response validation, locally derived exact per-block change lists, and the hashed LM Studio faithful-repair prompt prohibit paraphrase, style/grammar repair, summary, translation, and meaningful deletion. |
-| FR-K05, FR-K06, NFR-015 | implemented | Deterministic gap-free editable chunks, bounded read-only overlap, operation hashes, configuration validation, and boundary tests. |
-| FR-K08, FR-K09, FR-K10, FR-K11, FR-K12, NFR-016 | implemented | Local/cloud consent policy, strict-offline rejection, exact-scope private persistence, CLI warning/choice behavior, zero-call rejection, and sanitized failures are tested. |
-| FR-K13 | implemented | LLM revisions record provider/model/endpoint kind and prompt ID/content hash; operation and resume identity include the actual prompt/schema hash. |
-| FR-K14, FR-K15 | implemented | Adapter timeout budgets, bounded explicit retries, validated resume entries, deterministic batches, failure isolation, and stop policy tests. |
-| FR-K16 | implemented | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
-| FR-K17, FR-K18 | implemented | Exact-lineage canonical/revision cases report lexical outcomes, exact normalized gold-relative edit precision/recall, revision activity, warnings, alignment warnings, and speaker preservation. Private resume evidence now aggregates attempts, retries, provider latency, requests, tokens, cost, and legacy-entry coverage; unsupported/style interpretation remains an explicit manual review task. |
-| FR-K19 | implemented | CLI and operator documentation label automated output as a non-final candidate and require manual wording/speaker/punctuation/quotation review before final or gold use. |
+| FR-K00, FR-K01, FR-K03, FR-K07 | verified | Provider-neutral mock, LM Studio, and OpenRouter paths correct canonical or explicitly selected compatible revision text through the existing aligner and immutable revision storage. Child revisions retain exact parent lineage and remain complete standalone snapshots. |
+| FR-K02, FR-K04 | verified | Strict speaker-block text response validation, locally derived exact per-block change lists, and the hashed LM Studio faithful-repair prompt prohibit paraphrase, style/grammar repair, summary, translation, and meaningful deletion. |
+| FR-K05, FR-K06, NFR-015 | verified | Deterministic gap-free editable chunks, bounded read-only overlap, operation hashes, configuration validation, and boundary tests. |
+| FR-K08, FR-K09, FR-K10, FR-K11, FR-K12, NFR-016 | verified | Local/cloud consent policy, strict-offline rejection, exact-scope private persistence, CLI warning/choice behavior, zero-call rejection, and sanitized failures are tested. |
+| FR-K13 | verified | LLM revisions record provider/model/endpoint kind and prompt ID/content hash; operation and resume identity include the actual prompt/schema hash. |
+| FR-K14, FR-K15 | verified | Adapter timeout budgets, bounded explicit retries, validated resume entries, deterministic batches, failure isolation, and stop policy tests. |
+| FR-K16 | verified | The in-process deterministic provider exercises request, validation, alignment, and revision publication without network or models. |
+| FR-K17, FR-K18 | verified | Exact-lineage canonical/revision cases report lexical outcomes, exact normalized gold-relative edit precision/recall, revision activity, warnings, alignment warnings, and speaker preservation. Private resume evidence now aggregates attempts, retries, provider latency, requests, tokens, cost, and legacy-entry coverage; unsupported/style interpretation remains an explicit manual review task. |
+| FR-K19 | verified | CLI and operator documentation label automated output as a non-final candidate and require manual wording/speaker/punctuation/quotation review before final or gold use. |
 
 ## v0.4 translation and platform-export acceptance
 
@@ -116,4 +115,4 @@ The v0.4 contracts are defined in `23-v0.4-translation-contract.md`,
 | Timed-event semantics | verified | Canonical/derived schema `1.1`, legacy speech default, revision/effective inheritance, closed kind vocabulary, and YTT/HTML consumption. |
 | YouTube srv3 YTT | verified | Deterministic parser-tested exporter and successful unlisted real Polish upload covering wrapping, colors, centering, timing, labels, and diacritics. |
 | Embeddable HTML | verified | Escaped sentence-level raw/revised/translated fragments plus separate player; real-media Firefox, LibreWolf, Chrome, and Brave qualification covers range seeking, keyboard/mouse interaction, highlighting/following, theme controls, and no-script fallback. |
-| Privacy and reproducibility | verified | `/tmp`-only pilots, no committed private payloads or secrets, content-free benchmark evidence, deterministic exports, immutable source artifacts, the 602-test locked gate, archive-content inspection, and isolated installed-wheel CLI/HTML/YTT smoke checks. |
+| Privacy and reproducibility | verified | `/tmp`-only pilots, no committed private payloads or secrets, content-free benchmark evidence, deterministic exports, immutable source artifacts, the 620-test locked gate, archive-content inspection, and isolated installed-wheel CLI/HTML/YTT smoke checks. |

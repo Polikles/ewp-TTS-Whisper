@@ -122,7 +122,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-J17** TXT, SRT, VTT, and `segments.json` generated from a revision MUST be derived from one resolved `EffectiveTranscript` and MUST NOT require source audio or ML models.
 - **FR-J18** Revision artifacts and revision-aware exports MUST use non-destructive allocation and atomic publication.
 
-### K. Automated transcript correction (planned for v0.3)
+### K. Automated transcript correction (implemented for v0.3)
 
 - **FR-K00** Automated correction MUST consume a completed canonical result or compatible immutable revision and MUST publish corrections through the existing revision engine.
 - **FR-K01** Correction providers MUST implement one provider-neutral application protocol; provider-specific request/response objects MUST NOT enter the revision domain.
@@ -147,7 +147,11 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 
 ## 2. Non-functional requirements
 
-- **NFR-001 Privacy:** the pipeline performs no upload of audio or transcript text - everything is processed locally.
+- **NFR-001 Local-first privacy:** transcription, alignment, diarization, manual review, and
+  export MUST operate locally after explicit model setup. Transcript text MAY cross a separate
+  local-API or cloud boundary only for an explicitly selected automated correction or
+  translation operation governed by scoped consent, strict-offline enforcement, disclosure
+  warnings, and credential sanitization. Audio MUST NOT be uploaded by those operations.
 - **NFR-002 Reproducibility:** dependencies use a lockfile, and the effective configuration is stored in JSON.
 - **NFR-003 Stability:** a 60-minute file must complete without OOM on an RTX 3090 using the `accurate` preset.
 - **NFR-004 Atomicity:** the application must not leave a final result with an incomplete status.

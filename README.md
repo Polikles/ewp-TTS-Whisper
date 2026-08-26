@@ -5,6 +5,8 @@
 ## Status
 
 - MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.7.0` remains an internal beta, not a public release.
+- Development remains untagged on `main` while requirements work continues. The first public
+  release is planned only as the checkpoint immediately before Docker-image work begins.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
 - Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
 - Validated source language: Polish.

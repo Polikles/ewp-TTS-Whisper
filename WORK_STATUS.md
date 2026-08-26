@@ -5,7 +5,10 @@ Last updated: **2026-08-26**.
 ## Checkpoint
 
 Version `0.7.0` is the next internal beta on `main`; it is not tagged or published as a public
-release. The repository is public and licensed under `AGPL-3.0-only`.
+release. Development remains untagged while requirements work continues. The first public
+release is reserved for the checkpoint immediately before Docker-image implementation; an
+internal version number never implies publication. The repository is public and licensed
+under `AGPL-3.0-only`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
