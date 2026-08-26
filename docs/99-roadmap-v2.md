@@ -722,6 +722,9 @@ and expected evidence have stabilized.
 ## 15. Operations
 
 - `fail-fast`;
+- explicit per-input aliases/output identities for intentionally processing separate
+  same-stem sources in one batch, without overloading result versions or context-dependent
+  canonical IDs;
 - queue scheduling;
 - automatic cleanup of old work directories;
 - quality-trend reports between releases.

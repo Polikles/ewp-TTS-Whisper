@@ -24,6 +24,7 @@ Status meanings:
 | FR-B00, FR-B01, FR-B02, FR-B03 | verified | `group_discovered_files`; grouping tests cover suffix and speaker-count semantics. |
 | FR-B04 | verified | Explicit `--group` contract, tests, and ADR-0012 external validation. |
 | FR-B05, FR-B06, FR-B07 | verified | `inspect_episode`; sample-rate and duration-threshold tests, including the dedicated override. |
+| FR-B08 | verified | Application-level dry-run/transcription ambiguity guard, coded error, same-stem regression test, and real WSL MP3/WAV discovery evidence. |
 | FR-C00, FR-C01, FR-C02, FR-C03, FR-C04 | verified | Channel analysis/classification tests and Phase 2/7/10 external matrices. Enum values use hyphens at the CLI boundary and correspond to the underscore names in this requirement. |
 | FR-C05, FR-C06, FR-C07 | verified | Configuration, stream-planning, and pipeline tests; Phase 7/8 evidence. |
 | FR-C08 | verified | `inspection.py` applies explicit, filename, selected-stream title, then default priority; focused provenance/signature tests. |

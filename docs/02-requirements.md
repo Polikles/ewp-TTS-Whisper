@@ -27,6 +27,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-B05** Files in a group MUST have the same sample rate.
 - **FR-B06** A duration difference of up to 100 ms is accepted, a difference above 100 ms produces a warning, and a difference above 500 ms blocks the group.
 - **FR-B07** Bypassing the duration block MUST require a separate option; `--force` MUST NOT bypass it.
+- **FR-B08** Separate episodes discovered in one batch that derive the same `job_id` MUST block dry-run/transcription before publication. The application MUST NOT silently prefer one source, treat result versions as source aliases, or change canonical identity based on neighboring files.
 
 ### C. Channels and speakers
 
