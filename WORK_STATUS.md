@@ -93,6 +93,14 @@ validation, and framework-generated usage errors now print stable codes. Batch f
 the same application codes. `docs/25-warning-error-catalog.md` documents meaning, likely
 cause, safety implications, and operator action, and tests reject undocumented emitted codes.
 
+The `0.7.0` package candidate passes the 620-test locked gate and the 140-package environment
+compatibility check. Its wheel and source archive contain the expected license metadata/files
+and no runtime/private payload filenames or credential-shaped values. An external `/tmp`
+target installation proved wheel provenance outside the checkout, version/help, coded usage
+errors, and all six model-free export formats. Exact candidate hashes are recorded in the
+ADR-0010 follow-up; this targeted artifact smoke complements rather than repeats the earlier
+full isolated locked-dependency installation.
+
 ## v0.4 delivered work
 
 These are the delivered v0.4 workstreams; details and acceptance criteria live in

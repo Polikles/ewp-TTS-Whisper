@@ -6,6 +6,16 @@ All notable changes to EWP-transcripts are documented here.
 
 The next internal-beta version is `0.7.0`.
 
+### Validated
+
+- Passed formatting, lint, static typing, and all 620 tests; the locked environment contains
+  140 mutually compatible packages.
+- Built the `0.7.0` wheel and source archive, verified version and `AGPL-3.0-only` metadata,
+  confirmed inclusion of `LICENSE` and `LICENSING.md`, and scanned archive names/content for
+  runtime/private payloads and credential-shaped values.
+- Installed the wheel into an external `/tmp` target and ran it outside the checkout. Version,
+  help, coded framework errors, and model-free TXT/SRT/VTT/YTT/HTML/segments export passed.
+
 ### Added
 
 - Added a guided, explicitly networked `scripts/setup-models.sh` that downloads exact

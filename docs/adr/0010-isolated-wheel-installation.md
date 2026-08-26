@@ -106,3 +106,34 @@ the locked runtime graph on the already-qualified workstation. It is not a fresh
 test: the system packages, uv cache, model cache, WSL distribution, FFmpeg, and NVIDIA
 driver were already prepared. The separate fresh-OS limitation recorded here was
 subsequently closed by ADR-0019 on a dedicated Ubuntu 24.04.4 WSL2 distribution.
+
+## 2026-08-26 version 0.7.0 artifact follow-up
+
+After the stable diagnostic-code contract was added, the current locked source gate passed
+formatting, lint, typing, and 620 tests. `uv pip check` reported all 140 installed packages as
+compatible; the root-project-only version update produced this lock hash:
+
+```text
+3c174cacce1676f29f736a3cf7b6985e7f11edd715e3022df3827ac767820e51  uv.lock
+```
+
+The declared Hatchling backend built the source archive and then the wheel from that archive:
+
+```text
+262afc3627e889cb4eabaec038013f087a92122330b3a88513f409894c37ce71  ewp_transcripts-0.7.0-py3-none-any.whl
+258b99a4158d8b1a44870111c0d5c95c28c00766828b58532ddf1e97528da18e  ewp_transcripts-0.7.0.tar.gz
+```
+
+Wheel metadata reported version `0.7.0` and license expression `AGPL-3.0-only`; both `LICENSE`
+and `LICENSING.md` were present. A content/name scan found no canonical result, revision,
+translation, resume/operations, semantic-assessment, or dictionary-proposal payload and no
+credential-shaped Hugging Face or OpenRouter value. Documentation references to private
+testing, disposable `/tmp` paths, environment-variable names, and placeholder values are
+expected public instructions rather than private payloads.
+
+The wheel was installed without dependencies into an external `/tmp` target and imported
+from that target while reusing the already checked locked dependency environment. From outside
+the checkout it reported `0.7.0`, rendered help, emitted `CLI_USAGE_ERROR` plus the original
+missing-option message, and exported TXT, SRT, VTT, YouTube srv3 YTT, HTML, and segments JSON
+from the public example. This is a targeted current-artifact provenance/privacy smoke test; the
+earlier full external-venv procedure remains the dependency-isolation evidence.
