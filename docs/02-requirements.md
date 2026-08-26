@@ -145,6 +145,27 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, locally derived change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes. Provider-annotation precision/recall MUST be reported only for providers that emit such annotations.
 - **FR-K19** Every automated correction artifact and CLI outcome MUST be described as a non-final review candidate. Manual acceptance MUST verify wording, speaker attribution, punctuation, quotation marks, and sentence boundaries before the artifact is treated as final publication text or benchmark gold.
 
+### L. Local browser GUI (planned)
+
+- **FR-L00** The GUI MUST be one local browser application with the same bundled frontend, versioned API, application services, and artifact contracts on WSL2, bare-metal Ubuntu, and the future Docker image.
+- **FR-L01** The web adapter MUST call application services directly and MUST NOT invoke CLI subprocesses or maintain alternate transcript, revision, translation, or dictionary models.
+- **FR-L02** The service MUST bind to loopback by default. Non-loopback or multi-user deployment requires a separate security contract and MUST NOT be enabled implicitly.
+- **FR-L03** The primary media workflow MUST use server-visible paths within configured allowed roots. The GUI MUST reject traversal, disallowed symlinks, and access outside those roots.
+- **FR-L04** The GUI MUST expose inspect and dry-run evidence before transcription, including grouping, stream/channel choice, warnings, and resolved outputs.
+- **FR-L05** The GUI MUST expose a deterministic job queue and initially run at most one GPU-intensive job at a time. Browser refresh or closure MUST NOT corrupt active work.
+- **FR-L06** Transcript editing MUST preserve `EWP-REVIEW 1` anchors and lineage while allowing machine metadata to be hidden from the visible editor.
+- **FR-L07** Transcript preview/apply and export MUST use the existing revision, resolution, validation, and export services and retain immutable publication rules.
+- **FR-L08** Correction and translation screens MUST distinguish automated non-final candidates from manually verified artifacts and preserve exact source lineage.
+- **FR-L09** Translation from an unreviewed candidate MAY be offered only with the existing warning and explicit candidate-source provenance.
+- **FR-L10** Project dictionaries MUST be selected and displayed by project, language/direction, version, and hash; artifacts without a dictionary MUST display `none`.
+- **FR-L11** Expected GUI warnings and errors MUST display a stable diagnostic code, readable message, and catalogue/action link.
+- **FR-L12** Provider credentials MUST NOT be stored in URLs, browser history, local storage, logs, artifacts, or job records. Provider operations MUST preserve endpoint classification, explicit scoped consent, and strict-offline enforcement.
+- **FR-L13** The packaged GUI MUST use bundled assets and MUST NOT require runtime CDNs, telemetry, remote fonts, or externally hosted scripts/styles.
+- **FR-L14** The GUI MUST provide version, license/warranty, source-code, and issue-tracker information.
+- **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, highlighting, keyboard operation, and user-controlled follow-playback and theme settings.
+- **FR-L16** The frontend and backend MUST reject incompatible API versions rather than continuing with partial behavior.
+- **FR-L17** The local server MUST validate browser host/origin, protect state-changing requests against cross-site request forgery, escape untrusted content, use a restrictive content-security policy, and serve only validated artifacts.
+
 ## 2. Non-functional requirements
 
 - **NFR-001 Local-first privacy:** transcription, alignment, diarization, manual review, and
@@ -168,3 +189,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **NFR-014 Revision extensibility:** the manual revision core must be reusable by future LLM and GUI adapters without introducing another corrected transcript model.
 - **NFR-015 Correction determinism:** identical selected input, chunk configuration, prompt, and deterministic provider responses MUST produce identical chunk ownership, alignment classification, and audit content apart from allocated identity and creation time.
 - **NFR-016 Correction privacy:** no transcript content or credential may cross a provider boundary until endpoint classification and applicable consent have succeeded.
+- **NFR-017 GUI deployment parity:** automated acceptance MUST run the same frontend/API behavior against WSL2-compatible and native Linux service configurations; Docker later MUST reuse that application rather than fork it.
+- **NFR-018 GUI accessibility:** the interface MUST support keyboard navigation, visible focus, semantic labels, sufficient contrast, browser zoom, and status communication that does not depend on color alone.
+- **NFR-019 GUI offline operation:** all local GUI workflows MUST remain functional without network access once explicitly selected models and application assets are installed.
+- **NFR-020 GUI security:** filesystem exposure, browser-origin controls, credential handling, and rendered untrusted text MUST be covered by automated negative tests before GPU or provider workflows are exposed.

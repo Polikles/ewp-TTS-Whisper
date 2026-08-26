@@ -27,6 +27,7 @@
 | [22 - v0.3 automated correction](22-v0.3-automated-correction.md) | Provider-neutral correction, consent, chunking, provenance, benchmark, and acceptance contract |
 | [23 - v0.4 translation contract](23-v0.4-translation-contract.md) | Bidirectional manual-first translation artifact, workflow, and benchmarks |
 | [25 - Warning and error catalogue](25-warning-error-catalog.md) | Stable diagnostic meanings, safety implications, and operator actions |
+| [26 - Local browser GUI contract](26-local-web-gui-contract.md) | Portable WSL2/Ubuntu/Docker browser interface, security, workflows, and implementation slices |
 | [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 
@@ -52,6 +53,7 @@
 - [ADR-0018: Synthetic fast-speech and recorder-noise acceptance](adr/0018-fast-noisy-audio-acceptance.md)
 - [ADR-0019: Fresh Ubuntu 24.04 WSL installation](adr/0019-fresh-wsl-installation.md)
 - [ADR-0020: Versioned full-snapshot transcript revisions](adr/0020-versioned-transcript-revisions.md) — accepted for v0.2.0
+- [ADR-0021: One local browser GUI across deployment environments](adr/0021-local-browser-gui.md)
 
 ## Implementation guidance
 

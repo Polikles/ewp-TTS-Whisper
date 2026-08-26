@@ -18,6 +18,9 @@ The next internal-beta version is `0.7.0`.
 
 ### Added
 
+- Accepted one self-contained local browser GUI architecture for WSL2, bare-metal Ubuntu,
+  and the future Docker image, with normative workflow, allowed-root filesystem, security,
+  privacy, accessibility, diagnostics, and staged implementation requirements.
 - Added a guided, explicitly networked `scripts/setup-models.sh` that downloads exact
   pinned public snapshots and language data, privately reads the gated Hugging Face token,
   verifies every artifact, and runs readiness diagnostics without placing tokens in command

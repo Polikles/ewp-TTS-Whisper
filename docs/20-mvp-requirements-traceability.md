@@ -116,3 +116,20 @@ The v0.4 contracts are defined in `23-v0.4-translation-contract.md`,
 | YouTube srv3 YTT | verified | Deterministic parser-tested exporter and successful unlisted real Polish upload covering wrapping, colors, centering, timing, labels, and diacritics. |
 | Embeddable HTML | verified | Escaped sentence-level raw/revised/translated fragments plus separate player; real-media Firefox, LibreWolf, Chrome, and Brave qualification covers range seeking, keyboard/mouse interaction, highlighting/following, theme controls, and no-script fallback. |
 | Privacy and reproducibility | verified | `/tmp`-only pilots, no committed private payloads or secrets, content-free benchmark evidence, deterministic exports, immutable source artifacts, the 620-test locked gate, archive-content inspection, and isolated installed-wheel CLI/HTML/YTT smoke checks. |
+
+## Local browser GUI requirements
+
+ADR-0021 and `26-local-web-gui-contract.md` define the common WSL2, bare-metal Ubuntu, and
+future-Docker interface. These requirements are intentionally planned, not implied complete
+by the existing exported HTML transcript player.
+
+| Requirement | Status | Planned implementation/evidence |
+| --- | --- | --- |
+| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | planned | One bundled loopback web service with versioned `/api/v1`, direct application-service calls, offline assets, and API compatibility checks. |
+| FR-L03, FR-L17, NFR-020 | planned | Allowed-root path broker, traversal/symlink rejection, host/origin and state-change protection, restrictive CSP, escaping, and negative security tests. |
+| FR-L04, FR-L05 | planned | Inspect/dry-run vertical slice followed by a deterministic single-GPU queue with recoverable operation state. |
+| FR-L06, FR-L07, FR-L08, FR-L09 | planned | Anchor-preserving transcript and translation editors using existing preview/apply/audit/export services and exact lineage. |
+| FR-L10 | planned | Project dictionary selection/provenance first; proposal/review management in a later GUI slice. |
+| FR-L11, FR-L12 | planned | Coded diagnostic/action surfaces and session-only credential/consent handling with strict-offline tests. |
+| FR-L14, FR-L15, NFR-018 | planned | About/license/source surfaces plus accessible synchronized media review and theme/follow controls. |
+| NFR-017, NFR-019 | planned | Shared contract tests across WSL2-compatible/native launch modes, then the identical packaged application in Docker; offline acceptance after model setup. |

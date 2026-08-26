@@ -2,7 +2,10 @@
 
 ## 1. Architectural style
 
-The application core is a domain library. The CLI, future GUI, and any future local service are adapters. Integrations with FFmpeg, WhisperX, pyannote, and the filesystem are infrastructure ports.
+The application core is a domain library. The CLI and planned local browser GUI/web service
+are adapters. Integrations with FFmpeg, WhisperX, pyannote, and the filesystem are
+infrastructure ports. ADR-0021 and `26-local-web-gui-contract.md` define the web-adapter
+boundary without changing the application core.
 
 ## 2. Processing pipeline
 

@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.6 tree passes formatting, lint, type checks, and all **617 tests**. A fresh
+The current v0.7 tree passes formatting, lint, type checks, and all **620 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -95,6 +95,14 @@ direct privacy/non-final warnings, benchmark and dictionary command failures, ex
 validation, and framework-generated usage errors now print stable codes. Batch failures reuse
 the same application codes. `docs/25-warning-error-catalog.md` documents meaning, likely
 cause, safety implications, and operator action, and tests reject undocumented emitted codes.
+
+The GUI direction is now decided: one self-contained local browser application will use the
+same frontend, versioned API, application services, and immutable artifacts on WSL2,
+bare-metal Ubuntu, and the future Docker image. ADR-0021 and
+`docs/26-local-web-gui-contract.md` define loopback-only initial deployment, configured
+server-side path roots, direct service calls, single-GPU queueing, review/translation
+coverage, privacy/security controls, and the pre-Docker implementation sequence. GUI
+requirements remain planned; the existing exported HTML transcript player is not the GUI.
 
 The `0.7.0` package candidate passes the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files

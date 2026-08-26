@@ -650,7 +650,10 @@ versioning, and exporter architecture remain authoritative during implementation
 ## 13. GUI
 
 GUI remains deliberately late in the roadmap so the application/domain contracts are
-stable first.
+stable first. ADR-0021 selects one self-contained local browser application shared by WSL2,
+bare-metal Ubuntu, and the future Docker image. The normative workflow, path, privacy,
+security, accessibility, and implementation-slice contract is in
+[`26-local-web-gui-contract.md`](26-local-web-gui-contract.md).
 
 Planned capabilities:
 
@@ -672,6 +675,11 @@ Planned capabilities:
 
 The GUI calls application services directly and MUST NOT execute CLI commands as a
 subprocess or maintain a second revision/translation model.
+
+Implementation begins before Docker with the loopback server and read-only inspect/dry-run
+slice. Docker later packages the already qualified application and provides explicit host
+mounts; it does not receive a separate frontend. Browser uploads, remote listening,
+authentication, and multi-user hosting are not part of the initial GUI.
 
 ## 14. Distribution
 
