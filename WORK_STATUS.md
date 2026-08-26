@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **631 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **632 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -129,6 +129,12 @@ Origin with HTTP 403, and confirmed that dry-run created no output directory. Th
 report left the dry-run display unclear, so the interface now distinguishes inspection from
 dry-run completion, shows compact summary cards, treats a missing result as a coded defect,
 keeps full JSON in a disclosure panel, and places About in the page footer.
+
+That directory-level evidence also exposed two different sources (`s0e00.mp3` and
+`s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
+Application-level dry-run now simulates each earlier batch plan: a different signature is
+allocated the next result version and an exact duplicate is skipped. This correction applies
+to CLI and GUI planning alike and prevents the GUI from authorizing an impossible batch plan.
 
 The `0.7.0` package candidate passed the 620-test locked gate and the 140-package environment
 compatibility check. Its wheel and source archive contain the expected license metadata/files

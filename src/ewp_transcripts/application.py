@@ -44,7 +44,9 @@ from ewp_transcripts.domain import (
     DryRunResult,
     EpisodeCandidate,
     EpisodeInspection,
+    ExistingResult,
     InspectionResult,
+    JobOutputPlan,
     JobReservation,
     TranscriptReview,
     TranscriptRevision,
@@ -1616,22 +1618,32 @@ def dry_run(
         config=effective_config.outputs,
         explicit_directory=output_directory,
     )
-    existing = find_existing_results(destination)
-    jobs = tuple(
-        plan_job_outputs(
+    simulated_existing = list(find_existing_results(destination))
+    jobs: list[JobOutputPlan] = []
+    for episode in inspection.episodes:
+        plan = plan_job_outputs(
             episode,
             output_directory=destination,
-            existing_results=existing,
+            existing_results=tuple(simulated_existing),
             force=force,
             config=effective_config.outputs,
         )
-        for episode in inspection.episodes
-    )
+        jobs.append(plan)
+        if plan.decision is PlanDecision.PROCESS:
+            assert plan.outputs is not None
+            simulated_existing.append(
+                ExistingResult(
+                    path=plan.outputs.results,
+                    job_id=plan.job_id,
+                    episode_signature_sha256=plan.episode_signature_sha256,
+                    result_version=plan.outputs.result_version,
+                )
+            )
     return DryRunResult(
         inspection=inspection,
         output_directory=destination,
         language=effective_config.general.language,
-        jobs=jobs,
+        jobs=tuple(jobs),
     )
 
 

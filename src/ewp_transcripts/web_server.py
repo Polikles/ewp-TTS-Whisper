@@ -17,9 +17,10 @@ from urllib.parse import urlsplit
 from ewp_transcripts import __version__
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
-API_VERSION = "1"
+API_VERSION = "1.0"
 REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
 ISSUES_URL = f"{REPOSITORY_URL}/issues"
+LICENSE_URL = f"{REPOSITORY_URL}/blob/main/LICENSE"
 _ASSET_TYPES = {"app.css": "text/css; charset=utf-8", "app.js": "text/javascript; charset=utf-8"}
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
@@ -102,6 +103,7 @@ def dispatch_get(
                 "warranty": "Provided without warranty; see the bundled license.",
                 "repository_url": REPOSITORY_URL,
                 "issues_url": ISSUES_URL,
+                "license_url": LICENSE_URL,
             },
         )
     if path == "/api/v1/roots":

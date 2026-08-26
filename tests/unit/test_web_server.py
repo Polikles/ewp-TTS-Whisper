@@ -26,7 +26,7 @@ def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
     assert response.status == 200
     assert json.loads(response.body) == {
         "status": "ok",
-        "api_version": "1",
+        "api_version": "1.0",
         "application_version": __version__,
     }
     assert "default-src 'none'" in SECURITY_HEADERS["Content-Security-Policy"]

@@ -8,7 +8,7 @@ The next internal-beta version is `0.8.0`.
 
 ### Validated
 
-- Passed formatting, lint, static typing, and all 631 tests for the current v0.8 GUI slices;
+- Passed formatting, lint, static typing, and all 632 tests for the current v0.8 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
@@ -52,6 +52,11 @@ The next internal-beta version is `0.8.0`.
 
 ### Changed
 
+- Dry-run now simulates earlier jobs in the same batch when allocating later outputs. Inputs
+  with the same derived job ID therefore receive distinct versions (or an exact duplicate is
+  skipped) instead of advertising colliding paths.
+- Clarified the GUI footer as `EWP Transcriber v0.8.0` and `API v1.0`; license and warranty
+  is now a direct link rather than an unhelpful plaintext disclaimer.
 - Standardized repository and package licensing on `AGPL-3.0-only`, added the named author
   and licensing contact, and included the detailed licensing notice in distributions.
 - Reconciled live status, roadmap, correction, and onboarding documentation with the
