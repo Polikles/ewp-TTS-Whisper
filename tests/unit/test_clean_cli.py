@@ -26,7 +26,7 @@ def test_clean_requires_preview_or_explicit_confirmation(tmp_path: Path) -> None
     )
 
     assert outcome.exit_code == 2
-    assert "choose exactly one of --dry-run or --yes" in outcome.stderr
+    assert "CLI_CLEAN_MODE_INVALID" in outcome.stderr
 
 
 def test_clean_dry_run_then_confirmed_removal_preserves_unknown_sibling(tmp_path: Path) -> None:

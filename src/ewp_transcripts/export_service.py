@@ -251,7 +251,7 @@ def export_batch(
                 BatchExportJobOutcome(
                     results_path=results_path,
                     status="failed",
-                    failure_code=error.__class__.__name__,
+                    failure_code=error.code,
                     failure_message=str(error),
                 )
             )

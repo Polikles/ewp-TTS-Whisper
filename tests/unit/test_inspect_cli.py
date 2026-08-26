@@ -121,4 +121,4 @@ def test_inspect_rejects_invalid_speaker_count(tmp_path: Path) -> None:
     result = runner.invoke(app, ["inspect", str(tmp_path), "--speaker-count", "zero"])
 
     assert result.exit_code == 2
-    assert "positive integer" in result.output
+    assert "CLI_SPEAKER_COUNT_INVALID" in result.output

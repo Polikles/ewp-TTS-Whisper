@@ -100,7 +100,7 @@ def test_failed_editor_keeps_review_but_does_not_apply(monkeypatch, tmp_path: Pa
     )
 
     assert result.exit_code == 4
-    assert "Error: editor failed" in result.stderr
+    assert "Error [REVISION_EDITOR_FAILED]: editor failed" in result.stderr
     assert (reviews / "S01E01.review.txt").is_file()
     assert not revisions.exists()
 

@@ -71,27 +71,12 @@ This is still a duplicate. Without `--force`, the job is skipped and the existin
 - the process returns a non-zero exit code when at least one job failed;
 - `Ctrl+C` marks the current job as `cancelled`, removes temporary files being finalized, and stops the queue.
 
-## 6. Warning codes
+## 6. Warning and error codes
 
-Minimum catalog:
-
-```text
-CHANNEL_CLASSIFICATION_AMBIGUOUS
-INPUT_DURATION_MISMATCH
-INPUT_SAMPLE_RATE_MISMATCH
-AUDIO_CLIPPING
-AUDIO_LOW_LEVEL
-AUDIO_CHANNEL_IMBALANCE
-AUDIO_HIGH_SILENCE_RATIO
-WORD_ALIGNMENT_MISSING
-WORD_TIMESTAMP_INTERPOLATED
-OVERLAPPING_SPEECH
-DIARIZATION_LOW_CONFIDENCE
-LANGUAGE_CODE_SWITCHING_POSSIBLE
-EXISTING_RESULT_SKIPPED
-SOURCE_NAME_COLLISION
-NON_ATOMIC_OUTPUT_FILESYSTEM
-```
+Implemented user-visible diagnostics use stable codes and are documented in the
+[warning and error code catalogue](25-warning-error-catalog.md). Codes previously listed as
+aspirational minimums are not presented as implemented until an emitting path and test exist.
+Human-readable wording may improve, but a published code must not silently change meaning.
 
 ## 7. Logging
 
@@ -173,16 +158,17 @@ files are user-editable and are not treated as final application state.
 A revision verifies the exact SHA-256 of its canonical base before application or export.
 A parent revision hash is provenance; the parent is not needed to materialize the child.
 
-Additional planned warning/error codes:
+Implemented revision warning/error codes include:
 
 ```text
 REVISION_ALIGNMENT_AMBIGUOUS
-REVISION_BASE_HASH_MISMATCH
 REVISION_ANCHOR_INVALID
 REVISION_INSERT_ACROSS_LONG_GAP
-REVISION_SOURCE_WORD_MISSING
 REVISION_SPEAKER_INVALID
 ```
+
+Other incompatible revision conditions use `INVALID_REVISION`; the detailed message names
+the failed lineage or content check.
 
 Batch prepare/apply follows the existing failure-isolation policy and returns the existing
 batch-failure exit code when one or more items fail.

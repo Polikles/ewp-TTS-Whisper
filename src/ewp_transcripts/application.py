@@ -2012,14 +2012,8 @@ def _distribution_version(name: str) -> str | None:
 
 
 def _failure_code(error: Exception) -> str:
-    if isinstance(error, InvalidReviewError):
-        return error.code
     if isinstance(error, ApplicationError):
-        name = type(error).__name__
-        code = "".join(
-            f"_{character}" if character.isupper() else character.upper() for character in name
-        )
-        return code.lstrip("_")
+        return error.code
     return "TRANSCRIPTION_FAILED"
 
 

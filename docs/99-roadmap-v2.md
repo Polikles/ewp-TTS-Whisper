@@ -32,11 +32,11 @@ items belong to one monolithic "Version 2" release.
 9. GUI after the planned core functions are stable; GUI reuses application services and
    does not implement a parallel pipeline.
 
-Cross-cutting observability TODO: create a readable warning/error-code catalogue (a
-dedicated document is acceptable). Every user-visible warning and expected error must print
-its stable code, and every code must document its meaning, likely causes, safety
-implications, and operator action. Audit existing uncoded exception paths and CLI messages
-rather than limiting this requirement to new work.
+Cross-cutting observability is implemented in
+[`25-warning-error-catalog.md`](25-warning-error-catalog.md): domain warnings, expected
+application errors, direct policy warnings, command wrappers, and framework-generated usage
+failures print stable codes. The catalogue records meaning, likely causes, safety implications,
+and operator action, while automated coverage rejects undocumented emitted codes.
 
 The earlier small production pilot requirement is superseded operationally by the larger
 manual-review corpus used to build correction ground truth. Existing accepted v0.1

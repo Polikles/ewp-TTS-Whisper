@@ -56,6 +56,13 @@ def test_version_reports_installed_package_version() -> None:
     assert result.stdout.strip() == __version__
 
 
+def test_framework_usage_errors_have_a_stable_code() -> None:
+    result = runner.invoke(app, ["translate", "audit", "missing.json"])
+
+    assert result.exit_code == 2
+    assert "CLI_USAGE_ERROR" in result.stderr
+
+
 def test_module_entry_point_reports_version() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "ewp_transcripts", "--version"],

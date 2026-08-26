@@ -6,9 +6,12 @@ from contextlib import nullcontext, redirect_stdout
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
 import typer
+from typer._click.core import Context
+from typer._click.exceptions import UsageError
+from typer.core import TyperGroup
 
 from ewp_transcripts.application import (
     BatchAutomatedTranslationOutcome,
@@ -102,7 +105,38 @@ from ewp_transcripts.translation_lm_studio import (
 )
 from ewp_transcripts.translation_state import summarize_translation_resume_state
 
+
+class CodedTyperGroup(TyperGroup):
+    """Add a stable code to framework-generated command-line usage failures."""
+
+    @staticmethod
+    def _coded_usage_error(error: UsageError) -> UsageError:
+        message = error.format_message()
+        if "CLI_" in message:
+            return error
+        return UsageError(f"CLI_USAGE_ERROR: {message}", error.ctx)
+
+    def make_context(
+        self,
+        info_name: str | None,
+        args: list[str],
+        parent: Context | None = None,
+        **extra: Any,
+    ) -> Context:
+        try:
+            return super().make_context(info_name, args, parent=parent, **extra)
+        except UsageError as error:
+            raise self._coded_usage_error(error) from error
+
+    def invoke(self, ctx: Context) -> object:
+        try:
+            return super().invoke(ctx)
+        except UsageError as error:
+            raise self._coded_usage_error(error) from error
+
+
 app = typer.Typer(
+    cls=CodedTyperGroup,
     name="transcriber",
     help=(
         "Local-first transcription for edited podcast and training recordings. "
@@ -111,6 +145,7 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 revise_app = typer.Typer(
+    cls=CodedTyperGroup,
     name="revise",
     help=(
         "Prepare, validate, and publish transcript corrections without source audio. "
@@ -119,21 +154,25 @@ revise_app = typer.Typer(
     no_args_is_help=True,
 )
 benchmark_app = typer.Typer(
+    cls=CodedTyperGroup,
     name="benchmark",
     help="Build and evaluate private, exact-hash benchmark bundles.",
     no_args_is_help=True,
 )
 correction_benchmark_app = typer.Typer(
+    cls=CodedTyperGroup,
     name="correction",
     help="Benchmark automated transcript corrections against manual gold revisions.",
     no_args_is_help=True,
 )
 translation_benchmark_app = typer.Typer(
+    cls=CodedTyperGroup,
     name="translation",
     help="Benchmark translation meaning with exact-lineage human semantic assessments.",
     no_args_is_help=True,
 )
 translate_app = typer.Typer(
+    cls=CodedTyperGroup,
     name="translate",
     help=(
         "Prepare, validate, and publish source-faithful Polish-English translations. "
@@ -142,10 +181,16 @@ translate_app = typer.Typer(
     no_args_is_help=True,
 )
 dictionary_app = typer.Typer(
-    name="dictionary", help="Propose and approve project-scoped dictionaries.", no_args_is_help=True
+    cls=CodedTyperGroup,
+    name="dictionary",
+    help="Propose and approve project-scoped dictionaries.",
+    no_args_is_help=True,
 )
 correction_dictionary_app = typer.Typer(
-    name="correction", help="Build Polish correction dictionary proposals.", no_args_is_help=True
+    cls=CodedTyperGroup,
+    name="correction",
+    help="Build Polish correction dictionary proposals.",
+    no_args_is_help=True,
 )
 app.add_typer(revise_app, name="revise")
 app.add_typer(translate_app, name="translate")
@@ -200,8 +245,7 @@ def correction_dictionary_propose_command(
         normalized_output = output_path.expanduser().absolute()
         write_correction_dictionary_proposal(proposal, normalized_output)
     except (ApplicationError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=4) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_DICTIONARY_PROPOSAL_FAILED")
     typer.echo(f"PROPOSAL {normalized_output}")
     approved = sum(item.status == "approved" for item in proposal.candidates)
     rejected = sum(item.status == "rejected" for item in proposal.candidates)
@@ -227,8 +271,7 @@ def correction_dictionary_approve_command(
             output_path=output_path.expanduser().absolute(),
         )
     except (OSError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=4) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_DICTIONARY_APPROVAL_FAILED")
     typer.echo(f"DICTIONARY {output_path.expanduser().absolute()}")
     approved = sum(item.status == "approved" for item in dictionary.entries)
     rejected = sum(item.status == "rejected" for item in dictionary.entries)
@@ -316,8 +359,9 @@ def translation_benchmark_prepare_command(
             output_directory=normalize_input_path(output_directory),
         )
     except (OSError, ValueError, ApplicationError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(
+            error, fallback_code="TRANSLATION_BENCHMARK_PREPARE_FAILED", exit_code=2
+        )
     for assessment in assessments:
         typer.echo(f"ASSESSMENT {assessment}")
     typer.echo(f"SUMMARY cases={len(assessments)} pending_review={len(assessments)}")
@@ -345,8 +389,7 @@ def translation_benchmark_report_command(
             normalized_output.write_text(serialized, encoding="utf-8")
             normalized_output.chmod(0o600)
     except (OSError, ValueError, ApplicationError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(error, fallback_code="TRANSLATION_BENCHMARK_REPORT_FAILED", exit_code=2)
     if normalized_output is None:
         typer.echo(serialized, nl=False)
         return
@@ -381,8 +424,9 @@ def translation_benchmark_operations_command(
             normalized_output.write_text(serialized, encoding="utf-8")
             normalized_output.chmod(0o600)
     except (OSError, ValueError, ApplicationError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(
+            error, fallback_code="TRANSLATION_OPERATIONS_REPORT_FAILED", exit_code=2
+        )
     if normalized_output is None:
         typer.echo(serialized, nl=False)
     else:
@@ -417,8 +461,7 @@ def correction_benchmark_build_command(
         )
         loaded = load_correction_benchmark_manifest(manifest)
     except (OSError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_BENCHMARK_BUILD_FAILED", exit_code=2)
     typer.echo(f"MANIFEST {manifest}")
     typer.echo(f"SUMMARY cases={len(loaded.cases)}")
 
@@ -443,8 +486,7 @@ def correction_benchmark_report_command(
             normalized_output.write_text(serialized, encoding="utf-8")
             normalized_output.chmod(0o600)
     except (OSError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_BENCHMARK_REPORT_FAILED", exit_code=2)
     if normalized_output is None:
         typer.echo(serialized, nl=False)
         return
@@ -489,8 +531,7 @@ def correction_benchmark_review_command(
         )
         normalized_output.chmod(0o600)
     except (OSError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_BENCHMARK_REVIEW_FAILED", exit_code=2)
     cases = cast(list[dict[str, object]], review["cases"])
     unsupported = sum(len(cast(list[object], case["unsupported_edits"])) for case in cases)
     typer.echo(f"REVIEW {normalized_output}")
@@ -519,8 +560,7 @@ def correction_benchmark_operations_command(
             normalized_output.write_text(serialized, encoding="utf-8")
             typer.echo(f"REPORT {normalized_output}")
     except (OSError, ValueError, ApplicationError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=2) from error
+        _expected_cli_error(error, fallback_code="CORRECTION_OPERATIONS_REPORT_FAILED", exit_code=2)
     typer.echo(
         f"SUMMARY chunks={report['chunks']} requests={report['request_count']} "
         f"retries={report['retries']} elapsed_ms={report['elapsed_ms']} "
@@ -662,11 +702,11 @@ def _print_automated_translation_batch(outcome: BatchAutomatedTranslationOutcome
 
 def _warn_unreviewed_translation_source(verification: str) -> None:
     if verification == "automated_candidate":
-        typer.echo(
-            "WARNING: Translation source is an unreviewed automated transcript candidate. "
+        _coded_warning(
+            "TRANSLATION_SOURCE_UNREVIEWED",
+            "Translation source is an unreviewed automated transcript candidate. "
             "The translation artifact will preserve candidate—not manually verified—source "
             "lineage. Manually verify both source and translation before acceptance.",
-            err=True,
         )
 
 
@@ -755,11 +795,11 @@ def translate_automate_command(
 ) -> None:
     """Build a non-final candidate with the mock or LM Studio provider."""
 
-    typer.echo(
-        "WARNING: Automated translation is a non-final review candidate. "
+    _coded_warning(
+        "AUTOMATED_TRANSLATION_NON_FINAL",
+        "Automated translation is a non-final review candidate. "
         "Manually verify meaning, omissions, additions, uncertainty, names, and style "
         "before acceptance.",
-        err=True,
     )
     try:
         config = load_config(explicit_path=config_path)
@@ -840,10 +880,7 @@ def translate_automate_command(
                 dictionary_sha256=dictionary_sha256,
             )
     except (ApplicationError, ValueError) as error:
-        if isinstance(error, ApplicationError):
-            _expected_error(error)
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=4) from error
+        _expected_cli_error(error, fallback_code="AUTOMATED_TRANSLATION_REQUEST_INVALID")
     if normalized_result.is_dir():
         _print_automated_translation_batch(batch)
         if batch.count("failed"):
@@ -941,10 +978,7 @@ def translate_prepare_command(
                 style=translation_style,
             )
     except (ApplicationError, ValueError) as error:
-        if isinstance(error, ApplicationError):
-            _expected_error(error)
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=4) from error
+        _expected_cli_error(error, fallback_code="TRANSLATION_PREPARE_FAILED")
     if normalized_result.is_dir():
         _print_translation_batch(batch)
         if batch.count("failed"):
@@ -1710,11 +1744,11 @@ def revise_correct_command(
         )
         provider = create_correction_provider(config)
         choice = _correction_consent_choice(config, provider, consent)
-        typer.echo(
-            "WARNING: Automated correction creates a review candidate, not a final "
+        _coded_warning(
+            "AUTOMATED_CORRECTION_NON_FINAL",
+            "Automated correction creates a review candidate, not a final "
             "transcript. Manually verify wording, speakers, punctuation, and quotation "
             "marks before acceptance.",
-            err=True,
         )
         normalized_result = normalize_input_path(results_json)
         dictionary = None
@@ -1787,9 +1821,9 @@ def _correction_consent_choice(
     )
     warning = correction_api_warning(scope.endpoint_kind)
     if warning is not None:
-        typer.echo(f"WARNING: {warning}", err=True)
+        _coded_warning("EXTERNAL_API_DATA_DISCLOSURE", warning)
     if scope.endpoint_kind == "local" and not is_loopback_endpoint(scope.endpoint_identity):
-        typer.echo(f"WARNING: {REMOTE_LOCAL_API_WARNING}", err=True)
+        _coded_warning("REMOTE_API_TRANSPORT_UNVERIFIED", REMOTE_LOCAL_API_WARNING)
     records = load_correction_consents(config.correction.consent_store)
     if any(record.scope == scope for record in records):
         return None
@@ -1801,7 +1835,9 @@ def _correction_consent_choice(
     try:
         selected = RequestedCorrectionConsent(answer)
     except ValueError as error:
-        raise typer.BadParameter("consent must be reject, once, or persist") from error
+        raise typer.BadParameter(
+            "CLI_CONSENT_INVALID: consent must be reject, once, or persist"
+        ) from error
     return _consent_value(selected)
 
 
@@ -1821,9 +1857,9 @@ def _translation_consent_choice(
         return None
     warning = correction_api_warning(scope.endpoint_kind)
     if warning is not None:
-        typer.echo(f"WARNING: {warning}", err=True)
+        _coded_warning("EXTERNAL_API_DATA_DISCLOSURE", warning)
     if scope.endpoint_kind == "local" and not is_loopback_endpoint(scope.endpoint_identity):
-        typer.echo(f"WARNING: {REMOTE_LOCAL_API_WARNING}", err=True)
+        _coded_warning("REMOTE_API_TRANSPORT_UNVERIFIED", REMOTE_LOCAL_API_WARNING)
     store = config.correction.consent_store.with_name("translation-consent.json")
     if any(record.scope == scope for record in load_translation_consents(store)):
         return None
@@ -1835,7 +1871,9 @@ def _translation_consent_choice(
     try:
         selected = RequestedCorrectionConsent(answer)
     except ValueError as error:
-        raise typer.BadParameter("consent must be reject, once, or persist") from error
+        raise typer.BadParameter(
+            "CLI_CONSENT_INVALID: consent must be reject, once, or persist"
+        ) from error
     return _consent_value(selected)
 
 
@@ -2019,9 +2057,11 @@ def _speaker_count(value: str | None) -> str | int | None:
     try:
         parsed = int(value)
     except ValueError as error:
-        raise typer.BadParameter("must be 'auto' or a positive integer") from error
+        raise typer.BadParameter(
+            "CLI_SPEAKER_COUNT_INVALID: must be 'auto' or a positive integer"
+        ) from error
     if parsed < 1:
-        raise typer.BadParameter("must be 'auto' or a positive integer")
+        raise typer.BadParameter("CLI_SPEAKER_COUNT_INVALID: must be 'auto' or a positive integer")
     return parsed
 
 
@@ -2032,9 +2072,11 @@ def _speaker_mapping(values: list[str] | None) -> dict[str, str]:
         source = source.strip()
         label = label.strip()
         if not separator or not source or not label:
-            raise typer.BadParameter("speaker maps must use SOURCE=NAME")
+            raise typer.BadParameter("CLI_SPEAKER_MAP_INVALID: speaker maps must use SOURCE=NAME")
         if source in mapping:
-            raise typer.BadParameter(f"speaker map source repeated: {source}")
+            raise typer.BadParameter(
+                f"CLI_SPEAKER_MAP_DUPLICATE: speaker map source repeated: {source}"
+            )
         mapping[source] = label
     return mapping
 
@@ -2097,10 +2139,23 @@ def _transcribe_overrides(
     return overrides
 
 
+def _coded_warning(code: str, message: str) -> None:
+    typer.echo(f"WARNING [{code}]: {message}", err=True)
+
+
+def _expected_cli_error(
+    error: ApplicationError | OSError | ValueError,
+    *,
+    fallback_code: str,
+    exit_code: int = 4,
+) -> None:
+    stable_code = getattr(error, "code", fallback_code)
+    typer.echo(f"Error [{stable_code}]: {error}", err=True)
+    raise typer.Exit(code=exit_code) from error
+
+
 def _expected_error(error: ApplicationError) -> None:
-    stable_code = getattr(error, "code", None)
-    prefix = f"Error [{stable_code}]" if isinstance(stable_code, str) else "Error"
-    typer.echo(f"{prefix}: {error}", err=True)
+    typer.echo(f"Error [{error.code}]: {error}", err=True)
     if isinstance(error, InvalidConfigurationError):
         raise typer.Exit(code=2) from error
     if isinstance(error, MissingCapabilityError):
@@ -2120,16 +2175,20 @@ def _input_selection(
     explicit = tuple(normalize_input_path(path) for path in group_paths or ())
     if explicit:
         if input_path is not None:
-            raise typer.BadParameter("INPUT cannot be combined with --group")
+            raise typer.BadParameter(
+                "CLI_INPUT_SELECTION_INVALID: INPUT cannot be combined with --group"
+            )
         if len(explicit) < 2:
-            raise typer.BadParameter("--group must be repeated for at least two files")
+            raise typer.BadParameter(
+                "CLI_GROUP_TOO_SMALL: --group must be repeated for at least two files"
+            )
         if group_id is None or not group_id.strip():
-            raise typer.BadParameter("--group-id is required with --group")
+            raise typer.BadParameter("CLI_GROUP_ID_REQUIRED: --group-id is required with --group")
         return explicit[0], explicit, group_id.strip()
     if group_id is not None:
-        raise typer.BadParameter("--group-id requires --group")
+        raise typer.BadParameter("CLI_GROUP_REQUIRED: --group-id requires --group")
     if input_path is None:
-        raise typer.BadParameter("provide INPUT or an explicit --group")
+        raise typer.BadParameter("CLI_INPUT_REQUIRED: provide INPUT or an explicit --group")
     return normalize_input_path(input_path), None, None
 
 
@@ -2169,7 +2228,7 @@ def clean_command(
     """Safely preview or remove marker-verified application workspaces."""
 
     if dry_run == confirmed:
-        raise typer.BadParameter("choose exactly one of --dry-run or --yes")
+        raise typer.BadParameter("CLI_CLEAN_MODE_INVALID: choose exactly one of --dry-run or --yes")
     assert target is CleanTarget.ALL_WORKDIRS
     try:
         config = load_config(explicit_path=config_path)
@@ -2636,11 +2695,13 @@ def transcribe_command(
         parsed_speaker_count = _speaker_count(speaker_count)
         parsed_speaker_map = _speaker_mapping(speaker_maps)
         if speaker is not None and not speaker.strip():
-            raise typer.BadParameter("speaker label must not be empty")
+            raise typer.BadParameter("CLI_SPEAKER_LABEL_EMPTY: speaker label must not be empty")
         if speaker is not None and (selected_input.is_dir() or explicit_group_paths is not None):
-            raise typer.BadParameter("--speaker requires one input file")
+            raise typer.BadParameter("CLI_SPEAKER_INPUT_INVALID: --speaker requires one input file")
         if speaker is not None and parsed_speaker_count not in {None, 1}:
-            raise typer.BadParameter("--speaker requires --speaker-count 1")
+            raise typer.BadParameter(
+                "CLI_SPEAKER_COUNT_CONFLICT: --speaker requires --speaker-count 1"
+            )
         config = load_config(
             explicit_path=config_path,
             cli_overrides=_transcribe_overrides(

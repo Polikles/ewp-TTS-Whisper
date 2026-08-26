@@ -4,7 +4,7 @@ Last updated: **2026-08-26**.
 
 ## Checkpoint
 
-Version `0.6.2` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.7.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. The repository is public and licensed under `AGPL-3.0-only`.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
@@ -86,6 +86,12 @@ candidate-backed manual-review preparation, verified-revision export, and LM Stu
 translation candidate, audit, and review preparation. Canonical results and accepted
 revisions remain immutable. Private corpus content, API keys,
 provider payloads, and runtime resume/lock files remain outside Git.
+
+The cross-cutting diagnostic catalogue is implemented. Expected application exceptions,
+direct privacy/non-final warnings, benchmark and dictionary command failures, explicit CLI
+validation, and framework-generated usage errors now print stable codes. Batch failures reuse
+the same application codes. `docs/25-warning-error-catalog.md` documents meaning, likely
+cause, safety implications, and operator action, and tests reject undocumented emitted codes.
 
 ## v0.4 delivered work
 
