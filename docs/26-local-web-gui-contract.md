@@ -103,6 +103,11 @@ without writing a revision. The GUI MUST label that state as unpublished and sho
 summary before offering expandable technical JSON. Preparing another review while one is open
 MUST require an explicit clear action so unsaved editor content cannot be replaced. Disabled
 Apply and Export actions MUST be visually distinct and explain their prerequisite.
+The active saved review and its non-secret filesystem identity MUST survive page refresh and
+browser restart; restoration reloads content from the authoritative review file rather than
+storing transcript text in browser storage. Clearing this pointer requires confirmation and
+does not delete artifacts. One project output root SHOULD derive separate `reviews/`,
+`revisions/`, and `exports/` directories, with manual paths available as an explicit option.
 
 Long reviews MUST support both a sequential previous/next-section view and a continuous
 all-sections view, with the presentation preference retained locally. A visible speaker block
@@ -163,6 +168,9 @@ weaken the separate no-script readability requirement for exported HTML transcri
 
 The About surface MUST show application and API versions, license/warranty information, and
 the canonical source-code and issue-tracker links.
+
+As workflow coverage grows, top-level workflow sections MUST be collapsible and reachable
+through a table-of-contents navigation near the start of the page.
 
 ## 10. Initial implementation sequence
 

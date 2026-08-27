@@ -318,6 +318,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     payload = self.server.gui_reviews.prepare(
                         result, str(document.get("review_output_directory", ""))
                     )
+                elif path == "/api/v1/reviews/load":
+                    payload = self.server.gui_reviews.document(
+                        str(document.get("review_path", "")), result
+                    )
                 elif path == "/api/v1/reviews/save":
                     anchors = document.get("anchors")
                     if not isinstance(anchors, list):

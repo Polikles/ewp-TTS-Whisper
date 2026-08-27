@@ -700,6 +700,8 @@ Planned capabilities:
   less-technical users after the workflow stabilizes; screenshots are added after that pass.
 - after functional GUI coverage, a dedicated frontend pass that aligns appearance with the
   owner's other projects and adds final responsive light/dark styles;
+- add table-of-contents navigation and collapsible top-level workflow sections as correction,
+  translation, and dictionary functions make the page longer;
 - an explicit light/dark mode switch in that pass; automatic system preference remains an
   interim behavior rather than the final theme control.
 

@@ -59,8 +59,12 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"event.currentTarget.elements" not in script_response.body
     assert b"(auto)" in script_response.body
     assert b"GUI_REVIEW_ACTIVE" in script_response.body
+    assert b"GUI_REVIEW_RESTORE_FAILED" in script_response.body
     assert b"None \xe2\x80\x94 validation only" in script_response.body
     assert b"ewp-review-layout" in script_response.body
+    assert b"ewp-active-review-v1" in script_response.body
+    assert b"beforeunload" in script_response.body
+    assert b'postReview("load"' in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
     assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
 

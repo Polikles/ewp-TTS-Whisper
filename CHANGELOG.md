@@ -78,6 +78,9 @@ The next internal-beta version is `0.9.0`.
 - Clarified browser review state with readable validation/publication summaries and expandable
   JSON; protected open drafts from accidental Prepare replacement; visually distinguished
   disabled Apply/Export controls; and added persistent one-section/continuous review layouts.
+- Restored the active saved review after refresh from its authoritative disk file, derived
+  structured review/revision/export directories from one output root, guarded Clear with a
+  confirmation, and disabled repeated publication of the same open review.
 - GUI paths now reuse Windows/WSL/POSIX normalization before allowed-root authorization;
   Windows drive paths are convenient aliases, not a bypass around explicitly exposed roots.
 - Compacted dry-run summaries to logical jobs, filenames, source decisions, and warning codes.

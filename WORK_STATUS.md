@@ -180,6 +180,12 @@ and offers both sequential and continuous section layouts. The supplied fixture 
 an earlier instruction describing it as Polish was incorrect. Whole-block speaker reassignment
 is available now; partial-block reassignment and speaker display-name editing remain explicit
 later editor requirements.
+The same acceptance pass found that refresh discarded the active editor pointer and that
+separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
+from its authoritative disk file using only non-secret path pointers in browser storage,
+derives `reviews/`, `revisions/`, and `exports/` from one output root by default, guards Clear
+with confirmation, and prevents repeated Apply clicks from publishing the same open review
+again. Collapsible section/table-of-contents navigation is retained for the larger GUI.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
