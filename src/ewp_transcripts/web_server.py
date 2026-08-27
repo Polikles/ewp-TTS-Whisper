@@ -17,7 +17,9 @@ from urllib.parse import urlsplit
 
 from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
+from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
+from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 API_VERSION = "1.0"
@@ -144,6 +146,10 @@ class LocalGuiServer(ThreadingHTTPServer):
         application_config = load_config()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
+        self.gui_reviews = GuiReviewController(
+            config=application_config,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+        )
         self.gui_csrf_token = secrets.token_urlsafe(32)
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
@@ -272,7 +278,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
-            if not 0 < length <= 16_384:
+            if not 0 < length <= 1_048_576:
                 raise ValueError("Request body size is invalid")
             document = json.loads(self.rfile.read(length))
             if not isinstance(document, dict):
@@ -291,6 +297,92 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             )
             return
         path = urlsplit(self.path).path
+        if path.startswith("/api/v1/reviews/"):
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The review request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                result = str(document.get("result_path", ""))
+                if path == "/api/v1/reviews/prepare":
+                    payload = self.server.gui_reviews.prepare(
+                        result, str(document.get("review_output_directory", ""))
+                    )
+                elif path == "/api/v1/reviews/save":
+                    anchors = document.get("anchors")
+                    if not isinstance(anchors, list):
+                        raise ValueError("Review anchors must be an array")
+                    payload = self.server.gui_reviews.save(
+                        str(document.get("review_path", "")),
+                        result,
+                        expected_sha256=str(document.get("review_sha256", "")),
+                        anchors=anchors,
+                    )
+                elif path == "/api/v1/reviews/preview":
+                    payload = self.server.gui_reviews.preview(
+                        str(document.get("review_path", "")), result
+                    )
+                elif path == "/api/v1/reviews/apply":
+                    if document.get("confirmed") is not True:
+                        raise ValueError("Manual verification confirmation is required")
+                    payload = self.server.gui_reviews.apply(
+                        str(document.get("review_path", "")),
+                        result,
+                        str(document.get("revision_output_directory", "")),
+                    )
+                elif path == "/api/v1/reviews/export":
+                    formats = document.get("formats")
+                    if not isinstance(formats, list) or not all(
+                        isinstance(item, str) for item in formats
+                    ):
+                        raise ValueError("Export formats must be an array of names")
+                    payload = self.server.gui_reviews.export(
+                        result,
+                        str(document.get("revision_path", "")),
+                        str(document.get("export_output_directory", "")),
+                        formats,
+                    )
+                else:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.NOT_FOUND,
+                            {
+                                "error": {
+                                    "code": "GUI_ROUTE_NOT_FOUND",
+                                    "message": "No such GUI route.",
+                                }
+                            },
+                        )
+                    )
+                    return
+            except ApplicationError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": error.code, "message": str(error)}},
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_REVIEW_REQUEST_INVALID", "message": str(error)}},
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
         if path == "/api/v1/inspect":
             operation = self.server.gui_workflows.run("inspect", document)
         elif path == "/api/v1/dry-run":

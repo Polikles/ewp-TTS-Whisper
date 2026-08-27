@@ -20,10 +20,12 @@ transcriber gui [--port PORT] [--allow-root PATH]... [--no-open-browser]
 Starts the local browser adapter on `127.0.0.1`. Port `8765` is the default and `0` requests
 an ephemeral port. Repeated `--allow-root` options identify server-visible directories; when
 omitted, the current directory is the only root. The command serves bundled assets and the
-versioned `/api/v1` interface without loading ML models. The v0.8 interface provides
+versioned `/api/v1` interface without loading ML models. The v0.9 interface provides
 inspect/dry-run, readable output-plan tables, bundled help, and an explicitly confirmed queue.
 Each direct-file plan is staged without execution; distinct job IDs sharing one output
 directory begin serially only after the operator selects **Start queue**.
+It also provides model-free structured transcript review, save/preview/apply gates, and
+verified-revision export through the same application services as the CLI.
 
 ## 2. `doctor`
 

@@ -4,12 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.8.0`.
+The next internal-beta version is `0.9.0`.
 
 ### Validated
 
-- Passed formatting, lint, static typing, and all 638 tests for the current v0.8 GUI slices;
+- Passed formatting, lint, static typing, and all 640 tests for the current v0.9 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
+- Built the `0.9.0` wheel and source archive and verified inclusion of the model-free browser
+  review controller plus updated bundled review assets/help.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
 - Qualified real WAV inspection, allowed-root rejection, cross-origin rejection, and the
@@ -30,6 +32,10 @@ The next internal-beta version is `0.8.0`.
 
 ### Added
 
+- Added a model-free browser review workspace: prepare structured editable drafts without
+  exposing anchors, edit text/speaker attribution, save with optimistic hash conflict
+  protection, preview exact saved content, explicitly apply an immutable manually verified
+  revision, and export TXT/SRT/VTT/YTT/HTML/segments from that revision.
 - Connected read-only GUI inspect and dry-run forms directly to existing application
   services, with structured results, bounded in-process operation history, explicit-root
   containment, symlink rejection, Origin validation, and bounded JSON requests.

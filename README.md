@@ -4,7 +4,7 @@
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.8.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.9.0` remains an internal beta, not a public release.
 - Development remains untagged on `main` while requirements work continues. The first public
   release is planned only as the checkpoint immediately before Docker-image work begins.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
@@ -90,7 +90,9 @@ and exposes only the named directories. Inspect and dry-run are read-only. Each 
 can be staged without starting GPU work; collect distinct episode files under one shared
 output directory, review/remove rows, then select **Start queue** to process them serially.
 Brief instructions and a complete local help page are bundled into the GUI. Review workflows
-are still under implementation, so retain the CLI workflow below for production work.
+now provide structured draft editing, exact-hash preview, immutable manual apply, and verified
+export. Translation and provider workflows remain under implementation, so retain the CLI
+workflow below for production work.
 
 Transcribe one file or a directory after `doctor` reports model readiness:
 

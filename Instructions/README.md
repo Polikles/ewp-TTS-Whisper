@@ -51,6 +51,13 @@ rows, then select **Start queue**. The bundled **GUI workflow** help page explai
 requiring Internet access. Closing the browser does not stop a job; stopping the server waits
 for active transcription.
 
+The **Review and export** section accepts one completed canonical result. Keep its editable
+review, immutable revision, and derived exports in separate allowed-root directories. Prepare
+the draft, edit visible speaker/text blocks, save it, and run Preview. Apply remains locked
+until the exact saved draft previews successfully and the manual-verification confirmation is
+checked. Export then uses only the newly applied immutable revision. Automated candidates and
+translation remain CLI workflows in this slice.
+
 After cloning, a fresh Ubuntu 24.04 checkout can install the base packages, uv/Python,
 locked environment, and run diagnostics through the reviewable script:
 

@@ -1,10 +1,10 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-26**.
+Last updated: **2026-08-27**.
 
 ## Checkpoint
 
-Version `0.8.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.9.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **638 tests**. A fresh
+The current v0.9 tree passes formatting, lint, type checks, and all **640 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -104,12 +104,11 @@ server-side path roots, direct service calls, single-GPU queueing, review/transl
 coverage, privacy/security controls, and the pre-Docker implementation sequence. GUI
 requirements remain planned; the existing exported HTML transcript player is not the GUI.
 
-The first executable GUI slice is implemented in v0.8. `transcriber gui` starts a
+The first executable GUI slice was implemented in v0.8. `transcriber gui` starts a
 loopback-only server with bundled offline HTML/CSS/JavaScript, versioned health/about/root
 endpoints, frontend/API compatibility checking, explicit normalized allowed roots, Host
 validation, restrictive browser security headers, coded failures, and About/license/source
-information. It does not load ML models. The current shell is deliberately read-only; the
-next slice connects inspect/dry-run application services and a job view.
+information. It does not load ML models.
 
 The owner qualified this shell from Ubuntu 24.04 WSL2 in Firefox, LibreWolf, Brave, and
 Chrome. All browsers reported the v0.8/API-v1 compatibility state, exact configured roots,
@@ -166,6 +165,14 @@ plan detail table occupies its own full-width row, and the implicit language is 
 The owner confirmed the correction in the target browser: staging reports only `Added to
 staged queue`, plan details render full-width below the summary cards, and language displays
 as `pl (auto)`. This closes the current transcription queue and planning-presentation gate.
+
+The v0.9 model-free GUI review slice is now implemented pending external browser acceptance.
+It prepares a non-destructive review from one canonical result, exposes only editable
+speaker/text blocks, protects hidden anchors and lineage, rejects stale-tab saves by exact
+review hash, requires Preview of the current saved hash before Apply, and requires explicit
+manual-verification confirmation. Apply publishes through the existing immutable revision
+service; verified TXT/SRT/VTT/YTT/HTML/segments export uses that exact revision. Review API
+requests remain allowed-root constrained, Origin/CSRF protected, bounded, and model-free.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
