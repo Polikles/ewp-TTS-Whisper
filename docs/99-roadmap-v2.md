@@ -705,6 +705,8 @@ Planned capabilities:
 - add a bounded recent-work browser for saved GUI review sessions, labeled by optional project
   name plus job/input identity, so recovery does not require remembering an output root; handle
   expired temporary paths as unavailable entries;
+- add allowed-root-constrained Browse controls for transcript/result/dictionary inputs and
+  output directories without uploading files or exposing an unrestricted filesystem browser;
 - an explicit light/dark mode switch in that pass; automatic system preference remains an
   interim behavior rather than the final theme control.
 

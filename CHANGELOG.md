@@ -85,6 +85,8 @@ The next internal-beta version is `0.10.0`.
 - Strengthened the correction disclosure to state that API use is non-local and provider
   logging/retention/use/forwarding is outside application control; exposed dictionary
   provenance in the readable candidate summary and smoothed the manual-review handoff.
+- Derived correction project identity from the selected dictionary's validated metadata,
+  labeled the review identity, and retained explicit mismatch rejection for API callers.
 - Clarified browser review state with readable validation/publication summaries and expandable
   JSON; protected open drafts from accidental Prepare replacement; visually distinguished
   disabled Apply/Export controls; and added persistent one-section/continuous review layouts.

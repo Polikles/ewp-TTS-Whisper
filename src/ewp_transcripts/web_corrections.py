@@ -83,15 +83,21 @@ class GuiCorrectionController:
         resume_path = self._resolve_path(resume_directory, directory=True)
         dictionary = None
         dictionary_sha256 = None
-        if bool(dictionary_path) != bool(project_id):
+        if project_id and not dictionary_path:
             raise GuiCorrectionError(
                 "GUI_CORRECTION_DICTIONARY_INVALID",
-                "Dictionary path and project ID must be supplied together.",
+                "A project ID cannot be selected without a dictionary.",
             )
         if dictionary_path:
             dictionary, dictionary_sha256 = load_project_correction_dictionary(
                 self._resolve_path(dictionary_path)
             )
+            if project_id and project_id != dictionary.project_id:
+                raise GuiCorrectionError(
+                    "GUI_CORRECTION_DICTIONARY_INVALID",
+                    "The selected project ID does not match the dictionary.",
+                )
+            project_id = dictionary.project_id
         correction_updates: dict[str, Any] = {
             "provider": provider_name,
             "model": model.strip(),

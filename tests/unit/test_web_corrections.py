@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from ewp_transcripts.application import apply_mock_correction
+from ewp_transcripts.application import apply_correction
 from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
 from ewp_transcripts.correction import DeterministicMockCorrectionProvider
 from ewp_transcripts.web_corrections import (
@@ -19,12 +19,15 @@ EXAMPLE = ROOT / "examples/results.example.json"
 
 
 def mock_runner(result_path: Path, **kwargs: Any) -> Any:
-    return apply_mock_correction(
+    return apply_correction(
         result_path,
         config=kwargs["config"],
         provider=DeterministicMockCorrectionProvider(),
         output_directory=kwargs["output_directory"],
         resume_directory=kwargs["resume_directory"],
+        dictionary=kwargs["dictionary"],
+        dictionary_sha256=kwargs["dictionary_sha256"],
+        dictionary_project_id=kwargs["dictionary_project_id"],
     )
 
 
@@ -104,3 +107,30 @@ def test_gui_correction_preflight_rejects_missing_cloud_key(
         _preflight_provider(provider, ApplicationConfig())
 
     assert missing.value.code == "GUI_CORRECTION_CREDENTIAL_MISSING"
+
+
+def test_gui_correction_derives_project_id_from_dictionary(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    source_dictionary = (
+        ROOT / "dictionaries/ethics-in-the-loop/correction/pl/ethics-in-the-loop-pl-v1.json"
+    )
+    dictionary = tmp_path / source_dictionary.name
+    dictionary.write_bytes(source_dictionary.read_bytes())
+
+    outcome = controller(tmp_path).generate(
+        result=str(result),
+        output_directory=str(tmp_path / "candidates"),
+        resume_directory=str(tmp_path / "state"),
+        provider_name="openrouter",
+        model="google/gemini-2.5-flash",
+        endpoint="https://openrouter.ai/api/v1",
+        allow_remote_endpoint=False,
+        allow_cloud=True,
+        reasoning_max_tokens=0,
+        dictionary_path=str(dictionary),
+        project_id="",
+        confirmed=True,
+    )
+
+    assert outcome["dictionary"]["project_id"] == "ethics-in-the-loop"

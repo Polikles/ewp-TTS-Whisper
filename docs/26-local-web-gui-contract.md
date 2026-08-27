@@ -85,7 +85,8 @@ manually verified revisions, and final/manual translations. Translation from an 
 candidate remains allowed only with the existing warning and exact source provenance.
 
 Correction controls MUST require exact provider/model/endpoint selection, explicit disclosure
-consent, and optional dictionary path plus matching project ID. Credentials stay in the server
+consent, and an optional project dictionary whose embedded ID/version/hash are read and shown
+automatically. Credentials stay in the server
 environment. A short readiness check MUST reject missing credentials, unreachable providers,
 and unavailable exact models before bounded per-chunk retries. Successful candidates remain
 non-final and SHOULD hand off directly into candidate-backed manual review.
@@ -184,6 +185,9 @@ the canonical source-code and issue-tracker links.
 
 As workflow coverage grows, top-level workflow sections MUST be collapsible and reachable
 through a table-of-contents navigation near the start of the page.
+Server-side result, transcript, dictionary, and output path fields SHOULD offer an allowed-root
+Browse control in addition to direct entry. It must use the constrained GUI filesystem API,
+not the browser's upload picker or an unrestricted server filesystem explorer.
 
 ## 10. Initial implementation sequence
 

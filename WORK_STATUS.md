@@ -204,6 +204,11 @@ substitutions, two punctuation-only changes, no warnings, and a non-final candid
 reported dictionary provenance was `none`, so it is operational evidence but not yet the
 intended dictionary-assisted gate. The follow-up makes dictionary selection visible in the
 readable summary, strengthens cloud-data wording, and uses a smooth review handoff.
+The repeated dictionary-assisted run then passed with exact v1.1 ID/project/hash/proposal
+provenance, 17 substitutions, one punctuation-only change, zero drift/warnings, and smooth
+handoff to a `pl` review labeled `source: automated_candidate`. The GUI now derives project ID
+from the dictionary rather than requiring redundant typing and labels the review identity.
+Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional
