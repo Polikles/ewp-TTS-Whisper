@@ -133,4 +133,5 @@ by the existing exported HTML transcript player.
 | FR-L10 | planned | Project dictionary selection/provenance first; proposal/review management in a later GUI slice. |
 | FR-L11, FR-L12 | partial | Startup, Host, and route failures have documented stable codes. Session-only credential/consent handling arrives with provider workflows. |
 | FR-L14, FR-L15, NFR-018 | partial | Version, license/warranty, source, and issue information is implemented in the responsive keyboard-native shell. Synchronized media review and explicit theme/follow controls remain planned. |
+| FR-L18 | planned | Add per-file language and speaker-count controls; until then, GUI-selected language is explicitly labeled `(auto)`. |
 | NFR-017, NFR-019 | planned | Shared contract tests across WSL2-compatible/native launch modes, then the identical packaged application in Docker; offline acceptance after model setup. |

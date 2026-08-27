@@ -157,6 +157,12 @@ stopped unchanged polling from replacing selectable table DOM, and extended GUI 
 normalization to the Windows-drive forms already supported by the CLI. Repeated POSIX
 separators such as `//input-b` are intentionally normalized by the filesystem.
 
+The follow-up retest accepted a Windows-form media path and confirmed stable text selection.
+It also exposed a harmless frontend exception after successful staging: asynchronous access
+to the expired DOM event target. The form reference is now retained before the request. The
+plan detail table occupies its own full-width row, and the implicit language is labeled
+`pl (auto)` pending later per-file language and speaker-count controls.
+
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
 The initial attempt to allocate the next result version was rejected after owner review:

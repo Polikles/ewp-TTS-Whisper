@@ -75,6 +75,11 @@ The GUI MUST eventually expose the same supported pipeline as the application co
 6. create a manual or LLM-assisted translation from an explicitly identified source;
 7. manually review, preview, apply, audit, and export translation artifacts.
 
+Planning controls SHOULD expose language and speaker count per selected file. Values inferred
+or supplied by the GUI rather than explicitly chosen by the operator MUST be labeled as
+automatic. A later auto-discovery option may use only ephemeral within-job speaker features,
+as constrained by the roadmap; it must not create cross-recording identities.
+
 The interface MUST clearly distinguish canonical ASR output, automated non-final candidates,
 manually verified revisions, and final/manual translations. Translation from an unreviewed
 candidate remains allowed only with the existing warning and exact source provenance.

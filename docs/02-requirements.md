@@ -166,6 +166,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, highlighting, keyboard operation, and user-controlled follow-playback and theme settings.
 - **FR-L16** The frontend and backend MUST reject incompatible API versions rather than continuing with partial behavior.
 - **FR-L17** The local server MUST validate browser host/origin, protect state-changing requests against cross-site request forgery, escape untrusted content, use a restrictive content-security policy, and serve only validated artifacts.
+- **FR-L18** Planning SHOULD expose per-file language and speaker-count controls and MUST label values chosen by configuration or automatic inference as automatic rather than as explicit operator choices.
 
 ## 2. Non-functional requirements
 

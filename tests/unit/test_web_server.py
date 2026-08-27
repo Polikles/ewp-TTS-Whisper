@@ -44,6 +44,13 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     help_response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/help")
     assert help_response.status == 200
     assert b"Build and start a queue" in help_response.body
+    script_response = dispatch_get(
+        config, server_port=8765, host="localhost:8765", target="/assets/app.js"
+    )
+    assert b"const formElement = event.currentTarget" in script_response.body
+    assert b"formElement.elements.confirmed" in script_response.body
+    assert b"event.currentTarget.elements" not in script_response.body
+    assert b"(auto)" in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
     assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
 

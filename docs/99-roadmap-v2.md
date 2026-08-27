@@ -675,6 +675,8 @@ Planned capabilities:
 - file, directory, and group selection;
 - dry-run preview;
 - audio-stream selection;
+- per-file language selection and speaker-count selection, including clearly labeled
+  automatic choices and the later ephemeral auto-discovery research mode;
 - warning display and job queue;
 - an explicit visible workflow progression: transcription, transcript review (or provisional
   export), apply and verified export, then optional translation, translation review (or

@@ -69,6 +69,9 @@ The next internal-beta version is `0.8.0`.
   Windows drive paths are convenient aliases, not a bypass around explicitly exposed roots.
 - Compacted dry-run summaries to logical jobs, filenames, source decisions, and warning codes.
   Unchanged queue polling no longer replaces the table DOM, preserving text selection.
+- Retained the submitted form across asynchronous staging so successful queue additions no
+  longer display a false `GUI_API_UNAVAILABLE` message. Plan details now occupy a full-width
+  row, and the implicit language is labeled `(auto)`.
 - Dry-run and transcription now reject a batch containing separate episodes with the same
   derived job ID. They neither overwrite paths, misuse result versions as source aliases, nor
   silently prefer one format; explicit per-input aliases remain future work.
