@@ -190,6 +190,12 @@ External acceptance confirmed automatic structured paths, same-browser refresh/r
 recovery, unsaved-edit warnings, applied-state recovery, guarded Clear, and clean output
 structure. The next follow-up adds an explicit disk-backed last-session restore for another
 browser or later GUI process and labels the bordered review status surface.
+That disk-backed restore and the labeled status surface subsequently passed cross-browser
+testing. Recovery currently requires the operator to provide the output root. A later recovery
+browser must list recent saved work without requiring that path, identify entries by optional
+project name plus job/input identity, and treat expired `/tmp` roots as unavailable rather than
+breaking GUI startup. Browser-local fields may remember an old temporary root; this is useful
+convenience state, not authoritative project discovery.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

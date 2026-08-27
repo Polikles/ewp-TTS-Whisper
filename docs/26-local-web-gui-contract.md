@@ -111,6 +111,10 @@ does not delete artifacts. One project output root SHOULD derive separate `revie
 A small versioned, non-secret pointer file under that root SHOULD allow explicit restoration
 across browsers and application restarts. It identifies the last review and applied revision;
 it is not a transcript/revision artifact and MUST remain subject to allowed-root validation.
+A later recovery surface SHOULD discover a bounded list of recent pointer files without
+requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
+optional project name, job ID, and source filename. Missing temporary roots are shown as stale
+or unavailable and never prevent the rest of the GUI from loading.
 
 Long reviews MUST support both a sequential previous/next-section view and a continuous
 all-sections view, with the presentation preference retained locally. A visible speaker block

@@ -8,6 +8,8 @@ The next internal-beta version is `0.9.0`.
 
 ### Validated
 
+- Qualified disk-backed review restoration across browsers and confirmed that the bordered,
+  labeled review-status surface is readable and correctly placed.
 - Qualified the model-free browser review flow through editing, save/preview gating, two
   immutable revisions, and all six revision-backed export formats in WSL2.
 - Passed formatting, lint, static typing, and all 640 tests for the current v0.9 GUI slices;
