@@ -199,6 +199,11 @@ A short readiness check rejects missing credentials, unreachable backends, and u
 exact models before chunk retries. Successful immutable LLM candidates are labeled non-final
 and can be opened directly as the parent of the existing manual-review workflow. Local-model
 correction is rejected while transcription GPU work is queued or running.
+The first external OpenRouter/Gemini 2.5 Flash GUI run succeeded with 855 tokens, three
+substitutions, two punctuation-only changes, no warnings, and a non-final candidate. Its
+reported dictionary provenance was `none`, so it is operational evidence but not yet the
+intended dictionary-assisted gate. The follow-up makes dictionary selection visible in the
+readable summary, strengthens cloud-data wording, and uses a smooth review handoff.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional

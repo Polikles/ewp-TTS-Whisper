@@ -82,6 +82,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Strengthened the correction disclosure to state that API use is non-local and provider
+  logging/retention/use/forwarding is outside application control; exposed dictionary
+  provenance in the readable candidate summary and smoothed the manual-review handoff.
 - Clarified browser review state with readable validation/publication summaries and expandable
   JSON; protected open drafts from accidental Prepare replacement; visually distinguished
   disabled Apply/Export controls; and added persistent one-section/continuous review layouts.
