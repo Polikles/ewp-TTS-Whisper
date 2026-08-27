@@ -18,6 +18,8 @@ The next internal-beta version is `0.8.0`.
 - Qualified staged queue construction with two files, refresh and cross-browser persistence,
   staged removal, same-job-ID rejection, explicit execution, and canonical publication on
   WSL2. No GPU work began while items remained staged.
+- Qualified the follow-up planning UI fix in the target browser: successful staging has no
+  false API error, detail rows remain full-width, and automatic language is labeled clearly.
 - Passed formatting, lint, static typing, and all 620 tests; the locked environment contains
   140 mutually compatible packages.
 - Built the `0.7.0` wheel and source archive, verified version and `AGPL-3.0-only` metadata,

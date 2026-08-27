@@ -163,6 +163,10 @@ to the expired DOM event target. The form reference is now retained before the r
 plan detail table occupies its own full-width row, and the implicit language is labeled
 `pl (auto)` pending later per-file language and speaker-count controls.
 
+The owner confirmed the correction in the target browser: staging reports only `Added to
+staged queue`, plan details render full-width below the summary cards, and language displays
+as `pl (auto)`. This closes the current transcription queue and planning-presentation gate.
+
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
 The initial attempt to allocate the next result version was rejected after owner review:
@@ -326,6 +330,10 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
   counts. It must never become persistent cross-recording identity or a general people base.
 - Manually review the complete instruction set with less-technical readers after workflows
   stabilize, then add screenshots and revise unclear terminology.
+- After all GUI functions work, align the frontend's visual language with the owner's other
+  projects and complete the final responsive styling pass.
+- Add an explicit light/dark mode switch during that frontend pass; system color preference
+  remains the temporary default until the functional GUI is complete.
 - Content-aware arbitrary-extension discovery, audio repair/comparison, advanced 3+
   channel and surround handling, GUI, and additional subtitle/platform formats remain
   in `docs/99-roadmap-v2.md`; they are not v0.4 checkpoint blockers unless explicitly

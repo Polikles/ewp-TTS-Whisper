@@ -694,6 +694,10 @@ Planned capabilities:
   <https://github.com/Polikles/ewp-transcripts>.
 - a manual plain-language review of all bundled and repository instructions with
   less-technical users after the workflow stabilizes; screenshots are added after that pass.
+- after functional GUI coverage, a dedicated frontend pass that aligns appearance with the
+  owner's other projects and adds final responsive light/dark styles;
+- an explicit light/dark mode switch in that pass; automatic system preference remains an
+  interim behavior rather than the final theme control.
 
 The GUI calls application services directly and MUST NOT execute CLI commands as a
 subprocess or maintain a second revision/translation model.
