@@ -2,7 +2,9 @@ from pathlib import Path
 
 import pytest
 
+from ewp_transcripts.application import apply_mock_correction
 from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
+from ewp_transcripts.correction import DeterministicMockCorrectionProvider
 from ewp_transcripts.web_reviews import GuiReviewController, GuiReviewError
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
@@ -103,3 +105,20 @@ def test_browser_review_session_requires_saved_pointer(tmp_path: Path) -> None:
         service.restore_session(str(tmp_path))
 
     assert missing.value.code == "GUI_REVIEW_SESSION_NOT_FOUND"
+
+
+def test_browser_review_can_start_from_automated_candidate(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    automated = apply_mock_correction(
+        result,
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        provider=DeterministicMockCorrectionProvider(),
+        output_directory=tmp_path / "candidates",
+    )
+
+    prepared = controller(tmp_path).prepare(
+        str(result), str(tmp_path / "reviews"), str(automated.revision_path)
+    )
+
+    assert prepared["source_verification"] == "automated_candidate"

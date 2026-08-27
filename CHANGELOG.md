@@ -4,7 +4,7 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.9.0`.
+The next internal-beta version is `0.10.0`.
 
 ### Validated
 
@@ -36,6 +36,11 @@ The next internal-beta version is `0.9.0`.
 
 ### Added
 
+- Added the first browser correction workflow for explicitly consented LM Studio or
+  OpenRouter generation, optional project dictionary provenance, private resume state,
+  non-final candidate summaries, and direct handoff into candidate-backed manual review.
+- Added a three-second provider/model/credential readiness check before correction chunk
+  retries and prevented local correction from overlapping active transcription GPU work.
 - Added a model-free browser review workspace: prepare structured editable drafts without
   exposing anchors, edit text/speaker attribution, save with optimistic hash conflict
   protection, preview exact saved content, explicitly apply an immutable manually verified

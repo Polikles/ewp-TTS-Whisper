@@ -46,6 +46,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Add to queue" in response.body
     assert b"Start queue" in response.body
     assert b"Review and export" in response.body
+    assert b"LLM-assisted transcript correction" in response.body
+    assert b'id="generate-correction"' in response.body
+    assert b'id="review-correction"' in response.body
     assert b"Apply verified revision" in response.body
     assert b'id="clear-review"' in response.body
     assert b'id="restore-review"' in response.body

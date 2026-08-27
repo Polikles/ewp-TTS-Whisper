@@ -42,7 +42,9 @@ class GuiReviewController:
         self._resolve_path = resolve_path
         self._previewed: dict[str, str] = {}
 
-    def prepare(self, result: str, output_directory: str) -> dict[str, Any]:
+    def prepare(
+        self, result: str, output_directory: str, source_revision: str = ""
+    ) -> dict[str, Any]:
         result_path = self._resolve_path(result)
         output_path = self._resolve_path(output_directory, directory=True)
         if not result_path.is_file():
@@ -50,6 +52,7 @@ class GuiReviewController:
         outcome = prepare_review_file(
             result_path,
             output_directory=output_path,
+            source_revision_path=(self._resolve_path(source_revision) if source_revision else None),
             anchor_target_words=self._config.revision.anchor_target_words,
             lock_timeout_seconds=self._config.runtime.lock_timeout_seconds,
         )

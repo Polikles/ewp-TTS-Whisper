@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_workflows import GuiWorkflowController
@@ -147,6 +148,10 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
         self.gui_reviews = GuiReviewController(
+            config=application_config,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+        )
+        self.gui_corrections = GuiCorrectionController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
@@ -316,7 +321,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 result = str(document.get("result_path", ""))
                 if path == "/api/v1/reviews/prepare":
                     payload = self.server.gui_reviews.prepare(
-                        result, str(document.get("review_output_directory", ""))
+                        result,
+                        str(document.get("review_output_directory", "")),
+                        str(document.get("source_revision_path", "")),
                     )
                 elif path == "/api/v1/reviews/load":
                     payload = self.server.gui_reviews.document(
@@ -398,6 +405,72 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     _json_response(
                         HTTPStatus.BAD_REQUEST,
                         {"error": {"code": "GUI_REVIEW_REQUEST_INVALID", "message": str(error)}},
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path == "/api/v1/corrections/generate":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The correction request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                if document.get("provider") == "lm-studio" and any(
+                    job.status in {"queued", "running"}
+                    for job in self.server.gui_transcriptions.jobs()
+                ):
+                    raise GuiCorrectionError(
+                        "GUI_GPU_BUSY",
+                        "Wait for the active transcription before using local correction.",
+                    )
+                reasoning = document.get("reasoning_max_tokens")
+                if reasoning is not None and (
+                    not isinstance(reasoning, int) or isinstance(reasoning, bool) or reasoning < 0
+                ):
+                    raise ValueError("Reasoning-token budget must be a non-negative integer")
+                payload = self.server.gui_corrections.generate(
+                    result=str(document.get("result_path", "")),
+                    output_directory=str(document.get("output_directory", "")),
+                    resume_directory=str(document.get("resume_directory", "")),
+                    provider_name=str(document.get("provider", "")),
+                    model=str(document.get("model", "")),
+                    endpoint=str(document.get("endpoint", "")),
+                    allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
+                    allow_cloud=document.get("allow_cloud") is True,
+                    reasoning_max_tokens=reasoning,
+                    dictionary_path=str(document.get("dictionary_path", "")),
+                    project_id=str(document.get("project_id", "")),
+                    confirmed=document.get("confirmed") is True,
+                )
+            except ApplicationError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": error.code, "message": str(error)}},
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_CORRECTION_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
                     )
                 )
                 return

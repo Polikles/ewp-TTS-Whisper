@@ -84,6 +84,12 @@ The interface MUST clearly distinguish canonical ASR output, automated non-final
 manually verified revisions, and final/manual translations. Translation from an unreviewed
 candidate remains allowed only with the existing warning and exact source provenance.
 
+Correction controls MUST require exact provider/model/endpoint selection, explicit disclosure
+consent, and optional dictionary path plus matching project ID. Credentials stay in the server
+environment. A short readiness check MUST reject missing credentials, unreachable providers,
+and unavailable exact models before bounded per-chunk retries. Successful candidates remain
+non-final and SHOULD hand off directly into candidate-backed manual review.
+
 Project dictionaries MUST be selectable by project, language, version, and hash. The GUI
 MUST display the dictionary provenance recorded by an artifact, including `none`. Dictionary
 proposal/review management may arrive after the first vertical slice, but must reuse the

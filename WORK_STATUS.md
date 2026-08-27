@@ -4,7 +4,7 @@ Last updated: **2026-08-27**.
 
 ## Checkpoint
 
-Version `0.9.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.10.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
@@ -190,6 +190,15 @@ External acceptance confirmed automatic structured paths, same-browser refresh/r
 recovery, unsaved-edit warnings, applied-state recovery, guarded Clear, and clean output
 structure. The next follow-up adds an explicit disk-backed last-session restore for another
 browser or later GUI process and labels the bordered review status surface.
+
+The v0.10 GUI correction slice is implemented pending external provider qualification. It
+accepts an exact canonical result, structured candidate/resume output root, LM Studio or
+OpenRouter provider/model/endpoint, optional exact project dictionary and project ID, and an
+explicit disclosure/non-final confirmation. Credentials remain in the server environment.
+A short readiness check rejects missing credentials, unreachable backends, and unavailable
+exact models before chunk retries. Successful immutable LLM candidates are labeled non-final
+and can be opened directly as the parent of the existing manual-review workflow. Local-model
+correction is rejected while transcription GPU work is queued or running.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional
