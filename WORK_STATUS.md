@@ -186,6 +186,10 @@ from its authoritative disk file using only non-secret path pointers in browser 
 derives `reviews/`, `revisions/`, and `exports/` from one output root by default, guards Clear
 with confirmation, and prevents repeated Apply clicks from publishing the same open review
 again. Collapsible section/table-of-contents navigation is retained for the larger GUI.
+External acceptance confirmed automatic structured paths, same-browser refresh/restart
+recovery, unsaved-edit warnings, applied-state recovery, guarded Clear, and clean output
+structure. The next follow-up adds an explicit disk-backed last-session restore for another
+browser or later GUI process and labels the bordered review status surface.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

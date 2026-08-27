@@ -48,6 +48,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Review and export" in response.body
     assert b"Apply verified revision" in response.body
     assert b'id="clear-review"' in response.body
+    assert b'id="restore-review"' in response.body
+    assert b"Review status" in response.body
     help_response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/help")
     assert help_response.status == 200
     assert b"Build and start a queue" in help_response.body
@@ -65,6 +67,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"ewp-active-review-v1" in script_response.body
     assert b"beforeunload" in script_response.body
     assert b'postReview("load"' in script_response.body
+    assert b'postReview("session/restore"' in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
     assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
 

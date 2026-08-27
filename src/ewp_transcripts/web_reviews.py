@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Callable
 from pathlib import Path
@@ -59,6 +60,11 @@ class GuiReviewController:
         result_path = self._resolve_path(str(result))
         parsed = load_review(review_path)
         base = load_canonical_result(result_path)
+        if parsed.header.base_result_sha256 != sha256_file(result_path):
+            raise GuiReviewError(
+                "GUI_REVIEW_RESULT_MISMATCH",
+                "The saved review does not belong to the selected canonical result.",
+            )
         verification = next(
             (
                 extension.value
@@ -209,6 +215,86 @@ class GuiReviewController:
             "written": [str(path) for path in outcome.written],
             "skipped": [str(path) for path in outcome.skipped],
         }
+
+    def remember_session(
+        self,
+        *,
+        project_output_directory: str,
+        result: str,
+        review: str,
+        review_output_directory: str,
+        revision_output_directory: str,
+        export_output_directory: str,
+        applied_revision: str = "",
+    ) -> dict[str, Any]:
+        """Persist one non-secret review pointer set inside its project output root."""
+
+        root = self._resolve_path(project_output_directory, directory=True)
+        root.mkdir(parents=True, exist_ok=True)
+        document = {
+            "session_version": 1,
+            "result_path": str(self._resolve_path(result)),
+            "review_path": str(self._resolve_path(review)),
+            "review_output_directory": str(
+                self._resolve_path(review_output_directory, directory=True)
+            ),
+            "revision_output_directory": str(
+                self._resolve_path(revision_output_directory, directory=True)
+            ),
+            "export_output_directory": str(
+                self._resolve_path(export_output_directory, directory=True)
+            ),
+            "applied_revision_path": (
+                str(self._resolve_path(applied_revision)) if applied_revision else ""
+            ),
+        }
+        path = root / ".ewp-gui-review-session.json"
+        self._atomic_replace(
+            path,
+            (json.dumps(document, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+        )
+        return {"session_path": str(path)}
+
+    def restore_session(self, project_output_directory: str) -> dict[str, Any]:
+        """Reload the last review pointer set recorded under one persistent output root."""
+
+        root = self._resolve_path(project_output_directory, directory=True)
+        path = root / ".ewp-gui-review-session.json"
+        if not path.is_file() or path.is_symlink():
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_NOT_FOUND",
+                "No saved GUI review session exists under this output root.",
+            )
+        try:
+            session = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_INVALID", "The saved GUI review session is invalid."
+            ) from error
+        if not isinstance(session, dict) or session.get("session_version") != 1:
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_INVALID", "The saved GUI review session is invalid."
+            )
+        required = (
+            "result_path",
+            "review_path",
+            "review_output_directory",
+            "revision_output_directory",
+            "export_output_directory",
+        )
+        if not all(isinstance(session.get(key), str) and session[key] for key in required):
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_INVALID", "The saved GUI review session is incomplete."
+            )
+        review_document = self.document(session["review_path"], session["result_path"])
+        applied = session.get("applied_revision_path", "")
+        if not isinstance(applied, str):
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_INVALID", "The saved GUI review session is invalid."
+            )
+        if applied:
+            self._resolve_path(applied)
+        return {**review_document, "session": session, "session_path": str(path)}
 
     @staticmethod
     def _atomic_replace(path: Path, payload: bytes) -> None:

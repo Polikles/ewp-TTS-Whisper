@@ -81,6 +81,8 @@ The next internal-beta version is `0.9.0`.
 - Restored the active saved review after refresh from its authoritative disk file, derived
   structured review/revision/export directories from one output root, guarded Clear with a
   confirmation, and disabled repeated publication of the same open review.
+- Added an allowed-root-validated disk pointer for explicitly restoring the last review from a
+  persistent output root across browsers and GUI restarts, plus a labeled status panel.
 - GUI paths now reuse Windows/WSL/POSIX normalization before allowed-root authorization;
   Windows drive paths are convenient aliases, not a bypass around explicitly exposed roots.
 - Compacted dry-run summaries to logical jobs, filenames, source decisions, and warning codes.

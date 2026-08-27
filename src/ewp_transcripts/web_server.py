@@ -322,6 +322,22 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     payload = self.server.gui_reviews.document(
                         str(document.get("review_path", "")), result
                     )
+                elif path == "/api/v1/reviews/session/save":
+                    payload = self.server.gui_reviews.remember_session(
+                        project_output_directory=str(document.get("project_output_directory", "")),
+                        result=result,
+                        review=str(document.get("review_path", "")),
+                        review_output_directory=str(document.get("review_output_directory", "")),
+                        revision_output_directory=str(
+                            document.get("revision_output_directory", "")
+                        ),
+                        export_output_directory=str(document.get("export_output_directory", "")),
+                        applied_revision=str(document.get("applied_revision_path", "")),
+                    )
+                elif path == "/api/v1/reviews/session/restore":
+                    payload = self.server.gui_reviews.restore_session(
+                        str(document.get("project_output_directory", ""))
+                    )
                 elif path == "/api/v1/reviews/save":
                     anchors = document.get("anchors")
                     if not isinstance(anchors, list):

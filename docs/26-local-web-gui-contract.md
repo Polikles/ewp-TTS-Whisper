@@ -108,6 +108,9 @@ browser restart; restoration reloads content from the authoritative review file 
 storing transcript text in browser storage. Clearing this pointer requires confirmation and
 does not delete artifacts. One project output root SHOULD derive separate `reviews/`,
 `revisions/`, and `exports/` directories, with manual paths available as an explicit option.
+A small versioned, non-secret pointer file under that root SHOULD allow explicit restoration
+across browsers and application restarts. It identifies the last review and applied revision;
+it is not a transcript/revision artifact and MUST remain subject to allowed-root validation.
 
 Long reviews MUST support both a sequential previous/next-section view and a continuous
 all-sections view, with the presentation preference retained locally. A visible speaker block

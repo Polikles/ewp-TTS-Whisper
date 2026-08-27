@@ -72,3 +72,34 @@ def test_browser_review_requires_current_hash_and_preview(tmp_path: Path) -> Non
     with pytest.raises(GuiReviewError, match="Preview") as missing_preview:
         service.apply(prepared["review_path"], str(result), str(tmp_path / "revisions"))
     assert missing_preview.value.code == "GUI_REVIEW_PREVIEW_REQUIRED"
+
+
+def test_browser_review_session_restores_from_project_root(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    project = tmp_path / "project"
+    prepared = service.prepare(str(result), str(project / "reviews"))
+
+    remembered = service.remember_session(
+        project_output_directory=str(project),
+        result=str(result),
+        review=prepared["review_path"],
+        review_output_directory=str(project / "reviews"),
+        revision_output_directory=str(project / "revisions"),
+        export_output_directory=str(project / "exports"),
+    )
+    restored = service.restore_session(str(project))
+
+    assert Path(remembered["session_path"]).name == ".ewp-gui-review-session.json"
+    assert restored["review_path"] == prepared["review_path"]
+    assert restored["session"]["result_path"] == str(result)
+
+
+def test_browser_review_session_requires_saved_pointer(tmp_path: Path) -> None:
+    service = controller(tmp_path)
+
+    with pytest.raises(GuiReviewError, match="No saved") as missing:
+        service.restore_session(str(tmp_path))
+
+    assert missing.value.code == "GUI_REVIEW_SESSION_NOT_FOUND"
