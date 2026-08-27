@@ -166,13 +166,20 @@ The owner confirmed the correction in the target browser: staging reports only `
 staged queue`, plan details render full-width below the summary cards, and language displays
 as `pl (auto)`. This closes the current transcription queue and planning-presentation gate.
 
-The v0.9 model-free GUI review slice is now implemented pending external browser acceptance.
+The v0.9 model-free GUI review slice passed its first external browser workflow test.
 It prepares a non-destructive review from one canonical result, exposes only editable
 speaker/text blocks, protects hidden anchors and lineage, rejects stale-tab saves by exact
 review hash, requires Preview of the current saved hash before Apply, and requires explicit
 manual-verification confirmation. Apply publishes through the existing immutable revision
 service; verified TXT/SRT/VTT/YTT/HTML/segments export uses that exact revision. Review API
 requests remain allowed-root constrained, Origin/CSRF protected, bounded, and model-free.
+The test published two immutable revisions and all six export formats. Follow-up UI work now
+labels preview as validation-only, summarizes it in a readable table with expandable JSON,
+protects an open draft from accidental Prepare replacement, distinguishes disabled actions,
+and offers both sequential and continuous section layouts. The supplied fixture was English;
+an earlier instruction describing it as Polish was incorrect. Whole-block speaker reassignment
+is available now; partial-block reassignment and speaker display-name editing remain explicit
+later editor requirements.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

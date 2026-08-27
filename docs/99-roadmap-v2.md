@@ -516,6 +516,10 @@ label a real person across recordings, or be written as reusable biometric ident
 Artifacts may retain ordinary anonymous `speaker_NNN` assignments and audit parameters, but
 the temporary embeddings/fingerprints are discarded when the job finishes.
 
+Extend the browser review editor with safe block splitting/merging so a word or sentence can
+be reassigned to the correct speaker without moving unrelated text. Add revision-scoped
+speaker display-name editing for recordings whose canonical result lacks useful names.
+
 Every dataset requires a pinned version/configuration, source and license record,
 download/preparation hashes, official split preservation, normalization declaration,
 language/subset selection, and a report of exclusions. WER/CER comparisons must not mix

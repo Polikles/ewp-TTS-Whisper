@@ -97,6 +97,20 @@ hidden visually, but the GUI MUST NOT discard or invent them. Applying changes r
 preview produced by the existing revision validation/alignment path and an explicit user
 action.
 
+Preview is a non-publishing validation step: it parses the exact saved review, verifies its
+base hash and protected anchors, runs alignment, and reports revision statistics and warnings
+without writing a revision. The GUI MUST label that state as unpublished and show a readable
+summary before offering expandable technical JSON. Preparing another review while one is open
+MUST require an explicit clear action so unsaved editor content cannot be replaced. Disabled
+Apply and Export actions MUST be visually distinct and explain their prerequisite.
+
+Long reviews MUST support both a sequential previous/next-section view and a continuous
+all-sections view, with the presentation preference retained locally. A visible speaker block
+can be reassigned as a whole in the initial slice. Later editing MUST also permit a reviewer to
+split at a word or sentence boundary and reassign only the affected part while retaining exact
+lineage. It MUST permit project/revision-scoped speaker display-name replacement when canonical
+speaker labels are absent or wrong; neither feature may silently rewrite canonical results.
+
 Equivalent rules apply to translation units: source text remains visible, target text is
 editable, source ownership is immutable, and apply uses the existing translation service.
 

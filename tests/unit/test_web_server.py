@@ -38,11 +38,16 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/")
     assert response.status == 200
     assert b"EWP Transcriber" in response.body
+    assert response.body.index(b"EWP Transcriber") < response.body.index(
+        b"Local-first podcast workflow"
+    )
+    assert b"Status: connecting" in response.body
     assert b'id="clear-workflow"' in response.body
     assert b"Add to queue" in response.body
     assert b"Start queue" in response.body
     assert b"Review and export" in response.body
     assert b"Apply verified revision" in response.body
+    assert b'id="clear-review"' in response.body
     help_response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/help")
     assert help_response.status == 200
     assert b"Build and start a queue" in help_response.body
@@ -53,6 +58,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"formElement.elements.confirmed" in script_response.body
     assert b"event.currentTarget.elements" not in script_response.body
     assert b"(auto)" in script_response.body
+    assert b"GUI_REVIEW_ACTIVE" in script_response.body
+    assert b"None \xe2\x80\x94 validation only" in script_response.body
+    assert b"ewp-review-layout" in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
     assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
 

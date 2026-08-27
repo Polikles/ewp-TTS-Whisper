@@ -8,6 +8,8 @@ The next internal-beta version is `0.9.0`.
 
 ### Validated
 
+- Qualified the model-free browser review flow through editing, save/preview gating, two
+  immutable revisions, and all six revision-backed export formats in WSL2.
 - Passed formatting, lint, static typing, and all 640 tests for the current v0.9 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Built the `0.9.0` wheel and source archive and verified inclusion of the model-free browser
@@ -73,6 +75,9 @@ The next internal-beta version is `0.9.0`.
 
 ### Changed
 
+- Clarified browser review state with readable validation/publication summaries and expandable
+  JSON; protected open drafts from accidental Prepare replacement; visually distinguished
+  disabled Apply/Export controls; and added persistent one-section/continuous review layouts.
 - GUI paths now reuse Windows/WSL/POSIX normalization before allowed-root authorization;
   Windows drive paths are convenient aliases, not a bypass around explicitly exposed roots.
 - Compacted dry-run summaries to logical jobs, filenames, source decisions, and warning codes.
