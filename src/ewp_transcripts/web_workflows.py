@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ewp_transcripts.application import dry_run, inspect_input
 from ewp_transcripts.config import load_config
+from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain.errors import ApplicationError
 
 
@@ -100,7 +101,7 @@ class GuiWorkflowController:
         return self.completed_plan(input_path, output_directory) is not None
 
     def resolve_allowed_path(self, raw_path: str, *, directory: bool = False) -> Path:
-        candidate = Path(raw_path).expanduser()
+        candidate = normalize_input_path(raw_path)
         if candidate.is_symlink():
             raise ValueError("Symbolic-link paths are not allowed")
         resolved = candidate.resolve(strict=not directory)

@@ -8,13 +8,16 @@ The next internal-beta version is `0.8.0`.
 
 ### Validated
 
-- Passed formatting, lint, static typing, and all 637 tests for the current v0.8 GUI slices;
+- Passed formatting, lint, static typing, and all 638 tests for the current v0.8 GUI slices;
   verified that its bundled HTML/CSS/JavaScript assets are included in the built wheel.
 - Qualified the loopback shell on WSL2 with Firefox, LibreWolf, Chrome, and Brave, including
   exact allowed roots, health/about data, and rejection of an untrusted Host header.
 - Qualified real WAV inspection, allowed-root rejection, cross-origin rejection, and the
   dry-run no-write invariant from WSL2; moved About into a compact footer and added explicit
   inspect/dry-run summaries plus a collapsible structured result.
+- Qualified staged queue construction with two files, refresh and cross-browser persistence,
+  staged removal, same-job-ID rejection, explicit execution, and canonical publication on
+  WSL2. No GPU work began while items remained staged.
 - Passed formatting, lint, static typing, and all 620 tests; the locked environment contains
   140 mutually compatible packages.
 - Built the `0.7.0` wheel and source archive, verified version and `AGPL-3.0-only` metadata,
@@ -62,6 +65,10 @@ The next internal-beta version is `0.8.0`.
 
 ### Changed
 
+- GUI paths now reuse Windows/WSL/POSIX normalization before allowed-root authorization;
+  Windows drive paths are convenient aliases, not a bypass around explicitly exposed roots.
+- Compacted dry-run summaries to logical jobs, filenames, source decisions, and warning codes.
+  Unchanged queue polling no longer replaces the table DOM, preserving text selection.
 - Dry-run and transcription now reject a batch containing separate episodes with the same
   derived job ID. They neither overwrite paths, misuse result versions as source aliases, nor
   silently prefer one format; explicit per-input aliases remain future work.

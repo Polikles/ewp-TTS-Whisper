@@ -501,6 +501,21 @@ Candidate diarization corpora are:
 - VoxConverse;
 - AMI Meeting Corpus.
 
+### Ephemeral speaker auto-discovery research — later
+
+Research options for within-job speaker discovery when the operator does not know whether a
+meeting contains, for example, three or four speakers. Evaluate whether the existing
+`speaker_count = auto` diarization behavior is sufficient or needs a clearer explicit
+auto-discovery mode, confidence reporting, lower/upper bounds, or alternative clustering.
+Candidate work should compare diarization embeddings and within-recording clustering against
+fixed-count operation on held-out meeting material, including overlap and short-speaker cases.
+
+Any speaker “fingerprint” in this feature means an ephemeral representation used only to
+cluster segments inside the current job. It MUST NOT create a general identity database,
+label a real person across recordings, or be written as reusable biometric identity data.
+Artifacts may retain ordinary anonymous `speaker_NNN` assignments and audit parameters, but
+the temporary embeddings/fingerprints are discarded when the job finishes.
+
 Every dataset requires a pinned version/configuration, source and license record,
 download/preparation hashes, official split preservation, normalization declaration,
 language/subset selection, and a report of exclusions. WER/CER comparisons must not mix
@@ -661,6 +676,9 @@ Planned capabilities:
 - dry-run preview;
 - audio-stream selection;
 - warning display and job queue;
+- an explicit visible workflow progression: transcription, transcript review (or provisional
+  export), apply and verified export, then optional translation, translation review (or
+  provisional export), apply, and verified translated export;
 - transcript correction and speaker-attribution editing;
 - hide review anchors while retaining the same internal revision mapping;
 - preview revision changes without applying them;
@@ -672,6 +690,8 @@ Planned capabilities:
 - a License section presenting the applicable license and warranty notice;
 - a Source Code section with a direct link to the public project repository:
   <https://github.com/Polikles/ewp-transcripts>.
+- a manual plain-language review of all bundled and repository instructions with
+  less-technical users after the workflow stabilizes; screenshots are added after that pass.
 
 The GUI calls application services directly and MUST NOT execute CLI commands as a
 subprocess or maintain a second revision/translation model.

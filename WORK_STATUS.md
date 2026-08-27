@@ -82,7 +82,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.8 tree passes formatting, lint, type checks, and all **637 tests**. A fresh
+The current v0.8 tree passes formatting, lint, type checks, and all **638 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -148,6 +148,14 @@ technical detail, contains expandable brief instructions, and serves a bundled `
 with a link to the complete repository runbook. Each staged row records its logical job ID
 and planned result path; duplicate active inputs, output-directory changes, and colliding
 logical job IDs are rejected before GPU work begins.
+
+The staged-queue qualification then passed end to end on WSL2: two distinct files were
+staged, survived refresh/browser replacement, one was removed, a same-job-ID source was
+rejected with `GUI_QUEUE_JOB_ID_COLLISION`, and the remaining job published canonical JSON,
+preview TXT, and segments. Follow-up usability work compacted dry-run paths to filenames,
+stopped unchanged polling from replacing selectable table DOM, and extended GUI path
+normalization to the Windows-drive forms already supported by the CLI. Repeated POSIX
+separators such as `//input-b` are intentionally normalized by the filesystem.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
@@ -308,6 +316,10 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
 - Public-corpus WER/translation/diarization qualification, preset/hardware matrices,
   Apple Silicon support, CPU-only and GTX 1070 tiers, and automated model load/unload
   benchmarking remain later roadmap work.
+- Research ephemeral per-job speaker fingerprinting/clustering for unknown meeting speaker
+  counts. It must never become persistent cross-recording identity or a general people base.
+- Manually review the complete instruction set with less-technical readers after workflows
+  stabilize, then add screenshots and revise unclear terminology.
 - Content-aware arbitrary-extension discovery, audio repair/comparison, advanced 3+
   channel and surround handling, GUI, and additional subtitle/platform formats remain
   in `docs/99-roadmap-v2.md`; they are not v0.4 checkpoint blockers unless explicitly

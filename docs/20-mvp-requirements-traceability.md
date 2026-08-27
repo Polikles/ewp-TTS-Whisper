@@ -127,7 +127,7 @@ by the existing exported HTML transcript player.
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
 | FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | `transcriber gui`, bundled offline assets, loopback-only adapter, `/api/v1` health/about/root endpoints, and frontend compatibility rejection. Application-workflow calls begin in the next slice. |
-| FR-L03, FR-L17, NFR-020 | partial | Existing directories are normalized into explicit roots; Host validation, restrictive CSP, safe fixed routing, and negative tests are implemented. Root-contained browsing, origin/state-change controls, and download identity arrive with the first state-changing API. |
+| FR-L03, FR-L17, NFR-020 | partial | Windows/WSL/POSIX paths normalize before explicit-root authorization; Host/Origin/CSRF validation, restrictive CSP, safe fixed routing, and negative tests are implemented. Root-contained browsing and download identity remain later work. |
 | FR-L04, FR-L05 | implemented | Browser inspect/dry-run calls existing services; an explicitly confirmed single-worker queue invokes atomic transcription, survives browser refresh, and waits safely on server shutdown. Explicit cancellation and richer persisted GUI history remain later operational enhancements. |
 | FR-L06, FR-L07, FR-L08, FR-L09 | planned | Anchor-preserving transcript and translation editors using existing preview/apply/audit/export services and exact lineage. |
 | FR-L10 | planned | Project dictionary selection/provenance first; proposal/review management in a later GUI slice. |

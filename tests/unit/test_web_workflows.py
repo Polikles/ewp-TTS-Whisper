@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 
+import pytest
 from pydantic import BaseModel
 
 from ewp_transcripts.web_workflows import GuiWorkflowController
@@ -75,6 +76,28 @@ def test_paths_outside_roots_and_symlinks_are_rejected(tmp_path: Path) -> None:
     assert outside_result.error["code"] == "GUI_PATH_REJECTED"
     assert link_result.error is not None
     assert link_result.error["code"] == "GUI_PATH_REJECTED"
+
+
+def test_windows_drive_path_is_normalized_before_root_authorization(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    seen: list[Path] = []
+
+    def inspect(path: Path, **kwargs: Any) -> BaseModel:
+        seen.append(path)
+        return StubResult(selected=str(path), mode="inspect")
+
+    monkeypatch.setattr(
+        "ewp_transcripts.web_workflows.normalize_input_path", lambda supplied: media
+    )
+    controller = GuiWorkflowController((tmp_path.resolve(),), inspect_service=inspect)
+
+    operation = controller.run("inspect", {"path": r"D:\recordings\episode.wav"})
+
+    assert operation.status == "completed"
+    assert seen == [media]
 
 
 def test_missing_path_is_a_coded_failure(tmp_path: Path) -> None:

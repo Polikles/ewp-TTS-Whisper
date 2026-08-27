@@ -54,7 +54,8 @@ The web adapter MUST:
 - normalize paths through the existing path policy and reject traversal or disallowed
   symlink resolution;
 - show the resolved source and destination before a mutating or expensive operation;
-- preserve Unicode, spaces, WSL-mounted Windows paths, and native Linux paths;
+- preserve Unicode and spaces, and normalize Windows drive, WSL-mounted Windows, and native
+  Linux path forms before enforcing the same explicit allowed-root boundary;
 - require explicit Docker mounts rather than implying that host paths are automatically
   visible inside a container;
 - never serve arbitrary source files as static web content.
