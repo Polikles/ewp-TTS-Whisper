@@ -146,6 +146,11 @@ may still produce a traceback and are not assigned a misleading expected-error c
 | `GUI_TRANSLATION_REVIEW_PREVIEW_REQUIRED` | Apply was requested without previewing the exact saved translation review. | Unvalidated target text cannot become final. | Save, preview, inspect, confirm, then apply. |
 | `GUI_TRANSLATION_EXPORT_FORMAT_INVALID` | An unsupported translated export format was requested. | No partial format interpretation occurs. | Select TXT, SRT, VTT, or HTML. |
 | `GUI_TRANSLATION_REVIEW_REQUEST_INVALID` | Translation-review paths, confirmation, or editable targets are malformed. | No ambiguous review mutation is performed. | Correct the displayed inputs and retry. |
+| `GUI_DICTIONARY_PROJECT_REQUIRED` | Proposal generation lacks a project ID. | Cross-project dictionary scope is never inferred. | Enter the stable project ID. |
+| `GUI_DICTIONARY_CONFLICT` | The editable proposal changed after the browser loaded it. | A stale tab cannot overwrite newer decisions. | Reload the current proposal. |
+| `GUI_DICTIONARY_DECISIONS_INVALID` | Candidate identities changed or a decision is missing/unknown. | Proposal mappings remain machine-owned and every decision explicit. | Decide only through the offered pending/approved/rejected controls. |
+| `GUI_DICTIONARY_ID_REQUIRED` | Publication lacks a versioned dictionary ID. | An anonymous dictionary is not published. | Enter the project dictionary ID/version. |
+| `GUI_DICTIONARY_REQUEST_INVALID` | Corpus paths, minimum count, proposal, confirmation, or output is invalid. | No ambiguous proposal/dictionary is written. | Correct the displayed inputs and retry. |
 | `CLI_USAGE_ERROR` | Typer rejected a missing argument/option, unknown command/option, or invalid declared value. | The command body did not run. | Read the usage panel and command-specific `--help`, then correct the invocation. |
 | `CLI_CONSENT_INVALID` | Interactive consent was not `reject`, `once`, or `persist`. | No new consent is granted. | Enter one documented value. |
 | `CLI_SPEAKER_COUNT_INVALID` | Speaker count is neither `auto` nor a positive integer. | Invalid diarization settings are rejected. | Correct the option value. |

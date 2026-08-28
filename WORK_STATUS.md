@@ -246,6 +246,11 @@ adjustments: target labels are regular weight and unit headings use the subdued 
 color. Resume reuse was also observed to perform backend readiness only and send no transcript
 excerpt. Full explicit workspace save/load across workstation or VM shutdown is now a later
 GUI requirement, distinct from provider resume state and the existing saved-review pointer.
+The first project correction-dictionary GUI slice is implemented pending external
+qualification. It compares canonical-result and exact manual-revision directories, supports
+minimum-occurrence filtering and an optional previous dictionary, renders bounded contextual
+examples, saves explicit pending/approved/rejected decisions with conflict protection, and
+publishes a new immutable project/version dictionary only after no pending decisions remain.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

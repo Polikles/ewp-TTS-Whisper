@@ -19,6 +19,7 @@ from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
+from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
@@ -153,6 +154,9 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_reviews = GuiReviewController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
+        )
+        self.gui_dictionaries = GuiDictionaryController(
+            resolve_path=self.gui_workflows.resolve_allowed_path
         )
         self.gui_corrections = GuiCorrectionController(
             config=application_config,
@@ -641,6 +645,87 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         {
                             "error": {
                                 "code": "GUI_TRANSLATION_REVIEW_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path.startswith("/api/v1/dictionaries/"):
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The dictionary request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                if path.endswith("/propose"):
+                    minimum = document.get("minimum_occurrences", 2)
+                    if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum < 1:
+                        raise ValueError("Minimum occurrences must be a positive integer")
+                    payload = self.server.gui_dictionaries.propose(
+                        canonical_directory=str(document.get("canonical_directory", "")),
+                        revision_directory=str(document.get("revision_directory", "")),
+                        output_root=str(document.get("output_root", "")),
+                        project_id=str(document.get("project_id", "")),
+                        minimum_occurrences=minimum,
+                        previous_dictionary=str(document.get("previous_dictionary", "")),
+                    )
+                elif path.endswith("/save"):
+                    decisions = document.get("decisions")
+                    if not isinstance(decisions, list):
+                        raise ValueError("Dictionary decisions must be an array")
+                    payload = self.server.gui_dictionaries.save(
+                        proposal_path=str(document.get("proposal_path", "")),
+                        expected_sha256=str(document.get("proposal_sha256", "")),
+                        decisions=decisions,
+                    )
+                elif path.endswith("/publish"):
+                    if document.get("confirmed") is not True:
+                        raise ValueError("Dictionary publication confirmation is required")
+                    payload = self.server.gui_dictionaries.publish(
+                        proposal_path=str(document.get("proposal_path", "")),
+                        dictionary_id=str(document.get("dictionary_id", "")),
+                        output_root=str(document.get("output_root", "")),
+                    )
+                else:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.NOT_FOUND,
+                            {
+                                "error": {
+                                    "code": "GUI_ROUTE_NOT_FOUND",
+                                    "message": "No such GUI route.",
+                                }
+                            },
+                        )
+                    )
+                    return
+            except ApplicationError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": error.code, "message": str(error)}},
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_DICTIONARY_REQUEST_INVALID",
                                 "message": str(error),
                             }
                         },

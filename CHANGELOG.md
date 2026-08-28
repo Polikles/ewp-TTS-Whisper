@@ -42,6 +42,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added browser correction-dictionary proposal, contextual evidence review, optimistic decision
+  saving, retained prior approved/rejected decisions, and immutable project dictionary
+  publication with exact proposal/corpus provenance.
 - Added browser semantic translation review with immutable source units, editable targets,
   save/preview/manual-verification gating, exact-parent manual apply, audit reconstruction,
   and deterministic TXT/SRT/VTT/HTML plus provenance export.

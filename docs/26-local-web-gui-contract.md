@@ -95,6 +95,11 @@ Project dictionaries MUST be selectable by project, language, version, and hash.
 MUST display the dictionary provenance recorded by an artifact, including `none`. Dictionary
 proposal/review management may arrive after the first vertical slice, but must reuse the
 existing project-scoped formats and retained approved/rejected decisions.
+The initial correction-dictionary manager MUST compare exact canonical/manual-revision
+directories, expose bounded before/after context, preserve mapping identity, retain both
+approved and rejected prior decisions, and prevent publication while any candidate remains
+pending. Published dictionaries remain immutable and include their exact proposal/corpus
+provenance.
 
 Each completed workflow stage SHOULD offer a clearly named next-step action that transfers
 known canonical, revision, output-root, language, and project context without asking the user
