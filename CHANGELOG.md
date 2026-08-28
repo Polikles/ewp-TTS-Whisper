@@ -40,6 +40,8 @@ The next internal-beta version is `0.10.0`.
   generation from an exact canonical or revision-backed source, with bounded backend/model
   preflight, optional project dictionary provenance, readable source-verification status,
   private resume state, and explicit non-final semantic-review labeling.
+- Matched browser Bielik translation to the accepted zero-context compatibility profile;
+  adjacent context had caused the model to return both the owned and neighboring unit.
 - Added the first browser correction workflow for explicitly consented LM Studio or
   OpenRouter generation, optional project dictionary provenance, private resume state,
   non-final candidate summaries, and direct handoff into candidate-backed manual review.

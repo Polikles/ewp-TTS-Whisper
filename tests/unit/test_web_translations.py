@@ -14,6 +14,7 @@ EXAMPLE = ROOT / "examples/results.example.json"
 
 
 def mock_runner(result_path: Path, **kwargs: Any) -> Any:
+    assert kwargs["context_units"] == 0
     return apply_automated_translation(
         result_path,
         config=kwargs["config"],

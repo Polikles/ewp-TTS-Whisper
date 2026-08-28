@@ -218,6 +218,11 @@ The first GUI translation qualification reached exact-model preflight after a cl
 restart. LM Studio advertised `bielik-11b-v3.0-instruct`, so the deliberately exact request for
 the older `bielik-11b-v3.0-instruct@q8_0` ID was correctly rejected as
 `TRANSLATION_MODEL_UNAVAILABLE`; candidate generation remains pending with the advertised ID.
+The advertised-model retry reached generation but reproduced Bielik's known adjacent-context
+leakage: the final response contained two separately quoted translations for one owned unit
+and was correctly rejected as `INVALID_TRANSLATION_RESPONSE` after bounded retries. The GUI
+had mistakenly requested one context unit; it now uses the previously qualified zero-context
+Bielik profile.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

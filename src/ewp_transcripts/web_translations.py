@@ -114,7 +114,7 @@ class GuiTranslationController:
                 resume_directory=resume_path,
                 output_directory=output_path,
                 consent_choice="accept_once",
-                context_units=1,
+                context_units=0,
                 dictionary=dictionary,
                 dictionary_sha256=dictionary_sha256,
             )
