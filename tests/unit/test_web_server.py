@@ -76,6 +76,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"ewp-active-review-v1" in script_response.body
     assert b"beforeunload" in script_response.body
     assert b"not manually verified" in script_response.body
+    assert b"Only pending" in script_response.body
+    assert b"Previous occurrence" in script_response.body
+    assert b"Versioned project dictionary published" in script_response.body
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")

@@ -702,6 +702,10 @@ Planned capabilities:
   owner's other projects and adds final responsive light/dark styles;
 - add table-of-contents navigation and collapsible top-level workflow sections as correction,
   translation, and dictionary functions make the page longer;
+- after GUI function coverage, replace the interim long page with numbered workflow tabs or
+  equivalent routed views for transcription, optional correction, review/export, translation,
+  and semantic review/export; keep dictionary and settings management in separate tabs while
+  preserving state across navigation;
 - add a bounded recent-work browser for saved GUI review sessions, labeled by optional project
   name plus job/input identity, so recovery does not require remembering an output root; handle
   expired temporary paths as unavailable entries;

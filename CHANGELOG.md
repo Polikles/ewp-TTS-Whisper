@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified browser dictionary publication against the 22-case private corpus: the previous
+  dictionary restored all 41 decisions, and the GUI published a 4,438-byte immutable test
+  dictionary plus its 58,616-byte reviewed proposal under a temporary root.
 - Qualified browser semantic review through source/target editing, exact preview, manual child
   translation 3, audit reconstruction, and TXT/SRT/VTT/HTML/provenance export from the
   dictionary-backed 79-unit Bielik candidate.
@@ -105,6 +108,9 @@ The next internal-beta version is `0.10.0`.
   summary instead of exposing only a technical status sentence.
 - Reduced semantic-editor label emphasis so unit headings and target labels do not compete
   visually with the source and editable translation.
+- Added dictionary candidate filters, a four-count proposal summary, five-example list
+  truncation, list/sequential occurrence navigation, required-field highlighting, and
+  visible post-publication feedback.
 
 - Strengthened the correction disclosure to state that API use is non-local and provider
   logging/retention/use/forwarding is outside application control; exposed dictionary

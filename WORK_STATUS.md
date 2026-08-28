@@ -251,6 +251,12 @@ qualification. It compares canonical-result and exact manual-revision directorie
 minimum-occurrence filtering and an optional previous dictionary, renders bounded contextual
 examples, saves explicit pending/approved/rejected decisions with conflict protection, and
 publishes a new immutable project/version dictionary only after no pending decisions remain.
+External qualification passed with the private 22-case corpus and the previous v1 dictionary:
+all 41 candidates/decisions rendered and an immutable 4,438-byte test dictionary was published
+with its 58,616-byte proposal under `/tmp`. The first layout was too long and publication
+feedback remained below the fold. The follow-up adds approved/rejected/pending filters, a
+compact count summary, five-example truncation, list or previous/next evidence navigation,
+required-field highlighting, and scroll-visible publication confirmation.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

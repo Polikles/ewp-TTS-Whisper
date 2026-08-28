@@ -212,6 +212,11 @@ the canonical source-code and issue-tracker links.
 
 As workflow coverage grows, top-level workflow sections MUST be collapsible and reachable
 through a table-of-contents navigation near the start of the page.
+After functional coverage is complete, the primary workflow MUST become numbered, separate
+tabs or equivalent routed views—transcribe, optional correction, review/export, translation,
+semantic review/export—while dictionary and settings management live in their own clearly
+separate views. Navigation must preserve current saved state and must not imply that optional
+stages are mandatory.
 Server-side result, transcript, dictionary, and output path fields SHOULD offer an allowed-root
 Browse control in addition to direct entry. It must use the constrained GUI filesystem API,
 not the browser's upload picker or an unrestricted server filesystem explorer.
