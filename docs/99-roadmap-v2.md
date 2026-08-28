@@ -709,6 +709,23 @@ Planned capabilities:
   output directories without uploading files or exposing an unrestricted filesystem browser;
 - an explicit light/dark mode switch in that pass; automatic system preference remains an
   interim behavior rather than the final theme control.
+- add explicit next-step actions after apply/export that carry exact canonical, revision,
+  language, project, and output context into the following workflow; selecting a revision
+  should prefill its canonical source whenever exact lineage resolves it unambiguously;
+- make installed and custom dictionary directories discoverable through project/language/
+  version selectors, while retaining direct allowed-root path selection;
+- add GUI dictionary proposal, preview, decision editing, versioned publication, and audit
+  views with bundled plain-language workflow documentation;
+- persist non-secret preferences such as common output roots and dictionary locations;
+  application settings must support versioned import/export, with a deliberate option to
+  include or omit custom dictionaries and no secret/API-key export;
+- shortly before public release, add an explicit Polish/English interface-language selector
+  alongside the final light/dark toggle and persist both preferences;
+- add consistent accessible information controls for unfamiliar options, beginning with
+  non-loopback endpoints, and link them to the corresponding bundled local documentation;
+- expand bundled help into a designed pipeline guide covering transcription, optional LLM
+  correction, manual verification, export, optional translation, semantic review, and final
+  translated export.
 
 The GUI calls application services directly and MUST NOT execute CLI commands as a
 subprocess or maintain a second revision/translation model.

@@ -96,6 +96,13 @@ MUST display the dictionary provenance recorded by an artifact, including `none`
 proposal/review management may arrive after the first vertical slice, but must reuse the
 existing project-scoped formats and retained approved/rejected decisions.
 
+Each completed workflow stage SHOULD offer a clearly named next-step action that transfers
+known canonical, revision, output-root, language, and project context without asking the user
+to re-enter it. Selecting an existing revision SHOULD resolve and prefill its exact canonical
+result where lineage and allowed-root evidence identify one unambiguously; otherwise the GUI
+must request the source rather than guess. Common output roots, dictionary locations, and
+other non-secret preferences may be persisted in explicit application settings.
+
 ## 6. Review and media interaction
 
 The transcript editor MUST present human-readable speaker turns while preserving the same
@@ -194,6 +201,10 @@ through a table-of-contents navigation near the start of the page.
 Server-side result, transcript, dictionary, and output path fields SHOULD offer an allowed-root
 Browse control in addition to direct entry. It must use the constrained GUI filesystem API,
 not the browser's upload picker or an unrestricted server filesystem explorer.
+Unfamiliar controls, including non-loopback endpoint authorization, SHOULD have a compact
+accessible information action with a plain-language explanation and an optional link to the
+relevant bundled documentation. The local help surface SHOULD explain the intended stage-by-
+stage workflow, not merely individual fields.
 
 ## 10. Initial implementation sequence
 

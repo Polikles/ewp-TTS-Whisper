@@ -214,6 +214,10 @@ The repeated dictionary-assisted run then passed with exact v1.1 ID/project/hash
 provenance, 17 substitutions, one punctuation-only change, zero drift/warnings, and smooth
 handoff to a `pl` review labeled `source: automated_candidate`. The GUI now derives project ID
 from the dictionary rather than requiring redundant typing and labels the review identity.
+The first GUI translation qualification reached exact-model preflight after a clean machine
+restart. LM Studio advertised `bielik-11b-v3.0-instruct`, so the deliberately exact request for
+the older `bielik-11b-v3.0-instruct@q8_0` ID was correctly rejected as
+`TRANSLATION_MODEL_UNAVAILABLE`; candidate generation remains pending with the advertised ID.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
