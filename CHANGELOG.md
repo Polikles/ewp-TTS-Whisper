@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified GUI LM Studio translation generation from the manually verified `s0e00` revision
+  with the project PL→EN dictionary: 79 units, 867 source tokens, 1,051 target tokens, zero
+  warnings, exact model/source/dictionary provenance, and an explicitly non-final candidate.
 - Qualified disk-backed review restoration across browsers and confirmed that the bordered,
   labeled review-status surface is readable and correctly placed.
 - Qualified the model-free browser review flow through editing, save/preview gating, two
