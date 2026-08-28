@@ -87,6 +87,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b'behavior: "smooth"' in script_response.body
     assert b"installConfirmationHighlight" in script_response.body
     assert b"confirmation is required" in script_response.body
+    assert b"Continue to correction" in script_response.body
+    assert b"Continue to manual review" in script_response.body
+    assert b"Completed canonical transcription loaded" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )

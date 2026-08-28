@@ -111,6 +111,9 @@ to re-enter it. Selecting an existing revision SHOULD resolve and prefill its ex
 result where lineage and allowed-root evidence identify one unambiguously; otherwise the GUI
 must request the source rather than guess. Common output roots, dictionary locations, and
 other non-secret preferences may be persisted in explicit application settings.
+Completed transcription jobs SHOULD offer both optional correction and direct manual-review
+handoffs. Each fills the exact canonical result and containing output root, scrolls to the
+chosen stage, and leaves candidate generation or review preparation under explicit user control.
 
 ## 6. Review and media interaction
 

@@ -288,6 +288,11 @@ That retest also exposed a missing visual cue when transcript application reject
 manual-verification confirmation. Required confirmation errors now highlight and mark the
 relevant checkbox accessibly across transcript review, correction, translation, and semantic
 translation review; external visual qualification of this shared behavior remains pending.
+The browser retest confirmed the red required-field outline, immediate clearing after checking,
+and successful transcript application. Shared confirmation highlighting is externally qualified.
+Completed transcription rows now expose two explicit next steps: optional LLM correction or
+direct manual review. Both transfer the exact canonical result and containing output root and
+scroll to the chosen stage without starting work. External browser qualification is pending.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

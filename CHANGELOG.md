@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added completed-transcription handoffs for optional LLM correction and direct manual review.
+  Each fills the exact canonical result and containing output root, scrolls smoothly, and starts
+  no correction provider request or review preparation automatically.
 - Added a gated `Proceed to translation` handoff after immutable transcript application. It
   fills canonical source, verified revision, shared output root, and opposite target language,
   then scrolls to translation without starting a provider request or changing provider settings.
@@ -20,6 +23,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified shared confirmation highlighting in the browser: a rejected unchecked manual-review
+  confirmation received the visible red outline, checking it cleared the outline, and applying
+  the verified revision then succeeded normally.
 - Qualified the verified-review handoff using an English example and revision 3: the button
   stayed gated until application, then filled exact canonical/revision/root lineage, selected
   Polish, preserved provider fields, scrolled smoothly, and started no translation request.
