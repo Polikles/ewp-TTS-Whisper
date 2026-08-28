@@ -16,6 +16,7 @@ from ewp_transcripts.correction_dictionary import (
 )
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.translation_dictionary import load_project_translation_dictionary
 
 
 class GuiDictionaryError(ApplicationError):
@@ -130,6 +131,52 @@ class GuiDictionaryController:
             "dictionary_sha256": sha256_file(output),
             "dictionary": dictionary.model_dump(mode="json"),
         }
+
+    def catalog(self, directory: str) -> dict[str, Any]:
+        root = self._resolve_path(directory, directory=True)
+        paths = sorted(root.rglob("*.json"))
+        if len(paths) > 1000:
+            raise GuiDictionaryError(
+                "GUI_DICTIONARY_CATALOG_TOO_LARGE",
+                "Dictionary catalog contains more than 1,000 JSON files.",
+            )
+        items: list[dict[str, Any]] = []
+        for path in paths:
+            if path.is_symlink() or not path.is_file():
+                continue
+            try:
+                dictionary, digest = load_project_correction_dictionary(path)
+                items.append(
+                    {
+                        "kind": "correction",
+                        "path": str(path),
+                        "dictionary_id": dictionary.dictionary_id,
+                        "project_id": dictionary.project_id,
+                        "version": dictionary.dictionary_version,
+                        "language": dictionary.language,
+                        "sha256": digest,
+                    }
+                )
+                continue
+            except ApplicationError:
+                pass
+            try:
+                translation, digest = load_project_translation_dictionary(path)
+                items.append(
+                    {
+                        "kind": "translation",
+                        "path": str(path),
+                        "dictionary_id": translation.dictionary_id,
+                        "project_id": translation.project_id,
+                        "version": translation.dictionary_version,
+                        "source_language": translation.source_language,
+                        "target_language": translation.target_language,
+                        "sha256": digest,
+                    }
+                )
+            except ApplicationError:
+                continue
+        return {"catalog_directory": str(root), "count": len(items), "items": items}
 
     @staticmethod
     def _atomic_replace(path: Path, payload: bytes) -> None:

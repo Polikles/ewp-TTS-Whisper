@@ -669,7 +669,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             try:
-                if path.endswith("/propose"):
+                if path.endswith("/catalog"):
+                    payload = self.server.gui_dictionaries.catalog(
+                        str(document.get("catalog_directory", ""))
+                    )
+                elif path.endswith("/propose"):
                     minimum = document.get("minimum_occurrences", 2)
                     if not isinstance(minimum, int) or isinstance(minimum, bool) or minimum < 1:
                         raise ValueError("Minimum occurrences must be a positive integer")

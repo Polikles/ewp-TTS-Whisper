@@ -262,6 +262,14 @@ highlight, and visible publication message. It found that evidence still require
 manual expansion and inactive sequential controls remained visible because shared `.actions`
 CSS overrode `hidden`. Visible evidence now opens automatically in both layouts, and a global
 author-level hidden rule keeps inactive controls out of the layout.
+The final retest accepted all four corrections: initial and expanded list evidence is open,
+sequential evidence is open one at a time, and sequential controls are absent in list mode.
+The correction-dictionary proposal/review/publication GUI slice is therefore externally
+qualified. Installed/custom dictionary discovery and selection is the next functional slice.
+That selection slice is now implemented pending external qualification. Correction and
+translation forms scan one explicit allowed-root catalog (bounded to 1,000 JSON files), ignore
+unrelated invalid JSON, list valid dictionaries by project/ID/version/language or direction,
+and fill the exact path while preserving direct custom-path entry.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified the final dictionary evidence layout: list mode opens the first five examples,
+  show-more opens the remainder, sequential mode shows one expanded example, and its inactive
+  navigation controls disappear completely in list mode.
 - Qualified browser dictionary publication against the 22-case private corpus: the previous
   dictionary restored all 41 decisions, and the GUI published a 4,438-byte immutable test
   dictionary plus its 58,616-byte reviewed proposal under a temporary root.
@@ -45,6 +48,8 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added bounded allowed-root dictionary catalog discovery and project/ID/version/language
+  selectors to correction and translation forms while retaining explicit custom paths.
 - Added browser correction-dictionary proposal, contextual evidence review, optimistic decision
   saving, retained prior approved/rejected decisions, and immutable project dictionary
   publication with exact proposal/corpus provenance.

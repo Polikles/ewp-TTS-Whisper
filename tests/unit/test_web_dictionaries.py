@@ -62,3 +62,20 @@ def test_gui_dictionary_retains_decisions_and_publishes(tmp_path: Path) -> None:
     assert saved["counts"]["pending"] == 0
     assert Path(published["dictionary_path"]).is_file()
     assert all(item["status"] == "rejected" for item in published["dictionary"]["entries"])
+
+
+def test_gui_dictionary_catalog_discovers_both_project_dictionary_kinds(tmp_path: Path) -> None:
+    source = ROOT / "dictionaries/ethics-in-the-loop"
+    correction = source / "correction/pl/ethics-in-the-loop-pl-v1.json"
+    translation = source / "translation/pl-en/ethics-in-the-loop-pl-en-v1.json"
+    (tmp_path / "catalog").mkdir()
+    (tmp_path / "catalog" / correction.name).write_bytes(correction.read_bytes())
+    (tmp_path / "catalog" / translation.name).write_bytes(translation.read_bytes())
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+
+    catalog = GuiDictionaryController(resolve_path=paths.resolve_allowed_path).catalog(
+        str(tmp_path / "catalog")
+    )
+
+    assert catalog["count"] == 2
+    assert {item["kind"] for item in catalog["items"]} == {"correction", "translation"}
