@@ -125,6 +125,11 @@ does not delete artifacts. One project output root SHOULD derive separate `revie
 A small versioned, non-secret pointer file under that root SHOULD allow explicit restoration
 across browsers and application restarts. It identifies the last review and applied revision;
 it is not a transcript/revision artifact and MUST remain subject to allowed-root validation.
+A later full-workspace state MUST allow the operator to deliberately save and restore all
+non-secret workflow fields, staged artifact identities, open review identity, and current
+step after the browser, GUI process, VM, or workstation has stopped. Restore revalidates every
+allowed-root path and exact artifact hash; it never serializes API keys, transcript text, or
+unsaved editor contents as casual browser preferences.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
 requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
 optional project name, job ID, and source filename. Missing temporary roots are shown as stale

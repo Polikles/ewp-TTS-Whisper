@@ -719,6 +719,10 @@ Planned capabilities:
 - persist non-secret preferences such as common output roots and dictionary locations;
   application settings must support versioned import/export, with a deliberate option to
   include or omit custom dictionaries and no secret/API-key export;
+- add explicit Save current work state and Load previous work state actions. A versioned
+  server-side workspace record should restore all non-secret fields, staged artifact paths,
+  open saved review, and current workflow step after a full workstation/VM restart, while
+  revalidating allowed roots and hashes and never persisting credentials or unsaved edits;
 - shortly before public release, add an explicit Polish/English interface-language selector
   alongside the final light/dark toggle and persist both preferences;
 - add consistent accessible information controls for unfamiliar options, beginning with

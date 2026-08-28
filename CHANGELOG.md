@@ -100,6 +100,8 @@ The next internal-beta version is `0.10.0`.
 - Restyled translation review as numbered source/target cards with automatically sized target
   editors, consistent primary handoff actions, and a readable preview validation/publication
   summary instead of exposing only a technical status sentence.
+- Reduced semantic-editor label emphasis so unit headings and target labels do not compete
+  visually with the source and editable translation.
 
 - Strengthened the correction disclosure to state that API use is non-local and provider
   logging/retention/use/forwarding is outside application control; exposed dictionary

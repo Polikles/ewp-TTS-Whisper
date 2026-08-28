@@ -241,6 +241,11 @@ published, its audit reconstructed, and TXT/SRT/VTT/HTML plus provenance exporte
 presentation was functionally correct but cramped and exposed unit IDs prominently; the
 follow-up uses readable numbered source/target cards, auto-sized target areas, consistent
 primary handoff buttons, and a preview table explaining validation and non-publication.
+The owner accepted the revised card layout and Preview table, with two final hierarchy
+adjustments: target labels are regular weight and unit headings use the subdued source-label
+color. Resume reuse was also observed to perform backend readiness only and send no transcript
+excerpt. Full explicit workspace save/load across workstation or VM shutdown is now a later
+GUI requirement, distinct from provider resume state and the existing saved-review pointer.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
