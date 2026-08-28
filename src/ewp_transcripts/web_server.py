@@ -21,6 +21,7 @@ from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_reviews import GuiReviewController
+from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
@@ -162,6 +163,10 @@ class LocalGuiServer(ThreadingHTTPServer):
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
             operation_lock=local_provider_lock,
+        )
+        self.gui_translation_reviews = GuiTranslationReviewController(
+            config=application_config,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
         )
         self.gui_csrf_token = secrets.token_urlsafe(32)
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
@@ -538,6 +543,104 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         {
                             "error": {
                                 "code": "GUI_TRANSLATION_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path.startswith("/api/v1/translation-reviews/"):
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The translation review request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            common = {
+                "review": str(document.get("review_path", "")),
+                "result": str(document.get("result_path", "")),
+                "revision": str(document.get("revision_path", "")),
+                "parent": str(document.get("parent_translation_path", "")),
+            }
+            try:
+                if path.endswith("/prepare"):
+                    payload = self.server.gui_translation_reviews.prepare(
+                        result=common["result"],
+                        revision=common["revision"],
+                        parent=common["parent"],
+                        output=str(document.get("review_output_directory", "")),
+                    )
+                elif path.endswith("/save"):
+                    targets = document.get("targets")
+                    if not isinstance(targets, list):
+                        raise ValueError("Translation targets must be an array")
+                    payload = self.server.gui_translation_reviews.save(
+                        **common,
+                        expected_sha256=str(document.get("review_sha256", "")),
+                        targets=targets,
+                    )
+                elif path.endswith("/preview"):
+                    payload = self.server.gui_translation_reviews.preview(**common)
+                elif path.endswith("/apply"):
+                    if document.get("confirmed") is not True:
+                        raise ValueError("Semantic manual verification confirmation is required")
+                    payload = self.server.gui_translation_reviews.apply(
+                        **common, output=str(document.get("translation_output_directory", ""))
+                    )
+                elif path.endswith("/audit-export"):
+                    formats = document.get("formats")
+                    if not isinstance(formats, list) or not all(
+                        isinstance(item, str) for item in formats
+                    ):
+                        raise ValueError("Export formats must be an array")
+                    payload = self.server.gui_translation_reviews.audit_export(
+                        translation=str(document.get("translation_path", "")),
+                        result=common["result"],
+                        revision=common["revision"],
+                        audit_output=str(document.get("audit_output_directory", "")),
+                        export_output=str(document.get("export_output_directory", "")),
+                        formats=formats,
+                    )
+                else:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.NOT_FOUND,
+                            {
+                                "error": {
+                                    "code": "GUI_ROUTE_NOT_FOUND",
+                                    "message": "No such GUI route.",
+                                }
+                            },
+                        )
+                    )
+                    return
+            except ApplicationError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": error.code, "message": str(error)}},
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_TRANSLATION_REVIEW_REQUEST_INVALID",
                                 "message": str(error),
                             }
                         },

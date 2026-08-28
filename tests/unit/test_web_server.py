@@ -50,6 +50,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b'id="generate-correction"' in response.body
     assert b'id="generate-translation"' in response.body
     assert b"LLM-assisted translation" in response.body
+    assert b"Semantic translation review" in response.body
+    assert b'id="review-translation"' in response.body
     assert b'id="review-correction"' in response.body
     assert b"Apply verified revision" in response.body
     assert b'id="clear-review"' in response.body

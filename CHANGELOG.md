@@ -39,6 +39,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added browser semantic translation review with immutable source units, editable targets,
+  save/preview/manual-verification gating, exact-parent manual apply, audit reconstruction,
+  and deterministic TXT/SRT/VTT/HTML plus provenance export.
 - Added the first browser translation workflow for explicitly consented LM Studio candidate
   generation from an exact canonical or revision-backed source, with bounded backend/model
   preflight, optional project dictionary provenance, readable source-verification status,

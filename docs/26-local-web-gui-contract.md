@@ -145,6 +145,10 @@ project dictionary. The candidate summary MUST expose source verification and di
 identity/hash. Raw-ASR and automated-candidate sources remain permitted, but MUST be visibly
 distinguished from manually verified revisions. Every automated translation is non-final and
 requires semantic—not lexical-overlap—manual review before acceptance.
+The semantic editor MUST keep source text and ownership immutable, invalidate preview after
+every saved target change, and require explicit checks for meaning, omissions, additions,
+uncertainty, names, conventions, register, and style. Only the exact-parent manual child may
+be presented as final; audit reconstruction and translated export operate on that child.
 
 Where source media is available, the GUI SHOULD provide synchronized playback, seeking from
 a transcript unit, active-unit highlighting, keyboard operation, and independently persistent

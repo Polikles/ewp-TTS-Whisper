@@ -229,6 +229,12 @@ verified revision, 79 units, 867 source tokens, 1,051 target tokens, zero warnin
 `ethics-in-the-loop-pl-en-v1` dictionary ID/project/hash provenance. Translation generation is
 therefore externally qualified. Browser semantic review/apply/audit/export is the next GUI
 slice; this candidate is not accepted publication text.
+That next model-free browser slice is now implemented pending external qualification. A
+generated candidate opens as an exact parent with immutable source units and editable target
+text; save invalidates preview, apply requires the exact preview hash plus explicit semantic
+verification, and the resulting manual child can be reconstructed into an audit and exported
+as deterministic TXT/SRT/VTT/HTML with provenance. Transcript review remains a separate
+workspace and is unchanged.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

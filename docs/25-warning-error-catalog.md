@@ -141,6 +141,11 @@ may still produce a traceback and are not assigned a misleading expected-error c
 | `GUI_TRANSLATION_OUTPUT_MODE_INVALID` | The selected response compatibility mode is unsupported. | Provider output is not parsed under an unknown contract. | Select one offered mode; Bielik pilots use plain text. |
 | `GUI_TRANSLATION_BUSY` | Another local provider operation is already running. | Local correction and translation do not compete for the same model service. | Wait for the active operation to finish. |
 | `GUI_TRANSLATION_REQUEST_INVALID` | Translation paths, dictionary, endpoint, or request fields are invalid. | No candidate is published from ambiguous input. | Correct the displayed fields and allowed-root configuration. |
+| `GUI_TRANSLATION_REVIEW_CONFLICT` | A translation review changed after the browser loaded it. | A stale tab cannot overwrite newer target text. | Reload the current review before editing. |
+| `GUI_TRANSLATION_REVIEW_STRUCTURE_INVALID` | Submitted target units are missing, duplicated, or changed identity. | Source ownership and unit lineage remain immutable. | Reload and edit only offered target text. |
+| `GUI_TRANSLATION_REVIEW_PREVIEW_REQUIRED` | Apply was requested without previewing the exact saved translation review. | Unvalidated target text cannot become final. | Save, preview, inspect, confirm, then apply. |
+| `GUI_TRANSLATION_EXPORT_FORMAT_INVALID` | An unsupported translated export format was requested. | No partial format interpretation occurs. | Select TXT, SRT, VTT, or HTML. |
+| `GUI_TRANSLATION_REVIEW_REQUEST_INVALID` | Translation-review paths, confirmation, or editable targets are malformed. | No ambiguous review mutation is performed. | Correct the displayed inputs and retry. |
 | `CLI_USAGE_ERROR` | Typer rejected a missing argument/option, unknown command/option, or invalid declared value. | The command body did not run. | Read the usage panel and command-specific `--help`, then correct the invocation. |
 | `CLI_CONSENT_INVALID` | Interactive consent was not `reject`, `once`, or `persist`. | No new consent is granted. | Enter one documented value. |
 | `CLI_SPEAKER_COUNT_INVALID` | Speaker count is neither `auto` nor a positive integer. | Invalid diarization settings are rejected. | Correct the option value. |
