@@ -83,6 +83,10 @@ as constrained by the roadmap; it must not create cross-recording identities.
 The interface MUST clearly distinguish canonical ASR output, automated non-final candidates,
 manually verified revisions, and final/manual translations. Translation from an unreviewed
 candidate remains allowed only with the existing warning and exact source provenance.
+After an immutable transcript revision is applied, the review surface SHOULD offer a named
+next-step action that fills the canonical result, verified revision, shared output root, and
+opposite target language in the translation form. It MUST NOT start translation automatically
+or overwrite the operator's provider, model, endpoint, or dictionary choices.
 
 Correction controls MUST require exact provider/model/endpoint selection, explicit disclosure
 consent, and an optional project dictionary whose embedded ID/version/hash are read and shown

@@ -275,6 +275,14 @@ correction proposal, correctly rejected it as a correction dictionary, then allo
 unwrapped translation-schema validation error to abort the whole scan. Catalog discovery now
 isolates every invalid/proposal JSON file and each picker exposes local loaded/empty/error
 feedback instead of sending failures only to the distant dictionary-management status.
+The corrected browser retest passed: correction and translation each found one compatible
+project dictionary, showed project/ID/version/language or direction plus a local count, and
+filled the exact direct path on selection. Dictionary catalog discovery/selection is therefore
+externally qualified.
+The next browser slice now connects verified transcript review to translation: only an applied
+immutable revision enables the handoff, which fills exact source lineage and the shared project
+root, selects the opposite target language, and scrolls to translation without starting it.
+External browser qualification of this handoff remains pending.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

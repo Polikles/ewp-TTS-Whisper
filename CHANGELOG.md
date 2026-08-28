@@ -6,8 +6,17 @@ All notable changes to EWP-transcripts are documented here.
 
 The next internal-beta version is `0.10.0`.
 
+### Added
+
+- Added a gated `Proceed to translation` handoff after immutable transcript application. It
+  fills canonical source, verified revision, shared output root, and opposite target language,
+  then scrolls to translation without starting a provider request or changing provider settings.
+
 ### Validated
 
+- Qualified dictionary catalog selection in the browser: correction and translation each
+  discovered exactly one compatible Ethics in the Loop dictionary, displayed project/ID/
+  version/language identity, reported local counts, and filled the exact selected path.
 - Qualified the final dictionary evidence layout: list mode opens the first five examples,
   show-more opens the remainder, sequential mode shows one expanded example, and its inactive
   navigation controls disappear completely in list mode.

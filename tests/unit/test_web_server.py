@@ -82,6 +82,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Refresh dictionary list" in script_response.body
     assert b"Available ${kind} dictionaries" in script_response.body
     assert b"item.open = !item.hidden" in script_response.body
+    assert b"Proceed to translation" in script_response.body
+    assert b"Verified transcript source loaded" in script_response.body
+    assert b'behavior: "smooth"' in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )
