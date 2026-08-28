@@ -282,7 +282,12 @@ externally qualified.
 The next browser slice now connects verified transcript review to translation: only an applied
 immutable revision enables the handoff, which fills exact source lineage and the shared project
 root, selects the opposite target language, and scrolls to translation without starting it.
-External browser qualification of this handoff remains pending.
+The browser retest passed all of those conditions with English example revision 3, including
+preservation of model, endpoint, and dictionary fields. This handoff is externally qualified.
+That retest also exposed a missing visual cue when transcript application rejected an unchecked
+manual-verification confirmation. Required confirmation errors now highlight and mark the
+relevant checkbox accessibly across transcript review, correction, translation, and semantic
+translation review; external visual qualification of this shared behavior remains pending.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

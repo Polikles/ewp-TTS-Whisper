@@ -12,8 +12,17 @@ The next internal-beta version is `0.10.0`.
   fills canonical source, verified revision, shared output root, and opposite target language,
   then scrolls to translation without starting a provider request or changing provider settings.
 
+### Changed
+
+- Highlight required confirmation controls after transcript review, correction, translation,
+  or semantic translation review rejects an operation for missing explicit confirmation; the
+  highlight and accessibility-invalid state clear when the operator checks the control.
+
 ### Validated
 
+- Qualified the verified-review handoff using an English example and revision 3: the button
+  stayed gated until application, then filled exact canonical/revision/root lineage, selected
+  Polish, preserved provider fields, scrolled smoothly, and started no translation request.
 - Qualified dictionary catalog selection in the browser: correction and translation each
   discovered exactly one compatible Ethics in the Loop dictionary, displayed project/ID/
   version/language identity, reported local counts, and filled the exact selected path.
