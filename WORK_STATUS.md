@@ -270,6 +270,11 @@ That selection slice is now implemented pending external qualification. Correcti
 translation forms scan one explicit allowed-root catalog (bounded to 1,000 JSON files), ignore
 unrelated invalid JSON, list valid dictionaries by project/ID/version/language or direction,
 and fill the exact path while preserving direct custom-path entry.
+The first external catalog test returned empty lists because scanning encountered the retained
+correction proposal, correctly rejected it as a correction dictionary, then allowed an
+unwrapped translation-schema validation error to abort the whole scan. Catalog discovery now
+isolates every invalid/proposal JSON file and each picker exposes local loaded/empty/error
+feedback instead of sending failures only to the distant dictionary-management status.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

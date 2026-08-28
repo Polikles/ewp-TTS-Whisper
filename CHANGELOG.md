@@ -108,6 +108,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Fixed dictionary catalog scans aborting on valid proposal JSON encountered before project
+  dictionaries; proposals and unrelated JSON are now ignored, and each picker reports local
+  loading, empty, or coded failure status.
 - Restyled translation review as numbered source/target cards with automatically sized target
   editors, consistent primary handoff actions, and a readable preview validation/publication
   summary instead of exposing only a technical status sentence.

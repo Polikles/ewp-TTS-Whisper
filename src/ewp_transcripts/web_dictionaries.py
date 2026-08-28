@@ -158,7 +158,7 @@ class GuiDictionaryController:
                     }
                 )
                 continue
-            except ApplicationError:
+            except (ApplicationError, OSError, UnicodeError, ValueError):
                 pass
             try:
                 translation, digest = load_project_translation_dictionary(path)
@@ -174,7 +174,7 @@ class GuiDictionaryController:
                         "sha256": digest,
                     }
                 )
-            except ApplicationError:
+            except (ApplicationError, OSError, UnicodeError, ValueError):
                 continue
         return {"catalog_directory": str(root), "count": len(items), "items": items}
 

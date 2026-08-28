@@ -79,3 +79,17 @@ def test_gui_dictionary_catalog_discovers_both_project_dictionary_kinds(tmp_path
 
     assert catalog["count"] == 2
     assert {item["kind"] for item in catalog["items"]} == {"correction", "translation"}
+
+
+def test_gui_dictionary_catalog_ignores_proposals_and_unrelated_json() -> None:
+    paths = GuiWorkflowController((ROOT.resolve(),))
+
+    catalog = GuiDictionaryController(resolve_path=paths.resolve_allowed_path).catalog(
+        str(ROOT / "dictionaries")
+    )
+
+    assert catalog["count"] == 2
+    assert {item["dictionary_id"] for item in catalog["items"]} == {
+        "ethics-in-the-loop-pl-v1",
+        "ethics-in-the-loop-pl-en-v1",
+    }
