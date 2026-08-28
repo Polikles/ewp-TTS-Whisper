@@ -135,6 +135,12 @@ may still produce a traceback and are not assigned a misleading expected-error c
 | `GUI_CORRECTION_BUSY` | Another browser correction is already running. | Duplicate candidate publication and provider calls are prevented. | Wait for the active operation to finish. |
 | `GUI_GPU_BUSY` | Local correction was requested while transcription GPU work was queued or running. | Competing GUI GPU workflows do not run concurrently. | Wait for transcription to finish or use an explicitly consented cloud provider. |
 | `GUI_CORRECTION_REQUEST_INVALID` | Correction paths or numeric/request fields are malformed or outside allowed roots. | No provider request is made from ambiguous input. | Correct the displayed fields and allowed-root configuration. |
+| `GUI_TRANSLATION_CONFIRMATION_REQUIRED` | Translation was requested without accepting endpoint disclosure and non-final semantic-review requirements. | Transcript text is not transferred accidentally. | Read and accept the exact confirmation before generation. |
+| `GUI_TRANSLATION_LANGUAGE_INVALID` | The requested target language is unsupported. | No ambiguous translation direction is inferred. | Select Polish or English. |
+| `GUI_TRANSLATION_MODEL_REQUIRED` | No exact LM Studio model ID was supplied. | The backend cannot choose a model implicitly. | Enter the exact ID advertised by `/v1/models`. |
+| `GUI_TRANSLATION_OUTPUT_MODE_INVALID` | The selected response compatibility mode is unsupported. | Provider output is not parsed under an unknown contract. | Select one offered mode; Bielik pilots use plain text. |
+| `GUI_TRANSLATION_BUSY` | Another local provider operation is already running. | Local correction and translation do not compete for the same model service. | Wait for the active operation to finish. |
+| `GUI_TRANSLATION_REQUEST_INVALID` | Translation paths, dictionary, endpoint, or request fields are invalid. | No candidate is published from ambiguous input. | Correct the displayed fields and allowed-root configuration. |
 | `CLI_USAGE_ERROR` | Typer rejected a missing argument/option, unknown command/option, or invalid declared value. | The command body did not run. | Read the usage panel and command-specific `--help`, then correct the invocation. |
 | `CLI_CONSENT_INVALID` | Interactive consent was not `reject`, `once`, or `persist`. | No new consent is granted. | Enter one documented value. |
 | `CLI_SPEAKER_COUNT_INVALID` | Speaker count is neither `auto` nor a positive integer. | Invalid diarization settings are rejected. | Correct the option value. |

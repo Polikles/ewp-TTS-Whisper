@@ -132,6 +132,12 @@ speaker labels are absent or wrong; neither feature may silently rewrite canonic
 
 Equivalent rules apply to translation units: source text remains visible, target text is
 editable, source ownership is immutable, and apply uses the existing translation service.
+Automated translation generation MUST identify the exact canonical result and optional source
+revision, exact provider endpoint/model, target language, compatibility mode, and optional
+project dictionary. The candidate summary MUST expose source verification and dictionary
+identity/hash. Raw-ASR and automated-candidate sources remain permitted, but MUST be visibly
+distinguished from manually verified revisions. Every automated translation is non-final and
+requires semantic—not lexical-overlap—manual review before acceptance.
 
 Where source media is available, the GUI SHOULD provide synchronized playback, seeking from
 a transcript unit, active-unit highlighting, keyboard operation, and independently persistent

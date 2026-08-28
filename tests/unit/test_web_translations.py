@@ -1,0 +1,75 @@
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from ewp_transcripts.application import apply_automated_translation
+from ewp_transcripts.automated_translation import DeterministicMockTranslationProvider
+from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
+from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
+from ewp_transcripts.web_workflows import GuiWorkflowController
+
+ROOT = Path(__file__).resolve().parents[2]
+EXAMPLE = ROOT / "examples/results.example.json"
+
+
+def mock_runner(result_path: Path, **kwargs: Any) -> Any:
+    return apply_automated_translation(
+        result_path,
+        config=kwargs["config"],
+        provider=DeterministicMockTranslationProvider(),
+        target_language=kwargs["target_language"],
+        revision_path=kwargs["revision_path"],
+        style=kwargs["style"],
+        output_directory=kwargs["output_directory"],
+        resume_directory=kwargs["resume_directory"],
+        dictionary=kwargs["dictionary"],
+        dictionary_sha256=kwargs["dictionary_sha256"],
+    )
+
+
+def controller(tmp_path: Path) -> GuiTranslationController:
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    return GuiTranslationController(
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        resolve_path=paths.resolve_allowed_path,
+        runner=mock_runner,
+        preflight=lambda provider: None,
+    )
+
+
+def request(tmp_path: Path, result: Path) -> dict[str, Any]:
+    return {
+        "result": str(result),
+        "source_revision": "",
+        "output_directory": str(tmp_path / "candidates"),
+        "resume_directory": str(tmp_path / "state"),
+        "target_language": "pl",
+        "model": "bielik-test",
+        "endpoint": "http://127.0.0.1:1234/v1",
+        "allow_remote_endpoint": False,
+        "output_mode": "plain-text",
+        "dictionary_path": "",
+    }
+
+
+def test_gui_translation_publishes_explicit_non_final_candidate(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+
+    outcome = controller(tmp_path).generate(**request(tmp_path, result), confirmed=True)
+
+    assert outcome["final"] is False
+    assert outcome["source_verification"] == "raw"
+    assert outcome["model"] == "deterministic-unit-map-v1"
+    assert Path(outcome["candidate_path"]).is_file()
+
+
+def test_gui_translation_requires_confirmation(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+
+    with pytest.raises(GuiTranslationError) as missing:
+        controller(tmp_path).generate(**request(tmp_path, result), confirmed=False)
+
+    assert missing.value.code == "GUI_TRANSLATION_CONFIRMATION_REQUIRED"

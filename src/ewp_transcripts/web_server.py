@@ -21,6 +21,7 @@ from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_reviews import GuiReviewController
+from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 API_VERSION = "1.0"
@@ -145,6 +146,7 @@ class LocalGuiServer(ThreadingHTTPServer):
 
     def __init__(self, config: WebConfiguration) -> None:
         application_config = load_config()
+        local_provider_lock = threading.Lock()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
         self.gui_reviews = GuiReviewController(
@@ -154,6 +156,12 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_corrections = GuiCorrectionController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
+            operation_lock=local_provider_lock,
+        )
+        self.gui_translations = GuiTranslationController(
+            config=application_config,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+            operation_lock=local_provider_lock,
         )
         self.gui_csrf_token = secrets.token_urlsafe(32)
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
@@ -468,6 +476,68 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         {
                             "error": {
                                 "code": "GUI_CORRECTION_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path == "/api/v1/translations/generate":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The translation request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                if any(
+                    job.status in {"queued", "running"}
+                    for job in self.server.gui_transcriptions.jobs()
+                ):
+                    raise GuiTranslationError(
+                        "GUI_GPU_BUSY",
+                        "Wait for active transcription before using local translation.",
+                    )
+                payload = self.server.gui_translations.generate(
+                    result=str(document.get("result_path", "")),
+                    source_revision=str(document.get("source_revision_path", "")),
+                    output_directory=str(document.get("output_directory", "")),
+                    resume_directory=str(document.get("resume_directory", "")),
+                    target_language=str(document.get("target_language", "")),
+                    model=str(document.get("model", "")),
+                    endpoint=str(document.get("endpoint", "")),
+                    allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
+                    output_mode=str(document.get("output_mode", "")),
+                    dictionary_path=str(document.get("dictionary_path", "")),
+                    confirmed=document.get("confirmed") is True,
+                )
+            except ApplicationError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": error.code, "message": str(error)}},
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_TRANSLATION_REQUEST_INVALID",
                                 "message": str(error),
                             }
                         },

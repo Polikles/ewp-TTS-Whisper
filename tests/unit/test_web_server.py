@@ -48,6 +48,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Review and export" in response.body
     assert b"LLM-assisted transcript correction" in response.body
     assert b'id="generate-correction"' in response.body
+    assert b'id="generate-translation"' in response.body
+    assert b"LLM-assisted translation" in response.body
     assert b'id="review-correction"' in response.body
     assert b"Apply verified revision" in response.body
     assert b'id="clear-review"' in response.body
@@ -69,6 +71,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"ewp-review-layout" in script_response.body
     assert b"ewp-active-review-v1" in script_response.body
     assert b"beforeunload" in script_response.body
+    assert b"not manually verified" in script_response.body
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")

@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-08-27**.
+Last updated: **2026-08-28**.
 
 ## Checkpoint
 
@@ -191,8 +191,14 @@ recovery, unsaved-edit warnings, applied-state recovery, guarded Clear, and clea
 structure. The next follow-up adds an explicit disk-backed last-session restore for another
 browser or later GUI process and labels the bordered review status surface.
 
-The v0.10 GUI correction slice is implemented pending external provider qualification. It
-accepts an exact canonical result, structured candidate/resume output root, LM Studio or
+The v0.10 GUI correction slice is implemented and externally qualified with Gemini 2.5 Flash,
+including dictionary-assisted generation and smooth candidate-backed review handoff. The first
+GUI translation-candidate slice is implemented pending external LM Studio qualification. It
+accepts an exact canonical source plus optional revision, records source verification and
+dictionary provenance, performs a bounded exact-model preflight, and labels every result as
+non-final pending semantic manual review. It
+builds on the correction slice, which accepts an exact canonical result, structured
+candidate/resume output root, LM Studio or
 OpenRouter provider/model/endpoint, optional exact project dictionary and project ID, and an
 explicit disclosure/non-final confirmation. Credentials remain in the server environment.
 A short readiness check rejects missing credentials, unreachable backends, and unavailable

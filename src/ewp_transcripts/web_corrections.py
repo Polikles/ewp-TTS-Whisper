@@ -41,12 +41,13 @@ class GuiCorrectionController:
         resolve_path: PathResolver,
         runner: CorrectionRunner = apply_correction,
         preflight: ProviderPreflight | None = None,
+        operation_lock: threading.Lock | None = None,
     ) -> None:
         self._config = config
         self._resolve_path = resolve_path
         self._runner = runner
         self._preflight = preflight or _preflight_provider
-        self._lock = threading.Lock()
+        self._lock = operation_lock or threading.Lock()
 
     def generate(
         self,
