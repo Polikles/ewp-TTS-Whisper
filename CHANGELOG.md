@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified browser semantic review through source/target editing, exact preview, manual child
+  translation 3, audit reconstruction, and TXT/SRT/VTT/HTML/provenance export from the
+  dictionary-backed 79-unit Bielik candidate.
 - Qualified GUI LM Studio translation generation from the manually verified `s0e00` revision
   with the project PL→EN dictionary: 79 units, 867 source tokens, 1,051 target tokens, zero
   warnings, exact model/source/dictionary provenance, and an explicitly non-final candidate.
@@ -93,6 +96,10 @@ The next internal-beta version is `0.10.0`.
   provider, batch, and CLI paths.
 
 ### Changed
+
+- Restyled translation review as numbered source/target cards with automatically sized target
+  editors, consistent primary handoff actions, and a readable preview validation/publication
+  summary instead of exposing only a technical status sentence.
 
 - Strengthened the correction disclosure to state that API use is non-local and provider
   logging/retention/use/forwarding is outside application control; exposed dictionary

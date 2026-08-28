@@ -235,6 +235,12 @@ text; save invalidates preview, apply requires the exact preview hash plus expli
 verification, and the resulting manual child can be reconstructed into an audit and exported
 as deterministic TXT/SRT/VTT/HTML with provenance. Transcript review remains a separate
 workspace and is unchanged.
+External qualification passed on the 79-unit `s0e00` candidate: immutable sources and all
+editable targets rendered, one target edit saved and previewed, manual child translation 3
+published, its audit reconstructed, and TXT/SRT/VTT/HTML plus provenance exported. The first
+presentation was functionally correct but cramped and exposed unit IDs prominently; the
+follow-up uses readable numbered source/target cards, auto-sized target areas, consistent
+primary handoff buttons, and a preview table explaining validation and non-publication.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
