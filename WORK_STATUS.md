@@ -257,6 +257,11 @@ with its 58,616-byte proposal under `/tmp`. The first layout was too long and pu
 feedback remained below the fold. The follow-up adds approved/rejected/pending filters, a
 compact count summary, five-example truncation, list or previous/next evidence navigation,
 required-field highlighting, and scroll-visible publication confirmation.
+The retest accepted the summary, filters, five-item limit, show-more behavior, confirmation
+highlight, and visible publication message. It found that evidence still required redundant
+manual expansion and inactive sequential controls remained visible because shared `.actions`
+CSS overrode `hidden`. Visible evidence now opens automatically in both layouts, and a global
+author-level hidden rule keeps inactive controls out of the layout.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

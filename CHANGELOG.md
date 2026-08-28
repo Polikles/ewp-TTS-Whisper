@@ -111,6 +111,8 @@ The next internal-beta version is `0.10.0`.
 - Added dictionary candidate filters, a four-count proposal summary, five-example list
   truncation, list/sequential occurrence navigation, required-field highlighting, and
   visible post-publication feedback.
+- Made visible dictionary evidence expanded by default and restored reliable hiding of
+  inactive controls whose native `hidden` state had been overridden by shared flex styling.
 
 - Strengthened the correction disclosure to state that API use is non-local and provider
   logging/retention/use/forwarding is outside application control; exposed dictionary
