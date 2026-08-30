@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ewp_transcripts.application import transcribe_one
 from ewp_transcripts.config import ApplicationConfig
+from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 
 
@@ -27,6 +28,8 @@ class GuiTranscriptionJob(BaseModel):
     output_directory: str
     planned_job_id: str
     planned_result_path: str
+    language: LanguageMode
+    speaker_count: Literal["auto"] | int
     created_at: datetime
     updated_at: datetime
     result_path: str | None = None
@@ -47,7 +50,9 @@ class GuiTranscriptionQueue:
     ) -> None:
         self._config = config
         self._service = service
-        self._pending: Queue[tuple[str, Path, Path] | None] = Queue()
+        self._pending: Queue[tuple[str, Path, Path, LanguageMode, Literal["auto"] | int] | None] = (
+            Queue()
+        )
         self._jobs: dict[str, GuiTranscriptionJob] = {}
         self._order: deque[str] = deque(maxlen=50)
         self._lock = threading.Lock()
@@ -65,6 +70,8 @@ class GuiTranscriptionQueue:
         *,
         planned_job_id: str,
         planned_result_path: str,
+        language: LanguageMode = LanguageMode.POLISH,
+        speaker_count: Literal["auto"] | int = "auto",
     ) -> GuiTranscriptionJob:
         now = datetime.now(UTC)
         job = GuiTranscriptionJob(
@@ -74,6 +81,8 @@ class GuiTranscriptionQueue:
             output_directory=str(output_directory),
             planned_job_id=planned_job_id,
             planned_result_path=planned_result_path,
+            language=language,
+            speaker_count=speaker_count,
             created_at=now,
             updated_at=now,
         )
@@ -85,7 +94,7 @@ class GuiTranscriptionQueue:
     def start(self) -> int:
         """Queue every staged job in stable insertion order."""
 
-        pending: list[tuple[str, Path, Path]] = []
+        pending: list[tuple[str, Path, Path, LanguageMode, Literal["auto"] | int]] = []
         with self._lock:
             for job_id in reversed(self._order):
                 job = self._jobs[job_id]
@@ -94,7 +103,15 @@ class GuiTranscriptionQueue:
                 self._jobs[job_id] = job.model_copy(
                     update={"status": "queued", "updated_at": datetime.now(UTC)}
                 )
-                pending.append((job_id, Path(job.input_path), Path(job.output_directory)))
+                pending.append(
+                    (
+                        job_id,
+                        Path(job.input_path),
+                        Path(job.output_directory),
+                        job.language,
+                        job.speaker_count,
+                    )
+                )
         for item in pending:
             self._pending.put(item)
         return len(pending)
@@ -155,12 +172,20 @@ class GuiTranscriptionQueue:
             item = self._pending.get()
             if item is None:
                 return
-            job_id, input_path, output_directory = item
+            job_id, input_path, output_directory, language, speaker_count = item
             self._replace(job_id, status="running")
             try:
+                config = self._config.model_copy(
+                    update={
+                        "general": self._config.general.model_copy(update={"language": language}),
+                        "diarization": self._config.diarization.model_copy(
+                            update={"speaker_count": speaker_count}
+                        ),
+                    }
+                )
                 outcome = self._service(
                     input_path,
-                    config=self._config,
+                    config=config,
                     output_directory=output_directory,
                 )
                 self._replace(

@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added explicit transcription language and speaker-count controls to GUI inspection, exact
+  dry-run authorization, staged jobs, and execution. A plan produced with different controls can
+  no longer authorize queueing with stale settings.
 - Added an OpenRouter correction-model chooser with three priced Gemini 2.5 presets, an explicit
   manual-ID mode, and opt-in live availability/list-price checks for only those bounded presets.
   Live checks disclose the external request, run only on button press, and send no transcript.
@@ -20,6 +23,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Recorded future LM Studio connection/model discovery and explicit capability-gated loading,
+  plus searchable broader OpenRouter model browsing, without expanding the accepted bounded
+  preset slice prematurely.
 - Require an explicit GUI dry-run output directory and highlight it when absent instead of
   later misreporting a missing matching plan. OpenRouter readiness now validates the key through
   authenticated `/api/v1/key` before checking the exact model catalog; public `/models` success

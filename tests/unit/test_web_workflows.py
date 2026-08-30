@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
+from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
@@ -58,6 +59,57 @@ def test_dry_run_passes_allowed_output_directory(tmp_path: Path) -> None:
     assert controller.has_completed_plan(media, output)
     assert controller.completed_plan(media, output) == operation.result
     assert not controller.has_completed_plan(media, tmp_path / "other")
+
+
+def test_dry_run_identity_includes_language_and_speaker_count(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    output = tmp_path / "exports"
+    captured: dict[str, Any] = {}
+
+    def plan(path: Path, **kwargs: Any) -> BaseModel:
+        captured.update(kwargs)
+        return StubResult(selected=str(path), mode="dry-run", output_directory=str(output))
+
+    controller = GuiWorkflowController((tmp_path.resolve(),), dry_run_service=plan)
+    operation = controller.run(
+        "dry-run",
+        {
+            "path": str(media),
+            "output_directory": str(output),
+            "language": "en",
+            "speaker_count": 3,
+        },
+    )
+
+    assert operation.language == LanguageMode.ENGLISH
+    assert operation.speaker_count == 3
+    assert captured["config"].general.language == LanguageMode.ENGLISH
+    assert captured["config"].diarization.speaker_count == 3
+    assert controller.has_completed_plan(
+        media, output, language=LanguageMode.ENGLISH, speaker_count=3
+    )
+    assert not controller.has_completed_plan(
+        media, output, language=LanguageMode.ENGLISH, speaker_count=2
+    )
+
+
+def test_invalid_transcription_controls_are_coded_failures(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    controller = GuiWorkflowController((tmp_path.resolve(),))
+
+    language = controller.run("inspect", {"path": str(media), "language": "xx"})
+    speakers = controller.run("inspect", {"path": str(media), "speaker_count": 0})
+
+    assert language.error == {
+        "code": "GUI_TRANSCRIPTION_OPTIONS_INVALID",
+        "message": "Language must be pl, en, or auto",
+    }
+    assert speakers.error == {
+        "code": "GUI_TRANSCRIPTION_OPTIONS_INVALID",
+        "message": "Speaker count must be auto or an integer from 1 to 20",
+    }
 
 
 def test_dry_run_requires_explicit_output_directory(tmp_path: Path) -> None:

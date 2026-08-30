@@ -103,6 +103,10 @@ Small tested model presets MAY show approximate separately labeled input/output 
 but MUST retain exact manual-ID entry. Mutable model availability and pricing MUST be fetched
 only after an explicit external-request action, labeled with its disclosure, and never inferred
 from stale bundled values. Searchable full-catalog browsing and saved favorites are later UI work.
+LM Studio controls SHOULD offer the same explicit readiness check and may prefill the exact model
+when the backend advertises one unambiguous loaded model. Any later backend model-load control must
+use an explicit operator action and capability detection; discovery or selection must not silently
+load, unload, or replace a local model.
 
 Project dictionaries MUST be selectable by project, language, version, and hash. The GUI
 MUST display the dictionary provenance recorded by an artifact, including `none`. Dictionary

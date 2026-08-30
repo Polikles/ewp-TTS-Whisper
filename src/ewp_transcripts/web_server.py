@@ -875,6 +875,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 if not input_path.is_file():
                     raise ValueError("The first transcription slice accepts one file")
+                language, speaker_count = self.server.gui_workflows.resolve_transcription_options(
+                    document
+                )
                 active_output = self.server.gui_transcriptions.active_output_directory()
                 if active_output is not None and active_output != str(output_path):
                     self._write_response(
@@ -904,7 +907,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
-                plan = self.server.gui_workflows.completed_plan(input_path, output_path)
+                plan = self.server.gui_workflows.completed_plan(
+                    input_path,
+                    output_path,
+                    language=language,
+                    speaker_count=speaker_count,
+                )
                 if plan is None:
                     self._write_response(
                         _json_response(
@@ -971,6 +979,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     output_path,
                     planned_job_id=planned_job_id,
                     planned_result_path=planned_result_path,
+                    language=language,
+                    speaker_count=speaker_count,
                 )
             except (FileNotFoundError, OSError, ValueError) as error:
                 self._write_response(

@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict
 from ewp_transcripts.application import dry_run, inspect_input
 from ewp_transcripts.config import load_config
 from ewp_transcripts.discovery import normalize_input_path
+from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 
 
@@ -27,6 +28,8 @@ class GuiOperation(BaseModel):
     kind: Literal["inspect", "dry-run"]
     status: Literal["completed", "failed"]
     input_path: str
+    language: LanguageMode
+    speaker_count: Literal["auto"] | int
     created_at: datetime
     result: dict[str, Any] | None = None
     error: dict[str, str] | None = None
@@ -49,8 +52,25 @@ class GuiWorkflowController:
         if not isinstance(raw_path, str) or not raw_path.strip():
             return self._failure(kind, "", "GUI_REQUEST_INVALID", "A non-empty path is required.")
         try:
+            language, speaker_count = self.resolve_transcription_options(document)
+        except ValueError as error:
+            return self._failure(
+                kind,
+                raw_path,
+                "GUI_TRANSCRIPTION_OPTIONS_INVALID",
+                str(error),
+            )
+        try:
             input_path = self.resolve_allowed_path(raw_path)
             config = load_config()
+            config = config.model_copy(
+                update={
+                    "general": config.general.model_copy(update={"language": language}),
+                    "diarization": config.diarization.model_copy(
+                        update={"speaker_count": speaker_count}
+                    ),
+                }
+            )
             if kind == "inspect":
                 result = self.inspect_service(input_path, config=config)
             else:
@@ -73,6 +93,8 @@ class GuiWorkflowController:
                 kind=kind,
                 status="completed",
                 input_path=str(input_path),
+                language=language,
+                speaker_count=speaker_count,
                 created_at=datetime.now(UTC),
                 result=result.model_dump(mode="json"),
             )
@@ -86,7 +108,14 @@ class GuiWorkflowController:
     def operations(self) -> tuple[GuiOperation, ...]:
         return tuple(self._operations)
 
-    def completed_plan(self, input_path: Path, output_directory: Path) -> dict[str, Any] | None:
+    def completed_plan(
+        self,
+        input_path: Path,
+        output_directory: Path,
+        *,
+        language: LanguageMode = LanguageMode.POLISH,
+        speaker_count: Literal["auto"] | int = "auto",
+    ) -> dict[str, Any] | None:
         """Return the newest exact dry-run produced by this server session."""
 
         return next(
@@ -96,16 +125,54 @@ class GuiWorkflowController:
                 if operation.kind == "dry-run"
                 and operation.status == "completed"
                 and operation.input_path == str(input_path)
+                and operation.language == language
+                and operation.speaker_count == speaker_count
                 and operation.result is not None
                 and operation.result.get("output_directory") == str(output_directory)
             ),
             None,
         )
 
-    def has_completed_plan(self, input_path: Path, output_directory: Path) -> bool:
+    def has_completed_plan(
+        self,
+        input_path: Path,
+        output_directory: Path,
+        *,
+        language: LanguageMode = LanguageMode.POLISH,
+        speaker_count: Literal["auto"] | int = "auto",
+    ) -> bool:
         """Confirm this server session produced the exact dry-run being authorized."""
 
-        return self.completed_plan(input_path, output_directory) is not None
+        return (
+            self.completed_plan(
+                input_path,
+                output_directory,
+                language=language,
+                speaker_count=speaker_count,
+            )
+            is not None
+        )
+
+    @staticmethod
+    def resolve_transcription_options(
+        document: dict[str, Any],
+    ) -> tuple[LanguageMode, Literal["auto"] | int]:
+        """Validate GUI transcription controls without accepting arbitrary config."""
+
+        try:
+            language = LanguageMode(document.get("language", LanguageMode.POLISH))
+        except ValueError as error:
+            raise ValueError("Language must be pl, en, or auto") from error
+        raw_speakers = document.get("speaker_count", "auto")
+        if raw_speakers == "auto":
+            speaker_count: Literal["auto"] | int = "auto"
+        elif isinstance(raw_speakers, int) and not isinstance(raw_speakers, bool):
+            if not 1 <= raw_speakers <= 20:
+                raise ValueError("Speaker count must be auto or an integer from 1 to 20")
+            speaker_count = raw_speakers
+        else:
+            raise ValueError("Speaker count must be auto or an integer from 1 to 20")
+        return language, speaker_count
 
     def resolve_allowed_path(self, raw_path: str, *, directory: bool = False) -> Path:
         candidate = normalize_input_path(raw_path)
@@ -136,6 +203,8 @@ class GuiWorkflowController:
             kind=kind,
             status="failed",
             input_path=path,
+            language=LanguageMode.POLISH,
+            speaker_count="auto",
             created_at=datetime.now(UTC),
             error={"code": code, "message": message},
         )

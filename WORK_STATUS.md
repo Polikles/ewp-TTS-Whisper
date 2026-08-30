@@ -318,7 +318,13 @@ Correction model choice now offers Gemini 2.5 Flash (recommended), Flash Lite, a
 separate approximate listed input/output tokens per USD plus an explicit manual-ID mode. A
 collapsed, opt-in model/pricing check refreshes availability and listed rates for those three
 models only and sends no transcript. Saving custom selections and searchable browsing across
-the provider catalog remain later settings/UI work.
+the provider catalog remain later settings/UI work. External testing accepted all bounded preset,
+manual-ID, disclosure, and opt-in pricing behaviors. A later LM Studio control should check the
+connection, prefill one unambiguous advertised loaded model, and—only if supported—offer explicit
+model loading without silently changing backend state.
+Per-job transcription language and speaker-count controls now flow through inspect, exact dry-run
+identity, staged queue evidence, and execution. Changing either setting invalidates the prior
+dry-run authorization; external browser qualification remains pending.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

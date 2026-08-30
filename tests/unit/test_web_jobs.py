@@ -3,6 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from ewp_transcripts.config import ApplicationConfig
+from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 
 
@@ -44,6 +45,36 @@ def test_queue_stages_then_runs_application_service_and_records_result(tmp_path:
     assert completed.result_path == str(output / "episode_results.json")
     assert calls[0][0] == source
     assert calls[0][1]["output_directory"] == output
+
+
+def test_queue_applies_staged_language_and_speaker_count(tmp_path: Path) -> None:
+    source = tmp_path / "episode.wav"
+    output = tmp_path / "output"
+    seen = []
+
+    def transcribe(path, **kwargs):
+        seen.append(kwargs["config"])
+        return SimpleNamespace(result_path=output / "episode_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        staged = queue.stage(
+            source,
+            output,
+            planned_job_id="episode",
+            planned_result_path=str(output / "episode_results.json"),
+            language=LanguageMode.ENGLISH,
+            speaker_count=4,
+        )
+        queue.start()
+        wait_for_terminal(queue)
+    finally:
+        queue.close()
+
+    assert staged.language == LanguageMode.ENGLISH
+    assert staged.speaker_count == 4
+    assert seen[0].general.language == LanguageMode.ENGLISH
+    assert seen[0].diarization.speaker_count == 4
 
 
 def test_queue_sanitizes_unexpected_failure(tmp_path: Path) -> None:
