@@ -293,6 +293,14 @@ and successful transcript application. Shared confirmation highlighting is exter
 Completed transcription rows now expose two explicit next steps: optional LLM correction or
 direct manual review. Both transfer the exact canonical result and containing output root and
 scroll to the chosen stage without starting work. External browser qualification is pending.
+The browser handoff retest passed both paths and confirmed that the two actions fit the queue
+table. It also exposed queue guidance and confirmation affordance problems. Queue staging now
+reports inspect/dry-run first, highlights the exact confirmation only after a matching plan,
+and renders Clear as a lower-emphasis action. Advanced correction provider settings are now
+collapsed with defaults retained. A password-masked OpenRouter dialog can set a key for the
+current loopback server process without browser/file persistence; durable restart persistence
+remains blocked on a future OS credential-store design and must never use plaintext settings.
+An end-to-end MP4 transcription run is retained as a later acceptance task.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

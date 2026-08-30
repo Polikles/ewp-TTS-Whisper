@@ -17,6 +17,12 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Require an exact matching dry-run before reporting a missing transcription confirmation,
+  explain the inspect/dry-run sequence, highlight the required queue checkbox, soften the Clear
+  button, and collapse advanced correction provider/model/endpoint/reasoning controls.
+- Added a password-masked OpenRouter dialog that transfers a key only to loopback server memory
+  for the current process, clears the browser field immediately, exposes only configured/not-
+  configured state, and never persists or returns the secret.
 - Highlight required confirmation controls after transcript review, correction, translation,
   or semantic translation review rejects an operation for missing explicit confirmation; the
   highlight and accessibility-invalid state clear when the operator checks the control.

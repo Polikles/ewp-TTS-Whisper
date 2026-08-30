@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import secrets
 import subprocess
 import threading
@@ -173,10 +174,13 @@ class LocalGuiServer(ThreadingHTTPServer):
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
         self.gui_csrf_token = secrets.token_urlsafe(32)
+        self.gui_openrouter_api_key = ""
+        self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
 
     def server_close(self) -> None:
+        self.gui_openrouter_api_key = ""
         self.gui_transcriptions.close()
         super().server_close()
 
@@ -211,7 +215,13 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             if urlsplit(self.path).path == "/api/v1/session":
-                payload: dict[str, object] = {"csrf_token": self.server.gui_csrf_token}
+                payload: dict[str, object] = {
+                    "csrf_token": self.server.gui_csrf_token,
+                    "openrouter_key_configured": bool(
+                        self.server.gui_openrouter_api_key
+                        or os.environ.get(self.server.gui_openrouter_api_key_env, "").strip()
+                    ),
+                }
             else:
                 payload = {
                     "jobs": [
@@ -319,6 +329,43 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             )
             return
         path = urlsplit(self.path).path
+        if path == "/api/v1/credentials/openrouter":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {"error": {"code": "GUI_CSRF_REJECTED", "message": "Invalid session."}},
+                    )
+                )
+                return
+            key = document.get("api_key")
+            if (
+                not isinstance(key, str)
+                or not key.strip()
+                or len(key) > 512
+                or any(character.isspace() for character in key)
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_CREDENTIAL_INVALID",
+                                "message": "Enter one non-empty API key without whitespace.",
+                            }
+                        },
+                    )
+                )
+                return
+            self.server.gui_openrouter_api_key = key
+            self._write_response(
+                _json_response(
+                    HTTPStatus.OK,
+                    {"configured": True, "persistence": "server-session-only"},
+                )
+            )
+            return
         if path.startswith("/api/v1/reviews/"):
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
@@ -469,6 +516,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     dictionary_path=str(document.get("dictionary_path", "")),
                     project_id=str(document.get("project_id", "")),
                     confirmed=document.get("confirmed") is True,
+                    api_key=self.server.gui_openrouter_api_key,
                 )
             except ApplicationError as error:
                 self._write_response(
@@ -793,19 +841,6 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 )
                 return
-            if document.get("confirmed") is not True:
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.BAD_REQUEST,
-                        {
-                            "error": {
-                                "code": "GUI_CONFIRMATION_REQUIRED",
-                                "message": "Explicit transcription confirmation is required.",
-                            }
-                        },
-                    )
-                )
-                return
             try:
                 input_path = self.server.gui_workflows.resolve_allowed_path(
                     str(document.get("path", ""))
@@ -853,7 +888,24 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "error": {
                                     "code": "GUI_DRY_RUN_REQUIRED",
                                     "message": (
-                                        "Run and review dry-run for this exact input and output."
+                                        "Inspect this input, then run and review dry-run for "
+                                        "this exact input and output before adding it to the queue."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                if document.get("confirmed") is not True:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CONFIRMATION_REQUIRED",
+                                    "message": (
+                                        "Check 'I reviewed this exact dry-run' before adding "
+                                        "the file to the queue."
                                     ),
                                 }
                             },

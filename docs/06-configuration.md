@@ -203,9 +203,11 @@ The consent store contains only non-secret exact scopes and is created with priv
 permissions; API keys never belong in this configuration.
 
 `openrouter` is an explicit cloud provider. Its endpoint must be an uncredentialed HTTPS
-URL ending in `/api/v1`. The secret is read lazily from the environment variable named by
-`openrouter_api_key_env`; its value is never accepted in TOML, CLI arguments, provenance,
-resume state, or logs. A cloud command additionally requires `--allow-cloud` and scoped
+URL ending in `/api/v1`. The CLI secret is read lazily from the environment variable named by
+`openrouter_api_key_env`. The loopback GUI may instead accept a key into server-process memory
+for the current run; it clears the browser field immediately and never persists the value. The
+value is never accepted in TOML, CLI arguments, provenance, resume state, or logs. A cloud
+command additionally requires `--allow-cloud` and scoped
 reject/once/persist consent. The adapter disables provider fallback and requires support
 for requested structured-output parameters. Pin the exact model slug reported by the
 provider; never silently substitute a similarly named model.

@@ -37,7 +37,7 @@ def controller(tmp_path: Path) -> GuiCorrectionController:
         config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
         resolve_path=paths.resolve_allowed_path,
         runner=mock_runner,
-        preflight=lambda provider, config: None,
+        preflight=lambda provider, config, environment: None,
     )
 
 
@@ -91,6 +91,37 @@ def test_gui_correction_requires_consent_and_cloud_opt_in(tmp_path: Path) -> Non
     with pytest.raises(GuiCorrectionError) as missing_cloud:
         service.generate(**{**request, "allow_cloud": False}, confirmed=True)
     assert missing_cloud.value.code == "GUI_CORRECTION_CLOUD_OPT_IN_REQUIRED"
+
+
+def test_gui_correction_passes_session_key_only_to_provider_boundary(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    seen: list[object] = []
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    service = GuiCorrectionController(
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        resolve_path=paths.resolve_allowed_path,
+        runner=mock_runner,
+        preflight=lambda provider, config, environment: seen.append(environment),
+    )
+
+    service.generate(
+        result=str(result),
+        output_directory=str(tmp_path / "candidates"),
+        resume_directory=str(tmp_path / "state"),
+        provider_name="openrouter",
+        model="google/gemini-2.5-flash",
+        endpoint="https://openrouter.ai/api/v1",
+        allow_remote_endpoint=False,
+        allow_cloud=True,
+        reasoning_max_tokens=0,
+        dictionary_path="",
+        project_id="",
+        confirmed=True,
+        api_key="session-secret",
+    )
+
+    assert seen == [{"OPENROUTER_API_KEY": "session-secret"}]
 
 
 def test_gui_correction_preflight_rejects_missing_cloud_key(

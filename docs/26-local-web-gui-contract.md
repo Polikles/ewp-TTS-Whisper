@@ -90,10 +90,15 @@ or overwrite the operator's provider, model, endpoint, or dictionary choices.
 
 Correction controls MUST require exact provider/model/endpoint selection, explicit disclosure
 consent, and an optional project dictionary whose embedded ID/version/hash are read and shown
-automatically. Credentials stay in the server
-environment. A short readiness check MUST reject missing credentials, unreachable providers,
+automatically. Credentials stay at the server boundary. A short readiness check MUST reject
+missing credentials, unreachable providers,
 and unavailable exact models before bounded per-chunk retries. Successful candidates remain
 non-final and SHOULD hand off directly into candidate-backed manual review.
+The loopback GUI MAY accept a provider key into server-process memory for one run. Such a field
+MUST be password-masked, cleared immediately after submission, protected by the same origin and
+CSRF boundary, excluded from browser storage/logs/artifacts/configuration, and erased when the
+server closes. Persistence across restarts requires a separately designed OS credential store;
+plaintext project or settings files are prohibited.
 
 Project dictionaries MUST be selectable by project, language, version, and hash. The GUI
 MUST display the dictionary provenance recorded by an artifact, including `none`. Dictionary

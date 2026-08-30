@@ -7,7 +7,7 @@ import os
 import threading
 import urllib.error
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +28,7 @@ class GuiCorrectionError(ApplicationError):
 
 PathResolver = Callable[..., Path]
 CorrectionRunner = Callable[..., CorrectionApplyOutcome]
-ProviderPreflight = Callable[[Any, ApplicationConfig], None]
+ProviderPreflight = Callable[[Any, ApplicationConfig, Mapping[str, str] | None], None]
 
 
 class GuiCorrectionController:
@@ -64,6 +64,7 @@ class GuiCorrectionController:
         dictionary_path: str,
         project_id: str,
         confirmed: bool,
+        api_key: str = "",
     ) -> dict[str, Any]:
         if not confirmed:
             raise GuiCorrectionError(
@@ -117,8 +118,11 @@ class GuiCorrectionController:
                 "correction": self._config.correction.model_copy(update=correction_updates),
             }
         )
-        provider = create_correction_provider(config)
-        self._preflight(provider, config)
+        environment: Mapping[str, str] | None = None
+        if provider_name == "openrouter" and api_key:
+            environment = {config.correction.openrouter_api_key_env: api_key}
+        provider = create_correction_provider(config, environment=environment)
+        self._preflight(provider, config, environment)
         if not self._lock.acquire(blocking=False):
             raise GuiCorrectionError(
                 "GUI_CORRECTION_BUSY", "Another GUI correction is already running."
@@ -157,12 +161,17 @@ class GuiCorrectionController:
         }
 
 
-def _preflight_provider(provider: Any, config: ApplicationConfig) -> None:
+def _preflight_provider(
+    provider: Any,
+    config: ApplicationConfig,
+    environment: Mapping[str, str] | None = None,
+) -> None:
     """Fail quickly when credentials, backend, or exact model are unavailable."""
 
     headers = {"Accept": "application/json"}
     if provider.provider_id == "openrouter":
-        key = os.environ.get(config.correction.openrouter_api_key_env, "").strip()
+        source = environment if environment is not None else os.environ
+        key = source.get(config.correction.openrouter_api_key_env, "").strip()
         if not key:
             raise GuiCorrectionError(
                 "GUI_CORRECTION_CREDENTIAL_MISSING",

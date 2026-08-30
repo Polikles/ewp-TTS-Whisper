@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.correction import CorrectionProvider
 from ewp_transcripts.domain.errors import InvalidConfigurationError
@@ -15,7 +17,9 @@ from ewp_transcripts.openrouter_adapter import (
 )
 
 
-def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
+def create_correction_provider(
+    config: ApplicationConfig, *, environment: Mapping[str, str] | None = None
+) -> CorrectionProvider:
     """Construct only an explicitly configured provider without making an API call."""
 
     correction = config.correction
@@ -45,7 +49,7 @@ def create_correction_provider(config: ApplicationConfig) -> CorrectionProvider:
             raise InvalidConfigurationError(
                 "Invalid OpenRouter correction configuration"
             ) from error
-        return OpenRouterCorrectionProvider(openrouter_config)
+        return OpenRouterCorrectionProvider(openrouter_config, environment=environment)
     raise InvalidConfigurationError(
         "No correction provider is configured; set correction.provider and correction.model"
     )
