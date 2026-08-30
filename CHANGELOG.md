@@ -23,6 +23,11 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Limited the 1–6 GUI speaker-count field to one typed or pasted character and recorded accepted
+  browser evidence that dry-run summaries survive confirmation failures and clear after staging.
+- Added roadmap contracts for separate, default-off punctuation-check and basic-editorial LLM
+  correction modes with increased-usage/risk disclosure, versioned provenance, and mandatory
+  manual review; the conservative lexical default remains unchanged.
 - Replaced the fixed speaker-count list with a validated 1–6 number field plus explicit automatic
   detection, documented the expected accuracy tradeoff, and retained the last dry-run summary
   while queue confirmation or exact-plan validation fails.

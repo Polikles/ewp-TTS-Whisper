@@ -103,8 +103,8 @@ Requirements:
   context, not the complete canonical processing/configuration payload;
 - corrected LLM output is passed through the same alignment and `RevisionEngine` used by
   manual review;
-- prompt the model to correct only obvious ASR lexical errors, misspelled proper names,
-  conservative punctuation, capitalization, and sentence boundaries;
+- the implemented default prompt corrects only obvious ASR lexical errors and high-confidence
+  proper-name spelling; punctuation, capitalization, and sentence boundaries remain manual;
 - preserve the speaker's actual wording, repetitions, self-corrections, fillers,
   malformed sentences, grammatical mistakes, and stylistic quirks; never paraphrase,
   polish prose, or silently repair how the person spoke;
@@ -115,6 +115,12 @@ Requirements:
 - LLM revisions may be direct siblings of manual gold for benchmark comparison;
 - a model revision may later have a manual child revision, with parent provenance but a
   complete standalone child snapshot.
+
+A later experiment may add two independent, default-off GUI modes: **check also punctuation**
+and **try basic editorial fixes**. They require separately versioned prompt contracts and
+evaluation because punctuation repair changes sentenceization, while editorial repair crosses
+the default boundary that preserves spoken grammar and style. Both controls must warn that they
+may increase API token usage and unsupported edits, and neither may remove mandatory manual review.
 
 Benchmarking must cover local and cloud providers separately and report at least lexical
 accuracy against manual gold, locally derived change precision/recall, unsupported or stylistic

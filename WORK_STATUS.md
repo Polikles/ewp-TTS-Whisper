@@ -327,6 +327,9 @@ identity, staged queue evidence, and execution. Changing either setting invalida
 dry-run authorization. External testing accepted the settings summary, stale-plan rejection, and
 staged queue evidence. Follow-up replaces the fixed count list with a validated 1–6 number field,
 retains automatic detection, and preserves dry-run evidence across queue-validation failures.
+The accepted browser retest confirmed the 1–6 range, exact dry-run summary retention across a
+confirmation error, and summary clearing only after successful queue staging. The numeric input
+now also refuses more than one typed or pasted character.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
@@ -496,6 +499,10 @@ These are the delivered v0.4 workstreams; details and acceptance criteria live i
   benchmarking remain later roadmap work.
 - Research ephemeral per-job speaker fingerprinting/clustering for unknown meeting speaker
   counts. It must never become persistent cross-recording identity or a general people base.
+- After the conservative lexical correction workflow is stable, evaluate two separately enabled
+  non-final LLM modes: `check also punctuation` and `try basic editorial fixes`. Each must be an
+  explicit unchecked GUI option with a clear warning that it can increase API usage and error
+  risk, preserve exact provenance/prompt identity, and still require complete manual review.
 - Manually review the complete instruction set with less-technical readers after workflows
   stabilize, then add screenshots and revise unclear terminology.
 - After all GUI functions work, align the frontend's visual language with the owner's other

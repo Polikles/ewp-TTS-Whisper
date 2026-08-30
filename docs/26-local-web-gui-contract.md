@@ -94,6 +94,11 @@ automatically. Credentials stay at the server boundary. A short readiness check 
 missing credentials, unreachable providers,
 and unavailable exact models before bounded per-chunk retries. Successful candidates remain
 non-final and SHOULD hand off directly into candidate-backed manual review.
+Any later punctuation-check or basic-editorial correction mode MUST be separately selectable,
+off by default, and identified in prompt/provenance evidence. The GUI MUST warn before execution
+that either mode may increase API usage and unsupported changes; output remains a non-final
+candidate requiring full manual review. These modes must not silently broaden the default lexical
+correction contract.
 The loopback GUI MAY accept a provider key into server-process memory for one run. Such a field
 MUST be password-masked, cleared immediately after submission, protected by the same origin and
 CSRF boundary, excluded from browser storage/logs/artifacts/configuration, and erased when the

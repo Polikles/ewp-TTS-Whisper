@@ -187,6 +187,7 @@ workflowActions.before(workflowOptions);
 const workflowSpeakerCount = document.querySelector('#workflow input[name="speaker_count"]');
 const workflowAutoSpeakers = document.querySelector('#workflow input[name="speaker_count_auto"]');
 workflowAutoSpeakers.addEventListener("change", () => { workflowSpeakerCount.disabled = workflowAutoSpeakers.checked; });
+workflowSpeakerCount.addEventListener("input", () => { if (workflowSpeakerCount.value.length > 1) workflowSpeakerCount.value = workflowSpeakerCount.value.slice(0, 1); });
 document.querySelector("#workflow").addEventListener("submit", event => { const kind = event.submitter?.value; if (kind !== "dry-run" && kind !== "transcriptions") return; if (workflowOutput.value.trim()) return; event.preventDefault(); event.stopImmediatePropagation(); workflowOutput.classList.add("field-error"); workflowOutput.setAttribute("aria-invalid", "true"); document.querySelector("#operation-status").textContent = "GUI_OUTPUT_REQUIRED: Enter a shared output directory before dry-run or queue staging."; }, {capture: true});
 workflowOutput.addEventListener("input", () => { if (!workflowOutput.value.trim()) return; workflowOutput.classList.remove("field-error"); workflowOutput.setAttribute("aria-invalid", "false"); });
 start();
