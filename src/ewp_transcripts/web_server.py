@@ -474,7 +474,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
             return
-        if path == "/api/v1/corrections/generate":
+        if path in {"/api/v1/corrections/check", "/api/v1/corrections/generate"}:
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
                 self._write_response(
@@ -503,21 +503,31 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     not isinstance(reasoning, int) or isinstance(reasoning, bool) or reasoning < 0
                 ):
                     raise ValueError("Reasoning-token budget must be a non-negative integer")
-                payload = self.server.gui_corrections.generate(
-                    result=str(document.get("result_path", "")),
-                    output_directory=str(document.get("output_directory", "")),
-                    resume_directory=str(document.get("resume_directory", "")),
-                    provider_name=str(document.get("provider", "")),
-                    model=str(document.get("model", "")),
-                    endpoint=str(document.get("endpoint", "")),
-                    allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
-                    allow_cloud=document.get("allow_cloud") is True,
-                    reasoning_max_tokens=reasoning,
-                    dictionary_path=str(document.get("dictionary_path", "")),
-                    project_id=str(document.get("project_id", "")),
-                    confirmed=document.get("confirmed") is True,
-                    api_key=self.server.gui_openrouter_api_key,
-                )
+                if path == "/api/v1/corrections/check":
+                    payload = self.server.gui_corrections.check_provider(
+                        provider_name=str(document.get("provider", "")),
+                        model=str(document.get("model", "")),
+                        endpoint=str(document.get("endpoint", "")),
+                        allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
+                        reasoning_max_tokens=reasoning,
+                        api_key=self.server.gui_openrouter_api_key,
+                    )
+                else:
+                    payload = self.server.gui_corrections.generate(
+                        result=str(document.get("result_path", "")),
+                        output_directory=str(document.get("output_directory", "")),
+                        resume_directory=str(document.get("resume_directory", "")),
+                        allow_cloud=document.get("allow_cloud") is True,
+                        dictionary_path=str(document.get("dictionary_path", "")),
+                        project_id=str(document.get("project_id", "")),
+                        confirmed=document.get("confirmed") is True,
+                        provider_name=str(document.get("provider", "")),
+                        model=str(document.get("model", "")),
+                        endpoint=str(document.get("endpoint", "")),
+                        allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
+                        reasoning_max_tokens=reasoning,
+                        api_key=self.server.gui_openrouter_api_key,
+                    )
             except ApplicationError as error:
                 self._write_response(
                     _json_response(

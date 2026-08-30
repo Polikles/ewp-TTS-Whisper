@@ -49,6 +49,47 @@ class GuiCorrectionController:
         self._preflight = preflight or _preflight_provider
         self._lock = operation_lock or threading.Lock()
 
+    def check_provider(
+        self,
+        *,
+        provider_name: str,
+        model: str,
+        endpoint: str,
+        allow_remote_endpoint: bool,
+        reasoning_max_tokens: int | None,
+        api_key: str = "",
+    ) -> dict[str, Any]:
+        """Check the exact configured backend and model without sending transcript text."""
+
+        if provider_name not in {"lm-studio", "openrouter"}:
+            raise GuiCorrectionError("GUI_CORRECTION_PROVIDER_INVALID", "Unknown provider")
+        if not model.strip():
+            raise GuiCorrectionError("GUI_CORRECTION_MODEL_REQUIRED", "Model is required")
+        updates: dict[str, Any] = {
+            "provider": provider_name,
+            "model": model.strip(),
+            "allow_remote_endpoint": allow_remote_endpoint,
+        }
+        if provider_name == "lm-studio":
+            updates["endpoint"] = endpoint.strip()
+        else:
+            updates["openrouter_endpoint"] = endpoint.strip()
+            updates["openrouter_reasoning_max_tokens"] = reasoning_max_tokens
+        config = self._config.model_copy(
+            update={"correction": self._config.correction.model_copy(update=updates)}
+        )
+        environment: Mapping[str, str] | None = None
+        if provider_name == "openrouter" and api_key:
+            environment = {config.correction.openrouter_api_key_env: api_key}
+        provider = create_correction_provider(config, environment=environment)
+        self._preflight(provider, config, environment)
+        return {
+            "status": "ok",
+            "provider": provider.provider_id,
+            "model": provider.model_id,
+            "endpoint_kind": provider.endpoint_kind,
+        }
+
     def generate(
         self,
         *,
@@ -188,6 +229,16 @@ def _preflight_provider(
             if len(payload) > 1_048_576:
                 raise ValueError("Provider model response is too large")
             document = json.loads(payload)
+    except urllib.error.HTTPError as error:
+        if error.code in {401, 403}:
+            raise GuiCorrectionError(
+                "GUI_CORRECTION_CREDENTIAL_REJECTED",
+                f"Provider connection succeeded, but the API key was rejected (HTTP {error.code}).",
+            ) from error
+        raise GuiCorrectionError(
+            "GUI_CORRECTION_BACKEND_REJECTED",
+            f"Provider connection was rejected with HTTP status {error.code}.",
+        ) from error
     except (OSError, ValueError, urllib.error.URLError) as error:
         raise GuiCorrectionError(
             "GUI_CORRECTION_BACKEND_UNAVAILABLE",

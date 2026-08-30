@@ -301,6 +301,12 @@ collapsed with defaults retained. A password-masked OpenRouter dialog can set a 
 current loopback server process without browser/file persistence; durable restart persistence
 remains blocked on a future OS credential-store design and must never use plaintext settings.
 An end-to-end MP4 transcription run is retained as a later acceptance task.
+The follow-up browser test accepted the subdued Clear action, collapsed provider defaults, and
+session-key dialog including empty-on-reopen behavior. Queue confirmation still lacked its red
+outline because the shared helper matched old prose rather than `GUI_CONFIRMATION_REQUIRED`;
+the helper now recognizes coded confirmation errors. A new transcript-free `Check connection`
+action reports a green `API OK` state or a red coded error and distinguishes rejected keys,
+unreachable/rejecting endpoints, and unavailable exact models. Both require external retesting.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

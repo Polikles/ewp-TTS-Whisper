@@ -17,6 +17,11 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Added an explicit correction-provider connection check with a neutral/green/red indicator and
+  distinct missing/rejected credential, unavailable connection, rejected HTTP response, and
+  exact-model-unavailable errors; it sends no transcript text.
+- Match confirmation error codes as well as legacy message wording when highlighting required
+  controls, and clarify the OpenRouter spending-limit example as `USD $2`.
 - Require an exact matching dry-run before reporting a missing transcription confirmation,
   explain the inspect/dry-run sequence, highlight the required queue checkbox, soften the Clear
   button, and collapse advanced correction provider/model/endpoint/reasoning controls.
@@ -29,6 +34,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified the collapsed correction provider settings, lower-emphasis Clear action, and
+  password-dialog behavior including empty-on-reopen secret handling. The first queue-checkbox
+  retest exposed and did not qualify the red outline because its matcher missed the coded error.
 - Qualified shared confirmation highlighting in the browser: a rejected unchecked manual-review
   confirmation received the visible red outline, checking it cleared the outline, and applying
   the verified revision then succeeded normally.

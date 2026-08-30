@@ -1,3 +1,4 @@
+import urllib.error
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -124,6 +125,33 @@ def test_gui_correction_passes_session_key_only_to_provider_boundary(tmp_path: P
     assert seen == [{"OPENROUTER_API_KEY": "session-secret"}]
 
 
+def test_gui_provider_check_sends_no_transcript_and_reports_exact_model(tmp_path: Path) -> None:
+    seen: list[object] = []
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    service = GuiCorrectionController(
+        config=ApplicationConfig(),
+        resolve_path=paths.resolve_allowed_path,
+        preflight=lambda provider, config, environment: seen.append(environment),
+    )
+
+    result = service.check_provider(
+        provider_name="openrouter",
+        model="google/gemini-2.5-flash",
+        endpoint="https://openrouter.ai/api/v1",
+        allow_remote_endpoint=False,
+        reasoning_max_tokens=0,
+        api_key="session-secret",
+    )
+
+    assert result == {
+        "status": "ok",
+        "provider": "openrouter",
+        "model": "google/gemini-2.5-flash",
+        "endpoint_kind": "cloud",
+    }
+    assert seen == [{"OPENROUTER_API_KEY": "session-secret"}]
+
+
 def test_gui_correction_preflight_rejects_missing_cloud_key(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -138,6 +166,27 @@ def test_gui_correction_preflight_rejects_missing_cloud_key(
         _preflight_provider(provider, ApplicationConfig())
 
     assert missing.value.code == "GUI_CORRECTION_CREDENTIAL_MISSING"
+
+
+def test_gui_correction_preflight_distinguishes_rejected_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = SimpleNamespace(
+        provider_id="openrouter",
+        endpoint_identity="https://openrouter.ai/api/v1",
+        model_id="google/gemini-2.5-flash",
+    )
+    rejected = urllib.error.HTTPError("https://openrouter.ai/api/v1/models", 401, "", {}, None)
+
+    def reject(*args: object, **kwargs: object) -> None:
+        raise rejected
+
+    monkeypatch.setattr("ewp_transcripts.web_corrections.urllib.request.urlopen", reject)
+
+    with pytest.raises(GuiCorrectionError) as error:
+        _preflight_provider(provider, ApplicationConfig(), {"OPENROUTER_API_KEY": "bad"})
+
+    assert error.value.code == "GUI_CORRECTION_CREDENTIAL_REJECTED"
 
 
 def test_gui_correction_derives_project_id_from_dictionary(tmp_path: Path) -> None:
