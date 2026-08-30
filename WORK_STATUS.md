@@ -324,7 +324,9 @@ connection, prefill one unambiguous advertised loaded model, and—only if suppo
 model loading without silently changing backend state.
 Per-job transcription language and speaker-count controls now flow through inspect, exact dry-run
 identity, staged queue evidence, and execution. Changing either setting invalidates the prior
-dry-run authorization; external browser qualification remains pending.
+dry-run authorization. External testing accepted the settings summary, stale-plan rejection, and
+staged queue evidence. Follow-up replaces the fixed count list with a validated 1–6 number field,
+retains automatic detection, and preserves dry-run evidence across queue-validation failures.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

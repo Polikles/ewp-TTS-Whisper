@@ -108,7 +108,7 @@ def test_invalid_transcription_controls_are_coded_failures(tmp_path: Path) -> No
     }
     assert speakers.error == {
         "code": "GUI_TRANSCRIPTION_OPTIONS_INVALID",
-        "message": "Speaker count must be auto or an integer from 1 to 20",
+        "message": "Speaker count must be auto or an integer from 1 to 6",
     }
 
 

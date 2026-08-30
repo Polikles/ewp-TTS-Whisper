@@ -167,11 +167,11 @@ class GuiWorkflowController:
         if raw_speakers == "auto":
             speaker_count: Literal["auto"] | int = "auto"
         elif isinstance(raw_speakers, int) and not isinstance(raw_speakers, bool):
-            if not 1 <= raw_speakers <= 20:
-                raise ValueError("Speaker count must be auto or an integer from 1 to 20")
+            if not 1 <= raw_speakers <= 6:
+                raise ValueError("Speaker count must be auto or an integer from 1 to 6")
             speaker_count = raw_speakers
         else:
-            raise ValueError("Speaker count must be auto or an integer from 1 to 20")
+            raise ValueError("Speaker count must be auto or an integer from 1 to 6")
         return language, speaker_count
 
     def resolve_allowed_path(self, raw_path: str, *, directory: bool = False) -> Path:

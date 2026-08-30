@@ -2,9 +2,16 @@
 
 > EWP-transcripts is a local-first CLI application for accurate transcription of audio recordings. The executable is named `transcriber`.
 
+EWP Transcriber is designed as one component in a wider media-production ecosystem, not as
+a sealed all-in-one product. Speech, alignment, and diarization models come from their upstream
+authors, while optional assisted correction and translation can use separately operated local
+or cloud APIs. This is why setup includes explicit external-model downloads, gated-model terms,
+and optional provider API keys. The application records provenance and keeps every network use
+explicit, but it cannot control an external provider's retention or data-use policies.
+
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.9.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.10.0` remains an internal beta, not a public release.
 - Development remains untagged on `main` while requirements work continues. The first public
   release is planned only as the checkpoint immediately before Docker-image work begins.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
@@ -86,7 +93,9 @@ uv run --locked transcriber gui \
 ```
 
 It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and exposes only the named directories. Inspect and dry-run are read-only. Each reviewed file
+and exposes only the named directories. Inspect and dry-run are read-only; dry-run includes its
+own inspection, so running Inspect separately is optional and intended for examining media before
+choosing output settings. Each reviewed file
 can be staged without starting GPU work; collect distinct episode files under one shared
 output directory, review/remove rows, then select **Start queue** to process them serially.
 Brief instructions and a complete local help page are bundled into the GUI. Review workflows

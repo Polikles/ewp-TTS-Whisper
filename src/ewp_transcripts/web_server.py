@@ -921,8 +921,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "error": {
                                     "code": "GUI_DRY_RUN_REQUIRED",
                                     "message": (
-                                        "Inspect this input, then run and review dry-run for "
-                                        "this exact input and output before adding it to the queue."
+                                        "Run and review dry-run for this exact input, output, "
+                                        "language, and speaker count before adding it to the queue."
                                     ),
                                 }
                             },

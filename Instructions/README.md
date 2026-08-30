@@ -326,6 +326,11 @@ The detailed revision guide is
 
 ### Automated correction with LM Studio or OpenRouter
 
+This application is intentionally part of a wider toolchain. It orchestrates pinned models from
+their upstream repositories and optional separately operated APIs rather than redistributing or
+silently configuring every external dependency. Model terms and API credentials therefore remain
+explicit operator-controlled setup steps.
+
 The provider contract, local/cloud execution, manual-review boundary, and project-dictionary
 path are acceptance-audited. Gemini 2.5 Flash through OpenRouter is the qualified project
 workflow; evaluated local models remain useful for controlled experiments but did not improve
@@ -338,6 +343,14 @@ can miss ASR errors or introduce plausible-looking substitutions, deletions, par
 and improper names. Manually review wording, speaker attribution, punctuation, quotation
 marks, and sentence boundaries before exporting it as accepted work. Only a manually
 accepted revision may serve as final publication text or benchmark gold.
+
+The current `faithful-correction-v11` provider contract is deliberately lexical: it may repair
+only unmistakable ASR word/short-phrase errors and high-confidence proper-name spelling, aided by
+an optional project dictionary. It must preserve punctuation, capitalization, sentence boundaries,
+grammar, repetitions, fillers, and style. The revision engine and manual editor fully support
+punctuation and sentence-boundary corrections, but the LLM is not currently authorized to make
+them. This conservative boundary avoids presenting plausible editorial rewriting as recovered
+speech; punctuation and sentence splitting remain part of required human review.
 
 ```bash
 curl -fsS http://127.0.0.1:1234/v1/models | \

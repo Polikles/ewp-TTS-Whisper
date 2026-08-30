@@ -23,6 +23,12 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Replaced the fixed speaker-count list with a validated 1–6 number field plus explicit automatic
+  detection, documented the expected accuracy tradeoff, and retained the last dry-run summary
+  while queue confirmation or exact-plan validation fails.
+- Clarified that dry-run already performs inspection, documented EWP Transcriber as part of a
+  wider externally sourced model/API ecosystem, and made the current lexical-only LLM correction
+  boundary explicit: punctuation and sentence boundaries remain manual-review responsibilities.
 - Recorded future LM Studio connection/model discovery and explicit capability-gated loading,
   plus searchable broader OpenRouter model browsing, without expanding the accepted bounded
   preset slice prematurely.
