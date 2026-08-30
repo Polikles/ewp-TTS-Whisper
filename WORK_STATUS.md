@@ -313,6 +313,12 @@ authenticated current-key endpoint, then separately validates the exact model. E
 output is rejected directly and highlighted. The API-check light/status now form one labeled row
 below the buttons, and the informational secret status explicitly says the key is session-only
 and not stored. These corrections require external retesting.
+The next retest accepted output validation and clear fake/empty credential/model failures.
+Correction model choice now offers Gemini 2.5 Flash (recommended), Flash Lite, and Pro with
+separate approximate listed input/output tokens per USD plus an explicit manual-ID mode. A
+collapsed, opt-in model/pricing check refreshes availability and listed rates for those three
+models only and sends no transcript. Saving custom selections and searchable browsing across
+the provider catalog remain later settings/UI work.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

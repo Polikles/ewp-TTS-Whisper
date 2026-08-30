@@ -99,6 +99,10 @@ MUST be password-masked, cleared immediately after submission, protected by the 
 CSRF boundary, excluded from browser storage/logs/artifacts/configuration, and erased when the
 server closes. Persistence across restarts requires a separately designed OS credential store;
 plaintext project or settings files are prohibited.
+Small tested model presets MAY show approximate separately labeled input/output cost evidence,
+but MUST retain exact manual-ID entry. Mutable model availability and pricing MUST be fetched
+only after an explicit external-request action, labeled with its disclosure, and never inferred
+from stale bundled values. Searchable full-catalog browsing and saved favorites are later UI work.
 
 Project dictionaries MUST be selectable by project, language, version, and hash. The GUI
 MUST display the dictionary provenance recorded by an artifact, including `none`. Dictionary

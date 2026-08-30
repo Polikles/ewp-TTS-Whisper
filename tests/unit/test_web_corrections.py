@@ -153,6 +153,50 @@ def test_gui_provider_check_sends_no_transcript_and_reports_exact_model(tmp_path
     assert seen == [{"OPENROUTER_API_KEY": "session-secret"}]
 
 
+def test_gui_model_pricing_is_bounded_to_requested_presets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    service = GuiCorrectionController(
+        config=ApplicationConfig(), resolve_path=paths.resolve_allowed_path
+    )
+    monkeypatch.setattr(
+        "ewp_transcripts.web_corrections._read_provider_document",
+        lambda url, headers: {
+            "data": [
+                {
+                    "id": "google/gemini-2.5-flash",
+                    "name": "Gemini 2.5 Flash",
+                    "pricing": {"prompt": "0.0000003", "completion": "0.0000025"},
+                },
+                {"id": "unrequested/model", "pricing": {"prompt": "1"}},
+            ]
+        },
+    )
+
+    result = service.model_pricing(
+        endpoint="https://openrouter.ai/api/v1",
+        model_ids=["google/gemini-2.5-flash", "missing/model"],
+    )
+
+    assert result["items"] == [
+        {
+            "id": "google/gemini-2.5-flash",
+            "available": True,
+            "name": "Gemini 2.5 Flash",
+            "input": {"usd_per_million": 0.3, "tokens_per_usd": 3_333_333},
+            "output": {"usd_per_million": 2.5, "tokens_per_usd": 400_000},
+        },
+        {
+            "id": "missing/model",
+            "available": False,
+            "name": None,
+            "input": None,
+            "output": None,
+        },
+    ]
+
+
 def test_gui_correction_preflight_rejects_missing_cloud_key(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

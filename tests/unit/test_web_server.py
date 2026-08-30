@@ -98,6 +98,11 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"GUI_OUTPUT_REQUIRED" in script_response.body
     assert b"API check" in script_response.body
     assert b"does not store API keys" in script_response.body
+    assert b"Gemini 2.5 Flash Lite" in script_response.body
+    assert b"Gemini 2.5 Pro" in script_response.body
+    assert b"Enter ID manually" in script_response.body
+    assert b"Check models and pricing" in script_response.body
+    assert b"does not send transcript text" in script_response.body
     assert b"server-session-only" not in script_response.body
     assert b"#operation-status" in script_response.body
     style_response = dispatch_get(

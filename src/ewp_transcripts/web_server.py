@@ -474,7 +474,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
             return
-        if path in {"/api/v1/corrections/check", "/api/v1/corrections/generate"}:
+        if path in {
+            "/api/v1/corrections/check",
+            "/api/v1/corrections/generate",
+            "/api/v1/corrections/models",
+        }:
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
                 self._write_response(
@@ -503,7 +507,18 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     not isinstance(reasoning, int) or isinstance(reasoning, bool) or reasoning < 0
                 ):
                     raise ValueError("Reasoning-token budget must be a non-negative integer")
-                if path == "/api/v1/corrections/check":
+                if path == "/api/v1/corrections/models":
+                    model_ids = document.get("model_ids")
+                    if not isinstance(model_ids, list) or not all(
+                        isinstance(item, str) for item in model_ids
+                    ):
+                        raise ValueError("Model IDs must be an array of strings")
+                    payload = self.server.gui_corrections.model_pricing(
+                        endpoint=str(document.get("endpoint", "")),
+                        model_ids=model_ids,
+                        api_key=self.server.gui_openrouter_api_key,
+                    )
+                elif path == "/api/v1/corrections/check":
                     payload = self.server.gui_corrections.check_provider(
                         provider_name=str(document.get("provider", "")),
                         model=str(document.get("model", "")),

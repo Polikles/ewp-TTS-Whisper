@@ -214,6 +214,9 @@ provider; never silently substitute a similarly named model.
 The GUI readiness check validates OpenRouter credentials through the authenticated
 `GET /api/v1/key` endpoint before separately reading the model catalog. A public model-list
 response alone is not evidence that the supplied key is valid.
+The GUI's bundled OpenRouter presets show approximate listed input/output tokens per USD for
+orientation. `Check models and pricing` explicitly refreshes the three bounded preset records
+from `/models`; rates are mutable external evidence, not configuration or a cost guarantee.
 `openrouter_reasoning_max_tokens` is optional and provider-specific. Set it to `0` to
 disable thinking on supported models such as Gemini 2.5, or use a positive explicit budget
 for a separately identified benchmark run. The value participates in prompt/resume identity

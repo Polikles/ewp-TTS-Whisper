@@ -8,6 +8,7 @@ import threading
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Mapping
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -89,6 +90,55 @@ class GuiCorrectionController:
             "model": provider.model_id,
             "endpoint_kind": provider.endpoint_kind,
         }
+
+    def model_pricing(
+        self,
+        *,
+        endpoint: str,
+        model_ids: list[str],
+        api_key: str = "",
+    ) -> dict[str, Any]:
+        """Read current OpenRouter availability/pricing for a small explicit model set."""
+
+        if not model_ids or len(model_ids) > 10 or any(not item.strip() for item in model_ids):
+            raise GuiCorrectionError(
+                "GUI_CORRECTION_MODEL_REQUIRED", "Select one to ten exact model IDs."
+            )
+        updates = {
+            "provider": "openrouter",
+            "model": model_ids[0],
+            "openrouter_endpoint": endpoint.strip(),
+        }
+        config = self._config.model_copy(
+            update={"correction": self._config.correction.model_copy(update=updates)}
+        )
+        environment = {config.correction.openrouter_api_key_env: api_key} if api_key else None
+        provider = create_correction_provider(config, environment=environment)
+        headers = {"Accept": "application/json"}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        document = _read_provider_document(
+            f"{provider.endpoint_identity.rstrip('/')}/models", headers
+        )
+        records = {
+            item.get("id"): item
+            for item in document.get("data", [])
+            if isinstance(item, dict) and isinstance(item.get("id"), str)
+        }
+        items = []
+        for model_id in model_ids:
+            record = records.get(model_id)
+            pricing = record.get("pricing", {}) if isinstance(record, dict) else {}
+            items.append(
+                {
+                    "id": model_id,
+                    "available": record is not None,
+                    "name": record.get("name") if isinstance(record, dict) else None,
+                    "input": _price_summary(pricing.get("prompt")),
+                    "output": _price_summary(pricing.get("completion")),
+                }
+            )
+        return {"provider": "openrouter", "items": items}
 
     def generate(
         self,
@@ -272,3 +322,18 @@ def _read_provider_document(url: str, headers: dict[str, str]) -> dict[str, Any]
             "Correction backend returned an invalid readiness document.",
         )
     return document
+
+
+def _price_summary(value: object) -> dict[str, object] | None:
+    """Convert provider dollars/token into readable listed-price evidence."""
+
+    try:
+        price = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return None
+    if price <= 0:
+        return None
+    return {
+        "usd_per_million": float(price * Decimal(1_000_000)),
+        "tokens_per_usd": int(Decimal(1) / price),
+    }

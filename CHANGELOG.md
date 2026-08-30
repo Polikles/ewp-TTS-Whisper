@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added an OpenRouter correction-model chooser with three priced Gemini 2.5 presets, an explicit
+  manual-ID mode, and opt-in live availability/list-price checks for only those bounded presets.
+  Live checks disclose the external request, run only on button press, and send no transcript.
 - Added completed-transcription handoffs for optional LLM correction and direct manual review.
   Each fills the exact canonical result and containing output root, scrolls smoothly, and starts
   no correction provider request or review preparation automatically.
@@ -41,6 +44,8 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- Qualified explicit dry-run output validation and coded credential/model readiness failures,
+  including correct rejection precedence for fake keys and exact unavailable models.
 - The first live readiness retest proved that OpenRouter `/models` accepts an arbitrary bearer
   value: both fake and real keys appeared green while exact fake models were correctly rejected.
   This result invalidated the original credential-check assumption and prompted `/key` validation.
