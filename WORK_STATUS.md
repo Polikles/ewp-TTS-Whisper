@@ -307,6 +307,12 @@ outline because the shared helper matched old prose rather than `GUI_CONFIRMATIO
 the helper now recognizes coded confirmation errors. A new transcript-free `Check connection`
 action reports a green `API OK` state or a red coded error and distinguishes rejected keys,
 unreachable/rejecting endpoints, and unavailable exact models. Both require external retesting.
+Live testing showed that OpenRouter's public model catalog answered identically for fake and real
+bearer values, so `/models` cannot authenticate a key. Readiness now first calls the documented
+authenticated current-key endpoint, then separately validates the exact model. Empty dry-run
+output is rejected directly and highlighted. The API-check light/status now form one labeled row
+below the buttons, and the informational secret status explicitly says the key is session-only
+and not stored. These corrections require external retesting.
 Allowed-root Browse controls for path fields remain a later usability task.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery

@@ -39,16 +39,22 @@ providerCheckStatus.setAttribute("role", "status");
 providerCheckStatus.textContent = "Not checked";
 const providerActions = document.createElement("div");
 providerActions.className = "actions";
-providerActions.append(openRouterKeyButton, providerCheckButton, providerCheckLight, providerCheckStatus);
+providerActions.append(openRouterKeyButton, providerCheckButton);
+const providerCheckResult = document.createElement("div");
+providerCheckResult.className = "connection-status";
+const providerCheckLabel = document.createElement("strong");
+providerCheckLabel.textContent = "API check";
+providerCheckResult.append(providerCheckLabel, providerCheckLight, providerCheckStatus);
 const openRouterKeyStatus = document.createElement("p");
 openRouterKeyStatus.className = "field-hint";
+openRouterKeyStatus.classList.add("session-secret-status");
 openRouterKeyStatus.setAttribute("role", "status");
 document.querySelector("#openrouter-options .field-hint").textContent = "Use the server environment or set a session-only key below. Secrets are never written to project files or browser storage.";
-document.querySelector("#openrouter-options").append(providerActions, openRouterKeyStatus);
+document.querySelector("#openrouter-options").append(providerActions, providerCheckResult, openRouterKeyStatus);
 const openRouterKeyDialog = document.createElement("dialog");
 openRouterKeyDialog.innerHTML = '<form method="dialog"><h3>Set an OpenRouter API key</h3><p class="notice">Treat API keys as secrets. Use a dedicated key with a low spending limit; the project\'s 20-episode testing used substantially less than a USD $2 limit.</p><p>The key is sent only to this loopback server, kept only for the current server process, never written to project files or browser storage, and must be entered again after restarting the GUI.</p><label for="openrouter-api-key">API key</label><input id="openrouter-api-key" type="password" autocomplete="new-password" spellcheck="false"><div class="actions"><button type="button" class="primary" id="save-openrouter-key">Set key for this session</button><button type="button" id="cancel-openrouter-key">Cancel</button></div><p id="openrouter-key-dialog-status" role="status"></p></form>';
 document.body.append(openRouterKeyDialog);
-function updateOpenRouterKeyStatus() { openRouterKeyStatus.textContent = openRouterKeyConfigured ? "API key is configured for this server session." : "No API key is configured for this server session."; }
+function updateOpenRouterKeyStatus() { openRouterKeyStatus.textContent = openRouterKeyConfigured ? "API key is used only in this server session; EWP Transcriber does not store API keys." : "No API key is configured for this server session."; }
 openRouterKeyButton.addEventListener("click", () => { document.querySelector("#openrouter-api-key").value = ""; document.querySelector("#openrouter-key-dialog-status").textContent = ""; openRouterKeyDialog.showModal(); });
 document.querySelector("#cancel-openrouter-key").addEventListener("click", () => openRouterKeyDialog.close());
 document.querySelector("#save-openrouter-key").addEventListener("click", async () => { const input = document.querySelector("#openrouter-api-key"); const status = document.querySelector("#openrouter-key-dialog-status"); try { await queuePost("/api/v1/credentials/openrouter", {api_key: input.value}); input.value = ""; openRouterKeyConfigured = true; updateOpenRouterKeyStatus(); openRouterKeyDialog.close(); } catch (error) { input.value = ""; status.textContent = error.message; } });
@@ -153,4 +159,7 @@ installConfirmationHighlight("#operation-status", '#workflow input[name="confirm
 installConfirmationHighlight("#correction-status", '#correction-workflow input[name="confirmed"]');
 installConfirmationHighlight("#translation-status", '#translation-workflow input[name="confirmed"]');
 installConfirmationHighlight("#translation-review-status", "#translation-review-confirmed");
+const workflowOutput = document.querySelector("#output-path");
+document.querySelector("#workflow").addEventListener("submit", event => { const kind = event.submitter?.value; if (kind !== "dry-run" && kind !== "transcriptions") return; if (workflowOutput.value.trim()) return; event.preventDefault(); event.stopImmediatePropagation(); workflowOutput.classList.add("field-error"); workflowOutput.setAttribute("aria-invalid", "true"); document.querySelector("#operation-status").textContent = "GUI_OUTPUT_REQUIRED: Enter a shared output directory before dry-run or queue staging."; }, {capture: true});
+workflowOutput.addEventListener("input", () => { if (!workflowOutput.value.trim()) return; workflowOutput.classList.remove("field-error"); workflowOutput.setAttribute("aria-invalid", "false"); });
 start();

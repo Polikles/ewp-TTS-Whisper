@@ -220,9 +220,31 @@ def _preflight_provider(
                 f"{config.correction.openrouter_api_key_env} is missing.",
             )
         headers["Authorization"] = f"Bearer {key}"
-    request = urllib.request.Request(
-        f"{provider.endpoint_identity.rstrip('/')}/models", headers=headers, method="GET"
-    )
+    if provider.provider_id == "openrouter":
+        key_document = _read_provider_document(
+            f"{provider.endpoint_identity.rstrip('/')}/key", headers
+        )
+        if not isinstance(key_document.get("data"), dict):
+            raise GuiCorrectionError(
+                "GUI_CORRECTION_CREDENTIAL_REJECTED",
+                "Provider connection succeeded, but the API key response was invalid.",
+            )
+    document = _read_provider_document(f"{provider.endpoint_identity.rstrip('/')}/models", headers)
+    models = document.get("data") if isinstance(document, dict) else None
+    identifiers = {
+        item.get("id") for item in models or () if isinstance(item, dict) and item.get("id")
+    }
+    if provider.model_id not in identifiers:
+        raise GuiCorrectionError(
+            "GUI_CORRECTION_MODEL_UNAVAILABLE",
+            "The selected exact model is not available from the correction backend.",
+        )
+
+
+def _read_provider_document(url: str, headers: dict[str, str]) -> dict[str, Any]:
+    """Read one bounded provider readiness document with specific connection errors."""
+
+    request = urllib.request.Request(url, headers=headers, method="GET")
     try:
         with urllib.request.urlopen(request, timeout=3.0) as response:  # noqa: S310
             payload = response.read(1_048_577)
@@ -244,12 +266,9 @@ def _preflight_provider(
             "GUI_CORRECTION_BACKEND_UNAVAILABLE",
             "Correction backend did not pass the three-second readiness check.",
         ) from error
-    models = document.get("data") if isinstance(document, dict) else None
-    identifiers = {
-        item.get("id") for item in models or () if isinstance(item, dict) and item.get("id")
-    }
-    if provider.model_id not in identifiers:
+    if not isinstance(document, dict):
         raise GuiCorrectionError(
-            "GUI_CORRECTION_MODEL_UNAVAILABLE",
-            "The selected exact model is not available from the correction backend.",
+            "GUI_CORRECTION_BACKEND_UNAVAILABLE",
+            "Correction backend returned an invalid readiness document.",
         )
+    return document

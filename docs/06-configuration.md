@@ -211,6 +211,9 @@ command additionally requires `--allow-cloud` and scoped
 reject/once/persist consent. The adapter disables provider fallback and requires support
 for requested structured-output parameters. Pin the exact model slug reported by the
 provider; never silently substitute a similarly named model.
+The GUI readiness check validates OpenRouter credentials through the authenticated
+`GET /api/v1/key` endpoint before separately reading the model catalog. A public model-list
+response alone is not evidence that the supplied key is valid.
 `openrouter_reasoning_max_tokens` is optional and provider-specific. Set it to `0` to
 disable thinking on supported models such as Gemini 2.5, or use a positive explicit budget
 for a separately identified benchmark run. The value participates in prompt/resume identity

@@ -95,6 +95,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Check connection" in script_response.body
     assert b"API OK" in script_response.body
     assert b"GUI_[A-Z_]*CONFIRMATION_REQUIRED" in script_response.body
+    assert b"GUI_OUTPUT_REQUIRED" in script_response.body
+    assert b"API check" in script_response.body
+    assert b"does not store API keys" in script_response.body
     assert b"server-session-only" not in script_response.body
     assert b"#operation-status" in script_response.body
     style_response = dispatch_get(

@@ -60,6 +60,20 @@ def test_dry_run_passes_allowed_output_directory(tmp_path: Path) -> None:
     assert not controller.has_completed_plan(media, tmp_path / "other")
 
 
+def test_dry_run_requires_explicit_output_directory(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    controller = GuiWorkflowController((tmp_path.resolve(),))
+
+    operation = controller.run("dry-run", {"path": str(media), "output_directory": ""})
+
+    assert operation.status == "failed"
+    assert operation.error == {
+        "code": "GUI_OUTPUT_REQUIRED",
+        "message": "Enter a shared output directory before running dry-run.",
+    }
+
+
 def test_paths_outside_roots_and_symlinks_are_rejected(tmp_path: Path) -> None:
     allowed = tmp_path / "allowed"
     allowed.mkdir()

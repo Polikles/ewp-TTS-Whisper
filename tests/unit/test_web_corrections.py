@@ -1,7 +1,8 @@
+import json
 import urllib.error
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Self
 
 import pytest
 
@@ -187,6 +188,46 @@ def test_gui_correction_preflight_distinguishes_rejected_key(
         _preflight_provider(provider, ApplicationConfig(), {"OPENROUTER_API_KEY": "bad"})
 
     assert error.value.code == "GUI_CORRECTION_CREDENTIAL_REJECTED"
+
+
+def test_gui_correction_preflight_validates_key_before_exact_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = SimpleNamespace(
+        provider_id="openrouter",
+        endpoint_identity="https://openrouter.ai/api/v1",
+        model_id="google/gemini-2.5-flash",
+    )
+    requested: list[str] = []
+
+    class Response:
+        def __init__(self, document: dict[str, object]) -> None:
+            self.payload = json.dumps(document).encode()
+
+        def __enter__(self) -> Self:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def read(self, limit: int) -> bytes:
+            return self.payload
+
+    def respond(request: Any, **kwargs: object) -> Response:
+        url = request.full_url
+        requested.append(url)
+        if url.endswith("/key"):
+            return Response({"data": {"label": "configured"}})
+        return Response({"data": [{"id": "google/gemini-2.5-flash"}]})
+
+    monkeypatch.setattr("ewp_transcripts.web_corrections.urllib.request.urlopen", respond)
+
+    _preflight_provider(provider, ApplicationConfig(), {"OPENROUTER_API_KEY": "valid"})
+
+    assert requested == [
+        "https://openrouter.ai/api/v1/key",
+        "https://openrouter.ai/api/v1/models",
+    ]
 
 
 def test_gui_correction_derives_project_id_from_dictionary(tmp_path: Path) -> None:

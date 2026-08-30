@@ -17,6 +17,13 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Require an explicit GUI dry-run output directory and highlight it when absent instead of
+  later misreporting a missing matching plan. OpenRouter readiness now validates the key through
+  authenticated `/api/v1/key` before checking the exact model catalog; public `/models` success
+  can no longer produce a false green state for a fake key.
+- Keep the connection light and a labeled `API check` result together below the buttons, allow
+  long coded errors to wrap as one unit, and clarify that the informational key status means
+  session-only use with no API-key storage.
 - Added an explicit correction-provider connection check with a neutral/green/red indicator and
   distinct missing/rejected credential, unavailable connection, rejected HTTP response, and
   exact-model-unavailable errors; it sends no transcript text.
@@ -34,6 +41,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Validated
 
+- The first live readiness retest proved that OpenRouter `/models` accepts an arbitrary bearer
+  value: both fake and real keys appeared green while exact fake models were correctly rejected.
+  This result invalidated the original credential-check assumption and prompted `/key` validation.
 - Qualified the collapsed correction provider settings, lower-emphasis Clear action, and
   password-dialog behavior including empty-on-reopen secret handling. The first queue-checkbox
   retest exposed and did not qualify the red outline because its matcher missed the coded error.

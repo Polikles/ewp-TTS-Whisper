@@ -55,6 +55,13 @@ class GuiWorkflowController:
                 result = self.inspect_service(input_path, config=config)
             else:
                 raw_output = document.get("output_directory")
+                if not isinstance(raw_output, str) or not raw_output.strip():
+                    return self._failure(
+                        kind,
+                        raw_path,
+                        "GUI_OUTPUT_REQUIRED",
+                        "Enter a shared output directory before running dry-run.",
+                    )
                 output = (
                     self.resolve_allowed_path(raw_output, directory=True)
                     if isinstance(raw_output, str) and raw_output.strip()
