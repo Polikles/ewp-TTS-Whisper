@@ -81,6 +81,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"GUI_REVIEW_SPLIT_BOUNDARY_REQUIRED" in script_response.body
     assert b'addEventListener("mousedown", event => event.preventDefault())' in script_response.body
     assert b"captureSplitPosition" in script_response.body
+    assert b'addEventListener("pointerdown", captureSplitPosition)' in script_response.body
     assert b"Only pending" in script_response.body
     assert b"Previous occurrence" in script_response.body
     assert b"Versioned project dictionary published" in script_response.body
