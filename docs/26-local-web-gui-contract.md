@@ -180,6 +180,8 @@ Queued, running, completed, and failed work is never replayed automatically.
 When a workspace restores an output root with an existing review-session pointer, the GUI MAY
 reopen it only through the existing review-session validator. That validator confirms the review's
 canonical source lineage before rendering; unsaved browser editor text is never reconstructed.
+Saving a review draft SHOULD also update an active named workspace so its disk-backed review
+pointer and workspace state do not diverge.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
 requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
 optional project name, job ID, and source filename. Missing temporary roots are shown as stale

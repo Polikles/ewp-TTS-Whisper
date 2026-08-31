@@ -15,6 +15,8 @@ The next internal-beta version is `0.10.0`.
   unchanged state produces no write.
 - Added hash-validated restoration of staged GUI transcription jobs. Only unstarted jobs are
   persisted; restoration re-hashes each source and reproduces its dry-run plan before restaging.
+- Saving a manual-review draft now also saves an active named GUI workspace. The filesystem
+  browser hides unreadable and temporary desktop/session runtime directories from selection.
 - Added a read-only, CSRF-protected local filesystem browser for GUI media, result, revision,
   dictionary, and output path fields. Navigation is constrained to explicit allowed roots, hides
   symlinks, filters expected file types, and retains direct entry for not-yet-created outputs.

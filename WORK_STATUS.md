@@ -367,6 +367,10 @@ without beginning execution, while a deliberately modified temporary source was 
 `GUI_WORKSPACE_REQUEST_INVALID`. A final full-workflow qualification from mixed input directories
 to one output root is deferred until GUI functions are nearly complete; branding alignment follows
 that functional acceptance run.
+The review-workspace retest restored its saved paths, draft, and review section correctly. Draft
+saves now also update the active named workspace. The filesystem browser additionally hides
+unreadable and `/tmp` desktop/session runtime directories, rather than advertising them as normal
+output choices.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

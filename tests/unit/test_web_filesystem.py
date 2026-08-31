@@ -50,6 +50,23 @@ def test_directory_listing_hides_files_and_symlinks(tmp_path: Path) -> None:
     assert [(item.name, item.kind) for item in listing.entries] == [("directory", "directory")]
 
 
+def test_directory_listing_hides_unreadable_directories(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    visible = root / "visible"
+    hidden = root / "hidden"
+    visible.mkdir(parents=True)
+    hidden.mkdir()
+    hidden.chmod(0)
+    controller = GuiFilesystemController((root.resolve(),))
+
+    try:
+        listing = controller.list(str(root), select="directory")
+    finally:
+        hidden.chmod(0o700)
+
+    assert [item.name for item in listing.entries] == ["visible"]
+
+
 def test_outside_paths_symlinks_and_unknown_extensions_are_rejected(tmp_path: Path) -> None:
     root = tmp_path / "root"
     root.mkdir()

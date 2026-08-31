@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Literal
 
@@ -11,6 +12,8 @@ from ewp_transcripts.discovery import normalize_input_path
 
 _ALLOWED_EXTENSIONS = frozenset({"json", "txt", "toml", "wav", "mp3", "flac", "m4a", "ogg", "opus"})
 _MAX_ENTRIES = 500
+_TEMP_RUNTIME_DIRECTORY_NAMES = frozenset({".X11-unix", ".ICE-unix", ".XIM-unix", ".font-unix"})
+_TEMP_RUNTIME_DIRECTORY_PREFIXES = ("systemd-private-",)
 
 
 class GuiFilesystemEntry(BaseModel):
@@ -85,6 +88,13 @@ class GuiFilesystemController:
                 continue
             try:
                 if child.is_dir():
+                    if resolved == Path("/tmp") and (
+                        child.name in _TEMP_RUNTIME_DIRECTORY_NAMES
+                        or child.name.startswith(_TEMP_RUNTIME_DIRECTORY_PREFIXES)
+                    ):
+                        continue
+                    if not os.access(child, os.R_OK | os.X_OK):
+                        continue
                     entries.append(
                         GuiFilesystemEntry(
                             name=child.name,
