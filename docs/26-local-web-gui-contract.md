@@ -177,6 +177,9 @@ The first staged-queue recovery slice stores only jobs still in the `staged` sta
 SHA-256, resolved planned result path, language, and speaker-count settings. On restoration the
 server MUST re-hash the source and reproduce the model-free dry-run plan before restaging it.
 Queued, running, completed, and failed work is never replayed automatically.
+When a workspace restores an output root with an existing review-session pointer, the GUI MAY
+reopen it only through the existing review-session validator. That validator confirms the review's
+canonical source lineage before rendering; unsaved browser editor text is never reconstructed.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
 requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
 optional project name, job ID, and source filename. Missing temporary roots are shown as stale

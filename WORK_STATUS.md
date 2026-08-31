@@ -362,6 +362,11 @@ External retesting accepted checkbox alignment, unchanged-state reporting, track
 confirmation exclusion, and invalid-path retry behavior. The remaining presentation follow-up
 subordinates the supplementary status and reports pending tracked edits immediately rather than
 waiting silently for the next interval.
+The staged-queue recovery retest then passed: one unstarted job reappeared after a GUI restart
+without beginning execution, while a deliberately modified temporary source was rejected with
+`GUI_WORKSPACE_REQUEST_INVALID`. A final full-workflow qualification from mixed input directories
+to one output root is deferred until GUI functions are nearly complete; branding alignment follows
+that functional acceptance run.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

@@ -740,6 +740,11 @@ Planned capabilities:
   server-side workspace record should restore all non-secret fields, staged artifact paths,
   open saved review, and current workflow step after a full workstation/VM restart, while
   revalidating allowed roots and hashes and never persisting credentials or unsaved edits;
+- when functional GUI work is complete or nearly complete, qualify one full cross-directory
+  workflow with several inputs and one shared output root: transcription, optional correction,
+  manual verification/export, translation, semantic review, and translated export;
+- after that end-to-end qualification, perform the dedicated GUI visual overhaul so it aligns
+  with the Ethics in the Loop blog and podcast branding;
 - shortly before public release, add an explicit Polish/English interface-language selector
   alongside the final light/dark toggle and persist both preferences;
 - add consistent accessible information controls for unfamiliar options, beginning with

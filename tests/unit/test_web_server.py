@@ -112,6 +112,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Save current work state" in script_response.body
     assert b"/api/v1/workspaces/save" in script_response.body
     assert b"workspace-autosave" in script_response.body
+    assert b"restoreWorkspaceReviewIfPresent" in script_response.body
     assert b"60000" in script_response.body
     assert b"no tracked workflow-field changes" in script_response.body
     assert b"Changes pending for auto-save" in script_response.body
