@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added explicit named GUI workspace save/load for allowlisted non-secret fields and current-step
+  context in an application-owned user-state catalog. Paths are revalidated, stale work is listed
+  unavailable, and credentials, confirmations, transcript text, and unsaved edits are excluded.
 - Added a read-only, CSRF-protected local filesystem browser for GUI media, result, revision,
   dictionary, and output path fields. Navigation is constrained to explicit allowed roots, hides
   symlinks, filters expected file types, and retains direct entry for not-yet-created outputs.

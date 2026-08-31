@@ -160,6 +160,11 @@ non-secret workflow fields, staged artifact identities, open review identity, an
 step after the browser, GUI process, VM, or workstation has stopped. Restore revalidates every
 allowed-root path and exact artifact hash; it never serializes API keys, transcript text, or
 unsaved editor contents as casual browser preferences.
+The first workspace-state slice MAY persist only allowlisted non-secret form fields and the
+current step in an application-owned user-state catalog. It must mark entries with unavailable
+paths, revalidate every path on save/load, and exclude confirmations as well as credentials.
+Staged-job restoration and open-review identity remain incomplete until their exact artifact
+hashes and immutable queue reconstruction are included.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
 requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
 optional project name, job ID, and source filename. Missing temporary roots are shown as stale

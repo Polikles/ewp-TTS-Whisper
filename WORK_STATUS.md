@@ -341,6 +341,12 @@ work should make named media/project roots persistent without allowing a browser
 server authority. Start-time exact fingerprint revalidation and optional immutable input snapshots
 remain explicit TOCTOU-hardening work; media already undergoes FFprobe decoding and structured
 artifacts undergo strict schema parsing, so extension alone is not accepted as valid content.
+The first application-owned workspace-state slice now explicitly saves and loads a named set of
+allowlisted non-secret GUI form fields plus the current workflow step. It works across browser and
+server restarts through the user state directory, revalidates all paths, lists stale entries as
+unavailable, and excludes API keys, confirmations, transcript text, and unsaved editor content.
+External cross-browser/restart qualification remains pending. Exact staged-job reconstruction and
+open-review/artifact hash restoration remain required before the full workspace contract is met.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional

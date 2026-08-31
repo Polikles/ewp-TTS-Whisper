@@ -109,6 +109,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"/api/v1/filesystem/list" in script_response.body
     assert b"Browse\xe2\x80\xa6" in script_response.body
     assert b"filesystemDialog.showModal" in script_response.body
+    assert b"Save current work state" in script_response.body
+    assert b"/api/v1/workspaces/save" in script_response.body
+    assert b"API keys, confirmations, transcript text" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )

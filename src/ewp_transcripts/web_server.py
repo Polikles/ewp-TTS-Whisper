@@ -27,6 +27,7 @@ from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
 from ewp_transcripts.web_workflows import GuiWorkflowController
+from ewp_transcripts.web_workspaces import GuiWorkspaceController, default_workspace_directory
 
 API_VERSION = "1.0"
 REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
@@ -154,6 +155,10 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
         self.gui_filesystem = GuiFilesystemController(config.allowed_roots)
+        self.gui_workspaces = GuiWorkspaceController(
+            state_directory=default_workspace_directory(),
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+        )
         self.gui_reviews = GuiReviewController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -331,6 +336,71 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             )
             return
         path = urlsplit(self.path).path
+        if path.startswith("/api/v1/workspaces/"):
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The workspace request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                if path == "/api/v1/workspaces/list":
+                    payload: dict[str, object] = {
+                        "workspaces": [
+                            item.model_dump(mode="json")
+                            for item in self.server.gui_workspaces.list()
+                        ]
+                    }
+                elif path == "/api/v1/workspaces/save":
+                    fields = document.get("fields")
+                    if not isinstance(fields, dict):
+                        raise ValueError("Workspace fields must be an object")
+                    saved = self.server.gui_workspaces.save(
+                        name=str(document.get("name", "")),
+                        current_step=str(document.get("current_step", "")),
+                        fields=fields,
+                        workspace_id=str(document.get("workspace_id", "")),
+                    )
+                    payload = {"workspace": saved.model_dump(mode="json")}
+                elif path == "/api/v1/workspaces/load":
+                    loaded = self.server.gui_workspaces.load(str(document.get("workspace_id", "")))
+                    payload = {"workspace": loaded.model_dump(mode="json")}
+                else:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.NOT_FOUND,
+                            {
+                                "error": {
+                                    "code": "GUI_ROUTE_NOT_FOUND",
+                                    "message": "No such GUI route.",
+                                }
+                            },
+                        )
+                    )
+                    return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_WORKSPACE_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
         if path == "/api/v1/filesystem/list":
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
