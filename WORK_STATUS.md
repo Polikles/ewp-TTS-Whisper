@@ -178,8 +178,10 @@ labels preview as validation-only, summarizes it in a readable table with expand
 protects an open draft from accidental Prepare replacement, distinguishes disabled actions,
 and offers both sequential and continuous section layouts. The supplied fixture was English;
 an earlier instruction describing it as Polish was incorrect. Whole-block speaker reassignment
-is available now; partial-block reassignment and speaker display-name editing remain explicit
-later editor requirements.
+is available now. The GUI also supports splitting a visible block at the cursor between words
+or sentences, then assigning the affected part to another known speaker without modifying the
+canonical result. Project/revision-scoped speaker display-name editing remains a later editor
+requirement.
 The same acceptance pass found that refresh discarded the active editor pointer and that
 separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
 from its authoritative disk file using only non-secret path pointers in browser storage,
@@ -371,6 +373,7 @@ The review-workspace retest restored its saved paths, draft, and review section 
 saves now also update the active named workspace. The filesystem browser additionally hides
 unreadable and `/tmp` desktop/session runtime directories, rather than advertising them as normal
 output choices.
+The follow-up accepted draft-to-workspace synchronization and the safer `/tmp` browser listing.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

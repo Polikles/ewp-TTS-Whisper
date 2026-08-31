@@ -77,6 +77,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"ewp-active-review-v1" in script_response.body
     assert b"beforeunload" in script_response.body
     assert b"not manually verified" in script_response.body
+    assert b"Split at cursor" in script_response.body
+    assert b"GUI_REVIEW_SPLIT_BOUNDARY_REQUIRED" in script_response.body
     assert b"Only pending" in script_response.body
     assert b"Previous occurrence" in script_response.body
     assert b"Versioned project dictionary published" in script_response.body

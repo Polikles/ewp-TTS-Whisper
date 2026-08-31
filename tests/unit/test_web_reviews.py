@@ -56,6 +56,50 @@ def test_browser_review_prepare_edit_preview_and_apply(tmp_path: Path) -> None:
     assert len(exported["written"]) == 3
 
 
+def test_browser_review_can_split_and_reassign_a_speaker_block(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    blocks = prepared["anchors"][0]["blocks"]
+    first = blocks[0]
+    blocks.insert(1, {"speaker_id": "speaker_002", "text": "another episode."})
+    first["text"] = "Welcome to"
+
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+    )
+
+    assert [block["speaker_id"] for block in saved["anchors"][0]["blocks"]] == [
+        "speaker_001",
+        "speaker_002",
+        "speaker_002",
+    ]
+    preview = service.preview(saved["review_path"], str(result))
+    assert preview["statistics"]["speaker_changes"] > 0
+
+
+def test_browser_review_rejects_empty_split_blocks(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    prepared["anchors"][0]["blocks"].append({"speaker_id": "speaker_001", "text": ""})
+
+    with pytest.raises(GuiReviewError, match="cannot be empty") as error:
+        service.save(
+            prepared["review_path"],
+            str(result),
+            expected_sha256=prepared["review_sha256"],
+            anchors=prepared["anchors"],
+        )
+
+    assert error.value.code == "GUI_REVIEW_STRUCTURE_INVALID"
+
+
 def test_browser_review_requires_current_hash_and_preview(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())

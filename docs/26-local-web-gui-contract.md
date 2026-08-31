@@ -189,10 +189,11 @@ or unavailable and never prevent the rest of the GUI from loading.
 
 Long reviews MUST support both a sequential previous/next-section view and a continuous
 all-sections view, with the presentation preference retained locally. A visible speaker block
-can be reassigned as a whole in the initial slice. Later editing MUST also permit a reviewer to
-split at a word or sentence boundary and reassign only the affected part while retaining exact
-lineage. It MUST permit project/revision-scoped speaker display-name replacement when canonical
-speaker labels are absent or wrong; neither feature may silently rewrite canonical results.
+can be reassigned as a whole. The reviewer can also split a visible block at a whitespace word
+or sentence boundary and reassign either resulting part while retaining the original anchor
+lineage; empty blocks and unknown speakers are rejected. It MUST later permit
+project/revision-scoped speaker display-name replacement when canonical speaker labels are
+absent or wrong; neither feature may silently rewrite canonical results.
 
 Equivalent rules apply to translation units: source text remains visible, target text is
 editable, source ownership is immutable, and apply uses the existing translation service.

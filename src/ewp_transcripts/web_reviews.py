@@ -114,6 +114,8 @@ class GuiReviewController:
                 "The review changed after it was loaded; reload before saving.",
             )
         parsed = load_review(review_path)
+        base = load_canonical_result(result_path)
+        known_speakers = {speaker.speaker_id for speaker in base.speakers}
         if len(anchors) != len(parsed.anchors):
             raise GuiReviewError("GUI_REVIEW_STRUCTURE_INVALID", "Review anchors cannot change")
         updated: list[ReviewAnchor] = []
@@ -126,25 +128,35 @@ class GuiReviewController:
                     "GUI_REVIEW_STRUCTURE_INVALID", "Review anchor identity cannot change"
                 )
             raw_blocks = supplied.get("blocks")
-            if not isinstance(raw_blocks, list) or len(raw_blocks) != len(original.speaker_blocks):
+            if not isinstance(raw_blocks, list) or not raw_blocks:
                 raise GuiReviewError(
-                    "GUI_REVIEW_STRUCTURE_INVALID", "Review block count cannot change"
+                    "GUI_REVIEW_STRUCTURE_INVALID", "Every review anchor needs at least one block"
                 )
-            blocks = tuple(
-                ReviewSpeakerBlock.model_validate(
-                    {
-                        **block,
-                        "text": " ".join(str(block.get("text", "")).split()),
-                    }
-                )
-                for block in raw_blocks
-                if isinstance(block, dict)
-            )
-            if len(blocks) != len(raw_blocks):
-                raise GuiReviewError(
-                    "GUI_REVIEW_STRUCTURE_INVALID", "Every review block must be an object"
-                )
-            updated.append(original.model_copy(update={"speaker_blocks": blocks}))
+            blocks: list[ReviewSpeakerBlock] = []
+            for block in raw_blocks:
+                if not isinstance(block, dict):
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "Every review block must be an object"
+                    )
+                normalized_text = " ".join(str(block.get("text", "")).split())
+                if not normalized_text:
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "Review blocks cannot be empty"
+                    )
+                try:
+                    parsed_block = ReviewSpeakerBlock.model_validate(
+                        {**block, "text": normalized_text}
+                    )
+                except ValueError as error:
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "A review block is malformed"
+                    ) from error
+                if parsed_block.speaker_id not in known_speakers:
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "Review references an unknown speaker"
+                    )
+                blocks.append(parsed_block)
+            updated.append(original.model_copy(update={"speaker_blocks": tuple(blocks)}))
         revised = parsed.model_copy(update={"anchors": tuple(updated)})
         self._atomic_replace(review_path, render_review(revised).encode("utf-8"))
         self._previewed.pop(str(review_path), None)

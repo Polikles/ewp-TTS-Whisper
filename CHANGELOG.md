@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added GUI manual-review splitting at a word or sentence boundary. Each resulting editable
+  block can be assigned independently to a known speaker while protected anchors and the
+  canonical result remain unchanged.
 - Added explicit named GUI workspace save/load for allowlisted non-secret fields and current-step
   context in an application-owned user-state catalog. Paths are revalidated, stale work is listed
   unavailable, and credentials, confirmations, transcript text, and unsaved edits are excluded.
