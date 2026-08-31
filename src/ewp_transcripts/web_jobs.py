@@ -28,6 +28,7 @@ class GuiTranscriptionJob(BaseModel):
     output_directory: str
     planned_job_id: str
     planned_result_path: str
+    source_sha256: str = ""
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -70,6 +71,7 @@ class GuiTranscriptionQueue:
         *,
         planned_job_id: str,
         planned_result_path: str,
+        source_sha256: str = "",
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
     ) -> GuiTranscriptionJob:
@@ -81,6 +83,7 @@ class GuiTranscriptionQueue:
             output_directory=str(output_directory),
             planned_job_id=planned_job_id,
             planned_result_path=planned_result_path,
+            source_sha256=source_sha256,
             language=language,
             speaker_count=speaker_count,
             created_at=now,

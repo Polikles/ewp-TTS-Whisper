@@ -172,8 +172,11 @@ browser. Browsers connected to that process share the in-memory credential. It M
 included in workspace state, project files, or browser storage, and stopping the server erases it.
 This is an intentional single-user or single-organization pipeline boundary. Multi-user accounts,
 tenant isolation, and per-user credentials are outside the current roadmap.
-Staged-job restoration and open-review identity remain incomplete until their exact artifact
-hashes and immutable queue reconstruction are included.
+Open-review identity remains incomplete until its exact artifact hashes are included.
+The first staged-queue recovery slice stores only jobs still in the `staged` state, with source
+SHA-256, resolved planned result path, language, and speaker-count settings. On restoration the
+server MUST re-hash the source and reproduce the model-free dry-run plan before restaging it.
+Queued, running, completed, and failed work is never replayed automatically.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
 requiring the operator to remember an output root. Entries SHOULD be sortable/identifiable by
 optional project name, job ID, and source filename. Missing temporary roots are shown as stale

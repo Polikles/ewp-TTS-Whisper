@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from builtins import list as builtin_list
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
@@ -106,6 +107,7 @@ class GuiWorkspaceDocument(BaseModel):
     saved_at: datetime
     current_step: str
     fields: dict[str, str | bool | int]
+    staged_jobs: tuple[dict[str, str | int], ...] = ()
 
 
 ResolvePath = Callable[..., Path]
@@ -130,12 +132,14 @@ class GuiWorkspaceController:
         name: str,
         current_step: str,
         fields: dict[str, Any],
+        staged_jobs: builtin_list[dict[str, Any]] | None = None,
         workspace_id: str = "",
     ) -> GuiWorkspaceDocument:
         clean_name = name.strip()
         if not clean_name or len(clean_name) > 100:
             raise ValueError("Workspace name must contain 1 to 100 characters")
         clean_fields = self._validate_fields(fields)
+        clean_staged_jobs = self._validate_staged_jobs(staged_jobs or [])
         identifier = (
             self._normalize_workspace_id(workspace_id) if workspace_id.strip() else str(uuid4())
         )
@@ -145,6 +149,7 @@ class GuiWorkspaceController:
             saved_at=datetime.now(UTC),
             current_step=current_step[:100],
             fields=clean_fields,
+            staged_jobs=clean_staged_jobs,
         )
         self._state_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         destination = self._state_directory / f"{identifier}.json"
@@ -170,7 +175,7 @@ class GuiWorkspaceController:
         for path in self._state_directory.glob("*.json"):
             try:
                 document = self._read(path)
-                available = self._paths_available(document.fields)
+                available = self._paths_available(document.fields, document.staged_jobs)
                 summaries.append(
                     GuiWorkspaceSummary(
                         workspace_id=document.workspace_id,
@@ -189,6 +194,7 @@ class GuiWorkspaceController:
         path = self._workspace_path(workspace_id)
         document = self._read(path)
         self._validate_fields(document.fields)
+        self._validate_staged_jobs(list(document.staged_jobs))
         return document
 
     def _validate_fields(self, fields: dict[str, Any]) -> dict[str, str | bool | int]:
@@ -205,9 +211,47 @@ class GuiWorkspaceController:
             clean[name] = value
         return clean
 
-    def _paths_available(self, fields: dict[str, str | bool | int]) -> bool:
+    def _validate_staged_jobs(
+        self,
+        staged_jobs: builtin_list[dict[str, Any]],
+    ) -> tuple[dict[str, str | int], ...]:
+        if not isinstance(staged_jobs, builtin_list) or len(staged_jobs) > 50:
+            raise ValueError("Workspace staged jobs are invalid")
+        required = {
+            "input_path",
+            "output_directory",
+            "planned_job_id",
+            "planned_result_path",
+            "source_sha256",
+            "language",
+            "speaker_count",
+        }
+        clean: builtin_list[dict[str, str | int]] = []
+        for item in staged_jobs:
+            if not isinstance(item, dict) or set(item) != required:
+                raise ValueError("Workspace staged job is invalid")
+            speaker_count = item["speaker_count"]
+            if (
+                not isinstance(speaker_count, int) or isinstance(speaker_count, bool)
+            ) and speaker_count != "auto":
+                raise ValueError("Workspace staged job is invalid")
+            if any(not isinstance(item[key], str) for key in required - {"speaker_count"}):
+                raise ValueError("Workspace staged job is invalid")
+            if item["language"] not in {"pl", "en", "auto"} or len(item["source_sha256"]) != 64:
+                raise ValueError("Workspace staged job is invalid")
+            self._resolve_path(item["input_path"])
+            self._resolve_path(item["output_directory"], directory=True)
+            clean.append({key: item[key] for key in required})
+        return tuple(clean)
+
+    def _paths_available(
+        self,
+        fields: dict[str, str | bool | int],
+        staged_jobs: tuple[dict[str, str | int], ...],
+    ) -> bool:
         try:
             self._validate_fields(fields)
+            self._validate_staged_jobs(list(staged_jobs))
         except (FileNotFoundError, OSError, ValueError):
             return False
         return True

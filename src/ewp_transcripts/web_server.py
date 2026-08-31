@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_filesystem import GuiFilesystemController
@@ -367,12 +368,29 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         name=str(document.get("name", "")),
                         current_step=str(document.get("current_step", "")),
                         fields=fields,
+                        staged_jobs=[
+                            {
+                                "input_path": job.input_path,
+                                "output_directory": job.output_directory,
+                                "planned_job_id": job.planned_job_id,
+                                "planned_result_path": job.planned_result_path,
+                                "source_sha256": job.source_sha256,
+                                "language": job.language.value,
+                                "speaker_count": job.speaker_count,
+                            }
+                            for job in self.server.gui_transcriptions.jobs()
+                            if job.status == "staged"
+                        ],
                         workspace_id=str(document.get("workspace_id", "")),
                     )
                     payload = {"workspace": saved.model_dump(mode="json")}
                 elif path == "/api/v1/workspaces/load":
                     loaded = self.server.gui_workspaces.load(str(document.get("workspace_id", "")))
-                    payload = {"workspace": loaded.model_dump(mode="json")}
+                    restored = self._restore_workspace_staged_jobs(loaded.staged_jobs)
+                    payload = {
+                        "workspace": loaded.model_dump(mode="json"),
+                        "restored_staged_jobs": restored,
+                    }
                 else:
                     self._write_response(
                         _json_response(
@@ -1074,6 +1092,21 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 planned_result_path = planned_outputs.get("results")
                 if not isinstance(planned_job_id, str) or not isinstance(planned_result_path, str):
                     raise ValueError("The staged dry-run has no valid result identity")
+                inspection = plan.get("inspection")
+                episodes = inspection.get("episodes") if isinstance(inspection, dict) else None
+                sources = (
+                    episodes[0].get("sources")
+                    if isinstance(episodes, list) and episodes and isinstance(episodes[0], dict)
+                    else None
+                )
+                fingerprint = (
+                    sources[0].get("fingerprint")
+                    if isinstance(sources, list) and sources and isinstance(sources[0], dict)
+                    else None
+                )
+                source_sha256 = fingerprint.get("sha256") if isinstance(fingerprint, dict) else None
+                if not isinstance(source_sha256, str) or len(source_sha256) != 64:
+                    raise ValueError("The staged dry-run has no valid source fingerprint")
                 if self.server.gui_transcriptions.contains_active_planned_job(planned_job_id):
                     self._write_response(
                         _json_response(
@@ -1095,6 +1128,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     output_path,
                     planned_job_id=planned_job_id,
                     planned_result_path=planned_result_path,
+                    source_sha256=source_sha256,
                     language=language,
                     speaker_count=speaker_count,
                 )
@@ -1118,6 +1152,66 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
         status = HTTPStatus.OK if operation.status == "completed" else HTTPStatus.BAD_REQUEST
         self._write_response(_json_response(status, operation.model_dump(mode="json")))
+
+    def _restore_workspace_staged_jobs(self, staged_jobs: tuple[dict[str, str | int], ...]) -> int:
+        """Rebuild only hash-validated staged jobs after a GUI restart."""
+
+        if not staged_jobs:
+            return 0
+        active = [
+            job
+            for job in self.server.gui_transcriptions.jobs()
+            if job.status in {"staged", "queued", "running"}
+        ]
+        expected = {(item["planned_job_id"], item["source_sha256"]) for item in staged_jobs}
+        if active:
+            actual = {(job.planned_job_id, job.source_sha256) for job in active}
+            if actual == expected:
+                return 0
+            raise ValueError(
+                "An active transcription queue cannot be replaced by saved workspace jobs"
+            )
+        for item in staged_jobs:
+            input_path = self.server.gui_workflows.resolve_allowed_path(str(item["input_path"]))
+            output_path = self.server.gui_workflows.resolve_allowed_path(
+                str(item["output_directory"]), directory=True
+            )
+            if sha256_file(input_path) != item["source_sha256"]:
+                raise ValueError("A staged source changed since this workspace was saved")
+            language, speaker_count = self.server.gui_workflows.resolve_transcription_options(
+                {"language": item["language"], "speaker_count": item["speaker_count"]}
+            )
+            operation = self.server.gui_workflows.run(
+                "dry-run",
+                {
+                    "path": str(input_path),
+                    "output_directory": str(output_path),
+                    "language": language.value,
+                    "speaker_count": speaker_count,
+                },
+            )
+            jobs = operation.result.get("jobs") if operation.result else None
+            if operation.status != "completed" or not isinstance(jobs, list) or len(jobs) != 1:
+                raise ValueError("A staged job could not be safely replanned")
+            planned = jobs[0]
+            outputs = planned.get("outputs") if isinstance(planned, dict) else None
+            if (
+                not isinstance(planned, dict)
+                or not isinstance(outputs, dict)
+                or planned.get("job_id") != item["planned_job_id"]
+                or outputs.get("results") != item["planned_result_path"]
+            ):
+                raise ValueError("A staged job plan changed since this workspace was saved")
+            self.server.gui_transcriptions.stage(
+                input_path,
+                output_path,
+                planned_job_id=str(item["planned_job_id"]),
+                planned_result_path=str(item["planned_result_path"]),
+                source_sha256=str(item["source_sha256"]),
+                language=language,
+                speaker_count=speaker_count,
+            )
+        return len(staged_jobs)
 
     def log_message(self, format: str, *args: object) -> None:
         return

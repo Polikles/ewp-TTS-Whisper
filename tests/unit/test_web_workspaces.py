@@ -73,3 +73,29 @@ def test_missing_saved_path_marks_summary_unavailable(tmp_path: Path) -> None:
     assert workspaces.list()[0].available is False
     with pytest.raises(FileNotFoundError):
         workspaces.load(saved.workspace_id)
+
+
+def test_workspace_retains_only_hash_bound_staged_queue_identity(tmp_path: Path) -> None:
+    workspaces, allowed = controller(tmp_path)
+    media = allowed / "episode.wav"
+    media.write_bytes(b"audio")
+    output = allowed / "output"
+    saved = workspaces.save(
+        name="Queued episode",
+        current_step="workspace-heading",
+        fields={"input-path": str(media), "output-path": str(output)},
+        staged_jobs=[
+            {
+                "input_path": str(media),
+                "output_directory": str(output),
+                "planned_job_id": "episode",
+                "planned_result_path": str(output / "episode_results.json"),
+                "source_sha256": "a" * 64,
+                "language": "pl",
+                "speaker_count": "auto",
+            }
+        ],
+    )
+
+    assert saved.staged_jobs[0]["planned_job_id"] == "episode"
+    assert workspaces.load(saved.workspace_id).staged_jobs == saved.staged_jobs

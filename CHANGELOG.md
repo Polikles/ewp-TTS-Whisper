@@ -13,6 +13,8 @@ The next internal-beta version is `0.10.0`.
   unavailable, and credentials, confirmations, transcript text, and unsaved edits are excluded.
 - Added optional change-sensitive 60-second auto-save after an explicit workspace save or load;
   unchanged state produces no write.
+- Added hash-validated restoration of staged GUI transcription jobs. Only unstarted jobs are
+  persisted; restoration re-hashes each source and reproduces its dry-run plan before restaging.
 - Added a read-only, CSRF-protected local filesystem browser for GUI media, result, revision,
   dictionary, and output path fields. Navigation is constrained to explicit allowed roots, hides
   symlinks, filters expected file types, and retains direct entry for not-yet-created outputs.

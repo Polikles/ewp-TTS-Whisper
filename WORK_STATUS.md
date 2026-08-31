@@ -348,8 +348,9 @@ unavailable, and excludes API keys, confirmations, transcript text, and unsaved 
 External qualification passed in Chrome, Brave, and Firefox: fields and last-step scrolling
 restore across browsers and a stopped/restarted GUI, while confirmation controls remain cleared.
 Exact staged-job reconstruction and open-review/artifact hash restoration remain required before
-the full workspace contract is met. The next slice adds optional change-sensitive 60-second
-auto-save for the active explicitly saved/loaded workspace. API credentials remain process-local,
+the full workspace contract is met. The staged-job slice now persists only unstarted jobs with
+source SHA-256 and exact dry-run output identity; restoration re-hashes and replans them before
+they return to the queue. Open-review/artifact identity remains the next recovery gap. API credentials remain process-local,
 shared by browsers connected to that process, excluded from workspaces, and erased on GUI stop.
 The first auto-save qualification correctly rejected a nonexistent saved input path and resumed
 saving after the path was repaired, but exposed poor checkbox alignment and ambiguous silence when
