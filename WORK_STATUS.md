@@ -244,8 +244,8 @@ primary handoff buttons, and a preview table explaining validation and non-publi
 The owner accepted the revised card layout and Preview table, with two final hierarchy
 adjustments: target labels are regular weight and unit headings use the subdued source-label
 color. Resume reuse was also observed to perform backend readiness only and send no transcript
-excerpt. Full explicit workspace save/load across workstation or VM shutdown is now a later
-GUI requirement, distinct from provider resume state and the existing saved-review pointer.
+excerpt. Named non-secret workspace save/load now survives workstation or VM shutdown; exact
+artifact-backed restoration remains distinct from provider resume state and saved-review pointers.
 The first project correction-dictionary GUI slice is implemented pending external
 qualification. It compares canonical-result and exact manual-revision directories, supports
 minimum-occurrence filtering and an optional previous dictionary, renders bounded contextual
@@ -345,14 +345,12 @@ The first application-owned workspace-state slice now explicitly saves and loads
 allowlisted non-secret GUI form fields plus the current workflow step. It works across browser and
 server restarts through the user state directory, revalidates all paths, lists stale entries as
 unavailable, and excludes API keys, confirmations, transcript text, and unsaved editor content.
-External cross-browser/restart qualification remains pending. Exact staged-job reconstruction and
-open-review/artifact hash restoration remain required before the full workspace contract is met.
-That disk-backed restore and the labeled status surface subsequently passed cross-browser
-testing. Recovery currently requires the operator to provide the output root. A later recovery
-browser must list recent saved work without requiring that path, identify entries by optional
-project name plus job/input identity, and treat expired `/tmp` roots as unavailable rather than
-breaking GUI startup. Browser-local fields may remember an old temporary root; this is useful
-convenience state, not authoritative project discovery.
+External qualification passed in Chrome, Brave, and Firefox: fields and last-step scrolling
+restore across browsers and a stopped/restarted GUI, while confirmation controls remain cleared.
+Exact staged-job reconstruction and open-review/artifact hash restoration remain required before
+the full workspace contract is met. The next slice adds optional change-sensitive 60-second
+auto-save for the active explicitly saved/loaded workspace. API credentials remain process-local,
+shared by browsers connected to that process, excluded from workspaces, and erased on GUI stop.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

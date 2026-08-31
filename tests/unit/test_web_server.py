@@ -98,7 +98,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"GUI_[A-Z_]*CONFIRMATION_REQUIRED" in script_response.body
     assert b"GUI_OUTPUT_REQUIRED" in script_response.body
     assert b"API check" in script_response.body
-    assert b"does not store API keys" in script_response.body
+    assert b"not saved in the project or workspace" in script_response.body
     assert b"Gemini 2.5 Flash Lite" in script_response.body
     assert b"Gemini 2.5 Pro" in script_response.body
     assert b"Enter ID manually" in script_response.body
@@ -111,6 +111,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"filesystemDialog.showModal" in script_response.body
     assert b"Save current work state" in script_response.body
     assert b"/api/v1/workspaces/save" in script_response.body
+    assert b"workspace-autosave" in script_response.body
+    assert b"60000" in script_response.body
+    assert b"active GUI server process" in script_response.body
     assert b"API keys, confirmations, transcript text" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"

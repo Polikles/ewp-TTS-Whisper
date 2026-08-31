@@ -11,6 +11,8 @@ The next internal-beta version is `0.10.0`.
 - Added explicit named GUI workspace save/load for allowlisted non-secret fields and current-step
   context in an application-owned user-state catalog. Paths are revalidated, stale work is listed
   unavailable, and credentials, confirmations, transcript text, and unsaved edits are excluded.
+- Added optional change-sensitive 60-second auto-save after an explicit workspace save or load;
+  unchanged state produces no write.
 - Added a read-only, CSRF-protected local filesystem browser for GUI media, result, revision,
   dictionary, and output path fields. Navigation is constrained to explicit allowed roots, hides
   symlinks, filters expected file types, and retains direct entry for not-yet-created outputs.
@@ -28,6 +30,9 @@ The next internal-beta version is `0.10.0`.
   then scrolls to translation without starting a provider request or changing provider settings.
 
 ### Changed
+
+- Clarified that GUI-entered API keys are shared only within the active GUI server process and
+  disappear when it stops; they are never saved in projects, workspaces, or browsers.
 
 - Recorded successful Chrome/Firefox allowed-root browser qualification and clarified that roots
   are operator-granted capabilities rather than hardcoded work directories. Added roadmap work

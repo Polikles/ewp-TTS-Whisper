@@ -8,6 +8,8 @@ authors, while optional assisted correction and translation can use separately o
 or cloud APIs. This is why setup includes explicit external-model downloads, gated-model terms,
 and optional provider API keys. The application records provenance and keeps every network use
 explicit, but it cannot control an external provider's retention or data-use policies.
+An API key entered in the browser lives only in the active GUI server process: browsers connected
+to that process share it, saved projects/workspaces never contain it, and stopping the GUI erases it.
 
 ## Status
 

@@ -163,6 +163,13 @@ unsaved editor contents as casual browser preferences.
 The first workspace-state slice MAY persist only allowlisted non-secret form fields and the
 current step in an application-owned user-state catalog. It must mark entries with unavailable
 paths, revalidate every path on save/load, and exclude confirmations as well as credentials.
+An active saved workspace MAY be auto-saved. The default GUI interval is 60 seconds and the
+client MUST compare the allowlisted state before writing, so unchanged state causes no save
+request. Auto-save begins only after an explicit save or load, remains optional, and never
+broadens the persisted field set.
+An API key entered through the GUI is scoped to the active GUI server process rather than one
+browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
+included in workspace state, project files, or browser storage, and stopping the server erases it.
 Staged-job restoration and open-review identity remain incomplete until their exact artifact
 hashes and immutable queue reconstruction are included.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
