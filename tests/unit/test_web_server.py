@@ -114,6 +114,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"workspace-autosave" in script_response.body
     assert b"60000" in script_response.body
     assert b"no tracked workflow-field changes" in script_response.body
+    assert b"Changes pending for auto-save" in script_response.body
     assert b"will retry" in script_response.body
     assert b"active GUI server process" in script_response.body
     assert b"API keys, confirmations, transcript text" in script_response.body

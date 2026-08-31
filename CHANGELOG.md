@@ -35,6 +35,8 @@ The next internal-beta version is `0.10.0`.
   disappear when it stops; they are never saved in projects, workspaces, or browsers.
 - Clarified the intentional single-user/single-organization credential boundary, aligned the
   auto-save checkbox with its label, and exposed distinct checked/saved/validation-failed status.
+- Added immediate `Changes pending for auto-save` feedback for tracked workspace edits and
+  visually subordinated the supplementary auto-save status line.
 
 - Recorded successful Chrome/Firefox allowed-root browser qualification and clarified that roots
   are operator-granted capabilities rather than hardcoded work directories. Added roadmap work

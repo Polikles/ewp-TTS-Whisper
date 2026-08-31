@@ -357,6 +357,10 @@ no tracked change was written. The follow-up aligns the control and reports inac
 validating, saved, and retry states separately. Confirmations and editor text remain intentionally
 outside workspace tracking. Process-wide credentials are an intentional single-user or
 single-organization deployment boundary; multi-user support is not currently planned.
+External retesting accepted checkbox alignment, unchanged-state reporting, tracked saves,
+confirmation exclusion, and invalid-path retry behavior. The remaining presentation follow-up
+subordinates the supplementary status and reports pending tracked edits immediately rather than
+waiting silently for the next interval.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.
