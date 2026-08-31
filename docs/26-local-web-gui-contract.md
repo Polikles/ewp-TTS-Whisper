@@ -245,6 +245,11 @@ stages are mandatory.
 Server-side result, transcript, dictionary, and output path fields SHOULD offer an allowed-root
 Browse control in addition to direct entry. It must use the constrained GUI filesystem API,
 not the browser's upload picker or an unrestricted server filesystem explorer.
+Allowed roots are operator-granted capabilities, not application-hardcoded work directories.
+Production usability SHOULD support persistent named media/project roots and a local launch or
+settings workflow for managing them. Browser requests MUST NOT silently broaden server authority;
+blacklisting a few operating-system directories is not an adequate replacement for allowlisting
+across Windows, WSL, Linux, and containers.
 Unfamiliar controls, including non-loopback endpoint authorization, SHOULD have a compact
 accessible information action with a plain-language explanation and an optional link to the
 relevant bundled documentation. The local help surface SHOULD explain the intended stage-by-

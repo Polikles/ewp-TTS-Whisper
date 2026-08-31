@@ -334,6 +334,13 @@ The first allowed-root Browse slice now covers media, canonical results, revisio
 and workflow/output directories. Its read-only CSRF-protected API stops navigation at configured
 roots, hides symlinks, bounds listings, and filters file types. Direct entry remains available for
 new output directories. External cross-browser qualification remains pending.
+Chrome and Firefox qualification passed root-only navigation, media/JSON filtering, symlink
+hiding, file selection, directory selection, close-without-change, and disabled upward traversal.
+The roots are launch-time capabilities rather than hardcoded work directories. Later settings
+work should make named media/project roots persistent without allowing a browser request to expand
+server authority. Start-time exact fingerprint revalidation and optional immutable input snapshots
+remain explicit TOCTOU-hardening work; media already undergoes FFprobe decoding and structured
+artifacts undergo strict schema parsing, so extension alone is not accepted as valid content.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional

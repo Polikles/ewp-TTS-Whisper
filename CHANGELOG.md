@@ -26,6 +26,10 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Recorded successful Chrome/Firefox allowed-root browser qualification and clarified that roots
+  are operator-granted capabilities rather than hardcoded work directories. Added roadmap work
+  for persistent named roots and start-time source fingerprint revalidation/optional immutable
+  snapshots instead of extension-only trust or fragile filesystem blacklists.
 - Limited the 1–6 GUI speaker-count field to one typed or pasted character and recorded accepted
   browser evidence that dry-run summaries survive confirmation failures and clear after staging.
 - Added roadmap contracts for separate, default-off punctuation-check and basic-editorial LLM

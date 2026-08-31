@@ -93,7 +93,10 @@ uv run --locked transcriber gui \
 ```
 
 It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and exposes only the named directories. Inspect and dry-run are read-only; dry-run includes its
+and exposes only the named directories. Roots are operator-selected capabilities, not hardcoded
+application work directories: grant a convenient parent such as a podcast/project directory
+rather than adding every episode separately. Avoid granting an entire drive or system/home root.
+Inspect and dry-run are read-only; dry-run includes its
 own inspection, so running Inspect separately is optional and intended for examining media before
 choosing output settings. Each reviewed file
 can be staged without starting GPU work; collect distinct episode files under one shared

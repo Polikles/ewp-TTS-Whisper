@@ -687,6 +687,13 @@ Planned capabilities:
 - audio-stream selection;
 - per-file language selection and speaker-count selection, including clearly labeled
   automatic choices and the later ephemeral auto-discovery research mode;
+- persistent named media/project roots managed through an explicit local configuration or launch
+  workflow, so ordinary use does not require repetitive path flags while browser requests remain
+  unable to grant themselves broader filesystem authority;
+- content-aware input validation and time-of-check/time-of-use protection: retain strict JSON
+  parsing and FFprobe decoding, then compare exact source fingerprints again when a staged job
+  starts. Evaluate an optional owned immutable input snapshot for workflows where files may change
+  during processing; do not rely on filename extensions or non-portable long-lived locks alone;
 - warning display and job queue;
 - an explicit visible workflow progression: transcription, transcript review (or provisional
   export), apply and verified export, then optional translation, translation review (or
