@@ -10,6 +10,8 @@ and optional provider API keys. The application records provenance and keeps eve
 explicit, but it cannot control an external provider's retention or data-use policies.
 An API key entered in the browser lives only in the active GUI server process: browsers connected
 to that process share it, saved projects/workspaces never contain it, and stopping the GUI erases it.
+This process-wide scope is intentional for the supported single-user or single-organization
+pipeline deployment. Multi-user credential isolation is not currently on the roadmap.
 
 ## Status
 

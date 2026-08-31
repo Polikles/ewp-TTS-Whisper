@@ -113,11 +113,14 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"/api/v1/workspaces/save" in script_response.body
     assert b"workspace-autosave" in script_response.body
     assert b"60000" in script_response.body
+    assert b"no tracked workflow-field changes" in script_response.body
+    assert b"will retry" in script_response.body
     assert b"active GUI server process" in script_response.body
     assert b"API keys, confirmations, transcript text" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )
+    assert b".workspace-autosave" in style_response.body
     assert b"[hidden]" in style_response.body
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body

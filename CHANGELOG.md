@@ -33,6 +33,8 @@ The next internal-beta version is `0.10.0`.
 
 - Clarified that GUI-entered API keys are shared only within the active GUI server process and
   disappear when it stops; they are never saved in projects, workspaces, or browsers.
+- Clarified the intentional single-user/single-organization credential boundary, aligned the
+  auto-save checkbox with its label, and exposed distinct checked/saved/validation-failed status.
 
 - Recorded successful Chrome/Firefox allowed-root browser qualification and clarified that roots
   are operator-granted capabilities rather than hardcoded work directories. Added roadmap work

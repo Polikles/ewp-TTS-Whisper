@@ -351,6 +351,12 @@ Exact staged-job reconstruction and open-review/artifact hash restoration remain
 the full workspace contract is met. The next slice adds optional change-sensitive 60-second
 auto-save for the active explicitly saved/loaded workspace. API credentials remain process-local,
 shared by browsers connected to that process, excluded from workspaces, and erased on GUI stop.
+The first auto-save qualification correctly rejected a nonexistent saved input path and resumed
+saving after the path was repaired, but exposed poor checkbox alignment and ambiguous silence when
+no tracked change was written. The follow-up aligns the control and reports inactive, unchanged,
+validating, saved, and retry states separately. Confirmations and editor text remain intentionally
+outside workspace tracking. Process-wide credentials are an intentional single-user or
+single-organization deployment boundary; multi-user support is not currently planned.
 
 That directory-level evidence also exposed two different sources (`s0e00.mp3` and
 `s0e00.wav`) deriving the same job ID and initially receiving colliding planned output paths.

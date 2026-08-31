@@ -170,6 +170,8 @@ broadens the persisted field set.
 An API key entered through the GUI is scoped to the active GUI server process rather than one
 browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
 included in workspace state, project files, or browser storage, and stopping the server erases it.
+This is an intentional single-user or single-organization pipeline boundary. Multi-user accounts,
+tenant isolation, and per-user credentials are outside the current roadmap.
 Staged-job restoration and open-review identity remain incomplete until their exact artifact
 hashes and immutable queue reconstruction are included.
 A later recovery surface SHOULD discover a bounded list of recent pointer files without
