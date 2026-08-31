@@ -21,6 +21,7 @@ from ewp_transcripts.config import load_config
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
+from ewp_transcripts.web_filesystem import GuiFilesystemController
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
@@ -152,6 +153,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         local_provider_lock = threading.Lock()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(config.allowed_roots)
+        self.gui_filesystem = GuiFilesystemController(config.allowed_roots)
         self.gui_reviews = GuiReviewController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -329,6 +331,50 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             )
             return
         path = urlsplit(self.path).path
+        if path == "/api/v1/filesystem/list":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The filesystem request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                select = document.get("select", "file")
+                if select not in {"file", "directory"}:
+                    raise ValueError("Filesystem selection kind must be file or directory")
+                raw_extensions = document.get("extensions", [])
+                if not isinstance(raw_extensions, list) or not all(
+                    isinstance(item, str) for item in raw_extensions
+                ):
+                    raise ValueError("Filesystem extensions must be an array of strings")
+                listing = self.server.gui_filesystem.list(
+                    str(document.get("path", "")),
+                    select=select,
+                    extensions=tuple(raw_extensions),
+                )
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_FILESYSTEM_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, listing.model_dump(mode="json")))
+            return
         if path == "/api/v1/credentials/openrouter":
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):

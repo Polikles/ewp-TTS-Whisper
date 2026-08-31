@@ -9,6 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 from ewp_transcripts import __version__
+from ewp_transcripts.web_filesystem import GuiFilesystemController
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
     LocalGuiRequestHandler,
@@ -105,6 +106,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"does not send transcript text" in script_response.body
     assert b"server-session-only" not in script_response.body
     assert b"#operation-status" in script_response.body
+    assert b"/api/v1/filesystem/list" in script_response.body
+    assert b"Browse\xe2\x80\xa6" in script_response.body
+    assert b"filesystemDialog.showModal" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )
@@ -191,3 +195,41 @@ def test_transcription_post_requires_active_csrf_token() -> None:
     response = write_response.call_args.args[0]
     assert response.status == 403
     assert json.loads(response.body)["error"]["code"] == "GUI_CSRF_REJECTED"
+
+
+def test_filesystem_listing_requires_csrf_and_returns_filtered_entries(tmp_path: Path) -> None:
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "result.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "notes.txt").write_text("notes", encoding="utf-8")
+    document = {
+        "path": str(tmp_path),
+        "select": "file",
+        "extensions": ["json"],
+    }
+    body = json.dumps(document).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/filesystem/list"
+    handler.rfile = BytesIO(body)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_filesystem=GuiFilesystemController((tmp_path.resolve(),)),
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    payload = json.loads(response.body)
+    assert [(item["name"], item["kind"]) for item in payload["entries"]] == [
+        ("nested", "directory"),
+        ("result.json", "file"),
+    ]

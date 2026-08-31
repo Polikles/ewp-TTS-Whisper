@@ -330,7 +330,10 @@ retains automatic detection, and preserves dry-run evidence across queue-validat
 The accepted browser retest confirmed the 1–6 range, exact dry-run summary retention across a
 confirmation error, and summary clearing only after successful queue staging. The numeric input
 now also refuses more than one typed or pasted character.
-Allowed-root Browse controls for path fields remain a later usability task.
+The first allowed-root Browse slice now covers media, canonical results, revisions, dictionaries,
+and workflow/output directories. Its read-only CSRF-protected API stops navigation at configured
+roots, hides symlinks, bounds listings, and filters file types. Direct entry remains available for
+new output directories. External cross-browser qualification remains pending.
 That disk-backed restore and the labeled status surface subsequently passed cross-browser
 testing. Recovery currently requires the operator to provide the output root. A later recovery
 browser must list recent saved work without requiring that path, identify entries by optional

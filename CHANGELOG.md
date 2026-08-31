@@ -8,6 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
+- Added a read-only, CSRF-protected local filesystem browser for GUI media, result, revision,
+  dictionary, and output path fields. Navigation is constrained to explicit allowed roots, hides
+  symlinks, filters expected file types, and retains direct entry for not-yet-created outputs.
 - Added explicit transcription language and speaker-count controls to GUI inspection, exact
   dry-run authorization, staged jobs, and execution. A plan produced with different controls can
   no longer authorize queueing with stale settings.
