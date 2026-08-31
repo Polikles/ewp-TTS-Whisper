@@ -1,4 +1,4 @@
-:root { color-scheme: light dark; font-family: system-ui, sans-serif; background: #f5f3ee; color: #17221c; }
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; background: #f5f3ee; color: #17221c; overflow-anchor: none; }
 body { margin: 0; min-height: 100vh; }
 [hidden] { display: none !important; }
 header, main, footer { width: min(70rem, calc(100% - 2rem)); margin-inline: auto; }
